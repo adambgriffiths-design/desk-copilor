@@ -1,0 +1,8 @@
+node_modules
+.next
+.env
+.env.local
+*.log
+data/feedback.jsonl
+data/learned-rules.json
+data/session-log.jsonl

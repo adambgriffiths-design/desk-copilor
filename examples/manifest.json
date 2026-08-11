@@ -1,0 +1,53 @@
+{
+  "scannedAt": "2026-08-11T19:00:00.000Z",
+  "validCount": 9,
+  "note": "86 priority screenshots scanned; May 13-14 were mostly StrategyQuant UI (correctly excluded). Manual adds for Aug 11 copilot test charts.",
+  "valid": [
+    {
+      "file": "Screenshot 2026-08-11 192428.png",
+      "tags": ["MNQ", "NDOG", "ORG", "NY-session"],
+      "notes": "Full TV chart with NDOG labels — bearish after 11am premium rejection"
+    },
+    {
+      "file": "Screenshot 2026-08-11 190323.png",
+      "tags": ["MNQ", "NWOG", "ORG", "EQ-lows"],
+      "notes": "NWOG raid → sell → potential buy to CE in cyan box"
+    },
+    {
+      "file": "Screenshot 2026-08-11 190043.png",
+      "tags": ["MNQ", "NWOG", "ORG"],
+      "notes": "Same setup variant — recovery into ORG after displacement"
+    },
+    {
+      "file": "Screenshot 2026-08-11 192156.png",
+      "tags": ["MNQ", "ORG", "FVG", "AMD"],
+      "notes": "Example #2 — 9:30 manipulation, FVG buy to CE, then chop"
+    },
+    {
+      "file": "Screenshot 2026-08-11 192134.png",
+      "tags": ["MNQ", "1m"],
+      "notes": "Aug 11 test chart — copilot training"
+    },
+    {
+      "file": "Screenshot 2025-08-09 104546.png",
+      "tags": ["historical"],
+      "notes": "Valid TV candlestick chart"
+    },
+    {
+      "file": "Screenshot 2025-08-09 104115.png",
+      "tags": ["historical"],
+      "notes": "Valid TV candlestick chart"
+    },
+    {
+      "file": "Screenshot 2025-08-06 171627.png",
+      "tags": ["historical"],
+      "notes": "Valid TV candlestick chart"
+    },
+    {
+      "file": "Screenshot 2025-08-06 165004.png",
+      "tags": ["historical"],
+      "notes": "Valid TV candlestick chart"
+    }
+  ],
+  "excludedSummary": "80 non-chart screenshots: StrategyQuant dashboards, Pareto charts, tables, error logs, training UI"
+}

@@ -1,0 +1,324 @@
+import type { Bar } from "./types";
+
+const SYMBOL = "MNQ=F";
+const YAHOO_CHART = "https://query1.finance.yahoo.com/v8/finance/chart";
+
+type YahooChartResponse = {
+  chart?: {
+    result?: Array<{
+      timestamp?: number[];
+      indicators?: {
+        quote?: Array<{
+          open?: (number | null)[];
+          high?: (number | null)[];
+          low?: (number | null)[];
+          close?: (number | null)[];
+        }>;
+      };
+    }>;
+    error?: { description?: string };
+  };
+};
+
+export async function fetchBars(
+  interval: "1d" | "15m" | "5m" | "1m",
+  range: string
+): Promise<Bar[]> {
+  const url = `${YAHOO_CHART}/${SYMBOL}?interval=${interval}&range=${range}`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0" },
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Yahoo Finance error: ${res.status}`);
+  }
+
+  const data = (await res.json()) as YahooChartResponse;
+  const err = data.chart?.error?.description;
+  if (err) throw new Error(err);
+
+  const result = data.chart?.result?.[0];
+  const timestamps = result?.timestamp ?? [];
+  const quote = result?.indicators?.quote?.[0];
+
+  if (!quote) throw new Error("No quote data returned");
+
+  const bars: Bar[] = [];
+  for (let i = 0; i < timestamps.length; i++) {
+    const open = quote.open?.[i];
+    const high = quote.high?.[i];
+    const low = quote.low?.[i];
+    const close = quote.close?.[i];
+    if (
+      open == null ||
+      high == null ||
+      low == null ||
+      close == null ||
+      Number.isNaN(open)
+    ) {
+      continue;
+    }
+    bars.push({
+      time: new Date(timestamps[i] * 1000),
+      open,
+      high,
+      low,
+      close,
+    });
+  }
+
+  return bars;
+}
+
+export async function fetchAllTimeframes() {
+  const [daily, m15, m5, m1] = await Promise.all([
+    fetchBars("1d", "3mo"),
+    fetchBars("15m", "5d"),
+    fetchBars("5m", "5d"),
+    fetchBars("1m", "7d"),
+  ]);
+  return { daily, m15, m5, m1, symbol: SYMBOL };
+}
+
+/** Longer ranges for historical replay training (Yahoo 1m max ~7d). */
+export async function fetchAllTimeframesForBacktest() {
+  const [daily, m15, m5, m1] = await Promise.all([
+    fetchBars("1d", "3mo"),
+    fetchBars("15m", "60d"),
+    fetchBars("5m", "60d"),
+    fetchBars("1m", "7d"),
+  ]);
+  return { daily, m15, m5, m1, symbol: SYMBOL };
+}
+
+export function sliceBarsAt(bars: Bar[], asOf: Date): Bar[] {
+  const t = asOf.getTime();
+  return bars.filter((b) => b.time.getTime() <= t);
+}
+
+export function formatEst(date: Date): string {
+  return date.toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+export function getEstMinutes(date: Date): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(date);
+
+  const hour = Number(parts.find((p) => p.type === "hour")?.value ?? 0);
+  const minute = Number(parts.find((p) => p.type === "minute")?.value ?? 0);
+  return hour * 60 + minute;
+}
+
+export function getEstDateKey(date: Date): string {
+  return date.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+}
+
+/** Calendar days between two EST date keys. */
+export function estDayGapDays(a: Date, b: Date): number {
+  const ka = getEstDateKey(a);
+  const kb = getEstDateKey(b);
+  const da = new Date(`${ka}T12:00:00Z`).getTime();
+  const db = new Date(`${kb}T12:00:00Z`).getTime();
+  return Math.round(Math.abs(db - da) / 86_400_000);
+}
+
+/** True when two daily bars are adjacent trading sessions (allows Fri → Mon). */
+export function isConsecutiveTradingSession(prev: Bar, next: Bar): boolean {
+  const gap = estDayGapDays(prev.time, next.time);
+  return gap >= 1 && gap <= 3;
+}
+
+/** Completed EST daily bars for FVG — excludes partial today; patches today from 1m if needed. */
+export function buildFvgDailyBars(yahooDaily: Bar[], m1: Bar[], asOf = new Date()): Bar[] {
+  const today = getEstDateKey(asOf);
+  const completed = yahooDaily.filter((b) => getEstDateKey(b.time) < today);
+
+  const todayM1 = m1.filter((b) => getEstDateKey(b.time) === today);
+  if (todayM1.length >= 30) {
+    todayM1.sort((a, b) => a.time.getTime() - b.time.getTime());
+    const agg: Bar = {
+      time: todayM1.at(-1)!.time,
+      open: todayM1[0].open,
+      high: Math.max(...todayM1.map((b) => b.high)),
+      low: Math.min(...todayM1.map((b) => b.low)),
+      close: todayM1.at(-1)!.close,
+    };
+    if (getEstMinutes(asOf) >= 16 * 60) {
+      completed.push(agg);
+    }
+  }
+
+  return completed;
+}
+
+/** Unix seconds for a wall-clock time on an EST date key. */
+export function estTimeOnDateKey(dateKey: string, hour: number, minute: number): number {
+  const target = hour * 60 + minute;
+  const base = new Date(`${dateKey}T12:00:00Z`).getTime();
+  for (let t = base - 12 * 3_600_000; t < base + 36 * 3_600_000; t += 60_000) {
+    const d = new Date(t);
+    if (getEstDateKey(d) === dateKey && getEstMinutes(d) === target) {
+      return Math.floor(t / 1000);
+    }
+  }
+  return Math.floor(base / 1000);
+}
+
+/** @deprecated use estTimeOnDateKey */
+export function estDayCloseTime(dateKey: string): number {
+  return estTimeOnDateKey(dateKey, 17, 0);
+}
+
+/** When daily c3 completes — 5:00 PM ET (CME RTH close), aligned to 1m if available. */
+export function dayFormationTime(dailyBar: Bar, m1: Bar[]): number {
+  const key = getEstDateKey(dailyBar.time);
+  const closeBar = findBarClosestTo(m1, 17 * 60, key);
+  if (closeBar) return Math.floor(closeBar.time.getTime() / 1000);
+  return estTimeOnDateKey(key, 17, 0);
+}
+
+/** When the daily FVG forms on a 1m chart — 6:00 PM ET on displacement day (c2), CME session open. */
+export function fvgFormationTime(c2: Bar, m1: Bar[]): number {
+  const key = getEstDateKey(c2.time);
+  const bar = findBarClosestTo(m1, 18 * 60, key);
+  if (bar) return Math.floor(bar.time.getTime() / 1000);
+  return estTimeOnDateKey(key, 18, 0);
+}
+
+export function barsInEstWindow(
+  bars: Bar[],
+  startMinutes: number,
+  endMinutes: number,
+  dateKey?: string
+): Bar[] {
+  return bars.filter((b) => {
+    if (dateKey && getEstDateKey(b.time) !== dateKey) return false;
+    const m = getEstMinutes(b.time);
+    if (startMinutes <= endMinutes) {
+      return m >= startMinutes && m < endMinutes;
+    }
+    return m >= startMinutes || m < endMinutes;
+  });
+}
+
+export function sessionHighLow(bars: Bar[]): { high: number; low: number } | null {
+  if (bars.length === 0) return null;
+  return {
+    high: Math.max(...bars.map((b) => b.high)),
+    low: Math.min(...bars.map((b) => b.low)),
+  };
+}
+
+export function findBarClosestTo(bars: Bar[], targetMinutes: number, dateKey: string): Bar | null {
+  const dayBars = bars.filter((b) => getEstDateKey(b.time) === dateKey);
+  if (dayBars.length === 0) return null;
+
+  let best: Bar | null = null;
+  let bestDiff = Infinity;
+  for (const bar of dayBars) {
+    const diff = Math.abs(getEstMinutes(bar.time) - targetMinutes);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = bar;
+    }
+  }
+  return bestDiff <= 2 ? best : null;
+}
+
+function estWeekdayShort(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    timeZone: "America/New_York",
+    weekday: "short",
+  });
+}
+
+/** CME week starts Sunday 6:00 PM ET — date key of that Sunday for the week containing `asOf`. */
+export function cmeWeekSundayKey(asOf: Date): string | null {
+  for (let daysBack = 0; daysBack <= 8; daysBack++) {
+    const d = new Date(asOf.getTime() - daysBack * 86_400_000);
+    if (estWeekdayShort(d) !== "Sun") continue;
+    if (daysBack === 0 && getEstMinutes(asOf) < 18 * 60) continue;
+    return getEstDateKey(d);
+  }
+  return null;
+}
+
+/** Friday immediately before the given Sunday date key. */
+function fridayBeforeSunday(sundayKey: string): string | null {
+  const anchor = new Date(`${sundayKey}T12:00:00Z`);
+  for (let back = 1; back <= 3; back++) {
+    const d = new Date(anchor.getTime() - back * 86_400_000);
+    if (estWeekdayShort(d) === "Fri") return getEstDateKey(d);
+  }
+  return null;
+}
+
+export type NwogLevels = {
+  top: number;
+  bottom: number;
+  weekOpen: number;
+  priorWeekClose: number;
+  startTime: number;
+};
+
+/**
+ * NWOG = gap between prior Friday close and current week open (Sunday 6:00 PM ET).
+ * Uses 1m bars when available; falls back to completed daily bars.
+ */
+export function computeNwog(m1: Bar[], daily: Bar[], asOf: Date): NwogLevels | null {
+  const m1At = sliceBarsAt(m1, asOf);
+  const sundayKey = cmeWeekSundayKey(asOf);
+  if (!sundayKey) return null;
+
+  const fridayKey = fridayBeforeSunday(sundayKey);
+  if (!fridayKey) return null;
+
+  const weekOpenBar = findBarClosestTo(m1At, 18 * 60, sundayKey);
+  const friCloseBar =
+    findBarClosestTo(m1At, 17 * 60, fridayKey) ??
+    findBarClosestTo(m1At, 16 * 60 + 15, fridayKey);
+
+  let weekOpen: number | null = weekOpenBar?.open ?? null;
+  let priorWeekClose: number | null = friCloseBar?.close ?? null;
+  let startTime =
+    weekOpenBar != null
+      ? Math.floor(weekOpenBar.time.getTime() / 1000)
+      : estTimeOnDateKey(sundayKey, 18, 0);
+
+  if (weekOpen == null || priorWeekClose == null) {
+    const dailyBefore = daily.filter((b) => getEstDateKey(b.time) <= sundayKey);
+    const friDaily = dailyBefore.find((b) => getEstDateKey(b.time) === fridayKey);
+    const sunDaily = dailyBefore.find((b) => getEstDateKey(b.time) === sundayKey);
+    const monDaily = dailyBefore.find((b) => {
+      const d = new Date(`${sundayKey}T12:00:00Z`);
+      const mon = new Date(d.getTime() + 86_400_000);
+      return getEstDateKey(b.time) === getEstDateKey(mon);
+    });
+    const openDaily = sunDaily ?? monDaily;
+    if (!friDaily || !openDaily) return null;
+    weekOpen = openDaily.open;
+    priorWeekClose = friDaily.close;
+    startTime = estTimeOnDateKey(getEstDateKey(openDaily.time), 18, 0);
+  }
+
+  if (weekOpen == null || priorWeekClose == null) return null;
+  if (Math.abs(weekOpen - priorWeekClose) < 0.25) return null;
+
+  return {
+    top: Math.max(weekOpen, priorWeekClose),
+    bottom: Math.min(weekOpen, priorWeekClose),
+    weekOpen,
+    priorWeekClose,
+    startTime,
+  };
+}

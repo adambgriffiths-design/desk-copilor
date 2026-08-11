@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Desk Copilot Live",
+  "version": "0.9.8",
+  "description": "ICT desk partner on TradingView — voice verdicts, level drawing, training",
+  "permissions": ["activeTab", "tabs", "storage", "scripting"],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "http://localhost:3001/*",
+    "http://127.0.0.1:3000/*",
+    "http://127.0.0.1:3001/*",
+    "https://*/*",
+    "https://www.tradingview.com/*",
+    "https://*.tradingview.com/*"
+  ],
+  "options_page": "options.html",
+  "action": {
+    "default_title": "Desk Copilot — get verdict (click me)"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["tv-bridge.js"],
+      "matches": [
+        "https://www.tradingview.com/*",
+        "https://*.tradingview.com/*"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.tradingview.com/*",
+        "https://*.tradingview.com/*"
+      ],
+      "js": ["chart-intent.js", "voice.js", "chart-draw.js", "content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

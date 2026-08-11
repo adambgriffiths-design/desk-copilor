@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-11T19:59:33.921Z",
+  "promptAddendum": "Observations show a consistent problem in recognizing potential reversals amidst strong directional biases. The importance of confirming apparent shifts against established trends is critical, especially when contradictory signals emerge.",
+  "rules": [
+    {
+      "rule": "Consider a neutral verdict when price action shows mixed bias and structural setups, particularly after liquidity sweeps that do not align with expected directional moves.",
+      "source": "from inconsistencies in handling mixed signals and liquidity events (Failure 13, Failure 14)",
+      "addedAt": "2026-08-11T19:59:33.921Z"
+    },
+    {
+      "rule": "Grade as missed opportunity or reconsider direction if market structure shifts contradict predictions without follow-through in expected trend direction.",
+      "source": "from several missed shifts or confirmation (Failure 10, Failure 11)",
+      "addedAt": "2026-08-11T19:59:33.921Z"
+    }
+  ]
+}

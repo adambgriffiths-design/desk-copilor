@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Desk Copilot — API settings</title>
+    <style>
+      body {
+        max-width: 480px;
+        margin: 24px auto;
+        padding: 0 16px;
+        font-family: system-ui, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 0 0 16px;
+        color: #94a3b8;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        background: #1e293b;
+        color: #f8fafc;
+        font-size: 14px;
+      }
+      button {
+        margin-top: 12px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #3b82f6;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #334155;
+        margin-left: 8px;
+      }
+      #status {
+        margin-top: 12px;
+        min-height: 1.2em;
+      }
+      .ok {
+        color: #86efac;
+      }
+      .err {
+        color: #fca5a5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Desk Copilot API</h1>
+    <p>
+      Leave blank to use localhost (npm run dev). Set your hosted URL after deploying
+      the Next.js backend (e.g. https://your-app.vercel.app).
+    </p>
+    <label for="apiBaseUrl">API base URL</label>
+    <input
+      id="apiBaseUrl"
+      type="url"
+      placeholder="https://your-app.vercel.app"
+      autocomplete="off"
+    />
+    <div>
+      <button id="save">Save</button>
+      <button id="clear" class="secondary" type="button">Use localhost</button>
+    </div>
+    <p id="status"></p>
+    <script src="options.js"></script>
+  </body>
+</html>

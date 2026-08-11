@@ -1,0 +1,263 @@
+//@version=5
+// Desk Copilot — ICT levels for Nasdaq futures (matches backend lib/levels.ts)
+// TradingView: Pine Editor → paste → Save → Add to chart (1m recommended)
+indicator("Desk Copilot Levels", "Desk Copilot", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
+
+const string TZ = "America/New_York"
+
+showOrg       = input.bool(true, "Opening range gap + 50% midpoint")
+showNwog      = input.bool(true, "New week opening gap")
+showSessions  = input.bool(true, "Asia / London / NY pre-market")
+showDaily     = input.bool(true, "Previous day high/low + daily equilibrium")
+showDailyFvg  = input.bool(true, "Daily fair value gaps (shaded)")
+showLabels    = input.bool(true, "Price labels on scale")
+
+colOrg        = input.color(color.new(#22d3ee, 0), "Opening range gap")
+colCe         = input.color(color.new(#e879f9, 0), "ORG 50% midpoint")
+colNwog       = input.color(color.new(#ef4444, 0), "New week opening gap")
+colSession    = input.color(color.new(#94a3b8, 0), "Session levels")
+colDaily      = input.color(color.new(#cbd5e1, 0), "Daily levels")
+colFvgBull    = input.color(color.new(#fb7185, 78), "Bullish daily FVG fill")
+colFvgBear    = input.color(color.new(#f472b6, 78), "Bearish daily FVG fill")
+colFvgBorder  = input.color(color.new(#fb7185, 0), "Daily FVG border")
+
+estHour() =>
+    hour(time, TZ)
+
+estMinute() =>
+    minute(time, TZ)
+
+estMinutes() =>
+    estHour() * 60 + estMinute()
+
+newEstDay() =>
+    ta.change(time("D", TZ))
+
+// ── Opening range gap: prior day 4:15 PM close → 9:30 AM open (EST) ──
+var float orgClose415 = na
+var float orgOpen930  = na
+var int   orgStartBar = na
+
+if newEstDay()
+    orgOpen930  := na
+    orgStartBar := na
+
+m = estMinutes()
+// 4:15 PM — captured each session; used as prior close for next day's ORG
+if m >= 16 * 60 + 15 and m <= 16 * 60 + 17
+    orgClose415 := close
+// 9:30 AM cash open — completes today's ORG
+if m >= 9 * 60 + 30 and m <= 9 * 60 + 32
+    orgOpen930 := open
+    orgStartBar := bar_index
+
+orgTop    = showOrg and not na(orgClose415) and not na(orgOpen930) ? math.max(orgClose415, orgOpen930) : na
+orgBot    = showOrg and not na(orgClose415) and not na(orgOpen930) ? math.min(orgClose415, orgOpen930) : na
+orgCeVal  = showOrg and not na(orgTop) and not na(orgBot) ? (orgTop + orgBot) / 2 : na
+org25Val  = showOrg and not na(orgTop) and not na(orgBot) ? orgBot + (orgTop - orgBot) * 0.25 : na
+org75Val  = showOrg and not na(orgTop) and not na(orgBot) ? orgBot + (orgTop - orgBot) * 0.75 : na
+
+var float orgTopDay = na
+var float orgBotDay = na
+var float orgCeDay  = na
+var float org25Day  = na
+var float org75Day  = na
+var int   orgStartDay = na
+
+if newEstDay()
+    orgTopDay := na
+    orgBotDay := na
+    orgCeDay  := na
+    org25Day  := na
+    org75Day  := na
+    orgStartDay := na
+
+if not na(orgTop)
+    orgTopDay := orgTop
+    orgBotDay := orgBot
+    orgCeDay  := orgCeVal
+    org25Day  := org25Val
+    org75Day  := org75Val
+    orgStartDay := orgStartBar
+
+var line orgTopLine = na
+var line orgBotLine = na
+var line orgCeLine  = na
+var line org25Line  = na
+var line org75Line  = na
+
+if barstate.islast and showOrg and not na(orgStartDay)
+    line.delete(orgTopLine)
+    line.delete(orgBotLine)
+    line.delete(orgCeLine)
+    line.delete(org25Line)
+    line.delete(org75Line)
+    orgTopLine := line.new(orgStartDay, orgTopDay, bar_index, orgTopDay, xloc=xloc.bar_index, color=colOrg, width=1, style=line.style_solid)
+    orgBotLine := line.new(orgStartDay, orgBotDay, bar_index, orgBotDay, xloc=xloc.bar_index, color=colOrg, width=1, style=line.style_solid)
+    orgCeLine  := line.new(orgStartDay, orgCeDay, bar_index, orgCeDay, xloc=xloc.bar_index, color=colCe, width=2, style=line.style_solid)
+    org25Line  := line.new(orgStartDay, org25Day, bar_index, org25Day, xloc=xloc.bar_index, color=color.new(colOrg, 40), width=1, style=line.style_solid)
+    org75Line  := line.new(orgStartDay, org75Day, bar_index, org75Day, xloc=xloc.bar_index, color=color.new(colOrg, 40), width=1, style=line.style_solid)
+
+// ── New week opening gap ──
+var float nwogWeekOpen = na
+var float nwogPriorClose = na
+var int   nwogStartBar = na
+
+wk = weekofyear(time, TZ)
+if ta.change(wk)
+    nwogWeekOpen := na
+    nwogPriorClose := na
+    nwogStartBar := na
+
+dow = dayofweek(time, TZ)
+if dow == dayofweek.sunday or dow == dayofweek.monday
+    if na(nwogWeekOpen)
+        nwogWeekOpen := open
+        nwogPriorClose := close[1]
+        nwogStartBar := bar_index
+
+nwogTop = showNwog and not na(nwogWeekOpen) and not na(nwogPriorClose) ? math.max(nwogWeekOpen, nwogPriorClose) : na
+nwogBot = showNwog and not na(nwogWeekOpen) and not na(nwogPriorClose) ? math.min(nwogWeekOpen, nwogPriorClose) : na
+
+var line nwogTopLine = na
+var line nwogBotLine = na
+
+if barstate.islast and showNwog and not na(nwogStartBar) and not na(nwogTop)
+    line.delete(nwogTopLine)
+    line.delete(nwogBotLine)
+    nwogTopLine := line.new(nwogStartBar, nwogTop, bar_index, nwogTop, xloc=xloc.bar_index, color=colNwog, width=1, style=line.style_solid)
+    nwogBotLine := line.new(nwogStartBar, nwogBot, bar_index, nwogBot, xloc=xloc.bar_index, color=colNwog, width=1, style=line.style_solid)
+
+// ── Session highs/lows (reset each EST day) ──
+var float asiaH = na
+var float asiaL = na
+var float londonH = na
+var float londonL = na
+var float nyPreH = na
+var float nyPreL = na
+var int asiaHBar = na
+var int asiaLBar = na
+var int londonHBar = na
+var int londonLBar = na
+var int nyPreHBar = na
+var int nyPreLBar = na
+
+if newEstDay()
+    asiaH := na
+    asiaL := na
+    londonH := na
+    londonL := na
+    nyPreH := na
+    nyPreL := na
+    asiaHBar := na
+    asiaLBar := na
+    londonHBar := na
+    londonLBar := na
+    nyPreHBar := na
+    nyPreLBar := na
+
+if showSessions
+    inAsia = m >= 18 * 60 or m < 60
+    if inAsia
+        if na(asiaH) or high > asiaH
+            asiaH := high
+            asiaHBar := bar_index
+        if na(asiaL) or low < asiaL
+            asiaL := low
+            asiaLBar := bar_index
+    inLondon = m >= 120 and m < 300
+    if inLondon
+        if na(londonH) or high > londonH
+            londonH := high
+            londonHBar := bar_index
+        if na(londonL) or low < londonL
+            londonL := low
+            londonLBar := bar_index
+    inNyPre = m >= 420 and m < 570
+    if inNyPre
+        if na(nyPreH) or high > nyPreH
+            nyPreH := high
+            nyPreHBar := bar_index
+        if na(nyPreL) or low < nyPreL
+            nyPreL := low
+            nyPreLBar := bar_index
+
+var line asiaHLine = na
+var line asiaLLine = na
+var line londonHLine = na
+var line londonLLine = na
+var line nyPreHLine = na
+var line nyPreLLine = na
+
+if barstate.islast and showSessions
+    if not na(asiaHBar)
+        line.delete(asiaHLine)
+        asiaHLine := line.new(asiaHBar, asiaH, bar_index, asiaH, xloc=xloc.bar_index, color=colSession, width=1, style=line.style_solid)
+    if not na(asiaLBar)
+        line.delete(asiaLLine)
+        asiaLLine := line.new(asiaLBar, asiaL, bar_index, asiaL, xloc=xloc.bar_index, color=colSession, width=1, style=line.style_solid)
+    if not na(londonHBar)
+        line.delete(londonHLine)
+        londonHLine := line.new(londonHBar, londonH, bar_index, londonH, xloc=xloc.bar_index, color=colSession, width=1, style=line.style_solid)
+    if not na(londonLBar)
+        line.delete(londonLLine)
+        londonLLine := line.new(londonLBar, londonL, bar_index, londonL, xloc=xloc.bar_index, color=colSession, width=1, style=line.style_solid)
+    if not na(nyPreHBar)
+        line.delete(nyPreHLine)
+        nyPreHLine := line.new(nyPreHBar, nyPreH, bar_index, nyPreH, xloc=xloc.bar_index, color=colSession, width=1, style=line.style_solid)
+    if not na(nyPreLBar)
+        line.delete(nyPreLLine)
+        nyPreLLine := line.new(nyPreLBar, nyPreL, bar_index, nyPreL, xloc=xloc.bar_index, color=colSession, width=1, style=line.style_solid)
+
+// ── Previous day + daily equilibrium ──
+pdHigh = request.security(syminfo.tickerid, "D", high[1], barmerge.gaps_off, barmerge.lookahead_off)
+pdLow  = request.security(syminfo.tickerid, "D", low[1], barmerge.gaps_off, barmerge.lookahead_off)
+pdEq   = showDaily ? (pdHigh + pdLow) / 2 : na
+
+var int dayStartBar = na
+if newEstDay()
+    dayStartBar := bar_index
+
+var line pdHighLine = na
+var line pdLowLine = na
+var line pdEqLine = na
+
+if barstate.islast and showDaily and not na(dayStartBar)
+    line.delete(pdHighLine)
+    line.delete(pdLowLine)
+    line.delete(pdEqLine)
+    pdHighLine := line.new(dayStartBar, pdHigh, bar_index, pdHigh, xloc=xloc.bar_index, color=colDaily, width=1, style=line.style_solid)
+    pdLowLine  := line.new(dayStartBar, pdLow, bar_index, pdLow, xloc=xloc.bar_index, color=colDaily, width=1, style=line.style_solid)
+    pdEqLine   := line.new(dayStartBar, pdEq, bar_index, pdEq, xloc=xloc.bar_index, color=color.new(#a78bfa, 0), width=1, style=line.style_solid)
+
+// ── Daily fair value gaps (shaded, from 6:00 PM ET on displacement day / c2) ──
+bullFvgTop = request.security(syminfo.tickerid, "D", high[2] < low ? low : na, barmerge.gaps_off, barmerge.lookahead_off)
+bullFvgBot = request.security(syminfo.tickerid, "D", high[2] < low ? high[2] : na, barmerge.gaps_off, barmerge.lookahead_off)
+bearFvgTop = request.security(syminfo.tickerid, "D", low[2] > high ? low[2] : na, barmerge.gaps_off, barmerge.lookahead_off)
+bearFvgBot = request.security(syminfo.tickerid, "D", low[2] > high ? high : na, barmerge.gaps_off, barmerge.lookahead_off)
+
+fvgLeftBar(c2Time) =>
+    formLeft = timestamp(TZ, year(c2Time, TZ), month(c2Time, TZ), dayofmonth(c2Time, TZ), 18, 0)
+    span = math.max(1, time - time[1])
+    back = int(math.min(bar_index, math.max(0, (time - formLeft) / span)))
+    bar_index - back
+
+var box[] fvgBoxes = array.new_box()
+
+if showDailyFvg and ta.change(time("D", TZ))
+    if not na(bullFvgTop) and not na(bullFvgBot)
+        leftB = fvgLeftBar(time[1])
+        array.push(fvgBoxes, box.new(leftB, bullFvgTop, bar_index + 1, bullFvgBot, xloc=xloc.bar_index, border_color=colFvgBorder, bgcolor=colFvgBull, border_width=1))
+    if not na(bearFvgTop) and not na(bearFvgBot)
+        leftB = fvgLeftBar(time[1])
+        array.push(fvgBoxes, box.new(leftB, bearFvgTop, bar_index + 1, bearFvgBot, xloc=xloc.bar_index, border_color=colFvgBorder, bgcolor=colFvgBear, border_width=1))
+    while array.size(fvgBoxes) > 3
+        box.delete(array.shift(fvgBoxes))
+
+if showDailyFvg and barstate.islast
+    for i = 0 to array.size(fvgBoxes) - 1
+        b = array.get(fvgBoxes, i)
+        box.set_right(b, bar_index)
+
+if showLabels and barstate.islast and not na(orgCeDay)
+    label.new(bar_index, orgCeDay, "Desk Copilot · levels from formation time", style=label.style_label_left, color=color.new(#0f172a, 15), textcolor=color.new(#94a3b8, 0), size=size.tiny)
