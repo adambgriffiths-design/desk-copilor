@@ -1,5 +1,6 @@
 import { appendFile, mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
+import { tryDataWrite } from "./data-fs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const SESSION_FILE = path.join(DATA_DIR, "session-log.jsonl");
@@ -16,14 +17,16 @@ export type SessionLogEntry = {
 };
 
 export async function appendSessionLog(entry: SessionLogEntry): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  const line = JSON.stringify(entry) + "\n";
-  try {
-    await readFile(SESSION_FILE, "utf-8");
-    await appendFile(SESSION_FILE, line, "utf-8");
-  } catch {
-    await writeFile(SESSION_FILE, line, "utf-8");
-  }
+  await tryDataWrite("session log", async () => {
+    await mkdir(DATA_DIR, { recursive: true });
+    const line = JSON.stringify(entry) + "\n";
+    try {
+      await readFile(SESSION_FILE, "utf-8");
+      await appendFile(SESSION_FILE, line, "utf-8");
+    } catch {
+      await writeFile(SESSION_FILE, line, "utf-8");
+    }
+  });
 }
 
 export async function readSessionLogs(): Promise<SessionLogEntry[]> {
@@ -69,12 +72,15 @@ export async function rateSessionVerdict(
   if (!entry) return false;
 
   entry.rating = rating;
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(
-    SESSION_FILE,
-    logs.map((l) => JSON.stringify(l)).join("\n") + "\n",
-    "utf-8"
-  );
+  const saved = await tryDataWrite("session rating", async () => {
+    await mkdir(DATA_DIR, { recursive: true });
+    await writeFile(
+      SESSION_FILE,
+      logs.map((l) => JSON.stringify(l)).join("\n") + "\n",
+      "utf-8"
+    );
+  });
+  if (!saved) return false;
 
   if (rating === "down") {
     const { appendFeedback, createFeedbackEntry } = await import("@/lib/feedback-store");

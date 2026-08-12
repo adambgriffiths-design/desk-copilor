@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
 import type { LearnedRulesFile } from "./feedback-types";
+import { tryDataWrite } from "./data-fs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const LEARNED_FILE = path.join(DATA_DIR, "learned-rules.json");
@@ -23,8 +24,10 @@ export async function readLearnedRules(): Promise<LearnedRulesFile> {
 }
 
 export async function writeLearnedRules(rules: LearnedRulesFile): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(LEARNED_FILE, JSON.stringify(rules, null, 2), "utf-8");
+  await tryDataWrite("learned rules", async () => {
+    await mkdir(DATA_DIR, { recursive: true });
+    await writeFile(LEARNED_FILE, JSON.stringify(rules, null, 2), "utf-8");
+  });
 }
 
 const MAX_LEARNED_RULES = 8;

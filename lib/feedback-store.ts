@@ -1,6 +1,7 @@
 import { appendFile, mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import type { FeedbackEntry, FeedbackRating, FeedbackStats } from "./feedback-types";
+import { tryDataWrite } from "./data-fs";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const FEEDBACK_FILE = path.join(DATA_DIR, "feedback.jsonl");
@@ -22,21 +23,25 @@ export async function readAllFeedback(): Promise<FeedbackEntry[]> {
 }
 
 export async function appendFeedback(entry: FeedbackEntry): Promise<void> {
-  await ensureDataDir();
-  const line = JSON.stringify(entry) + "\n";
+  await tryDataWrite("feedback", async () => {
+    await ensureDataDir();
+    const line = JSON.stringify(entry) + "\n";
 
-  try {
-    await readFile(FEEDBACK_FILE, "utf-8");
-    await appendFile(FEEDBACK_FILE, line, "utf-8");
-  } catch {
-    await writeFile(FEEDBACK_FILE, line, "utf-8");
-  }
+    try {
+      await readFile(FEEDBACK_FILE, "utf-8");
+      await appendFile(FEEDBACK_FILE, line, "utf-8");
+    } catch {
+      await writeFile(FEEDBACK_FILE, line, "utf-8");
+    }
+  });
 }
 
 export async function writeAllFeedback(entries: FeedbackEntry[]): Promise<void> {
-  await ensureDataDir();
-  const body = entries.map((e) => JSON.stringify(e)).join("\n");
-  await writeFile(FEEDBACK_FILE, body ? body + "\n" : "", "utf-8");
+  await tryDataWrite("feedback rewrite", async () => {
+    await ensureDataDir();
+    const body = entries.map((e) => JSON.stringify(e)).join("\n");
+    await writeFile(FEEDBACK_FILE, body ? body + "\n" : "", "utf-8");
+  });
 }
 
 export function isBacktestEntry(entry: FeedbackEntry): boolean {

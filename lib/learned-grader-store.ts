@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { tryDataWrite } from "./data-fs";
 
 export type LearnedGraderRule = {
   rule: string;
