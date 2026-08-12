@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.46";
+  const DC_VERSION = "1.0.47";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.46</span>
+          <span class="dc-ver">v1.0.47</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
@@ -762,6 +762,14 @@
 
   async function tryStartAutonomousVoice() {
     if (!voiceReady || !backendOnline || !isAutoVoiceEnabled()) return;
+    if (window.DeskCopilotVoice?.getEngineMode?.() === "cascade") {
+      const ok = await window.DeskCopilotVoice.upgradeToRealtime?.(symbol);
+      if (ok) {
+        updateVoiceToggle(true, window.DeskCopilotVoice?.isRecording?.());
+        updateAgentStatus();
+      }
+      return;
+    }
     if (window.DeskCopilotVoice?.isListening?.()) return;
     window.DeskCopilotVoice?.resumeAutonomousAgent?.();
     const ok = await window.DeskCopilotVoice.startAutonomous?.(symbol);

@@ -1168,6 +1168,17 @@
     onInterim?.("");
   }
 
+  async function upgradeToRealtime(symbolResolver) {
+    if (!window.DeskCopilotRealtime?.retryUpgrade) return startAutonomous(symbolResolver);
+    window.DeskCopilotRealtime.suspend?.();
+    engineMode = "off";
+    setListening(false);
+    releaseMic();
+    onInterim?.("");
+    resumeAutonomousAgent();
+    return startAutonomous(symbolResolver);
+  }
+
   async function startAutonomous(symbolResolver) {
     if (!supported() || !isAutonomousEnabled() || userVoiceOff) return false;
 
@@ -1346,6 +1357,7 @@
     },
     speakAck,
     startCascadeVoice,
+    upgradeToRealtime,
     setCascadeFallback(cb) {
       onCascadeFallback = cb;
     },

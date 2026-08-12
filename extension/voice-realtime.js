@@ -38,6 +38,10 @@
   let inputTranscriptLive = "";
   let assistantTranscriptBuf = "";
   let lastAssistantSpoken = "";
+  let connectResolve = null;
+  let connectReject = null;
+  let connectTimer = null;
+  let lastFatalError = "";
 
   function setSpeaking(v) {
     onSpeakingChange?.(Boolean(v));
@@ -140,6 +144,40 @@
     if (!t || t === lastAssistantSpoken) return;
     lastAssistantSpoken = t;
     onAssistantReply?.(t);
+  }
+
+  function finishConnectAttempt(ok, err) {
+    if (connectTimer) {
+      clearTimeout(connectTimer);
+      connectTimer = null;
+    }
+    if (ok && connectResolve) {
+      connectResolve(true);
+    } else if (!ok && connectReject) {
+      connectReject(err instanceof Error ? err : new Error(String(err || "Realtime connection failed")));
+    }
+    connectResolve = null;
+    connectReject = null;
+  }
+
+  function isFatalRealtimeError(msg) {
+    const text = String(msg?.error?.message || msg?.message || msg || "").toLowerCase();
+    return (
+      text.includes("invalid") ||
+      text.includes("unknown") ||
+      text.includes("not supported") ||
+      text.includes("api key") ||
+      text.includes("unauthorized")
+    );
+  }
+
+  function failRealtime(message, fatal = false) {
+    lastFatalError = message;
+    if (fatal) {
+      wantActive = false;
+      reconnects = MAX_RECONNECTS;
+    }
+    onStatus?.(message, false);
   }
 
   function sendEvent(event) {
@@ -300,6 +338,21 @@
   function handleServerMessage(msg) {
     const type = msg.type || "";
 
+    if (type === "session.created" || type === "session.updated") {
+      if (connectResolve) finishConnectAttempt(true);
+    }
+
+    if (type === "error") {
+      const errMsg = msg.error?.message || "Realtime error";
+      if (connectReject) {
+        finishConnectAttempt(false, new Error(errMsg));
+        failRealtime(errMsg, isFatalRealtimeError(msg));
+        cleanupSocket();
+        return;
+      }
+      failRealtime(errMsg, isFatalRealtimeError(msg));
+    }
+
     if (type === "input_audio_buffer.speech_started") {
       stopPlayback();
       inputTranscriptLive = "";
@@ -397,11 +450,6 @@
     if (type === "response.function_call_arguments.done") {
       void handleFunctionCall(msg.name, msg.call_id, msg.arguments || "{}");
     }
-
-    if (type === "error") {
-      const errMsg = msg.error?.message || "Realtime error";
-      onStatus?.(errMsg, false);
-    }
   }
 
   async function connect(isReconnect = false) {
@@ -415,8 +463,10 @@
       onStatus?.(isReconnect ? "Reconnecting voice…" : "Connecting realtime voice…", null);
 
       await new Promise((resolve, reject) => {
-        const timer = setTimeout(() => {
-          reject(new Error("Realtime connection timed out"));
+        connectResolve = resolve;
+        connectReject = reject;
+        connectTimer = setTimeout(() => {
+          finishConnectAttempt(false, new Error("Realtime connection timed out"));
         }, CONNECT_TIMEOUT_MS);
 
         ws = new WebSocket(
@@ -425,21 +475,20 @@
         );
 
         ws.onopen = () => {
-          clearTimeout(timer);
-          active = true;
-          reconnects = 0;
-          setListening(true);
-          scheduleSessionRefresh();
-          onStatus?.("● Voice live — talk anytime", true);
-          resolve(true);
+          onStatus?.("Realtime socket open…", null);
         };
 
         ws.onerror = () => {
-          clearTimeout(timer);
-          reject(new Error("Realtime connection failed"));
+          finishConnectAttempt(false, new Error("Realtime connection failed"));
         };
 
-        ws.onclose = () => {
+        ws.onclose = (ev) => {
+          if (connectReject) {
+            finishConnectAttempt(
+              false,
+              new Error(lastFatalError || `Realtime closed (${ev.code})`)
+            );
+          }
           const wasActive = active;
           active = false;
           setListening(false);
@@ -454,6 +503,12 @@
           }
         };
       });
+
+      active = true;
+      reconnects = 0;
+      setListening(true);
+      scheduleSessionRefresh();
+      onStatus?.("● Voice live — talk anytime", true);
 
       await startCapture();
       return true;
@@ -538,6 +593,18 @@
     if (active && ws?.readyState === WebSocket.OPEN) return true;
     wantActive = true;
     reconnects = 0;
+    lastFatalError = "";
+    return connect(false);
+  }
+
+  async function retryUpgrade() {
+    wantActive = true;
+    reconnects = 0;
+    lastFatalError = "";
+    sessionKey = "";
+    cleanupSocket();
+    releaseMic();
+    active = false;
     return connect(false);
   }
 
@@ -554,6 +621,7 @@
     },
     prefetchSession,
     start,
+    retryUpgrade,
     stop,
     suspend,
     isActive() {

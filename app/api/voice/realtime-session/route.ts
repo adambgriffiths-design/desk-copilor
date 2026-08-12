@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
             input: {
               format: { type: "audio/pcm", rate: 24000 },
               noise_reduction: { type: "far_field" },
-              transcription: { model: "gpt-4o-mini-transcribe", language: "en" },
+              transcription: { model: "whisper-1", language: "en" },
               turn_detection: {
                 type: "server_vad",
                 create_response: true,
