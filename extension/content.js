@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.43";
+  const DC_VERSION = "1.0.44";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.43</span>
+          <span class="dc-ver">v1.0.44</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
@@ -479,6 +479,28 @@
     return true;
   }
 
+  let lastRecordedAssistantText = "";
+  let lastRecordedAssistantAt = 0;
+
+  function recordAssistantReply(text) {
+    const t = displayText(text).trim();
+    if (!t) return false;
+    const norm = t.toLowerCase();
+    const now = Date.now();
+    if (norm === lastRecordedAssistantText && now - lastRecordedAssistantAt < 8000) return false;
+    const last = chatHistory.at(-1);
+    if (last?.role === "assistant") {
+      const prev = last.content.toLowerCase();
+      if (prev === norm || prev.includes(norm) || norm.includes(prev.slice(0, 48))) return false;
+    }
+    lastRecordedAssistantText = norm;
+    lastRecordedAssistantAt = now;
+    appendChatBubble("assistant", t);
+    chatHistory.push({ role: "assistant", content: t });
+    trimHistory();
+    return true;
+  }
+
   function seedWelcome() {
     if (chatHistory.length) return;
     const welcome = "GET THE READ for the ICT brief. Grade it. You pull the trigger.";
@@ -687,7 +709,7 @@
       setMsg("Wait for current request to finish", false);
       return;
     }
-    void runChartRead("what do you see on the chart", { voice: voiceReady });
+    void runChartRead("what do you see on the chart", { voice: false });
   };
   document.getElementById("dc-rate-up").onclick = () => {
     void rateVerdict("up");
@@ -862,8 +884,7 @@
     showRateRow(Boolean(currentId));
     const shown = displayText(lastVerdict);
     document.getElementById("dc-text").textContent = shown;
-    chatHistory.push({ role: "assistant", content: shown });
-    appendChatBubble("assistant", shown);
+    recordAssistantReply(shown);
     refreshStats();
     if (voiceReady && window.DeskCopilotVoice?.autoRead) {
       const rtMode = window.DeskCopilotVoice?.getEngineMode?.() === "realtime";
@@ -1109,6 +1130,9 @@
         if (text?.trim()) lastVoiceTranscript = text.trim();
         recordUserTranscript(text);
       },
+      onAssistantReply: (text) => {
+        recordAssistantReply(text);
+      },
       onToolCall: async (name, args) => {
         if (name === "mark_levels") {
           await drawLevels();
@@ -1153,9 +1177,7 @@
         recordUserTranscript(text);
       },
       onAssistantReply: (reply, userText) => {
-        chatHistory.push({ role: "assistant", content: reply });
-        trimHistory();
-        appendChatBubble("assistant", reply);
+        recordAssistantReply(reply);
       },
       onNeedsChartRead: async (question) => {
         await runChartRead(question, { voice: true });

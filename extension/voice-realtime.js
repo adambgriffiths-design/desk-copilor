@@ -33,6 +33,11 @@
   let onListeningChange = null;
   let onToolCall = null;
   let onTranscript = null;
+  let onAssistantReply = null;
+
+  let inputTranscriptLive = "";
+  let assistantTranscriptBuf = "";
+  let lastAssistantSpoken = "";
 
   function setSpeaking(v) {
     onSpeakingChange?.(Boolean(v));
@@ -114,6 +119,27 @@
     sessionExpires = res.expires_at ? res.expires_at * 1000 : Date.now() + 550000;
     handledCallIds = new Set();
     return res;
+  }
+
+  function extractInputTranscript(msg) {
+    return (
+      msg.transcript ||
+      msg.item?.content?.find((c) => c?.transcript)?.transcript ||
+      msg.item?.content?.[0]?.transcript ||
+      ""
+    )
+      .trim();
+  }
+
+  function extractOutputTranscript(msg) {
+    return (msg.transcript || msg.delta || assistantTranscriptBuf || "").trim();
+  }
+
+  function emitAssistantReply(text) {
+    const t = String(text || "").trim();
+    if (!t || t === lastAssistantSpoken) return;
+    lastAssistantSpoken = t;
+    onAssistantReply?.(t);
   }
 
   function sendEvent(event) {
@@ -276,12 +302,56 @@
 
     if (type === "input_audio_buffer.speech_started") {
       stopPlayback();
+      inputTranscriptLive = "";
       onInterim?.("…");
       onStatus?.("Hearing you…", true);
     }
 
+    if (
+      type === "conversation.item.input_audio_transcription.delta" ||
+      type === "input_audio_buffer.transcription.delta"
+    ) {
+      const delta = msg.delta || msg.transcript || "";
+      if (delta) {
+        inputTranscriptLive += delta;
+        onInterim?.(inputTranscriptLive);
+      }
+    }
+
+    if (
+      type === "conversation.item.input_audio_transcription.completed" ||
+      type === "conversation.item.input_audio_transcription.done" ||
+      type === "input_audio_buffer.transcription.completed"
+    ) {
+      const text = extractInputTranscript(msg) || inputTranscriptLive;
+      inputTranscriptLive = "";
+      if (text) {
+        onInterim?.("");
+        onTranscript?.(text);
+      }
+    }
+
     if (type === "response.created" || type === "response.started") {
       responseActive = true;
+      assistantTranscriptBuf = "";
+      lastAssistantSpoken = "";
+    }
+
+    if (
+      type === "response.output_audio_transcript.delta" ||
+      type === "response.audio_transcript.delta"
+    ) {
+      const delta = msg.delta || "";
+      if (delta) assistantTranscriptBuf += delta;
+    }
+
+    if (
+      type === "response.output_audio_transcript.done" ||
+      type === "response.audio_transcript.done"
+    ) {
+      const text = extractOutputTranscript(msg);
+      assistantTranscriptBuf = "";
+      emitAssistantReply(text);
     }
 
     if (
@@ -292,14 +362,20 @@
       responseActive = false;
     }
 
-    if (
-      type === "conversation.item.input_audio_transcription.completed" ||
-      type === "conversation.item.input_audio_transcription.done"
-    ) {
-      const text = (msg.transcript || msg.item?.content?.[0]?.transcript || "").trim();
-      if (text) {
-        onInterim?.("");
-        onTranscript?.(text);
+    if (type === "response.done" && Array.isArray(msg.response?.output)) {
+      for (const item of msg.response.output) {
+        if (item.type === "function_call" && item.call_id) {
+          void handleFunctionCall(item.name, item.call_id, item.arguments || "{}");
+          continue;
+        }
+        if (item.type === "message" && Array.isArray(item.content)) {
+          const spoken = item.content
+            .map((c) => c.transcript || c.text || "")
+            .filter(Boolean)
+            .join(" ")
+            .trim();
+          if (spoken) emitAssistantReply(spoken);
+        }
       }
     }
 
@@ -316,14 +392,6 @@
       setTimeout(() => {
         if (playCtx && playCtx.currentTime >= playTime - 0.05) setSpeaking(false);
       }, 120);
-    }
-
-    if (type === "response.done" && Array.isArray(msg.response?.output)) {
-      for (const item of msg.response.output) {
-        if (item.type === "function_call" && item.call_id) {
-          void handleFunctionCall(item.name, item.call_id, item.arguments || "{}");
-        }
-      }
     }
 
     if (type === "response.function_call_arguments.done") {
@@ -481,6 +549,7 @@
       onListeningChange = handlers.onListeningChange;
       onToolCall = handlers.onToolCall;
       onTranscript = handlers.onTranscript;
+      onAssistantReply = handlers.onAssistantReply;
       return true;
     },
     prefetchSession,

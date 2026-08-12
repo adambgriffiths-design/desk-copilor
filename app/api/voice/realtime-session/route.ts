@@ -63,14 +63,14 @@ export async function POST(request: NextRequest) {
             input: {
               format: { type: "audio/pcm", rate: 24000 },
               noise_reduction: { type: "far_field" },
-              transcription: { model: "whisper-1", language: "en" },
+              transcription: { model: "gpt-4o-mini-transcribe", language: "en" },
               turn_detection: {
                 type: "server_vad",
                 create_response: true,
                 interrupt_response: true,
-                silence_duration_ms: 750,
-                threshold: 0.62,
-                prefix_padding_ms: 300,
+                silence_duration_ms: 650,
+                threshold: 0.58,
+                prefix_padding_ms: 400,
               },
             },
             output: {
