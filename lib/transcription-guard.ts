@@ -7,12 +7,12 @@ const PROMPT_ECHO_PHRASES = [
   "market structure shift",
   "liquidity sweep",
   "what do you see on the chart",
-  "what do you see",
   "get the read",
   "ict trading desk",
-  "nasdaq mnq",
-  "mini futures",
 ];
+
+const GARBAGE_ONLY =
+  /^(mnq|mnq futures|nasdaq|nasdaq futures|mini nasdaq|futures|thank you|thanks|you|uh|um|hmm|okay|ok|hello|hey)[.!?\s]*$/i;
 
 const ACRONYM_SOUP =
   /\b(fvg|org|ce|mss|ivfvg|ndog|nwog|ote|pdh|pdl|pdc)\b[\s,;]+(?:\b(fvg|org|ce|mss|liquidity|bias|premium|discount|ivfvg|ndog|nwog|ote|pdh|pdl|pdc)\b[\s,;]+){2,}/i;
@@ -20,9 +20,12 @@ const ACRONYM_SOUP =
 export function isTranscriptionHallucination(text: string): boolean {
   const t = text.replace(/\s+/g, " ").trim();
   if (!t) return true;
+  if (GARBAGE_ONLY.test(t)) return true;
 
   const lower = t.toLowerCase();
   const words = lower.split(/\s+/).filter(Boolean);
+
+  if (words.length < 2 && !/\?/.test(t)) return true;
 
   if (ACRONYM_SOUP.test(t)) return true;
 
@@ -38,9 +41,9 @@ export function isTranscriptionHallucination(text: string): boolean {
   if (phraseHits >= 2 && words.length < 18) return true;
 
   if (
-    phraseHits >= 1 &&
+    phraseHits >= 2 &&
     acronymCount >= 2 &&
-    !/\b(i|we|you|the|a|is|are|was|were|can|could|should|would|buy|sell|wait|look|thanks|hello|hey)\b/i.test(
+    !/\b(i|we|you|the|a|is|are|was|were|can|could|should|would|buy|sell|wait|look|thanks|hello|hey|what|how)\b/i.test(
       t
     )
   ) {
@@ -50,5 +53,5 @@ export function isTranscriptionHallucination(text: string): boolean {
   return false;
 }
 
-/** Short prior context only — long vocabulary lists cause silence hallucinations. */
-export const TRANSCRIBE_PROMPT = "MNQ futures.";
+/** No prompt — vocabulary hints cause silence hallucinations in noisy audio. */
+export const TRANSCRIBE_PROMPT = "";

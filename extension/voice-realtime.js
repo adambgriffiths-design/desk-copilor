@@ -394,6 +394,17 @@
     }, ms);
   }
 
+  async function prefetchSession(symbol) {
+    try {
+      if (!sessionKey || Date.now() > sessionExpires - 15000) {
+        await fetchSession(symbol || window.__dcSymbol?.() || "MNQ1!");
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async function start(symbolResolver) {
     if (symbolResolver) window.__dcSymbol = symbolResolver;
     if (active && ws?.readyState === WebSocket.OPEN) return true;
@@ -412,6 +423,7 @@
       onTranscript = handlers.onTranscript;
       return true;
     },
+    prefetchSession,
     start,
     stop,
     suspend,

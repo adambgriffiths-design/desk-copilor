@@ -1,5 +1,5 @@
 /**
- * Desk Copilot voice — continuous browser STT (ChatGPT-style) + Whisper fallback.
+ * Desk Copilot voice — Whisper + noise-gated VAD (works with background noise).
  */
 (function () {
   const SpeechRecognition =
@@ -13,12 +13,14 @@
       navigator.language) ||
     "en-US";
 
-  const SILENCE_MS = 1800;
-  const MIN_SPEECH_MS = 350;
+  const SILENCE_MS = 1300;
+  const MIN_SPEECH_MS = 320;
   const MAX_UTTERANCE_MS = 45000;
   const VAD_INTERVAL_MS = 60;
-  const VOLUME_THRESHOLD = 0.006;
-  const BARGE_IN_THRESHOLD = 0.018;
+  const VOLUME_THRESHOLD = 0.007;
+  const BARGE_IN_THRESHOLD = 0.022;
+  const NOISE_CALIBRATION_SAMPLES = 55;
+  const SPEECH_FRAMES_REQUIRED = 3;
 
   const COMMANDS = [
     {
@@ -56,21 +58,14 @@
   ];
 
   const NORMALIZE = [
-    [/\bem en q\b/gi, "Nasdaq futures"],
-    [/\bm and q\b/gi, "Nasdaq futures"],
-    [/\bmini nasdaq\b/gi, "Nasdaq futures"],
+    [/\bem en q\b/gi, "MNQ"],
+    [/\bm and q\b/gi, "MNQ"],
     [/\bf v g\b/gi, "fair value gap"],
     [/\bo r g\b/gi, "opening range gap"],
     [/\bwhat do you see on the char\b/gi, "what do you see on the chart"],
     [/\blook at the char\b/gi, "look at the chart"],
     [/\byour reed\b/gi, "your read"],
     [/\bgive me a reed\b/gi, "give me a read"],
-    [/\bmarket structure\b/gi, "market structure"],
-    [/\bliquidity sweep\b/gi, "liquidity sweep"],
-    [/\bfair value gap\b/gi, "fair value gap"],
-    [/\bopening range\b/gi, "opening range"],
-    [/\bget the read\b/gi, "get the read"],
-    [/\bget a read\b/gi, "get a read"],
   ];
 
   let micStream = null;
@@ -108,6 +103,7 @@
   let noiseFloor = 0.004;
   let noiseSamples = [];
   let vadCalibrated = false;
+  let speechFrames = 0;
   let pendingTranscript = "";
   let pendingTranscriptTimer = null;
   let nativeSttErrors = 0;
@@ -116,7 +112,6 @@
   let finishingUtterance = false;
   let utteranceBusy = false;
   let transcribeToken = 0;
-  let streamTtsPlayed = false;
   let getChatContext = null;
   let onAssistantReply = null;
   let onNeedsChartRead = null;
@@ -167,6 +162,11 @@
   function isLikelyHallucination(text) {
     const t = text.replace(/\s+/g, " ").trim();
     if (!t) return true;
+
+    if (/^(mnq|mnq futures|nasdaq|nasdaq futures|mini nasdaq|futures|thank you|thanks|uh|um|hmm|okay|ok|hello|hey)[.!?\s]*$/i.test(t)) {
+      return true;
+    }
+
     const lower = t.toLowerCase();
     const words = lower.split(/\s+/).filter(Boolean);
     const acronyms = (lower.match(/\b(fvg|org|ce|mss|ivfvg|ndog|nwog|ote|pdh|pdl|pdc)\b/gi) || [])
@@ -183,7 +183,6 @@
       "opening range gap",
       "market structure shift",
       "what do you see on the chart",
-      "what do you see",
       "get the read",
       "chart read",
       "liquidity sweep",
@@ -194,7 +193,7 @@
       if (lower.includes(phrase)) hits++;
     }
     if (hits >= 2 && words.length < 18) return true;
-    if (hits >= 1 && acronyms >= 2 && words.length < 14) return true;
+    if (hits >= 2 && acronyms >= 2 && words.length < 14) return true;
     if (/^(fvg|org|ce|mss|liquidity|bias|premium|discount)[\s,;]+/i.test(t)) return true;
     return false;
   }
@@ -321,6 +320,7 @@
     lastLoudAt = 0;
     noiseSamples = [];
     vadCalibrated = false;
+    speechFrames = 0;
     noiseFloor = 0.004;
 
     vadTimer = setInterval(() => {
@@ -329,10 +329,10 @@
 
       if (!vadCalibrated && !recording) {
         noiseSamples.push(volume);
-        if (noiseSamples.length >= 40) {
+        if (noiseSamples.length >= NOISE_CALIBRATION_SAMPLES) {
           const sorted = [...noiseSamples].sort((a, b) => a - b);
           const median = sorted[Math.floor(sorted.length / 2)] || 0;
-          noiseFloor = Math.max(0.003, median * 2.4);
+          noiseFloor = Math.max(0.004, median * 3.2);
           vadCalibrated = true;
         }
       }
@@ -340,17 +340,22 @@
       const threshold = Math.max(VOLUME_THRESHOLD, noiseFloor);
 
       if (speaking) {
-        if (volume >= Math.max(BARGE_IN_THRESHOLD, threshold * 1.8)) {
+        if (volume >= Math.max(BARGE_IN_THRESHOLD, threshold * 2)) {
           cancelSpeech();
         }
         return;
       }
 
       if (volume >= threshold) {
-        lastLoudAt = Date.now();
-        if (!recording) beginRecording();
+        speechFrames += 1;
+        if (speechFrames >= SPEECH_FRAMES_REQUIRED) {
+          lastLoudAt = Date.now();
+          if (!recording) beginRecording();
+        }
         return;
       }
+
+      speechFrames = 0;
 
       if (recording && lastLoudAt && Date.now() - lastLoudAt >= SILENCE_MS) {
         finishRecording();
@@ -438,7 +443,10 @@
           nativeSttErrors = 0;
           setRecording(false);
           onInterim?.("");
-          enqueueTranscript(normalizeTranscript(text));
+          const finalText = normalizeTranscript(text);
+          if (finalText && !isLikelyHallucination(finalText)) {
+            void handleTranscript(finalText);
+          }
         } else {
           interim += `${text} `;
         }
@@ -726,7 +734,7 @@
     try {
       const blob = new Blob(recordChunks, { type: cleanMime(mimeType) });
       recordChunks = [];
-      if (blob.size < 900) {
+      if (blob.size < 500) {
         onInterim?.("");
         if (listening) onStatus?.("Didn't catch that — speak louder, then pause", null);
         return;
@@ -747,7 +755,7 @@
       const msg = e instanceof Error ? e.message : String(e);
       if (/no speech detected|didn't catch|too short|OPENAI_API_KEY|fetch failed|Failed to fetch/i.test(msg)) {
         if (/OPENAI_API_KEY|fetch failed|Failed to fetch/i.test(msg)) {
-          onStatus?.("Backend offline — run npm run dev", false);
+          onStatus?.("Backend offline — check Extension Options (Vercel URL)", false);
         } else if (listening) onStatus?.("Didn't catch that — speak again", null);
       } else if (/invalid file format/i.test(msg)) {
         if (listening) onStatus?.("Audio format error — reload extension", false);
@@ -839,33 +847,60 @@
     ttsPlaying = false;
   }
 
-  async function enqueueTtsSentence(sentence, gen) {
-    if (!sentence.trim() || gen !== speakGeneration) return;
+  async function speakTextOnce(text, gen) {
+    const line = toSpeakable(text);
+    if (!line || gen !== speakGeneration) return;
+
+    setSpeaking(true);
+    pauseNativeStt();
+    stopTtsPlayback();
+    onStatus?.("Speaking — talk to interrupt", null);
+
     try {
-      const blob = await fetchTtsAudio(sentence);
+      const blob = await fetchTtsAudio(line.slice(0, 4096));
       if (gen !== speakGeneration) return;
-      streamTtsPlayed = true;
-      ttsQueue.push(blob);
-      void drainTtsQueue(gen);
+      await playTtsBlob(blob, gen);
     } catch {
-      /* fallback handled by caller */
+      if (gen !== speakGeneration) return;
+      await new Promise((resolve) => speakWithBrowserTts(line, resolve));
     }
   }
 
   function streamChatViaPort(payload) {
     return new Promise((resolve, reject) => {
       let port;
+      const timeout = setTimeout(() => {
+        try {
+          port?.disconnect();
+        } catch {
+          /* ignore */
+        }
+        chatStreamPort = null;
+        reject(new Error("Desk timed out — try again"));
+      }, 90000);
+
       try {
         port = chrome.runtime.connect({ name: "desk-copilot-chat-stream" });
       } catch (e) {
+        clearTimeout(timeout);
         reject(e);
         return;
       }
       chatStreamPort = port;
 
       let reply = "";
-      let sentenceBuf = "";
       let needsChartRead = null;
+
+      const finish = (fn) => {
+        clearTimeout(timeout);
+        chatStreamPort = null;
+        try {
+          port.disconnect();
+        } catch {
+          /* ignore */
+        }
+        fn();
+      };
 
       port.onMessage.addListener((msg) => {
         if (msg.type === "json" && msg.data?.needsChartRead) {
@@ -879,33 +914,18 @@
           }
           if (ev.type === "delta" && ev.text) {
             reply += ev.text;
-            sentenceBuf += ev.text;
             onInterim?.(reply);
-            const m = sentenceBuf.match(/(.+?[.!?])(?:\s+|$)/);
-            if (m) {
-              const sentence = m[1].trim();
-              sentenceBuf = sentenceBuf.slice(m[0].length);
-              void enqueueTtsSentence(sentence, speakGeneration);
-            }
           }
           if (ev.type === "done" && ev.reply) reply = ev.reply;
-          if (ev.type === "error") reject(new Error(ev.error || "Stream failed"));
+          if (ev.type === "error") finish(() => reject(new Error(ev.error || "Stream failed")));
         }
-        if (msg.type === "error") reject(new Error(msg.error || "Stream failed"));
+        if (msg.type === "error") finish(() => reject(new Error(msg.error || "Stream failed")));
         if (msg.type === "done") {
-          chatStreamPort = null;
-          try {
-            port.disconnect();
-          } catch {
-            /* ignore */
-          }
           if (needsChartRead) {
-            resolve({ needsChartRead: true, question: needsChartRead.question, reply: "" });
+            finish(() => resolve({ needsChartRead: true, question: needsChartRead.question, reply: "" }));
             return;
           }
-          const tail = sentenceBuf.trim();
-          if (tail) void enqueueTtsSentence(tail, speakGeneration);
-          resolve({ reply: reply.trim() });
+          finish(() => resolve({ reply: reply.trim() }));
         }
       });
 
@@ -929,7 +949,6 @@
 
     cancelSpeech();
     const gen = ++speakGeneration;
-    streamTtsPlayed = false;
     speakDone = null;
     setSpeaking(true);
     pauseNativeStt();
@@ -957,9 +976,8 @@
       onAssistantReply?.(reply, transcript);
       onStatus?.("Speaking — talk to interrupt", null);
 
-      await drainTtsQueue(gen);
-      if (gen === speakGeneration && autoRead && !streamTtsPlayed && reply) {
-        await new Promise((resolve) => speakWithBrowserTts(reply, resolve));
+      if (autoRead) {
+        await speakTextOnce(reply, gen);
       }
       if (gen === speakGeneration) {
         setSpeaking(false);
@@ -967,11 +985,13 @@
         if (listening) onStatus?.("Voice live — talk anytime", true);
       }
     } catch (e) {
-      setSpeaking(false);
       const msg = e instanceof Error ? e.message : String(e);
       onStatus?.(msg, false);
       onChat?.(transcript, { skipBubble: true });
+    } finally {
+      setSpeaking(false);
       resumeNativeStt();
+      if (listening) onStatus?.("Voice live — talk anytime", true);
     }
   }
 
@@ -993,7 +1013,7 @@
 
     const now = Date.now();
     const norm = t.toLowerCase();
-    if (utteranceBusy || (norm === lastHeardText && now - lastHeardAt < 8000)) {
+    if (utteranceBusy || (norm === lastHeardText && now - lastHeardAt < 3000)) {
       if (listening) onStatus?.("Listening…", true);
       return;
     }
@@ -1090,36 +1110,6 @@
     speakNext();
   }
 
-  async function speakWithOpenAiTts(line, onDone) {
-    const gen = ++speakGeneration;
-    speakDone = onDone;
-    setSpeaking(true);
-    pauseNativeStt();
-    stopTtsPlayback();
-    onStatus?.("Speaking — talk to interrupt", null);
-
-    const sentences = splitSentences(line);
-    for (const sentence of sentences) {
-      if (gen !== speakGeneration) break;
-      try {
-        const blob = await fetchTtsAudio(sentence);
-        if (gen !== speakGeneration) break;
-        await playTtsBlob(blob, gen);
-      } catch {
-        speakWithBrowserTts(line, onDone);
-        return;
-      }
-    }
-
-    if (gen !== speakGeneration) return;
-    const done = speakDone;
-    speakDone = null;
-    setSpeaking(false);
-    done?.();
-    resumeNativeStt();
-    if (listening) onStatus?.("Voice live — talk anytime", true);
-  }
-
   function speak(text, onDone) {
     const line = toSpeakable(text);
     if (!line) {
@@ -1127,7 +1117,15 @@
       return;
     }
     cancelSpeech();
-    void speakWithOpenAiTts(line, onDone);
+    const gen = speakGeneration;
+    void speakTextOnce(text, gen).then(() => {
+      if (gen !== speakGeneration) return;
+      setSpeaking(false);
+      speakDone = null;
+      onDone?.();
+      resumeNativeStt();
+      if (listening) onStatus?.("Voice live — talk anytime", true);
+    });
   }
 
   async function startCascadeVoice() {
@@ -1165,18 +1163,6 @@
     if (!supported() || !isAutonomousEnabled() || userVoiceOff) return false;
 
     window.DeskCopilotRealtime?.suspend?.();
-
-    if (window.DeskCopilotRealtime?.start) {
-      const rtOk = await window.DeskCopilotRealtime.start(symbolResolver);
-      if (rtOk) {
-        engineMode = "realtime";
-        setListening(true);
-        onStatus?.("Agent live — talk anytime", true);
-        return true;
-      }
-      window.DeskCopilotRealtime?.stop?.();
-    }
-
     return startCascadeVoice();
   }
 
@@ -1229,11 +1215,13 @@
 
     nativeSttErrors = 0;
     stopNativeStt();
-    // Whisper + VAD is reliable on TradingView; browser STT often starts but never hears.
-    sttMode = "whisper";
+    finishRecording();
     setListening(true);
+
+    // Whisper + noise-gated VAD — reliable with TV/chart background noise.
+    sttMode = "whisper";
     await startVad();
-    onStatus?.("Listening… speak, then pause", true);
+    onStatus?.("Voice live — speak, then pause", true);
     return true;
   }
 

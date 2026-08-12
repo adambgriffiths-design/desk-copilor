@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.33";
+  const DC_VERSION = "1.0.35";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.33</span>
+          <span class="dc-ver">v1.0.35</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
@@ -537,8 +537,11 @@
       lastBackendCheck = Date.now();
       if (r?.ok) {
         setBackendStatus(true);
-        if (reconnect) setMsg(`Desk online (${r.base || "localhost"})`, true);
+        if (reconnect) setMsg(`Desk online (${r.base || "Vercel"})`, true);
         else setMsg("", null);
+        if (window.DeskCopilotRealtime?.prefetchSession) {
+          void window.DeskCopilotRealtime.prefetchSession(symbol());
+        }
         void tryStartAutonomousVoice();
         return true;
       }

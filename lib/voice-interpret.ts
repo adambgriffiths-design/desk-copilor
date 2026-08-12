@@ -1,25 +1,24 @@
 import OpenAI from "openai";
 
-const VOICE_INTERPRET_PROMPT = `You fix garbled speech-to-text for a Nasdaq futures trader using ICT concepts at the desk.
+const VOICE_INTERPRET_PROMPT = `You fix garbled speech-to-text for an MNQ futures trader using ICT concepts at the desk.
 
 Input is a raw voice transcript — often wrong words, missing punctuation, homophones.
 
 Output ONLY the corrected phrase the trader likely meant — one short sentence or question. No quotes, no explanation, no prefix.
 
-Use plain language — spell out terms (fair value gap, opening range gap, market structure shift). Do not use abbreviations like FVG, ORG, MSS, MNQ.
+Keep MNQ as MNQ. Fix obvious STT errors only (char→chart, reed→read, homophones).
 
 Examples:
 - "what do you see on the char" → what do you see on the chart
 - "give me your reed on this" → give me your read on this
 - "should i take this long or weight" → should I take this long or wait
-- "how's the bias looking on em en q" → how's the bias looking on Nasdaq futures
+- "how's the bias on em en q" → how's the bias on MNQ
 
-Keep their intent. Fix obvious STT errors only.`;
+Keep their intent. Do not invent content they did not say.`;
 
 const RULE_FIXES: [RegExp, string][] = [
-  [/\bem en q\b/gi, "Nasdaq futures"],
-  [/\bm and q\b/gi, "Nasdaq futures"],
-  [/\bmini nasdaq\b/gi, "Nasdaq futures"],
+  [/\bem en q\b/gi, "MNQ"],
+  [/\bm and q\b/gi, "MNQ"],
   [/\bf v g\b/gi, "fair value gap"],
   [/\bo r g\b/gi, "opening range gap"],
   [/\bwhat do you see on the char\b/gi, "what do you see on the chart"],
@@ -29,11 +28,6 @@ const RULE_FIXES: [RegExp, string][] = [
   [/\bchart reed\b/gi, "chart read"],
   [/\byour reed\b/gi, "your read"],
   [/\bgive me a reed\b/gi, "give me a read"],
-  [/\bwhat are you seeing\b/gi, "what are you seeing"],
-  [/\bwhat you're seeing\b/gi, "what are you seeing"],
-  [/\bshould i long\b/gi, "should I go long"],
-  [/\bshould i short\b/gi, "should I go short"],
-  [/\bkill zone\b/gi, "kill zone"],
 ];
 
 export function applyVoiceRules(raw: string): string {

@@ -1,7 +1,5 @@
-/** Shared API base URL resolution — import via importScripts in service worker. */
+/** Shared API base URL — always Vercel unless Options overrides. */
 const PRODUCTION_BASE = "https://desk-copilor.vercel.app";
-const LOCAL_BASE = "http://127.0.0.1:3000";
-const LOCAL_FALLBACK = "http://localhost:3000";
 
 let cachedBase = null;
 
@@ -18,25 +16,10 @@ function rememberBase(base) {
   chrome.storage.local.set({ apiBaseLastGood: normalized }).catch(() => {});
 }
 
-async function getCustomBase() {
+async function getApiBase() {
   const { apiBaseUrl } = await chrome.storage.sync.get("apiBaseUrl");
-  return normalizeBase(apiBaseUrl);
-}
-
-function isLocalBase(base) {
-  const b = normalizeBase(base);
-  return (
-    b === LOCAL_BASE ||
-    b === LOCAL_FALLBACK ||
-    b.startsWith("http://127.0.0.1:") ||
-    b.startsWith("http://localhost:")
-  );
-}
-
-async function getApiCandidates() {
-  const custom = await getCustomBase();
-  if (custom) return [custom];
-  return [PRODUCTION_BASE, LOCAL_BASE, LOCAL_FALLBACK];
+  const custom = normalizeBase(apiBaseUrl);
+  return custom || PRODUCTION_BASE;
 }
 
 async function probeBase(base, timeoutMs) {
@@ -47,21 +30,14 @@ async function probeBase(base, timeoutMs) {
   return normalizeBase(base);
 }
 
-/** Health check — saved URL first, then production Vercel, localhost last. */
+/** Health check — Vercel only (or custom URL from Options). */
 async function pingHealth() {
-  const candidates = await getApiCandidates();
-  const ordered = [];
+  const base = await getApiBase();
+  const candidates = [cachedBase === base ? null : base, base].filter(Boolean);
 
-  if (cachedBase && candidates.includes(cachedBase)) {
-    ordered.push(cachedBase);
-  }
-  for (const base of candidates) {
-    if (!ordered.includes(base)) ordered.push(base);
-  }
-
-  for (const base of ordered) {
+  for (const candidate of candidates) {
     try {
-      const ok = await probeBase(base, 8000);
+      const ok = await probeBase(candidate, 10000);
       rememberBase(ok);
       return { ok: true, base: ok };
     } catch {
@@ -70,10 +46,9 @@ async function pingHealth() {
   }
 
   cachedBase = null;
-  const hint = normalizeBase(await getCustomBase()) || PRODUCTION_BASE;
   return {
     ok: false,
-    error: `Backend offline — check ${hint} is up (Extension Options → Save)`,
+    error: `Backend offline — check ${base} in Extension Options`,
   };
 }
 

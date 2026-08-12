@@ -1,16 +1,10 @@
 {
   "manifest_version": 3,
   "name": "The Trading Desk",
-  "version": "1.0.33",
+  "version": "1.0.36",
   "description": "No signals. Just the read. ICT desk on TradingView.",
   "permissions": ["activeTab", "tabs", "storage", "scripting"],
   "host_permissions": [
-    "http://localhost:3000/*",
-    "http://localhost:3001/*",
-    "http://127.0.0.1:3000/*",
-    "http://127.0.0.1:3001/*",
-    "http://localhost:3002/*",
-    "http://127.0.0.1:3002/*",
     "https://desk-copilor.vercel.app/*",
     "https://*.vercel.app/*",
     "https://api.openai.com/*",

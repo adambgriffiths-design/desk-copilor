@@ -13,8 +13,8 @@ const cors = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-const TRANSCRIBE_MODELS = ["gpt-4o-mini-transcribe", "whisper-1"] as const;
-const MIN_AUDIO_BYTES = 1200;
+const TRANSCRIBE_MODEL = "gpt-4o-mini-transcribe";
+const MIN_AUDIO_BYTES = 800;
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: cors });
@@ -27,31 +27,20 @@ async function transcribeBuffer(
   ext: string
 ): Promise<string> {
   const file = await toFile(buffer, `voice.${ext}`, { type: mime });
-  let lastError: unknown;
-
-  for (const model of TRANSCRIBE_MODELS) {
-    try {
-      const transcription = await openai.audio.transcriptions.create({
-        file,
-        model,
-        language: "en",
-        prompt: TRANSCRIBE_PROMPT,
-      });
-      const text =
-        "text" in transcription && typeof transcription.text === "string"
-          ? transcription.text.trim()
-          : "";
-      if (text && !isTranscriptionHallucination(text)) return text;
-      if (text && isTranscriptionHallucination(text)) {
-        throw new Error("No speech detected");
-      }
-    } catch (err) {
-      lastError = err;
-    }
+  const transcription = await openai.audio.transcriptions.create({
+    file,
+    model: TRANSCRIBE_MODEL,
+    language: "en",
+    ...(TRANSCRIBE_PROMPT ? { prompt: TRANSCRIBE_PROMPT } : {}),
+  });
+  const text =
+    "text" in transcription && typeof transcription.text === "string"
+      ? transcription.text.trim()
+      : "";
+  if (text && isTranscriptionHallucination(text)) {
+    throw new Error("No speech detected");
   }
-
-  if (lastError instanceof Error) throw lastError;
-  throw new Error("Transcription failed");
+  return text;
 }
 
 export async function POST(request: NextRequest) {
