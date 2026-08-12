@@ -1,9 +1,55 @@
+import type { ChartQuestionIntent } from "./chart-question-intent";
+import { classifyChartQuestion, isSnapshotIntent } from "./chart-question-intent";
 import type { MarketContext } from "./types";
 import { getExecutionScaffold } from "./execution-plan";
+import { expandTradingAbbreviations } from "./plain-language";
+import { buildMarketSnapshotAnswer } from "./market-snapshot";
+
+function formatLevelLabel(label: string): string {
+  return expandTradingAbbreviations(label.replace(/\([^)]*\)/g, "").trim());
+}
 
 function parseMetaCall(verdict: string): string | null {
   const meta = verdict.match(/^META:.*call=([^|]+)/im);
   return meta?.[1]?.trim() || null;
+}
+
+function spokenFromScaffold(
+  ctx: MarketContext,
+  call: string,
+  bias: string,
+  scaffold: NonNullable<ReturnType<typeof getExecutionScaffold>>
+): string {
+  const price = ctx.daily.lastClose.toFixed(2);
+  const target = `${scaffold.target1Price.toFixed(2)} at ${formatLevelLabel(scaffold.target1Label)}`;
+  const biasNote = expandTradingAbbreviations(
+    ctx.biasStack.summary?.split(";")[0]?.trim() || ""
+  );
+  const mss = ctx.structureFacts.mss;
+
+  const parts: string[] = [];
+  parts.push(`Nasdaq futures trading at ${price}`);
+  if (mss && !/\b\d{5}/.test(mss.description)) {
+    parts.push(expandTradingAbbreviations(mss.description));
+  }
+  if (biasNote) {
+    parts.push(`Bias is ${bias} — ${biasNote}`);
+  } else {
+    parts.push(`Bias is ${bias}`);
+  }
+  const entryPhrase =
+    scaffold.entryStatus === "WAIT"
+      ? "waiting for entry"
+      : "entry zone is active now";
+  parts.push(`Call is ${call}, ${entryPhrase}`);
+  if (scaffold.entryLabel.includes("inverted") && /potential sell/i.test(call)) {
+    parts.push("Entry uses inverted bullish fair value gap as resistance, not unfilled support");
+  } else if (scaffold.entryLabel.includes("inverted") && /potential buy/i.test(call)) {
+    parts.push("Entry uses inverted bearish fair value gap as support, not unfilled resistance");
+  }
+  parts.push(`Target one ${target}`);
+
+  return expandTradingAbbreviations(`${parts.join(". ")}.`);
 }
 
 function isGenericChartQuestion(question?: string): boolean {
@@ -18,57 +64,81 @@ function isGenericChartQuestion(question?: string): boolean {
   );
 }
 
-function leadSentence(question: string | undefined, scaffold: NonNullable<ReturnType<typeof getExecutionScaffold>>, call: string): string {
-  const q = (question || "").toLowerCase();
-  const last = scaffold.lastPrice.toFixed(2);
-  const entry = `${scaffold.entryLo.toFixed(2)} to ${scaffold.entryHi.toFixed(2)}`;
-  const target = `${scaffold.target1Price.toFixed(2)} at ${scaffold.target1Label}`;
+/** Scoped spoken line — only fields matching intent. */
+export function buildScopedSpokenBrief(
+  ctx: MarketContext,
+  intent: ChartQuestionIntent,
+  verdict: string,
+  question?: string
+): string {
+  if (isSnapshotIntent(intent)) {
+    return buildMarketSnapshotAnswer(ctx, intent, question || "").spoken;
+  }
 
-  if (/\b(entry|enter|where.*(buy|sell|long|short))\b/.test(q)) {
-    return `Entry zone ${entry}, status ${scaffold.entryStatus}. Last price ${last}.`;
+  const scaffold = getExecutionScaffold(ctx);
+  const call = parseMetaCall(verdict) || scaffold?.call || "stand aside";
+  const bias = ctx.biasStack.tradeableBias;
+
+  if (intent === "structure") {
+    const mss = ctx.structureFacts.mss;
+    if (mss) {
+      return expandTradingAbbreviations(`Structure: ${mss.description}.`);
+    }
+    const fp = ctx.structureFacts.firstPresentedFvg?.nyOpening;
+    if (fp) {
+      const lo = Math.min(fp.fvg.top, fp.fvg.bottom);
+      const hi = Math.max(fp.fvg.top, fp.fvg.bottom);
+      return `First presented one-minute ${fp.fvg.type} fair value gap ${lo.toFixed(2)} to ${hi.toFixed(2)}.`;
+    }
+    const fvgs = ctx.structureFacts.m1UnfilledFvgs;
+    if (fvgs.length) {
+      const f = fvgs[fvgs.length - 1];
+      return `Most recent one-minute ${f.type} fair value gap ${f.bottom.toFixed(2)} to ${f.top.toFixed(2)}.`;
+    }
+    return `No recent market structure shift in lookback. Tradeable bias is ${bias}.`;
   }
-  if (/\b(target|take profit|where.*(go|run))\b/.test(q)) {
-    return `Target one ${target}. Last price ${last}.`;
+
+  if (intent === "first_presented_fvg") {
+    return buildMarketSnapshotAnswer(ctx, intent, question || "").spoken;
   }
-  if (/\b(buy|sell|call|direction|bias|long|short)\b/.test(q)) {
-    return `Call ${call}, tradeable bias ${scaffold.bias}. Last price ${last}.`;
+
+  if (intent === "full_read" && scaffold) {
+    return spokenFromScaffold(ctx, call, bias, scaffold);
   }
-  if (/\b(level|pdh|pdl|high|low|support|resistance)\b/.test(q)) {
-    return `Target one ${target}. Entry zone ${entry}. Last price ${last}.`;
-  }
-  if (!isGenericChartQuestion(question)) {
-    return `On that: call ${call}, bias ${scaffold.bias}. Last price ${last}.`;
-  }
-  return `Nasdaq futures last ${last}. Call ${call}, bias ${scaffold.bias}.`;
+
+  return buildMarketSnapshotAnswer(ctx, "price", question || "").spoken;
 }
 
-/** Voice TTS script — prices from live JSON only, tuned to the trader's question. */
+/** Full voice TTS script for full_read; scoped for other intents. */
 export function buildVoiceSpokenBrief(
   ctx: MarketContext,
   verdict: string,
   question?: string
 ): string | null {
+  const intent = classifyChartQuestion(question || "");
+  if (intent !== "full_read") {
+    return buildScopedSpokenBrief(ctx, intent, verdict, question);
+  }
+
   const scaffold = getExecutionScaffold(ctx);
   const call = parseMetaCall(verdict) || scaffold?.call || "stand aside";
-  const price = ctx.daily.lastClose;
   const bias = ctx.biasStack.tradeableBias;
 
   if (!scaffold) {
-    const pdh = ctx.htfPdArrays.previousDay.high;
-    const pdl = ctx.htfPdArrays.previousDay.low;
-    return `Nasdaq futures last ${price.toFixed(2)}. Tradeable bias ${bias}. Call ${call}. Previous day high ${pdh.toFixed(2)}, previous day low ${pdl.toFixed(2)}.`;
+    const biasNote = expandTradingAbbreviations(
+      ctx.biasStack.summary?.split(";")[0]?.trim() || ""
+    );
+    if (biasNote) {
+      return expandTradingAbbreviations(`Tradeable bias is ${bias} — ${biasNote}. Call is ${call}.`);
+    }
+    return `Tradeable bias is ${bias}. Call is ${call}.`;
   }
 
-  const entry = `${scaffold.entryLo.toFixed(2)} to ${scaffold.entryHi.toFixed(2)}`;
-  const target = `${scaffold.target1Price.toFixed(2)} at ${scaffold.target1Label}`;
+  if (isGenericChartQuestion(question)) {
+    return spokenFromScaffold(ctx, call, bias, scaffold);
+  }
 
-  const parts = [
-    leadSentence(question, scaffold, call),
-    `Entry ${entry}, ${scaffold.entryStatus}.`,
-    `Target one ${target}.`,
-  ];
-
-  return parts.join(" ").replace(/\s+/g, " ").trim();
+  return buildScopedSpokenBrief(ctx, "full_read", verdict, question);
 }
 
 export function formatRealtimeToolOutput(spokenBrief: string): string {

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   VOICE_REALTIME_INSTRUCTIONS,
-  VOICE_REALTIME_TOOLS,
 } from "@/lib/voice-instructions";
 import { realtimeVoiceForPreference } from "@/lib/voice-options";
 import { formatVoiceDeskContext } from "@/lib/voice-desk-context";
@@ -15,6 +14,9 @@ const cors = {
 };
 
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || "gpt-realtime";
+
+const WHISPER_STT_PROMPT =
+  "MNQ Nasdaq futures ICT trading previous day high previous day low fair value gap chart read entry target bias verdict";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: cors });
@@ -58,20 +60,20 @@ export async function POST(request: NextRequest) {
           type: "realtime",
           model: REALTIME_MODEL,
           instructions,
-          tools: VOICE_REALTIME_TOOLS,
-          tool_choice: "auto",
+          tools: [],
+          tool_choice: "none",
           output_modalities: ["audio"],
           audio: {
             input: {
               format: { type: "audio/pcm", rate: 24000 },
-              noise_reduction: { type: "far_field" },
-              transcription: { model: "whisper-1", language: "en" },
+              noise_reduction: { type: "near_field" },
+              transcription: { model: "whisper-1", language: "en", prompt: WHISPER_STT_PROMPT },
               turn_detection: {
                 type: "server_vad",
-                create_response: true,
+                create_response: false,
                 interrupt_response: true,
-                silence_duration_ms: 650,
-                threshold: 0.58,
+                silence_duration_ms: 1000,
+                threshold: 0.4,
                 prefix_padding_ms: 400,
               },
             },

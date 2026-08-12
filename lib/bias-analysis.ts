@@ -58,13 +58,13 @@ export function computeBiasStack(
   let summary: string;
   if (biasConflict && tradeableBias === "conflicted") {
     summary =
-      "Mixed higher-timeframe biases with no daily edge — lean directional from PD-array brief at medium confidence, or low confidence with tight invalidation. Avoid stand aside unless chop at opening range gap fifty percent.";
+      "Mixed higher-timeframe biases with no daily edge — lean directional from the premium and discount array brief at medium confidence, or low confidence with tight invalidation. Avoid stand aside unless chop at opening range gap fifty percent.";
   } else if (biasConflict) {
-    summary = `Partial bias conflict (${conflictPairs.join(", ")}) — call in ${tradeableBias.toUpperCase()} direction (daily/PD-led) at medium confidence with clear invalidation.`;
+    summary = `Partial bias conflict (${conflictPairs.join(", ")}) — call in ${tradeableBias} direction (daily and premium-discount led) at medium confidence with clear invalidation.`;
   } else if (alignedCount >= 2) {
-    summary = `${dominantBias.toUpperCase()} alignment on ${alignedCount}/3 timeframes — call potential ${dominantBias === "bullish" ? "buy" : "sell"} at medium+ when PD target aligns; high if one-minute market structure shift or displacement confirms.`;
+    summary = `${dominantBias} alignment on ${alignedCount} of three timeframes — call potential ${dominantBias === "bullish" ? "buy" : "sell"} at medium or higher confidence when the premium-discount target aligns; high if one-minute market structure shift or displacement confirms.`;
   } else {
-    summary = `Daily bias ${daily.toUpperCase()} leads — call potential ${daily === "bullish" ? "buy" : daily === "bearish" ? "sell" : "buy or sell from PD brief"} at medium confidence toward nearest PD target unless hard no-trade rule applies.`;
+    summary = `Daily bias ${daily} leads — call potential ${daily === "bullish" ? "buy" : daily === "bearish" ? "sell" : "buy or sell from the premium-discount brief"} at medium confidence toward the nearest premium-discount target unless a hard no-trade rule applies.`;
   }
 
   return {

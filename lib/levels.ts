@@ -1,9 +1,12 @@
 import type { Bar, FvgZone, MarketContext } from "./types";
 import { computeBiasStack } from "./bias-analysis";
 import { detectUnfilledIntradayFvgs } from "./gap-zones";
-import { computeHtfPdArrays, computePremiumDiscount, formatPdArrayBrief, pdArrayDirectionHint } from "./pd-arrays";
+import { computeHtfPdArrays, computePremiumDiscount, formatPdArrayBrief, formatPdArrayBriefCompact, pdArrayDirectionHint } from "./pd-arrays";
 import { formatExecutionPlan } from "./execution-plan";
 import { resolveSessionContext, sessionPhaseSummary } from "./sessions";
+import {
+  formatSessionIctHints,
+} from "./ict-knowledge";
 import { buildStructureFacts } from "./structure";
 import {
   barsInEstWindow,
@@ -17,6 +20,7 @@ import {
   RTH_OPEN_MIN,
   sessionHighLow,
 } from "./market-data";
+import { resolveLiveLastPrice } from "./chart-live-price";
 
 function eq(a: number, b: number): number {
   return (a + b) / 2;
@@ -39,7 +43,7 @@ function priorTradingDayKey(m1: Bar[], todayKey: string): string | null {
   return priorEstDateKey(m1, todayKey);
 }
 
-/** ORG = prior session 4:15 PM close → today 9:30 AM open. */
+/** ORG = prior session 4:15 PM close → today 9:30 AM open. (ICT wording: "15 min after 4" / 4:14 — same anchor.) */
 function computeOrg(m1: Bar[], todayKey: string): MarketContext["org"] | null {
   const priorKey = priorTradingDayKey(m1, todayKey);
   if (!priorKey) return null;
@@ -160,7 +164,8 @@ function sliceDailyForAsOf(
 export function buildMarketContextAt(
   data: { daily: Bar[]; m15: Bar[]; m5: Bar[]; m1: Bar[]; symbol: string },
   asOf: Date,
-  chartTimeEst?: string
+  chartTimeEst?: string,
+  chartLastPrice?: number | null
 ): MarketContext {
   const m1 = sliceBarsAt(data.m1, asOf);
   const m5 = sliceBarsAt(data.m5, asOf);
@@ -172,7 +177,8 @@ export function buildMarketContextAt(
   const yesterday = getEstDateKey(yesterdayDate);
 
   const { prev, currPartial } = sliceDailyForAsOf(data.daily, m1, asOf);
-  const lastPrice = m1.at(-1)?.close ?? currPartial?.close ?? prev?.close ?? 0;
+  const barClose = m1.at(-1)?.close ?? currPartial?.close ?? prev?.close;
+  const lastPrice = resolveLiveLastPrice(barClose, chartLastPrice);
 
   const m15Recent = m15.slice(-32);
   const m5Recent = m5.slice(-48);
@@ -286,7 +292,9 @@ export function buildMarketContextAt(
       pdLevels: htfPdArrays.levels,
       sessions: sessionLevels,
       org,
-    })
+    }),
+    asOf,
+    sessionCtx.id
   );
 
   return {
@@ -354,10 +362,11 @@ function sliceBarsAt(bars: Bar[], asOf: Date): Bar[] {
 
 export function buildMarketContext(
   data: { daily: Bar[]; m15: Bar[]; m5: Bar[]; m1: Bar[]; symbol: string },
-  chartTimeEst?: string
+  chartTimeEst?: string,
+  chartLastPrice?: number | null
 ): MarketContext {
   const now = new Date();
-  return buildMarketContextAt(data, now, chartTimeEst);
+  return buildMarketContextAt(data, now, chartTimeEst, chartLastPrice);
 }
 
 export function formatContextForPrompt(ctx: MarketContext): string {
@@ -367,6 +376,8 @@ export function formatContextForPrompt(ctx: MarketContext): string {
     ? `\n⚠️ **Partial bias conflict** (${ctx.biasStack.conflictPairs.join(", ")}) — tradeableBias: **${ctx.biasStack.tradeableBias}**. Still call in this direction at medium confidence unless chop at opening range gap fifty percent.\n`
     : `\n**Tradeable bias:** ${ctx.biasStack.tradeableBias} (${ctx.biasStack.alignedCount}/3 aligned). ${ctx.biasStack.summary}\n`;
 
+  const sessionHints = formatSessionIctHints(ctx.activeSession.id, new Date(ctx.fetchedAt));
+
   return `## LIVE MARKET CONTEXT (auto-fetched — use these levels, do not invent HTF prices)
 
 **Last MNQ price (1m): ${ctx.daily.lastClose.toFixed(2)}** — all cited levels must be near this range from JSON, not volume scales on the chart image.
@@ -375,12 +386,65 @@ The trader only uploaded a 1m chart. **Lead HTF analysis with daily PD arrays be
 
 ${pdBrief}
 ${biasAlert}
-${execPlan}
+${sessionHints ? `\n${sessionHints}\n` : ""}${execPlan}
+
 \`\`\`json
 ${JSON.stringify(ctx, null, 2)}
 \`\`\`
 
 Use biasStack.tradeableBias for tradeable bias. Chart image = one-minute execution structure only. In all trader-facing text, spell out terms — no abbreviations.`;
+}
+
+function formatStructureCompact(ctx: MarketContext): string {
+  const lines: string[] = [];
+  const mss = ctx.structureFacts.mss;
+  if (mss) lines.push(`MSS: ${mss.description} at ${mss.level.toFixed(2)}`);
+  const fp = ctx.structureFacts.firstPresentedFvg?.nyOpening;
+  if (fp) {
+    const lo = Math.min(fp.fvg.top, fp.fvg.bottom);
+    const hi = Math.max(fp.fvg.top, fp.fvg.bottom);
+    lines.push(
+      `First presented 1m ${fp.fvg.type} FVG ${lo.toFixed(2)}–${hi.toFixed(2)} (${fp.windowLabel}, ${fp.filled ? "filled" : "unfilled"})`
+    );
+  }
+  const fvgs = ctx.structureFacts.m1UnfilledFvgs.slice(-3);
+  for (const f of fvgs) {
+    lines.push(
+      `${f.type} 1m FVG ${Math.min(f.top, f.bottom).toFixed(2)}–${Math.max(f.top, f.bottom).toFixed(2)}`
+    );
+  }
+  for (const pool of ctx.structureFacts.relativeEqualPools?.slice(0, 4) ?? []) {
+    lines.push(
+      `${pool.type === "reh" ? "REH" : "REL"} ${pool.price.toFixed(2)} (${pool.barCount} swings)`
+    );
+  }
+  if (!lines.length) lines.push("No recent MSS in lookback; check chart for displacement/FVG.");
+  return lines.join("\n");
+}
+
+/** Smaller prompt for live verdict — no full JSON dump (faster API). */
+export function formatContextForLiveVerdict(ctx: MarketContext): string {
+  const pdBrief = formatPdArrayBriefCompact(ctx);
+  const execPlan = formatExecutionPlan(ctx);
+  const biasLine = ctx.biasStack.biasConflict
+    ? `Tradeable bias: ${ctx.biasStack.tradeableBias} (partial conflict: ${ctx.biasStack.conflictPairs.join(", ")})`
+    : `Tradeable bias: ${ctx.biasStack.tradeableBias} (${ctx.biasStack.alignedCount}/3 aligned) — ${ctx.biasStack.summary}`;
+
+  const sessionHints = formatSessionIctHints(ctx.activeSession.id, new Date(ctx.fetchedAt));
+
+  return `## LIVE MARKET CONTEXT (JSON — use these prices exactly)
+
+Last MNQ (1m): ${ctx.daily.lastClose.toFixed(2)}
+Session: ${ctx.activeSession.label} — ${ctx.activeSession.summary}
+${biasLine}
+
+${pdBrief}
+
+${execPlan}
+${sessionHints ? `\n${sessionHints}\n` : ""}Structure (from 1m JSON — confirm on chart):
+${formatStructureCompact(ctx)}
+
+Premium/discount: ${ctx.premiumDiscount?.summary || "n/a"}`;
 }
 
 export function formatContextForBacktestPrompt(ctx: MarketContext, m1Snapshot: string): string {

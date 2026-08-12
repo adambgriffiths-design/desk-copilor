@@ -286,6 +286,31 @@ export function pdArrayDirectionHint(
   };
 }
 
+/** Compact PD block for live verdict — fewer levels = faster model + fewer price dumps. */
+export function formatPdArrayBriefCompact(ctx: MarketContext): string {
+  const price = ctx.daily.lastClose;
+  const pd = ctx.htfPdArrays;
+  const { support, resistance } = nearestPdLevels(price, pd.levels);
+  const direction = pdArrayDirectionHint(price, pd);
+  const topLevels = [...pd.levels]
+    .sort((a, b) => Math.abs(b.price - price) - Math.abs(a.price - price))
+    .slice(0, 4)
+    .sort((a, b) => b.price - a.price)
+    .map((l) => `${l.label}: ${l.price.toFixed(2)}`)
+    .join(" · ");
+
+  return [
+    "### PD arrays (compact — cite nearest support/resistance only in brief)",
+    `Last price: ${price.toFixed(2)}`,
+    `Bias: ${direction.bias} — ${direction.summary}`,
+    support ? `Nearest support: ${support.label} @ ${support.price.toFixed(2)}` : "",
+    resistance ? `Nearest resistance: ${resistance.label} @ ${resistance.price.toFixed(2)}` : "",
+    topLevels ? `Nearby levels: ${topLevels}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 /** Structured PD-array block for LLM prompts — lead analysis with these levels. */
 export function formatPdArrayBrief(ctx: MarketContext): string {
   const price = ctx.daily.lastClose;

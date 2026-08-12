@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateLiveVerdict } from "@/lib/verdict-engine";
+import { generateChartAnswer } from "@/lib/verdict-engine";
 import { interpretVoiceInput } from "@/lib/voice-interpret";
+import { parseChartPriceInput } from "@/lib/chart-live-price";
 
 export const runtime = "nodejs";
 
@@ -17,13 +18,7 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const imageBase64 = body.imageBase64 as string;
-    if (!imageBase64) {
-      return NextResponse.json(
-        { error: "imageBase64 required" },
-        { status: 400, headers: cors }
-      );
-    }
+    const imageBase64 = body.imageBase64 as string | undefined;
 
     let question = body.question as string | undefined;
     let understoodAs: string | undefined;
@@ -33,19 +28,25 @@ export async function POST(request: NextRequest) {
       if (interpreted.changed) understoodAs = interpreted.text;
     }
 
-    const result = await generateLiveVerdict({
+    const result = await generateChartAnswer({
       imageBase64,
       mimeType: body.mimeType || "image/png",
       symbol: body.symbol,
       chartTime: body.chartTime || estNow(),
       question,
       voiceInput: body.voiceInput === true,
+      chartLastPrice: parseChartPriceInput(body.chartLastPrice),
+      chartSnapshot: body.chartSnapshot,
+      debug: body.debug === true,
     });
 
-    return NextResponse.json(
-      understoodAs ? { ...result, understoodAs } : result,
-      { headers: cors }
-    );
+    const payload = understoodAs ? { ...result, understoodAs } : result;
+    if (!body.debug && payload.reasoningLog) {
+      const { reasoningLog: _rl, qualityReasons: _qr, ...publicPayload } = payload;
+      return NextResponse.json(publicPayload, { headers: cors });
+    }
+
+    return NextResponse.json(payload, { headers: cors });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500, headers: cors });

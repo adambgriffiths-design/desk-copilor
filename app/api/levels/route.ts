@@ -3,8 +3,11 @@ import { fetchAllTimeframes, buildFvgDailyBars } from "@/lib/market-data";
 import { buildMarketContext } from "@/lib/levels";
 import { formatPdArrayBrief } from "@/lib/pd-arrays";
 import {
+  assignStaggeredLabelAlign,
   buildDrawingLevels,
   buildDrawingZones,
+  computeFhdr,
+  formatFirstPresentedFvgDraw,
   formatLevelsForClipboard,
   formatLevelsForPineInputs,
 } from "@/lib/drawing-levels";
@@ -25,9 +28,15 @@ export async function GET() {
   try {
     const data = await fetchAllTimeframes();
     const ctx = buildMarketContext(data);
-    const levels = buildDrawingLevels(ctx, data.m1);
+    const levels = buildDrawingLevels(ctx, data.m1, {
+      currentPrice: ctx.daily.lastClose,
+    });
     const fvgDaily = buildFvgDailyBars(data.daily, data.m1);
     const zones = buildDrawingZones(ctx, data.m1, fvgDaily);
+    const fhdr = computeFhdr(data.m1, ctx.fetchedAt);
+    const firstPresentedFvg = formatFirstPresentedFvgDraw(
+      ctx.structureFacts.firstPresentedFvg?.nyOpening
+    );
 
     const levelPrices = [
       ...levels.map((l) => l.price),
@@ -36,6 +45,10 @@ export async function GET() {
     const priceMin = Math.min(...levelPrices, ctx.daily.currentDayLow, ctx.daily.previousDayLow);
     const priceMax = Math.max(...levelPrices, ctx.daily.currentDayHigh, ctx.daily.previousDayHigh);
     const pad = Math.max((priceMax - priceMin) * 0.06, 8);
+    assignStaggeredLabelAlign(levels, zones, {
+      priceMin: priceMin - pad,
+      priceMax: priceMax + pad,
+    });
 
     return NextResponse.json(
       {
@@ -59,6 +72,8 @@ export async function GET() {
         },
         levels,
         zones,
+        fhdr,
+        firstPresentedFvg,
         clipboardText: formatLevelsForClipboard(levels, zones),
         pineJson: formatLevelsForPineInputs(levels),
       },

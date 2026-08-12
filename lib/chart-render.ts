@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import type { Bar } from "./types";
 import type { MarketContext } from "./types";
+import { assignStaggeredLabelAlign, labelYOffsetPx, type DrawingLevel, type LabelAlign } from "./drawing-levels";
 
 const W = 960;
 const H = 540;
@@ -17,7 +18,37 @@ function priceScale(min: number, max: number, price: number): number {
   return PAD.top + PLOT_H - ((price - min) / range) * PLOT_H;
 }
 
-type LevelLine = { price: number; color: string; label: string; dash?: string };
+type LevelLine = {
+  price: number;
+  color: string;
+  label: string;
+  dash?: string;
+  labelAlign?: LabelAlign;
+  labelLane?: number;
+  showLabel?: boolean;
+};
+
+function applyLabelStagger(lines: LevelLine[], yMin: number, yMax: number): void {
+  const stubs: DrawingLevel[] = lines.map((l, i) => ({
+    id: String(i),
+    label: l.label,
+    price: l.price,
+    color: l.color,
+    dash: l.dash ?? "4 3",
+    group: "structure",
+  }));
+  assignStaggeredLabelAlign(stubs, [], {
+    priceMin: yMin,
+    priceMax: yMax,
+    plotHeightPx: PLOT_H,
+    yOffsetPx: PAD.top,
+  });
+  for (let i = 0; i < lines.length; i++) {
+    lines[i].labelAlign = stubs[i].labelAlign;
+    lines[i].labelLane = stubs[i].labelLane;
+    lines[i].showLabel = stubs[i].showLabel !== false;
+  }
+}
 
 function buildLevels(ctx: MarketContext): LevelLine[] {
   const levels: LevelLine[] = [];
@@ -70,6 +101,21 @@ function buildSvg(bars: Bar[], ctx: MarketContext, chartTimeEst: string): string
   const yMin = minP - pad;
   const yMax = maxP + pad;
 
+  const visibleLevels = levelLines.filter((l) => l.price >= yMin && l.price <= yMax && l.showLabel !== false);
+  applyLabelStagger(visibleLevels, yMin, yMax);
+
+  const tagEntries: Array<{ y: number; text: string; color: string }> = [];
+  const addTag = (line: LevelLine, lineY: number) => {
+    if (line.showLabel === false) return;
+    const align = line.labelAlign === "bottom" ? "bottom" : "top";
+    const lane = line.labelLane ?? 0;
+    tagEntries.push({
+      y: labelYOffsetPx(lineY, align, lane),
+      text: `${line.label} ${line.price.toFixed(1)}`,
+      color: line.color,
+    });
+  };
+
   const slot = PLOT_W / recent.length;
   const bodyW = Math.max(2, slot * 0.55);
 
@@ -89,13 +135,21 @@ function buildSvg(bars: Bar[], ctx: MarketContext, chartTimeEst: string): string
     })
     .join("\n");
 
-  const hLines = levelLines
-    .filter((l) => l.price >= yMin && l.price <= yMax)
+  const hLines = visibleLevels
     .map((l) => {
       const y = priceScale(yMin, yMax, l.price);
-      return `<line x1="${PAD.left}" y1="${y}" x2="${W - PAD.right}" y2="${y}" stroke="${l.color}" stroke-width="1" stroke-dasharray="${l.dash ?? "4 3"}" opacity="0.85"/>
-<text x="${W - PAD.right + 6}" y="${y + 4}" fill="${l.color}" font-family="monospace" font-size="11">${esc(l.label)} ${l.price.toFixed(1)}</text>`;
+      addTag(l, y);
+      return `<line x1="${PAD.left}" y1="${y}" x2="${W - PAD.right}" y2="${y}" stroke="${l.color}" stroke-width="1" stroke-dasharray="${l.dash ?? "4 3"}" opacity="0.85"/>`;
     })
+    .join("\n");
+
+  tagEntries.sort((a, b) => a.y - b.y);
+
+  const priceTags = tagEntries
+    .map(
+      (t) =>
+        `<text x="${W - PAD.right + 6}" y="${t.y}" fill="${t.color}" font-family="monospace" font-size="11">${esc(t.text)}</text>`
+    )
     .join("\n");
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
@@ -104,6 +158,7 @@ function buildSvg(bars: Bar[], ctx: MarketContext, chartTimeEst: string): string
 <text x="${PAD.left}" y="44" fill="#64748b" font-family="monospace" font-size="12">1m execution only · HTF PD arrays in JSON · cyan=ORG · fuchsia=CE · red=NWOG</text>
 <rect x="${PAD.left}" y="${PAD.top}" width="${PLOT_W}" height="${PLOT_H}" fill="#1e293b" stroke="#334155"/>
 ${hLines}
+${priceTags}
 ${candles}
 </svg>`;
 }

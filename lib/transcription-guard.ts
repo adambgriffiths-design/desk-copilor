@@ -1,3 +1,46 @@
+import { isGreeting, isFarewell } from "@/lib/casual-chat-intent";
+
+/** TradingView chart disclaimer — mic often picks this up from page audio. */
+export function isTradingViewDisclaimer(text: string): boolean {
+  const lower = String(text || "").toLowerCase();
+  if (!lower.trim()) return false;
+  return (
+    /\bcomplete disclaimer\b/.test(lower) ||
+    /\bplease see the complete disclaimer\b/.test(lower) ||
+    /sites\.google\.com/.test(lower) ||
+    (/\bdisclaimer\b/.test(lower) && /\b(tradingview|trading view)\b/.test(lower))
+  );
+}
+
+/** Strip TV disclaimer bleed; recover a leading greeting when both appear in one transcript. */
+export function sanitizeUserTranscript(text: string): string {
+  let t = String(text || "").replace(/\s+/g, " ").trim();
+  if (!t) return t;
+
+  if (isTradingViewDisclaimer(t)) {
+    const before = t.split(/\b(?:please see (?:the )?complete disclaimer|sites\.google\.com)/i)[0]?.trim();
+    if (before && before.length >= 2 && !isTradingViewDisclaimer(before)) {
+      t = before;
+    } else {
+      return "";
+    }
+  }
+
+  t = t
+    .replace(/\s*(?:please see (?:the )?complete disclaimer\b.*)$/i, "")
+    .replace(/\s*https?:\/\/\S+.*$/i, "")
+    .trim();
+
+  return t;
+}
+
+export function shouldDropUserTranscript(text: string): boolean {
+  const t = sanitizeUserTranscript(text);
+  if (!t) return isTradingViewDisclaimer(text);
+  if (isTranscriptionHallucination(t) && !isGreeting(t) && !isFarewell(t)) return true;
+  return false;
+}
+
 /** Detect Whisper prompt-echo / silence hallucinations (common with long `prompt` strings). */
 
 const PROMPT_ECHO_PHRASES = [
@@ -55,3 +98,14 @@ export function isTranscriptionHallucination(text: string): boolean {
 
 /** No prompt — vocabulary hints cause silence hallucinations in noisy audio. */
 export const TRANSCRIBE_PROMPT = "";
+
+/** STT: "presented" → "percentage" / "percent" on first presented FVG questions. */
+export function fixFirstPresentedFvgMishear(text: string): string {
+  return text
+    .replace(/\bfirst percentage (?:of )?fair value gap\b/gi, "first presented fair value gap")
+    .replace(/\bfirst percent (?:of )?fair value gap\b/gi, "first presented fair value gap")
+    .replace(/\bfirst percentage fvg\b/gi, "first presented fvg")
+    .replace(/\bfirst percent fvg\b/gi, "first presented fvg")
+    .replace(/\s+/g, " ")
+    .trim();
+}

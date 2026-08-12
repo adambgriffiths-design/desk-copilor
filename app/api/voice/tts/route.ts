@@ -35,11 +35,19 @@ export async function POST(request: NextRequest) {
     );
 
     const openai = new OpenAI({ apiKey });
+    const speed =
+      typeof body.speed === "number" && body.speed >= 0.5 && body.speed <= 1.2
+        ? body.speed
+        : 0.92;
+    const instructions =
+      typeof body.instructions === "string" ? body.instructions.trim().slice(0, 500) : "";
+    const useEmotive = instructions.length > 0;
     const speech = await openai.audio.speech.create({
-      model: "tts-1",
+      model: useEmotive ? "gpt-4o-mini-tts" : "tts-1",
       voice,
       input: text.slice(0, 4096),
       response_format: "mp3",
+      ...(useEmotive ? { instructions } : { speed }),
     });
 
     const buffer = Buffer.from(await speech.arrayBuffer());

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import pkg from "../../../package.json";
 
 export const runtime = "nodejs";
 
@@ -13,5 +14,5 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true }, { headers: cors });
+  return NextResponse.json({ ok: true, version: pkg.version }, { headers: cors });
 }

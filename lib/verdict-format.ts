@@ -1,6 +1,16 @@
 import { LIVE_VERDICT_OUTPUT_WRAPPER } from "@/lib/playbook";
+import type { ChartQuestionIntent } from "@/lib/chart-question-intent";
+import { expandTradingAbbreviations } from "@/lib/plain-language";
 
 const META_LINE = /^META:.*$/gim;
+
+function expandUserText(text: string): string {
+  const metaMatch = text.match(/^META:.*$/im);
+  const meta = metaMatch?.[0] || "";
+  const body = text.replace(META_LINE, "").trim();
+  const expanded = expandTradingAbbreviations(body);
+  return meta ? `${expanded}\n${meta}` : expanded;
+}
 
 export function parseVerdictSections(raw: string): {
   verdict: string;
@@ -23,10 +33,9 @@ export function parseVerdictSections(raw: string): {
       .split("\n")
       .filter((l) => l.trim() && !/^META:/i.test(l.trim()));
     const callLine = lines.find((l) => /^Call:/i.test(l.trim()));
-    const entryLine = lines.find((l) => /^Entry zone:/i.test(l.trim()));
     const targetLine = lines.find((l) => /^Target 1:/i.test(l.trim()));
     const biasLine = lines.find((l) => /^Bias:/i.test(l.trim()));
-    spokenBrief = [callLine, biasLine, entryLine, targetLine]
+    spokenBrief = [biasLine, callLine, targetLine]
       .filter((l): l is string => Boolean(l))
       .map((l) => l.replace(/^[A-Za-z ]+:\s*/, "").trim())
       .join(". ")
@@ -38,16 +47,62 @@ export function parseVerdictSections(raw: string): {
     verdict = spokenBrief;
   }
 
+  verdict = expandUserText(verdict);
+  spokenBrief = expandTradingAbbreviations(spokenBrief);
+
   return { verdict, spokenBrief };
 }
 
 export function liveVerdictUserTail(voiceInput?: boolean): string {
   const base =
-    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **All MNQ prices must come from JSON (lastClose, PD arrays, Execution scaffold) — typically 25000–32000. Never cite volume-axis numbers (~15000) from the chart image.** **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. **Include Entry zone, Entry status (ACTIVE/WAIT/EXTENDED), Target 1** from Execution scaffold. **Do NOT recommend stops.** **Multiple FVGs: retrace to most recent gap only.**";
+    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **All MNQ prices must come from JSON (lastClose, PD arrays, Execution scaffold) — typically 25000–32000. Never cite volume-axis numbers (~15000) from the chart image.** **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. **Include Entry zone, Entry status (ACTIVE/WAIT/EXTENDED), Target 1** from Execution scaffold. **Do NOT recommend stops.** **Multiple FVGs: retrace to most recent qualifying gap only.** **Never sell into unfilled bullish FVG or buy into unfilled bearish FVG unless inverted (inverse fair value gap).**";
 
   if (voiceInput) {
     return `${base}\n\n${LIVE_VERDICT_OUTPUT_WRAPPER}`;
   }
 
   return `${base} Respond with a dense labeled desk brief in full words (no abbreviations).`;
+}
+
+/** Structured OHLC path — text-only, step reasoning + confidence. */
+export function structuredVerdictUserTail(voiceInput?: boolean, question?: string): string {
+  const q = question ? `Trader asked: "${question}" — ` : "";
+  const base = `${q}STRUCTURED CHART READ — Use the candle array as primary evidence. Reason step-by-step: (1) recent price action (2) structure/MSS/displacement (3) nearest levels & gaps from JSON + drawings (4) bias (5) call with Entry zone, Entry status, Target 1 from Execution scaffold. **All prices from JSON/candles only — typically 25000–32000.** **Make a directional call at medium confidence by default.** **Do NOT recommend stops.** Include a brief Reasoning line in the panel before Bias.`;
+
+  if (voiceInput) {
+    return `${base}\n\n${LIVE_VERDICT_OUTPUT_WRAPPER}`;
+  }
+  return `${base} Respond with a dense labeled desk brief in full words (no abbreviations).`;
+}
+
+/** Narrow chart question — no full verdict unless intent is full_read. */
+export function scopedVerdictUserTail(
+  intent: ChartQuestionIntent,
+  question?: string
+): string {
+  const q = question ? `Trader asked: "${question}" — ` : "";
+
+  if (intent === "structure") {
+    return `${q}Answer ONLY about structure (market structure shift, fair value gap, displacement, liquidity sweep) in 2–4 sentences. Use JSON structureFacts and chart image. **Do NOT include Call, Entry zone, or Target unless explicitly asked.** Use JSON prices only. **Full words only — no abbreviations.**`;
+  }
+
+  if (intent === "first_presented_fvg") {
+    return `${q}Answer ONLY about the **first presented one-minute fair value gap** after session open — use JSON structureFacts.firstPresentedFvg (nyOpening / postFhdr / activeSession). **Never cite daily FVG for "first presented" questions.** 1–3 sentences with prices. **Full words only — no abbreviations.**`;
+  }
+
+  return `${q}Answer ONLY what was asked in 1–3 sentences. Use JSON lastClose and Execution scaffold. **Do NOT include Call, Entry zone, or Target unless explicitly asked.** **Full words only — no abbreviations.**`;
+}
+
+export function verdictUserTail(
+  intent: ChartQuestionIntent,
+  voiceInput?: boolean,
+  question?: string
+): string {
+  if (intent === "full_read") {
+    return liveVerdictUserTail(voiceInput);
+  }
+  if (voiceInput) {
+    return `${scopedVerdictUserTail(intent, question)}\n\nRespond with ===PANEL=== (2–4 lines max, answer only, full words) and ===SPOKEN=== (1–2 sentences, answer only, no abbreviations). No META in spoken block.`;
+  }
+  return scopedVerdictUserTail(intent, question);
 }

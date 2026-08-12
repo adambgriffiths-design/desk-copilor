@@ -81,6 +81,56 @@ export async function fetchAllTimeframes() {
   return { daily, m15, m5, m1, symbol: SYMBOL };
 }
 
+const MARKET_CACHE_MS = 45_000;
+let marketCache: { data: Awaited<ReturnType<typeof fetchAllTimeframes>>; expires: number } | null =
+  null;
+let marketFetchInFlight: Promise<Awaited<ReturnType<typeof fetchAllTimeframes>>> | null = null;
+
+function livePriceDiffersFromCache(chartLastPrice?: number | null): boolean {
+  if (chartLastPrice == null || !marketCache?.data) return false;
+  const m1Last = marketCache.data.m1.at(-1)?.close;
+  if (m1Last == null || !Number.isFinite(m1Last)) return false;
+  return Math.abs(chartLastPrice - m1Last) >= 0.25;
+}
+
+/** Cached Yahoo fetch — shared across snapshot + verdict within ~45s. */
+export async function fetchAllTimeframesCached(
+  force = false,
+  chartLastPrice?: number | null
+) {
+  const needsForce = force || livePriceDiffersFromCache(chartLastPrice);
+  const now = Date.now();
+  if (!needsForce && marketCache && now < marketCache.expires) {
+    return marketCache.data;
+  }
+  if (!needsForce && marketFetchInFlight) {
+    return marketFetchInFlight;
+  }
+
+  if (needsForce) {
+    marketCache = null;
+    marketFetchInFlight = null;
+  }
+
+  marketFetchInFlight = fetchAllTimeframes()
+    .then((data) => {
+      marketCache = { data, expires: Date.now() + MARKET_CACHE_MS };
+      marketFetchInFlight = null;
+      return data;
+    })
+    .catch((err) => {
+      marketFetchInFlight = null;
+      throw err;
+    });
+
+  return marketFetchInFlight;
+}
+
+/** Pre-warm Yahoo + serverless — call from extension before screenshot. */
+export async function warmMarketDataCache(): Promise<void> {
+  await fetchAllTimeframesCached();
+}
+
 /** Longer ranges for historical replay training (Yahoo 1m max ~7d). */
 export async function fetchAllTimeframesForBacktest() {
   const [daily, m15, m5, m1] = await Promise.all([

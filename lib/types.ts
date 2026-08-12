@@ -16,6 +16,18 @@ export type FvgZone = {
   startTime?: number;
   /** True when wick/body volume imbalances expand the fair value gap zone. */
   hasVolumeImbalance?: boolean;
+  /** True when bodies closed through the gap — polarity flips (inverse FVG / IFVG). */
+  inverted?: boolean;
+};
+
+export type FirstPresentedFvgVariant = "ny_opening" | "post_fhdr" | "session_open";
+
+export type FirstPresentedFvgResult = {
+  fvg: FvgZone;
+  variant: FirstPresentedFvgVariant;
+  sessionLabel: string;
+  windowLabel: string;
+  filled: boolean;
 };
 
 export type MarketContext = {
@@ -112,7 +124,23 @@ export type MarketContext = {
       at: string;
       atTime: number;
     }>;
+    /** Relative equal high/low liquidity pools from clustered 1m swings. */
+    relativeEqualPools: Array<{
+      price: number;
+      type: "reh" | "rel";
+      startTime: number;
+      endTime?: number;
+      barCount: number;
+    }>;
     m1UnfilledFvgs: FvgZone[];
+    /** Unfilled 1m FVGs with inverted=true (body closed through gap — polarity flipped). */
+    m1InvertedFvgs: FvgZone[];
+    /** First presented 1m FVG variants — not daily FVG. */
+    firstPresentedFvg: {
+      nyOpening: FirstPresentedFvgResult | null;
+      postFhdr: FirstPresentedFvgResult | null;
+      activeSession: FirstPresentedFvgResult | null;
+    };
     summary: string;
   };
   /** Daily / HTF PD arrays — JSON only, not drawn on 1m chart. */
