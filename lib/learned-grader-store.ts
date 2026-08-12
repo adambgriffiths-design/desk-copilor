@@ -35,8 +35,10 @@ export async function readLearnedGrader(): Promise<LearnedGraderFile> {
 }
 
 export async function writeLearnedGrader(data: LearnedGraderFile): Promise<void> {
-  await mkdir(path.dirname(FILE), { recursive: true });
-  await writeFile(FILE, JSON.stringify(data, null, 2) + "\n", "utf-8");
+  await tryDataWrite("learned grader", async () => {
+    await mkdir(path.dirname(FILE), { recursive: true });
+    await writeFile(FILE, JSON.stringify(data, null, 2) + "\n", "utf-8");
+  });
 }
 
 export function formatLearnedGraderForPrompt(data: LearnedGraderFile): string {
