@@ -35,7 +35,7 @@ async function publishResult(payload) {
     }
 
     const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
-    setStatus("Analyzing… (15–60 sec)", null);
+    setStatus("Analyzing… (5–20 sec)", null);
 
     const data = await apiFetch("/api/live-verdict", {
       method: "POST",

@@ -293,6 +293,82 @@ export function buildObservationFacts(
     });
   }
 
+  if (obs.reh_rel.status === "unknown") {
+    pushFact(facts, {
+      id: "liquidity.reh_rel",
+      category: "liquidity",
+      label: "Relative equal highs / lows",
+      value: "unknown — insufficient OHLC data",
+      status: "unknown",
+      evidence_key: "liquidity.nearest_reh_above",
+    });
+  } else {
+    if (obs.reh_rel.nearest_reh_above) {
+      const r = obs.reh_rel.nearest_reh_above;
+      pushFact(facts, {
+        id: r.id,
+        category: "liquidity",
+        label: "Nearest REH above price",
+        value: `${r.level.toFixed(2)} (${r.sourceSwingPrices.map((p) => p.toFixed(2)).join(", ")}) — ${r.distanceFromCurrentPrice.toFixed(2)} pts above`,
+        price: r.level,
+        price_low: r.range.low,
+        price_high: r.range.high,
+        status: r.status === "swept" ? "swept" : "active",
+        evidence_key: "liquidity.nearest_reh_above",
+      });
+    } else {
+      pushFact(facts, {
+        id: "liquidity.reh",
+        category: "liquidity",
+        label: "Nearest REH above price",
+        value: "none in lookback",
+        status: "absent",
+        evidence_key: "liquidity.nearest_reh_above",
+      });
+    }
+
+    if (obs.reh_rel.nearest_rel_below) {
+      const r = obs.reh_rel.nearest_rel_below;
+      pushFact(facts, {
+        id: r.id,
+        category: "liquidity",
+        label: "Nearest REL below price",
+        value: `${r.level.toFixed(2)} (${r.sourceSwingPrices.map((p) => p.toFixed(2)).join(", ")}) — ${r.distanceFromCurrentPrice.toFixed(2)} pts below`,
+        price: r.level,
+        price_low: r.range.low,
+        price_high: r.range.high,
+        status: r.status === "swept" ? "swept" : "active",
+        evidence_key: "liquidity.nearest_rel_below",
+      });
+    } else {
+      pushFact(facts, {
+        id: "liquidity.rel",
+        category: "liquidity",
+        label: "Nearest REL below price",
+        value: "none in lookback",
+        status: "absent",
+        evidence_key: "liquidity.nearest_rel_below",
+      });
+    }
+
+    for (const r of obs.reh_rel.all_levels) {
+      if (r.id === obs.reh_rel.nearest_reh_above?.id || r.id === obs.reh_rel.nearest_rel_below?.id) {
+        continue;
+      }
+      pushFact(facts, {
+        id: r.id,
+        category: "liquidity",
+        label: r.type === "reh" ? "REH pool" : "REL pool",
+        value: `${r.level.toFixed(2)} — ${r.status}${r.status === "swept" ? " (crossed)" : ""}`,
+        price: r.level,
+        price_low: r.range.low,
+        price_high: r.range.high,
+        status: r.status === "swept" ? "swept" : r.status === "active" ? "active" : "unknown",
+        evidence_key: `liquidity.${r.type}_${r.level.toFixed(2)}`,
+      });
+    }
+  }
+
   const sess = ctx.sessions;
   const sessionLevels: Array<[string, string, number]> = [
     ["session.asia_high", "Asia high", sess.asiaHigh],

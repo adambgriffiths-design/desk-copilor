@@ -11,10 +11,12 @@ import { isNonTradingConversation } from "@/lib/casual-chat-intent";
 import { detectTeachingConcept } from "@/lib/ict-teaching";
 import {
   extractLocationFromQuestion,
+  extractWeatherSwapLocation,
   isAmbiguousWeatherLocation,
   isWeatherAmbiguousPrompt,
   isWeatherDataQuestion,
   isWeatherLocationPrompt,
+  isWeatherLocationSwapFollowUp,
   resolveWeatherLocation,
 } from "@/lib/weather-location";
 import { needsWebSearch, resolveWebSearchQuestion } from "@/lib/web-search-intent";
@@ -115,6 +117,7 @@ function isRegionOnlyClarification(text: string): boolean {
 function isWeatherClarificationTurn(text: string): boolean {
   const t = text.trim();
   if (!t) return false;
+  if (isWeatherLocationSwapFollowUp(t)) return false;
   if (CLARIFICATION_PREFIX.test(t) && isRegionOnlyClarification(t)) return true;
   if (isRegionOnlyClarification(t)) return true;
   const loc = resolveWeatherLocation(t, { messages: [] });
@@ -161,8 +164,18 @@ export function inferPendingRequest(
       intent: "CURRENT_EXTERNAL",
       originalRequest: original || `weather in ${city}`,
       missingParam: "location",
-      entities: city ? { city } : {},
+      entities: city ? { city, task: "WEATHER" } : { task: "WEATHER" },
       requestId: "weather-clarify",
+    };
+  }
+
+  if (isWeatherDataQuestion(priorQuestion) && !isWeatherClarificationPrompt(assistant)) {
+    const location = extractLocationFromQuestion(priorQuestion) || "";
+    return {
+      intent: "CURRENT_EXTERNAL",
+      originalRequest: priorQuestion,
+      entities: { task: "WEATHER", location },
+      requestId: "weather-continuable",
     };
   }
 
@@ -237,8 +250,16 @@ export function classifyTurn(
 
   if (CONFIRMATION.test(q)) return pending ? "CONFIRMATION" : "NEW_REQUEST";
 
-  if (pending?.intent === "CURRENT_EXTERNAL" && isWeatherClarificationTurn(q)) {
+  if (
+    pending?.intent === "CURRENT_EXTERNAL" &&
+    pending.missingParam === "location" &&
+    isWeatherClarificationTurn(q)
+  ) {
     return "CLARIFICATION";
+  }
+
+  if (pending?.intent === "CURRENT_EXTERNAL" && pending.entities.task === "WEATHER") {
+    if (isWeatherLocationSwapFollowUp(q)) return "FOLLOW_UP";
   }
 
   if (pending?.intent === "MARKET_INTEL" || pending?.intent === "VERDICT_EXPLAIN") {
@@ -255,7 +276,13 @@ export function classifyTurn(
   }
 
   if (pending && isNonTradingConversation(q) && q.length < 64) {
-    if (pending.intent === "CURRENT_EXTERNAL" && isWeatherClarificationTurn(q)) return "CLARIFICATION";
+    if (
+      pending.intent === "CURRENT_EXTERNAL" &&
+      pending.missingParam === "location" &&
+      isWeatherClarificationTurn(q)
+    ) {
+      return "CLARIFICATION";
+    }
     if (pending.intent !== "CURRENT_EXTERNAL") return "FOLLOW_UP";
   }
 
@@ -287,6 +314,11 @@ export function resolveTurnQuestion(
     const region = q.replace(CLARIFICATION_PREFIX, "").replace(/[.!?,]+$/, "").trim();
     const merged = mergeWeatherClarification(city, region);
     return `What's the weather in ${merged}?`;
+  }
+
+  if (pending.intent === "CURRENT_EXTERNAL" && kind === "FOLLOW_UP") {
+    const loc = extractWeatherSwapLocation(q);
+    if (loc) return `What's the weather in ${loc}?`;
   }
 
   if (pending.intent === "MARKET_INTEL" && kind === "FOLLOW_UP") {
@@ -331,6 +363,7 @@ export function shouldDeferCasualRoute(
   const kind = classifyTurn(text, messages, conversationCtx);
   if (kind === "CLARIFICATION" && pending.intent === "CURRENT_EXTERNAL") return true;
   if (kind === "FOLLOW_UP") {
+    if (pending.intent === "CURRENT_EXTERNAL") return true;
     if (pending.intent === "MARKET_INTEL" || pending.intent === "VERDICT_EXPLAIN") return true;
     if (pending.intent === "TEACHING" && CHART_SHOW_FOLLOWUP.test(text)) return true;
   }
@@ -346,7 +379,8 @@ export function pendingNeedsLiveWebSearch(
 ): boolean {
   const pending = inferPendingRequest(messages, ctx);
   if (!pending || pending.intent !== "CURRENT_EXTERNAL") return false;
-  return classifyTurn(text, messages, ctx) === "CLARIFICATION";
+  const kind = classifyTurn(text, messages, ctx);
+  return kind === "CLARIFICATION" || kind === "FOLLOW_UP";
 }
 
 /** Expand lookup follow-ups and pending weather clarifications. */

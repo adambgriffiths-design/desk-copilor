@@ -12,6 +12,7 @@ import type {
   SessionBucket,
 } from "./desk-schema";
 import { freezeObservation } from "./desk-schema";
+import { detectRehRel } from "./reh-rel";
 
 function isUnknownQuality(q: DataQualityFlag): boolean {
   return q === "missing" || q === "stale";
@@ -127,6 +128,24 @@ function mapDataQuality(state: MarketState, ok: boolean): DataQualityFlag {
   return ok ? "good" : "missing";
 }
 
+function mapRehRel(state: MarketState, quality: DataQualityFlag) {
+  if (isUnknownQuality(quality) || state.candles.length < 5) {
+    return {
+      status: "unknown",
+      nearest_reh_above: null,
+      nearest_rel_below: null,
+      reh_levels: [],
+      rel_levels: [],
+      all_levels: [],
+    };
+  }
+  return detectRehRel({
+    candles: state.candles,
+    currentPrice: state.lastPrice,
+    timeframe: state.timeframe || "1m",
+  });
+}
+
 /** Layer 1 — deterministic facts only. No meaning, no scores, no verdict. */
 export function buildMarketObservation(ctx: MarketContext, state: MarketState) {
   const features = extractFeatures(ctx, state);
@@ -136,6 +155,7 @@ export function buildMarketObservation(ctx: MarketContext, state: MarketState) {
   const pd = ctx.premiumDiscount;
   const displacement = detectDisplacement(state, dataQuality);
   const levels = buildLiquidityLevels(ctx, dataQuality);
+  const rehRel = mapRehRel(state, dataQuality);
 
   const evidence: Record<string, string> = {
     "market_state.last_price": state.lastPrice.toFixed(2),
@@ -164,6 +184,22 @@ export function buildMarketObservation(ctx: MarketContext, state: MarketState) {
   for (const level of levels) {
     evidence[`liquidity.${level.label.toLowerCase().replace(/\s+/g, "_")}`] =
       `${level.price.toFixed(2)} taken=${level.taken}`;
+  }
+
+  if (rehRel.nearest_reh_above) {
+    const r = rehRel.nearest_reh_above;
+    evidence["liquidity.nearest_reh_above"] =
+      `${r.level.toFixed(2)} dist=${r.distanceFromCurrentPrice.toFixed(2)} status=${r.status}`;
+  }
+  if (rehRel.nearest_rel_below) {
+    const r = rehRel.nearest_rel_below;
+    evidence["liquidity.nearest_rel_below"] =
+      `${r.level.toFixed(2)} dist=${r.distanceFromCurrentPrice.toFixed(2)} status=${r.status}`;
+  }
+  for (let i = 0; i < rehRel.all_levels.length; i++) {
+    const r = rehRel.all_levels[i];
+    evidence[`liquidity.${r.type}_${i}`] =
+      `${r.level.toFixed(2)} range=${r.range.low.toFixed(2)}–${r.range.high.toFixed(2)} status=${r.status}`;
   }
 
   if (ctx.nwog && !isUnknownQuality(dataQuality)) {
@@ -201,6 +237,7 @@ export function buildMarketObservation(ctx: MarketContext, state: MarketState) {
     session: mapSession(ctx, dataQuality),
     time_context: buildTimeContext(ctx, dataQuality),
     data_quality: dataQuality,
+    reh_rel: rehRel,
     evidence,
     state_hash: state.stateHash,
   };

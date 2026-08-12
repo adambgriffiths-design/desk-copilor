@@ -109,6 +109,39 @@
   let nativeSttErrors = 0;
   let userVoiceOff = false;
   let engineMode = "off"; // realtime | cascade | off
+
+  const VOICE_OFF_KEY = "dc-voice-user-off";
+  const AUTO_READ_KEY = "dc-auto-read";
+
+  function loadPersistedVoiceOff() {
+    try {
+      return localStorage.getItem(VOICE_OFF_KEY) === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  function persistVoiceOff(off) {
+    try {
+      if (off) localStorage.setItem(VOICE_OFF_KEY, "1");
+      else localStorage.removeItem(VOICE_OFF_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function loadPersistedAutoRead() {
+    try {
+      const v = localStorage.getItem(AUTO_READ_KEY);
+      if (v != null) return v !== "0";
+    } catch {
+      /* ignore */
+    }
+    return true;
+  }
+
+  userVoiceOff = loadPersistedVoiceOff();
+  autoRead = loadPersistedAutoRead();
   let finishingUtterance = false;
   let utteranceBusy = false;
   let transcribeToken = 0;
@@ -121,6 +154,7 @@
   let ttsPlaying = false;
   let chatStreamPort = null;
   let onCascadeFallback = null;
+  let echoGuardUntil = 0;
 
   const UTTERANCE_WATCHDOG_MS = 30000;
   const CASCADE_STATUS =
@@ -135,7 +169,23 @@
     );
   }
 
+  function realtimeOwnsStt() {
+    return engineMode === "realtime" || Boolean(window.DeskCopilotRealtime?.isActive?.());
+  }
+
+  function stopCascadeStt() {
+    stopNativeStt();
+    stopVadTimer();
+    finishRecording();
+    if (pendingTranscriptTimer) {
+      clearTimeout(pendingTranscriptTimer);
+      pendingTranscriptTimer = null;
+    }
+    pendingTranscript = "";
+  }
+
   function flushPendingTranscript() {
+    if (realtimeOwnsStt()) return;
     if (pendingTranscriptTimer) {
       clearTimeout(pendingTranscriptTimer);
       pendingTranscriptTimer = null;
@@ -146,6 +196,7 @@
   }
 
   function enqueueTranscript(text) {
+    if (realtimeOwnsStt()) return;
     const t = text.trim();
     if (!t) return;
     pendingTranscript = pendingTranscript ? `${pendingTranscript} ${t}` : t;
@@ -169,6 +220,8 @@
   function isLikelyHallucination(text) {
     const t = text.replace(/\s+/g, " ").trim();
     if (!t) return true;
+
+    if (window.DeskCopilotTranscriptGuard?.isTradingViewDisclaimer?.(t)) return true;
 
     if (/^(mnq|mnq futures|nasdaq|nasdaq futures|mini nasdaq|futures|thank you|thanks|uh|um|hmm|okay|ok|hello|hey)[.!?\s]*$/i.test(t)) {
       return true;
@@ -216,13 +269,14 @@
 
   function toSpeakable(text) {
     if (!text) return "";
-    return text
+    const cleaned = text
       .replace(/^META:.*$/gim, "")
       .replace(/^#{1,3}\s+.*$/gm, "")
       .replace(/\*\*/g, "")
       .replace(/^\s*[-*]\s+/gm, "")
       .replace(/\n{3,}/g, "\n\n")
       .trim();
+    return window.DeskCopilotPlainLanguage?.expandTradingAbbreviations?.(cleaned) || cleaned;
   }
 
   /** Chrome chokes on one huge utterance — split on sentences, cap chunk size. */
@@ -275,6 +329,9 @@
 
   function setSpeaking(active) {
     speaking = active;
+    if (active) {
+      echoGuardUntil = Date.now() + 450;
+    }
     onSpeakingChange?.(active);
   }
 
@@ -331,7 +388,7 @@
     noiseFloor = 0.004;
 
     vadTimer = setInterval(() => {
-      if (!listening || transcribing) return;
+      if (realtimeOwnsStt() || !listening || transcribing) return;
       const volume = measureVolume();
 
       if (!vadCalibrated && !recording) {
@@ -418,6 +475,7 @@
   }
 
   function resumeNativeStt() {
+    if (realtimeOwnsStt()) return;
     if (!listening || sttMode !== "native" || speaking) return;
     if (!recognition) {
       if (!startNativeStt()) sttMode = "whisper";
@@ -438,7 +496,7 @@
     recognition.maxAlternatives = 1;
 
     recognition.onresult = (event) => {
-      if (speaking || !listening) return;
+      if (realtimeOwnsStt() || speaking || !listening) return;
 
       let interim = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -619,7 +677,7 @@
   }
 
   function cancelSpeech() {
-    if (!speaking && !window.speechSynthesis?.speaking && !ttsAudio) return false;
+    const active = speaking || window.speechSynthesis?.speaking || Boolean(ttsAudio);
     speakGeneration += 1;
     window.speechSynthesis?.cancel();
     stopTtsPlayback();
@@ -632,18 +690,27 @@
       chatStreamPort = null;
     }
     window.DeskCopilotRealtime?.cancelSpeech?.();
+    window.DeskCopilotRealtime?.setMicPaused?.(false);
     clearSpeakTimers();
     const done = speakDone;
     speakDone = null;
     setSpeaking(false);
-    done?.();
-    resumeNativeStt();
-    if (listening) onStatus?.("Listening…", true);
-    return true;
+    if (active || done) {
+      done?.();
+      resumeNativeStt();
+      if (listening) {
+        onStatus?.(
+          engineMode === "realtime" ? "● Voice live — talk anytime" : "Listening…",
+          engineMode === "realtime"
+        );
+      }
+      return true;
+    }
+    return false;
   }
 
   function beginRecording() {
-    if (recording || transcribing || !listening || speaking) return;
+    if (realtimeOwnsStt() || recording || transcribing || !listening || speaking) return;
     recordMimeType = cleanMime(pickMimeType() || "audio/webm");
     recordChunks = [];
     const mime = pickMimeType();
@@ -814,15 +881,34 @@
     }
   }
 
-  async function fetchTtsAudio(text) {
+  async function fetchTtsAudio(text, speed, instructions) {
     const voice = await getStoredVoice();
-    const res = await bgSend({ type: "TTS", text: text.slice(0, 4096), voice }, 45000);
+    const body = { text: text.slice(0, 4096), voice };
+    if (typeof speed === "number") body.speed = speed;
+    if (instructions) body.instructions = instructions;
+    const res = await bgSend({ type: "TTS", ...body }, 45000);
     if (res?.error) throw new Error(res.error);
     if (!res?.audioBase64) throw new Error("Empty TTS");
     const binary = atob(res.audioBase64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new Blob([bytes], { type: res.mimeType || "audio/mpeg" });
+  }
+
+  /** Start TTS fetch early (parallel with bubble paint) — consumed by speakTextOnce. */
+  function prefetchTtsAudio(text, speed, instructions) {
+    const line = toSpeakable(text);
+    if (!line) return null;
+    return fetchTtsAudio(line.slice(0, 4096), speed, instructions);
+  }
+
+  function safeResumeSynthesis() {
+    try {
+      const syn = window.speechSynthesis;
+      if (syn?.paused) syn.resume();
+    } catch {
+      /* ignore */
+    }
   }
 
   function stopTtsPlayback() {
@@ -841,19 +927,50 @@
 
   async function playTtsBlob(blob, gen) {
     return new Promise((resolve) => {
+      if (gen !== speakGeneration) {
+        resolve(false);
+        return;
+      }
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       ttsAudio = audio;
-      audio.onended = () => {
+      let settled = false;
+      let started = false;
+      const finish = (ok) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(startWatch);
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch {
+          /* ignore */
+        }
         URL.revokeObjectURL(url);
         if (ttsAudio === audio) ttsAudio = null;
-        resolve();
+        resolve(ok === true ? true : ok === "partial" ? "partial" : false);
       };
-      audio.onerror = () => {
-        URL.revokeObjectURL(url);
-        resolve();
+      audio.onplaying = () => {
+        started = true;
+        window.__dcVoiceLatencyMark?.("first_audible");
+        window.__dcVoiceLatencyMark?.("tts_playback");
       };
-      audio.play().catch(() => resolve());
+      audio.onended = () => finish(true);
+      audio.onerror = () => finish(started ? "partial" : false);
+      const startWatch = setTimeout(() => {
+        if (started) return;
+        if (ttsAudio === audio && !audio.paused && audio.currentTime > 0) {
+          started = true;
+          return;
+        }
+        finish(false);
+      }, 10000);
+      audio
+        .play()
+        .then(() => {
+          if (audio.currentTime > 0 || !audio.paused) started = true;
+        })
+        .catch(() => finish(started ? "partial" : false));
     });
   }
 
@@ -867,22 +984,72 @@
     ttsPlaying = false;
   }
 
-  async function speakTextOnce(text, gen) {
+  async function speakTextOnce(text, gen, speed, instructions, opts) {
+    opts = opts || {};
     const line = toSpeakable(text);
     if (!line || gen !== speakGeneration) return;
+
+    const browserRate =
+      typeof opts.browserRate === "number"
+        ? opts.browserRate
+        : typeof speed === "number" && speed < 0.9
+          ? 0.88
+          : line.length >= 120
+            ? 0.9
+            : undefined;
 
     setSpeaking(true);
     pauseNativeStt();
     stopTtsPlayback();
+    window.speechSynthesis?.cancel();
     onStatus?.("Speaking — talk to interrupt", null);
 
+    const browserFirst =
+      window.DeskCopilotVoiceQuickReply?.prefersBrowserTtsFirst?.(line, {
+        hasInstructions: Boolean(instructions),
+      }) === true && window.speechSynthesis;
+
+    if (browserFirst) {
+      await new Promise((resolve) => {
+        if (gen !== speakGeneration) {
+          resolve();
+          return;
+        }
+        speakWithBrowserTts(line, resolve, { rate: browserRate });
+      });
+      return;
+    }
+
     try {
-      const blob = await fetchTtsAudio(line.slice(0, 4096));
+      const prefetched = opts.ttsPrefetch;
+      const blob =
+        prefetched && typeof prefetched.then === "function"
+          ? await prefetched
+          : await fetchTtsAudio(line.slice(0, 4096), speed, instructions);
       if (gen !== speakGeneration) return;
-      await playTtsBlob(blob, gen);
-    } catch {
+      if (!blob) throw new Error("Empty TTS");
+      const played = await playTtsBlob(blob, gen);
       if (gen !== speakGeneration) return;
-      await new Promise((resolve) => speakWithBrowserTts(line, resolve));
+      if (played === true) return;
+      if (played === "partial") {
+        window.__dcVoiceLog?.("TTS partial playback — skip browser repeat");
+        return;
+      }
+      if (!played && window.speechSynthesis && gen === speakGeneration) {
+        stopTtsPlayback();
+        window.speechSynthesis.cancel();
+        await new Promise((resolve) => speakWithBrowserTts(line, resolve, { rate: browserRate }));
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      window.__dcVoiceLog?.("TTS failed:", msg);
+      if (window.speechSynthesis && gen === speakGeneration) {
+        stopTtsPlayback();
+        window.speechSynthesis.cancel();
+        await new Promise((resolve) => speakWithBrowserTts(line, resolve, { rate: browserRate }));
+      } else {
+        onStatus?.("Voice playback failed — check backend / TTS", false);
+      }
     }
   }
 
@@ -918,17 +1085,30 @@
     });
   }
 
-  /** Quick browser-only ack — no API round-trip. */
+  /** Quick browser-only ack — no API round-trip. Pauses mic so Karen doesn't hear herself. */
   function speakAck(text) {
     if (!text || !window.speechSynthesis) return;
     try {
       window.speechSynthesis.cancel();
+      setSpeaking(true);
+      window.DeskCopilotRealtime?.setMicPaused?.(true, { maxMs: 2000 });
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 1.05;
       u.lang = VOICE_LANG;
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        setSpeaking(false);
+        window.DeskCopilotRealtime?.setMicPaused?.(false);
+      };
+      u.onend = finish;
+      u.onerror = finish;
+      setTimeout(finish, Math.min(5000, String(text).length * 80 + 1200));
       window.speechSynthesis.speak(u);
     } catch {
-      /* ignore */
+      setSpeaking(false);
+      window.DeskCopilotRealtime?.setMicPaused?.(false);
     }
   }
 
@@ -939,6 +1119,18 @@
     }
 
     const ctx = getChatContext();
+    if (window.DeskCopilotCasual?.isCasualMessage?.(transcript, ctx?.messages)) {
+      window.DeskCopilotRealtime?.enterCasualTurn?.();
+      window.DeskCopilotVoice?.cancelSpeech?.();
+      if (window.__dcHandleVoiceTurn) {
+        void window.__dcHandleVoiceTurn(transcript);
+        return;
+      }
+      onUserTranscript?.(transcript);
+      onChat?.(transcript, { skipBubble: true });
+      return;
+    }
+
     const messages = [...(ctx.messages || []), { role: "user", content: transcript }];
     onUserTranscript?.(transcript);
 
@@ -954,15 +1146,19 @@
     const watchdog = setTimeout(async () => {
       if (gen !== speakGeneration || watchdogSpoke) return;
       watchdogSpoke = true;
-      onStatus?.("Didn't get that — try again", null);
-      if (autoRead) await speakTextOnce("Didn't get that — try again", gen);
+      onStatus?.("No reply in 90s — backend slow or offline; try RECONNECT", false);
+      if (autoRead) await speakTextOnce("No reply in 90 seconds — try RECONNECT on the panel.", gen);
     }, UTTERANCE_WATCHDOG_MS);
 
     try {
+      const pricePayload =
+        (await window.DeskCopilotChartPrice?.payload?.()) || {};
       const result = await chatViaBackground({
         messages,
         symbol: ctx.symbol,
         lastVerdict: ctx.lastVerdict,
+        voiceInput: true,
+        ...pricePayload,
       });
 
       if (result.needsChartRead) {
@@ -990,9 +1186,17 @@
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      onStatus?.(msg, false);
+      const spoken =
+        msg.includes("Empty reply")
+          ? "Backend returned nothing — hit RECONNECT on the panel and try again."
+          : msg.includes("timed out")
+            ? "That timed out — backend may be cold. Hit RECONNECT and ask again."
+            : msg.includes("offline") || msg.includes("fetch")
+              ? "Backend offline — click RECONNECT on the desk panel."
+              : `Couldn't answer: ${msg}`;
+      onStatus?.(spoken, false);
       if (autoRead && gen === speakGeneration) {
-        await speakTextOnce("Didn't get that — try again", gen);
+        await speakTextOnce(spoken, gen);
       }
       onChat?.(transcript, { skipBubble: true });
     } finally {
@@ -1004,6 +1208,7 @@
   }
 
   function handleTranscript(transcript) {
+    if (realtimeOwnsStt()) return;
     const t = transcript.trim();
     if (!t) return;
 
@@ -1013,7 +1218,7 @@
         cancelSpeech();
         return;
       }
-      stopListening();
+      stopAutonomous();
       return;
     }
 
@@ -1037,9 +1242,10 @@
       onCommand?.(cmd, t);
       return;
     }
-    if (engineMode === "cascade" && getChatContext) {
-      void respondWithCascade(t).finally(() => {
+    if (window.__dcHandleVoiceTurn) {
+      void window.__dcHandleVoiceTurn(t).finally(() => {
         utteranceBusy = false;
+        if (listening) onStatus?.(CASCADE_STATUS, null);
       });
       return;
     }
@@ -1051,7 +1257,8 @@
     }
   }
 
-  function speakWithBrowserTts(line, onDone) {
+  function speakWithBrowserTts(line, onDone, browserOpts) {
+    browserOpts = browserOpts || {};
     const gen = speakGeneration;
     const chunks = chunkForSpeech(line);
     let chunkIndex = 0;
@@ -1061,7 +1268,7 @@
     onStatus?.("Speaking — talk to interrupt", null);
 
     try {
-      window.speechSynthesis.resume();
+      safeResumeSynthesis();
       window.speechSynthesis.getVoices();
     } catch {
       /* ignore */
@@ -1073,12 +1280,27 @@
       if (finished || gen !== speakGeneration) return;
       finished = true;
       clearSpeakTimers();
+      window.DeskCopilotRealtime?.setMicPaused?.(false);
       const done = speakDone;
       speakDone = null;
       setSpeaking(false);
       done?.();
       resumeNativeStt();
       if (listening) onStatus?.("Listening…", true);
+    };
+
+    const armChunkWatchdog = () => {
+      if (speakMaxTimer) clearTimeout(speakMaxTimer);
+      const chunk = chunks[Math.min(chunkIndex, chunks.length - 1)] || line;
+      speakMaxTimer = setTimeout(() => {
+        if (finished || gen !== speakGeneration) return;
+        try {
+          window.speechSynthesis.cancel();
+        } catch {
+          /* ignore */
+        }
+        finish();
+      }, Math.max(25000, chunk.length * 110 + 12000));
     };
 
     const speakNext = () => {
@@ -1089,10 +1311,22 @@
       }
 
       const excerpt = chunks[chunkIndex++];
+      armChunkWatchdog();
       const u = new SpeechSynthesisUtterance(excerpt);
-      u.rate = 1;
-      u.pitch = 1;
+      u.rate =
+        typeof browserOpts.rate === "number"
+          ? browserOpts.rate
+          : browserOpts.chuckle
+            ? 1.02
+            : line.length >= 120
+              ? 0.9
+              : 1;
+      u.pitch = browserOpts.chuckle ? 1.06 : 1;
       u.lang = VOICE_LANG;
+      u.onstart = () => {
+        window.__dcVoiceLatencyMark?.("first_audible");
+        window.__dcVoiceLatencyMark?.("tts_playback");
+      };
       u.onend = () => {
         if (gen !== speakGeneration) return;
         speakNext();
@@ -1104,35 +1338,285 @@
       window.speechSynthesis.speak(u);
     };
 
-    // Chrome pauses synthesis on long reads — keep it alive; don't infer "done" from polling.
+    // Chrome pauses synthesis on long reads — keep it alive; completion is chunk-driven only.
     speakPollTimer = setInterval(() => {
       if (gen !== speakGeneration || finished) return;
-      try {
-        window.speechSynthesis.resume();
-      } catch {
-        /* ignore */
-      }
+      safeResumeSynthesis();
     }, 8000);
 
-    speakMaxTimer = setTimeout(finish, estimateSpeakMs(line));
     speakNext();
   }
 
-  function speak(text, onDone) {
+  function primeAudioPlayback() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) {
+        const ctx = new Ctx();
+        void ctx.resume();
+        const buf = ctx.createBuffer(1, 1, 22050);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(ctx.destination);
+        src.start(0);
+      }
+    } catch {
+      /* ignore */
+    }
+    try {
+      window.speechSynthesis?.getVoices?.();
+      safeResumeSynthesis();
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function createStreamingSpeaker(onAllDone, opts = {}) {
+    const sessionGen = ++speakGeneration;
+    let buffer = "";
+    let spokenIdx = 0;
+    let chain = Promise.resolve();
+    let active = true;
+    let micPaused = false;
+    let spokeAny = false;
+    const spokenChunks = new Set();
+    let spokenDelivered = "";
+
+    primeAudioPlayback();
+
+    function ensureMicPaused() {
+      if (micPaused || opts.pauseMic === false) return;
+      micPaused = true;
+      window.DeskCopilotRealtime?.setMicPaused?.(true, { maxMs: 22000 });
+    }
+
+    function unpauseMic() {
+      if (!micPaused) return;
+      micPaused = false;
+      window.DeskCopilotRealtime?.setMicPaused?.(false);
+    }
+
+    function chunkKey(text) {
+      return String(text || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\s']/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function nextSpeakChunk(from) {
+      const pending = buffer.slice(from).trimStart();
+      if (!pending) return null;
+      const isFirst = !spokeAny;
+      const minChars = isFirst ? 3 : 6;
+      const sentence = pending.match(
+        new RegExp(`^[\\s\\S]{${minChars},}?[.!?](?:\\s+|$)|^[\\s\\S]{${minChars},}?—(?:\\s+|$)`)
+      );
+      if (sentence) {
+        const start = buffer.length - pending.length;
+        return { text: sentence[0].trim(), end: start + sentence[0].length };
+      }
+      const clauseLen = isFirst ? 36 : 72;
+      const minCut = isFirst ? 12 : 24;
+      if (pending.length >= clauseLen) {
+        const cut = pending.lastIndexOf(" ", clauseLen);
+        if (cut >= minCut) {
+          const start = buffer.length - pending.length;
+          return { text: pending.slice(0, cut).trim(), end: start + cut };
+        }
+      }
+      return null;
+    }
+
+    function enqueueSpeak(text) {
+      const line = toSpeakable(text);
+      if (!line || !active || sessionGen !== speakGeneration) return "skip";
+      const key = chunkKey(line);
+      if (key && spokenChunks.has(key)) return "deduped";
+      if (key) spokenChunks.add(key);
+      spokeAny = true;
+      ensureMicPaused();
+      chain = chain.then(
+        () =>
+          new Promise((resolve) => {
+            if (!active || sessionGen !== speakGeneration) {
+              resolve();
+              return;
+            }
+            setSpeaking(true);
+            pauseNativeStt();
+            onStatus?.("Speaking — talk to interrupt", null);
+            const chuckle = window.DeskCopilotVoiceEmotion?.shouldChuckle?.(line) === true;
+            const u = new SpeechSynthesisUtterance(line);
+            u.rate = typeof opts.rate === "number" ? opts.rate : chuckle ? 1.08 : 1.06;
+            u.pitch = chuckle ? 1.06 : 1;
+            u.lang = VOICE_LANG;
+            let settled = false;
+            const done = () => {
+              if (settled) return;
+              settled = true;
+              clearTimeout(chunkTimer);
+              resolve();
+            };
+            u.onend = () => {
+              spokenDelivered = spokenDelivered
+                ? `${spokenDelivered} ${line}`.trim()
+                : line;
+              done();
+            };
+            u.onerror = done;
+            const chunkTimer = setTimeout(done, Math.max(8000, line.length * 85 + 3000));
+            try {
+              window.speechSynthesis.speak(u);
+            } catch {
+              done();
+            }
+          })
+      );
+      return "enqueued";
+    }
+
+    function drainSpeakable() {
+      while (active && sessionGen === speakGeneration) {
+        const hit = nextSpeakChunk(spokenIdx);
+        if (!hit) break;
+        const queued = enqueueSpeak(hit.text);
+        if (queued === "skip") break;
+        spokenIdx = hit.end;
+      }
+    }
+
+    function spokenBufferPrefix() {
+      return buffer.slice(0, spokenIdx).trim();
+    }
+
+    return {
+      pushDelta(delta) {
+        if (!delta || !active || sessionGen !== speakGeneration) return;
+        buffer += delta;
+        drainSpeakable();
+      },
+      pushText(text) {
+        if (!text || !active || sessionGen !== speakGeneration) return;
+        buffer += text;
+        drainSpeakable();
+      },
+      finish() {
+        active = false;
+        drainSpeakable();
+        const rest = buffer.slice(spokenIdx).trim();
+        if (rest) {
+          const restKey = chunkKey(toSpeakable(rest));
+          if (!restKey || !spokenChunks.has(restKey)) {
+            enqueueSpeak(rest);
+            spokenIdx = buffer.length;
+          }
+        }
+        const finishMs = Math.min(90000, Math.max(15000, buffer.length * 90 + 10000));
+        const finishTimeout = new Promise((resolve) => setTimeout(resolve, finishMs));
+        return Promise.race([chain, finishTimeout])
+          .then(() => spokenBufferPrefix() || spokenDelivered.trim())
+          .then((spokenText) => {
+            if (sessionGen !== speakGeneration) {
+              unpauseMic();
+              return spokenText;
+            }
+            unpauseMic();
+            setSpeaking(false);
+            resumeNativeStt();
+            onAllDone?.(spokenText);
+            return spokenText;
+          });
+      },
+      cancel() {
+        active = false;
+        unpauseMic();
+        if (sessionGen === speakGeneration) cancelSpeech();
+        else {
+          try {
+            window.speechSynthesis?.cancel();
+          } catch {
+            /* ignore */
+          }
+          setSpeaking(false);
+          resumeNativeStt();
+        }
+      },
+      getText() {
+        return buffer.trim();
+      },
+      getSpokenText() {
+        return spokenBufferPrefix() || spokenDelivered.trim();
+      },
+    };
+  }
+
+  function speak(text, onDone, opts) {
     const line = toSpeakable(text);
     if (!line) {
       onDone?.();
       return;
     }
     cancelSpeech();
-    const gen = speakGeneration;
-    void speakTextOnce(text, gen).then(() => {
+    const gen = ++speakGeneration;
+    speakDone = typeof onDone === "function" ? onDone : null;
+    const emotion = window.DeskCopilotVoiceEmotion?.speechEmotionFor?.(line) || {};
+    const instructions = emotion.instructions || null;
+    const forceApi = Boolean(opts?.vercelTts);
+
+    if (opts?.instant && window.speechSynthesis && !forceApi) {
+      const pauseMicForInstant =
+        opts.pauseMic !== false &&
+        (window.DeskCopilotVoiceQuickReply?.shouldPauseMicForReply?.(line, opts) ??
+          line.length >= 72);
+      if (pauseMicForInstant) {
+        const pauseMs = Math.min(12000, Math.max(4000, line.length * 90 + 2000));
+        queueMicrotask(() => {
+          if (gen !== speakGeneration) return;
+          window.DeskCopilotRealtime?.setMicPaused?.(true, { maxMs: pauseMs });
+        });
+      }
+      speakWithBrowserTts(
+        line,
+        () => {
+        if (gen !== speakGeneration) return;
+        window.DeskCopilotRealtime?.forceResumeListening?.("instant-tts-done");
+        setSpeaking(false);
+        const done = speakDone;
+        speakDone = null;
+        done?.();
+        resumeNativeStt();
+        if (listening) {
+          onStatus?.(
+            engineMode === "realtime" ? "● Voice live — talk anytime" : CASCADE_STATUS,
+            engineMode === "realtime"
+          );
+        }
+      },
+        { chuckle: emotion.chuckle === true }
+      );
+      return;
+    }
+
+    const speed =
+      typeof opts?.speed === "number" ? opts.speed : 0.92;
+    void speakTextOnce(line, gen, speed, instructions, {
+      ttsPrefetch: opts?.ttsPrefetch,
+      browserRate: opts?.browserRate,
+    }).then(() => {
       if (gen !== speakGeneration) return;
       setSpeaking(false);
+      window.DeskCopilotRealtime?.forceResumeListening?.("tts-done");
+      const done = speakDone;
       speakDone = null;
-      onDone?.();
+      done?.();
       resumeNativeStt();
-      if (listening) onStatus?.(CASCADE_STATUS, null);
+      if (listening) {
+        onStatus?.(
+          engineMode === "realtime" ? "● Voice live — talk anytime" : CASCADE_STATUS,
+          engineMode === "realtime"
+        );
+      }
     });
   }
 
@@ -1146,6 +1630,8 @@
 
   function stopVoiceSession() {
     engineMode = "off";
+    sttMode = SpeechRecognition ? "native" : "whisper";
+    stopCascadeStt();
     if (chatStreamPort) {
       try {
         chatStreamPort.disconnect();
@@ -1154,21 +1640,19 @@
       }
       chatStreamPort = null;
     }
-    if (window.DeskCopilotRealtime?.suspend) {
-      window.DeskCopilotRealtime.suspend();
-    } else if (window.DeskCopilotRealtime?.isActive?.()) {
+    if (window.DeskCopilotRealtime?.stop) {
       window.DeskCopilotRealtime.stop();
+    } else {
+      window.DeskCopilotRealtime?.suspend?.();
     }
     setListening(false);
-    flushPendingTranscript();
-    stopNativeStt();
     cancelSpeech();
-    finishRecording();
     releaseMic();
     onInterim?.("");
   }
 
   async function upgradeToRealtime(symbolResolver) {
+    if (userVoiceOff) return false;
     if (!window.DeskCopilotRealtime?.retryUpgrade) return startAutonomous(symbolResolver);
     window.DeskCopilotRealtime.suspend?.();
     engineMode = "off";
@@ -1179,8 +1663,10 @@
     return startAutonomous(symbolResolver);
   }
 
-  async function startAutonomous(symbolResolver) {
-    if (!supported() || !isAutonomousEnabled() || userVoiceOff) return false;
+  async function startAutonomous(symbolResolver, opts = {}) {
+    const manual = opts.manual === true;
+    if (!supported() || userVoiceOff) return false;
+    if (!manual && !isAutonomousEnabled()) return false;
 
     if (window.DeskCopilotRealtime?.start) {
       const sym =
@@ -1189,7 +1675,9 @@
       onStatus?.("Connecting voice…", null);
       const rtOk = await window.DeskCopilotRealtime.start(symbolResolver);
       if (rtOk) {
+        stopCascadeStt();
         engineMode = "realtime";
+        sttMode = "realtime";
         setListening(true);
         onStatus?.("● Voice live — talk anytime", true);
         return true;
@@ -1203,26 +1691,31 @@
 
   function stopAutonomous() {
     userVoiceOff = true;
+    persistVoiceOff(true);
     stopVoiceSession();
     onStatus?.("Agent off", null);
   }
 
   function resumeAutonomousAgent() {
     userVoiceOff = false;
+    persistVoiceOff(false);
   }
 
   async function toggleAutonomous(symbolResolver) {
-    if (
-      engineMode !== "off" ||
+    const sessionLive =
       listening ||
-      window.DeskCopilotRealtime?.isActive?.() ||
-      window.DeskCopilotRealtime?.wantsActive?.()
-    ) {
+      engineMode !== "off" ||
+      window.DeskCopilotRealtime?.isActive?.();
+    if (sessionLive) {
       stopAutonomous();
       return false;
     }
+    // Stale reconnect intent — not an active session; clear without persisting user-off.
+    if (window.DeskCopilotRealtime?.wantsActive?.()) {
+      window.DeskCopilotRealtime?.stop?.();
+    }
     resumeAutonomousAgent();
-    return startAutonomous(symbolResolver);
+    return startAutonomous(symbolResolver, { manual: true });
   }
 
   async function switchToWhisperMode(reason) {
@@ -1240,6 +1733,7 @@
       onStatus?.("Voice needs Chrome + microphone", false);
       return false;
     }
+    if (realtimeOwnsStt()) return true;
     if (listening) return true;
 
     const mic = await ensureMicPermission();
@@ -1317,7 +1811,10 @@
       onAssistantReply = handlers.onAssistantReply;
       onNeedsChartRead = handlers.onNeedsChartRead;
       onUserTranscript = handlers.onUserTranscript;
-      userVoiceOff = handlers.autonomous === false;
+      userVoiceOff =
+        handlers.autonomous === false || loadPersistedVoiceOff();
+      autoRead =
+        handlers.autoRead != null ? Boolean(handlers.autoRead) : loadPersistedAutoRead();
       return true;
     },
     testMic,
@@ -1330,11 +1827,22 @@
     toggleListening: toggleAutonomous,
     stopListening: stopAutonomous,
     isAgentEnabled: isAutonomousEnabled,
+    isUserVoiceOff() {
+      return userVoiceOff;
+    },
     cancelSpeech,
+    primeAudioPlayback,
+    prefetchTtsAudio,
+    createStreamingSpeaker,
     speakBrief: speak,
     speak,
     isSpeaking() {
-      return speaking || Boolean(ttsAudio) || window.DeskCopilotRealtime?.isSpeaking?.();
+      return (
+        speaking ||
+        Boolean(ttsAudio) ||
+        Boolean(window.speechSynthesis?.speaking) ||
+        window.DeskCopilotRealtime?.isSpeaking?.()
+      );
     },
     isRecording() {
       return recording;
@@ -1344,10 +1852,18 @@
     },
     set autoRead(v) {
       autoRead = Boolean(v);
+      try {
+        localStorage.setItem(AUTO_READ_KEY, autoRead ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
     },
     supported,
     isListening() {
       return listening || window.DeskCopilotRealtime?.isActive?.();
+    },
+    getEchoGuardUntil() {
+      return echoGuardUntil;
     },
     getEngineMode() {
       return engineMode;

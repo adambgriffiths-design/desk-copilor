@@ -380,6 +380,31 @@ export function isWeatherClarificationPrompt(text: string): boolean {
   return isWeatherLocationPrompt(text) || isWeatherAmbiguousPrompt(text);
 }
 
+const WEATHER_SWAP_FOLLOWUP =
+  /\b(?:what about|how about)\s+(?:the\s+)?(.+?)[?.!]*$/i;
+
+const WEATHER_SWAP_BLOCK =
+  /\b(weather|temperature|forecast|news|chart|trade|stock|bitcoin|ndog|nwog|mss|fvg|pizza|burger|food|music|color|colour|your|my)\b/i;
+
+/** Location swap in a weather thread — "What about Paris?" after Berlin weather. */
+export function extractWeatherSwapLocation(text: string): string | null {
+  const q = text.trim();
+  const m = q.match(WEATHER_SWAP_FOLLOWUP);
+  if (!m?.[1]) return null;
+  const target = m[1].trim();
+  if (!target || target.length > 48) return null;
+  if (WEATHER_SWAP_BLOCK.test(target)) return null;
+  const fromClarification = extractClarificationLocation(target);
+  if (fromClarification) return fromClarification;
+  const normalized = normalizeLocation(target.replace(/^the\s+/i, ""));
+  if (normalized.length >= 2 && isPlausiblePlaceName(normalized)) return normalized;
+  return null;
+}
+
+export function isWeatherLocationSwapFollowUp(text: string): boolean {
+  return extractWeatherSwapLocation(text) != null;
+}
+
 function extractLocationFromClarification(
   question: string,
   messages?: HistoryMsg[]

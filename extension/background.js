@@ -1,5 +1,37 @@
-/** Stats/rate/learn proxied here — content scripts on HTTPS pages can't fetch localhost reliably. */
-importScripts("api-config.js");
+/** Stats/learn proxied here — content scripts on HTTPS pages can't fetch localhost reliably. */
+importScripts("api-config.js", "connection-state.js");
+
+function broadcastConnectionState(snap) {
+  const payload = { type: "CONNECTION_STATE", snapshot: snap };
+  chrome.tabs.query({ url: ["*://www.tradingview.com/*", "*://*.tradingview.com/*"] }, (tabs) => {
+    for (const tab of tabs) {
+      if (!tab.id) continue;
+      chrome.tabs.sendMessage(tab.id, payload).catch(() => {});
+    }
+  });
+}
+
+const connectionManager = DeskCopilotConnection.createConnectionManager({
+  pingHealth: async (opts) => {
+    if (opts?.clearCache) clearApiCache();
+    return pingHealth({ quick: opts?.quick !== false, warm: opts?.warm !== false });
+  },
+  onStateChange: (snap) => broadcastConnectionState(snap),
+  onResync: () => broadcastConnectionState(connectionManager.snapshot()),
+});
+
+connectionManager.start();
+
+async function apiFetchTracked(path, options = {}) {
+  try {
+    const data = await apiFetch(path, options);
+    connectionManager.recordRequestSuccess(cachedBase);
+    return data;
+  } catch (err) {
+    connectionManager.recordRequestFailure(err);
+    throw err;
+  }
+}
 
 async function reloadTradingViewTabs() {
   const patterns = ["*://www.tradingview.com/*", "*://*.tradingview.com/*"];
@@ -20,6 +52,7 @@ async function reloadTradingViewTabs() {
 
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === "install" || details.reason === "update") {
+    ensureVercelApiBase().catch(() => {});
     reloadTradingViewTabs().catch(() => {});
   }
 });
@@ -62,15 +95,22 @@ chrome.runtime.onConnect.addListener((port) => {
           symbol: msg.symbol,
           lastVerdict: msg.lastVerdict,
           voiceInput: msg.voiceInput === true,
+          voiceSttClean: msg.voiceSttClean === true,
+          casualOnly: msg.casualOnly === true,
+          chartLastPrice: msg.chartLastPrice,
+          forceMarket: msg.forceMarket === true,
+          memory: msg.memory,
         }),
       });
 
       const ct = res.headers.get("content-type") || "";
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
+        connectionManager.recordRequestFailure(new Error(err.error || `HTTP ${res.status}`));
         safePortPost({ type: "error", error: err.error || `HTTP ${res.status}` });
         return;
       }
+      connectionManager.recordRequestSuccess(base);
 
       if (ct.includes("application/json")) {
         const data = await res.json();
@@ -110,6 +150,7 @@ chrome.runtime.onConnect.addListener((port) => {
       }
       safePortPost({ type: "done" });
     } catch (e) {
+      connectionManager.recordRequestFailure(e);
       safePortPost({
         type: "error",
         error: e instanceof Error ? e.message : String(e),
@@ -159,7 +200,7 @@ async function captureChartPng(tab) {
 async function runVerdictForTab(tab, symbol) {
   const dataUrl = await captureChartPng(tab);
   const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
-  return apiFetch("/api/live-verdict", {
+  return apiFetchTrackedTracked("/api/live-verdict", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -200,7 +241,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "REALTIME_SESSION") {
-    apiFetch("/api/voice/realtime-session", {
+    apiFetchTracked("/api/voice/realtime-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -219,7 +260,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const res = await fetch(`${base}/api/voice/tts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: msg.text || "", voice: msg.voice || undefined }),
+          body: JSON.stringify({
+            text: msg.text || "",
+            voice: msg.voice || undefined,
+            speed: typeof msg.speed === "number" ? msg.speed : undefined,
+            instructions: typeof msg.instructions === "string" ? msg.instructions : undefined,
+          }),
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -237,8 +283,22 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
+  if (msg.type === "VOICE_INTERPRET") {
+    const body = { text: msg.text || "" };
+    if (msg.recentContext) body.recentContext = msg.recentContext;
+    if (Array.isArray(msg.messages)) body.messages = msg.messages;
+    apiFetchTracked("/api/voice/interpret", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      timeoutMs: 15000,
+    })
+      .then(sendResponse)
+      .catch((e) => sendResponse({ error: e.message, text: msg.text, changed: false, raw: msg.text }));
+    return true;
+  }
   if (msg.type === "TRANSCRIBE") {
-    apiFetch("/api/transcribe", {
+    apiFetchTracked("/api/transcribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -251,8 +311,41 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
+  if (msg.type === "MARKET_SNAPSHOT") {
+    apiFetchTracked("/api/market-snapshot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: msg.question || "",
+        voiceInput: msg.voiceInput === true,
+        chartLastPrice: msg.chartLastPrice,
+        conversationContext: msg.conversationContext,
+      }),
+      timeoutMs: 20000,
+    })
+      .then(sendResponse)
+      .catch((e) => sendResponse({ error: e.message }));
+    return true;
+  }
+  if (msg.type === "DESK_TRACKER") {
+    apiFetchTracked("/api/desk-tracker", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chartSnapshot: msg.chartSnapshot,
+        chartLastPrice: msg.chartLastPrice,
+        lastBarTime: msg.lastBarTime,
+        candleClosed: msg.candleClosed === true,
+        freeze: msg.freeze === true,
+      }),
+      timeoutMs: 30000,
+    })
+      .then(sendResponse)
+      .catch((e) => sendResponse({ error: e.message }));
+    return true;
+  }
   if (msg.type === "CHAT") {
-    apiFetch("/api/chat", {
+    apiFetchTracked("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -260,14 +353,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         symbol: msg.symbol,
         lastVerdict: msg.lastVerdict,
         voiceInput: msg.voiceInput === true,
+        voiceSttClean: msg.voiceSttClean === true,
+        chartLastPrice: msg.chartLastPrice,
+        casualOnly: msg.casualOnly === true,
+        wantsLiveWebData: msg.wantsLiveWebData === true,
+        searchQuery: msg.searchQuery || undefined,
+        memory: msg.memory,
       }),
-      timeoutMs: 60000,
+      timeoutMs: 90000,
     })
       .then(sendResponse)
       .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
   if (msg.type === "PREPARE_VERDICT") {
+    apiFetchTracked("/api/warm", { timeoutMs: 15000 }).catch(() => {});
     chrome.storage.session
       .set({ dcVerdictRequest: { symbol: msg.symbol || "MNQ1!", ts: Date.now() } })
       .then(() => sendResponse({ ok: true }))
@@ -286,7 +386,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "VERDICT") {
     const run =
       msg.base64 != null
-        ? apiFetch("/api/live-verdict", {
+        ? apiFetchTracked("/api/live-verdict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -304,7 +404,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "VERDICT_ASYNC") {
     const tabId = sender.tab?.id;
     deliverVerdict(tabId, { status: "analyzing" }).catch(() => {});
-    apiFetch("/api/live-verdict", {
+    apiFetchTracked("/api/live-verdict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -313,6 +413,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         symbol: msg.symbol || "MNQ1!",
         question: msg.question,
         voiceInput: msg.voiceInput === true,
+        chartLastPrice: msg.chartLastPrice,
+        chartSnapshot: msg.chartSnapshot,
+        debug: msg.debug === true,
       }),
       timeoutMs: 120000,
     })
@@ -325,36 +428,66 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (msg.type === "LEVELS") {
-    apiFetch("/api/levels", { timeoutMs: 60000 })
+    apiFetchTracked("/api/levels", { timeoutMs: 60000 })
       .then(sendResponse)
       .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
-  if (msg.type === "PING" || msg.type === "RECONNECT") {
-    if (msg.type === "RECONNECT") clearApiCache();
-    pingHealth()
-      .then((result) => sendResponse(result))
+  if (msg.type === "WARM") {
+    apiFetchTracked("/api/warm", { timeoutMs: 12000 })
+      .then(() => sendResponse({ ok: true }))
       .catch((e) => sendResponse({ ok: false, error: e.message }));
     return true;
   }
+  if (msg.type === "PING" || msg.type === "RECONNECT") {
+    const run =
+      msg.type === "RECONNECT"
+        ? connectionManager.forceReconnect()
+        : connectionManager.probeBackend(false);
+    run
+      .then((snap) => {
+        sendResponse({
+          ok: snap.backendUp,
+          base: snap.apiBaseUrl,
+          version: snap.backendVersion,
+          connectionState: snap.state,
+          diagnostics: snap,
+          statusLine: DeskCopilotConnection.formatConnectionStatus(snap),
+          liveDataAvailable: DeskCopilotConnection.isLiveDataAvailable(snap),
+        });
+        if (!snap.backendUp) connectionManager.scheduleReconnect();
+      })
+      .catch((e) => sendResponse({ ok: false, error: e.message }));
+    return true;
+  }
+  if (msg.type === "GET_CONNECTION_STATE") {
+    sendResponse({
+      ...connectionManager.snapshot(),
+      statusLine: DeskCopilotConnection.formatConnectionStatus(connectionManager.snapshot()),
+      liveDataAvailable: connectionManager.isLiveDataAvailable(),
+    });
+    return false;
+  }
+  if (msg.type === "CONNECTION_MARKET_PULSE") {
+    const snap = connectionManager.recordMarketPulse({
+      source: msg.source,
+      timestamp: msg.timestamp,
+      receivedAt: msg.receivedAt || Date.now(),
+      symbol: msg.symbol,
+      timeframe: msg.timeframe,
+      version: msg.version,
+    });
+    sendResponse({ ok: true, snapshot: snap });
+    return false;
+  }
   if (msg.type === "STATS") {
-    apiFetch("/api/session", { timeoutMs: 120000 })
+    apiFetchTracked("/api/session", { timeoutMs: 120000 })
       .then((data) => sendResponse(data))
       .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
-  if (msg.type === "RATE") {
-    apiFetch("/api/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: msg.id, rating: msg.rating }),
-    })
-      .then(sendResponse)
-      .catch((e) => sendResponse({ error: e.message }));
-    return true;
-  }
   if (msg.type === "LEARN") {
-    apiFetch("/api/learn", { method: "POST", timeoutMs: 60000 })
+    apiFetchTracked("/api/learn", { method: "POST", timeoutMs: 60000 })
       .then(sendResponse)
       .catch((e) => sendResponse({ error: e.message }));
     return true;

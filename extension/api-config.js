@@ -1,7 +1,7 @@
-/** Shared API base URL — always Vercel unless Options overrides. */
+/** Shared API base URL — always Vercel production. */
 const PRODUCTION_BASE = "https://desk-copilor.vercel.app";
 
-let cachedBase = null;
+let cachedBase = PRODUCTION_BASE;
 
 function normalizeBase(url) {
   return String(url || "")
@@ -9,17 +9,39 @@ function normalizeBase(url) {
     .replace(/\/+$/, "");
 }
 
+function isVercelBase(url) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 function rememberBase(base) {
   const normalized = normalizeBase(base);
-  if (!normalized) return;
+  if (!normalized || !isVercelBase(normalized)) return;
   cachedBase = normalized;
   chrome.storage.local.set({ apiBaseLastGood: normalized }).catch(() => {});
 }
 
 async function getApiBase() {
+  return PRODUCTION_BASE;
+}
+
+/** Force Vercel on install/update — clear stale localhost from storage. */
+async function ensureVercelApiBase() {
   const { apiBaseUrl } = await chrome.storage.sync.get("apiBaseUrl");
   const custom = normalizeBase(apiBaseUrl);
-  return custom || PRODUCTION_BASE;
+  if (!custom || !isVercelBase(custom)) {
+    await chrome.storage.sync.set({ apiBaseUrl: PRODUCTION_BASE });
+  }
+  const { apiBaseLastGood } = await chrome.storage.local.get("apiBaseLastGood");
+  const last = normalizeBase(apiBaseLastGood);
+  if (last && !isVercelBase(last)) {
+    await chrome.storage.local.remove("apiBaseLastGood");
+    cachedBase = PRODUCTION_BASE;
+  }
 }
 
 async function probeBase(base, timeoutMs) {
@@ -27,28 +49,43 @@ async function probeBase(base, timeoutMs) {
     signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return normalizeBase(base);
+  let version = null;
+  try {
+    const data = await res.json();
+    version = data?.version || null;
+  } catch {
+    /* health body optional */
+  }
+  return { base: normalizeBase(base), version };
 }
 
-/** Health check — Vercel only (or custom URL from Options). */
-async function pingHealth() {
+/** Health check — Vercel production only. */
+async function pingHealth(opts = {}) {
+  const timeoutMs = opts.quick ? 4500 : 10000;
+  await ensureVercelApiBase();
   const base = await getApiBase();
-  const candidates = [cachedBase === base ? null : base, base].filter(Boolean);
+  const candidates = [
+    cachedBase && isVercelBase(cachedBase) ? cachedBase : null,
+    base,
+  ].filter(Boolean);
 
   for (const candidate of candidates) {
     try {
-      const ok = await probeBase(candidate, 10000);
-      rememberBase(ok);
-      return { ok: true, base: ok };
+      const probe = await probeBase(candidate, timeoutMs);
+      rememberBase(probe.base);
+      if (opts.warm !== false) {
+        fetch(`${probe.base}/api/warm`, { signal: AbortSignal.timeout(12000) }).catch(() => {});
+      }
+      return { ok: true, base: probe.base, version: probe.version || null };
     } catch {
       /* try next */
     }
   }
 
-  cachedBase = null;
+  cachedBase = PRODUCTION_BASE;
   return {
     ok: false,
-    error: `Backend offline — check ${base} in Extension Options`,
+    error: `Vercel backend offline — ${base}`,
   };
 }
 

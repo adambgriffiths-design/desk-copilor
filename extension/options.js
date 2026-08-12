@@ -44,23 +44,27 @@ async function load() {
     await chrome.storage.sync.set({ voiceId: DEFAULT_VOICE });
   }
 
+  try {
+    const routeDebug = localStorage.getItem("dc-route-debug") === "1";
+    document.getElementById("routeDebug").checked = routeDebug;
+  } catch {
+    /* ignore */
+  }
+
   await testConnection();
 }
 
 async function saveSettings() {
-  const raw = normalizeUrl(document.getElementById("apiBaseUrl").value);
-  if (!raw) {
-    setStatus("Enter your Vercel URL", false);
-    return;
-  }
-  if (!/^https:\/\//i.test(raw)) {
-    setStatus("Use https:// (Vercel URL)", false);
-    return;
-  }
   const voiceId = document.getElementById("voiceId").value || DEFAULT_VOICE;
-  await chrome.storage.sync.set({ apiBaseUrl: raw, voiceId });
+  const routeDebug = document.getElementById("routeDebug").checked;
+  try {
+    localStorage.setItem("dc-route-debug", routeDebug ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
+  await chrome.storage.sync.set({ apiBaseUrl: PRODUCTION_BASE, voiceId });
   await chrome.storage.local.remove("apiBaseLastGood");
-  setStatus(`Saved — ${raw}, voice ${voiceId}`, true);
+  setStatus(`Saved — ${PRODUCTION_BASE}, voice ${voiceId}${routeDebug ? ", routing debug on" : ""}`, true);
   await testConnection();
 }
 

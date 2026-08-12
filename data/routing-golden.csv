@@ -1,0 +1,66 @@
+phrase,expected_route,detail
+Tell me about yourself,casual,persona
+What is your favorite food?,casual,persona
+Hi my name's Adam,casual,stream
+What's my name?,casual,memory
+Do you remember my name?,casual,memory
+What is the capital of France?,casual,stream
+Tell me about the Roman Empire,casual,stream
+Tell me a joke,casual,stream
+Do you like KFC?,casual,persona
+Hey what's the weather in London?,live_web,search
+What is the weather in Shrewsbury?,live_web,search
+weather in Telford Shropshire,live_web,search
+weather in Birmingham,live_web,search
+What's the market doing right now?,snapshot,status
+What is the chart doing right now?,snapshot,status
+What's the bias?,trading,bias
+What's the current price?,snapshot,price
+What price are we at?,snapshot,price
+Where are we trading?,snapshot,price
+What level are we at?,snapshot,price
+What level are we trading at?,snapshot,price
+get the read,chart_read,structured
+full read,chart_read,structured
+what do you see on the chart,chart_read,structured
+read the chart,chart_read,structured
+mark levels,levels,
+draw levels,levels,
+show levels,levels,
+draw levels on chart,levels,
+What's the nearest support?,snapshot,level
+What's the entry?,snapshot,entry
+What's target one?,snapshot,target
+tell me about market structure,trading,structure
+explain why we should wait,trading,
+should I take this long,chart_read,structured
+what do you see,chart_read,structured
+Who are you,casual,persona
+What is your name,casual,persona
+Hi,casual,stream
+How are you,casual,stream
+weather in Telford,live_web,search
+What happened in the news today,live_web,search
+look it up,live_web,search
+What is MNQ doing,snapshot,status
+nearest resistance,snapshot,level
+first presented fvg,snapshot,first_presented_fvg
+is it bullish or bearish,snapshot,bias
+what's on the chart,chart_read,structured
+analyze this setup,chart_read,structured
+why is price lagging,trading,
+tell me about yourself and the chart,trading,
+Tell me about the market structure.,trading,structure
+Explain displacement to me,trading,structure
+What's the session bias today?,trading,bias
+Why should I wait for confirmation?,trading,
+Walk me through the dealing range,trading,
+Should I fade this move?,trading,
+Help me understand premium vs discount,trading,
+Tell me about the current setup,trading,
+What do you think about going long here,trading,
+Break down the market structure for me,trading,structure
+Explain order blocks,trading,
+Why wait for a reclaim,trading,
+What's happening in the London session,trading,
+Talk me through the kill zone,trading,

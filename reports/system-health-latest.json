@@ -1,0 +1,123 @@
+{
+  "at": "2026-08-12T23:18:16.789Z",
+  "pass": true,
+  "score": 100,
+  "subsystems": [
+    {
+      "name": "routing-golden",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P0",
+      "ms": 8128
+    },
+    {
+      "name": "conversation-chains",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P0",
+      "ms": 6095
+    },
+    {
+      "name": "observation-engine",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P0",
+      "ms": 3817
+    },
+    {
+      "name": "reh-rel",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P1",
+      "ms": 3893
+    },
+    {
+      "name": "chart-snapshot",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P0",
+      "ms": 5683
+    },
+    {
+      "name": "decision-pipeline",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P0",
+      "ms": 4252
+    },
+    {
+      "name": "contamination-guard",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P0",
+      "ms": 6660
+    },
+    {
+      "name": "chart-export-quality",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P1",
+      "ms": 6107
+    },
+    {
+      "name": "request-trace",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P2",
+      "ms": 4097
+    },
+    {
+      "name": "connection-state",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "pass",
+      "priority": "P2",
+      "ms": 6065
+    }
+  ],
+  "checklist": {
+    "pass": true,
+    "items": [
+      {
+        "id": "criticals",
+        "label": "No open critical failures",
+        "pass": true,
+        "detail": "0 open P0/P1",
+        "severity": "P0"
+      },
+      {
+        "id": "voice",
+        "label": "Voice latency ≤ 3000ms (recent max)",
+        "pass": true,
+        "detail": "no voice traces",
+        "severity": "P1"
+      },
+      {
+        "id": "export",
+        "label": "Chart export success ≥ 85%",
+        "pass": true,
+        "detail": "100% (0 exports)",
+        "severity": "P1"
+      },
+      {
+        "id": "golden",
+        "label": "Golden tests pass",
+        "pass": true,
+        "detail": "all pass",
+        "severity": "P0"
+      }
+    ],
+    "openCriticals": 0
+  },
+  "summary": "System health OK — ready for release review.",
+  "failures": []
+}

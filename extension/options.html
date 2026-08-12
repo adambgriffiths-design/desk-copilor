@@ -167,11 +167,15 @@
     <p style="font-size: 12px; color: #666; margin-top: 8px">
       Realtime uses your pick directly. Cascade TTS fallback maps to the nearest OpenAI voice.
     </p>
-    <label for="apiBaseUrl">API base URL</label>
+    <label style="display: flex; align-items: center; gap: 8px; margin: 16px 0; font-size: 13px; text-transform: none; letter-spacing: 0; color: #ccc;">
+      <input type="checkbox" id="routeDebug" />
+      Show routing debug in panel (route: casual · stream)
+    </label>
+    <label for="apiBaseUrl">API base URL (Vercel only)</label>
     <input
       id="apiBaseUrl"
       type="url"
-      placeholder="https://desk-copilor.vercel.app"
+      readonly
       autocomplete="off"
       value="https://desk-copilor.vercel.app"
     />

@@ -1,5 +1,10 @@
 /**
  * Draw Desk Copilot levels on TradingView — native chart API (if found) + overlay fallback.
+ *
+ * Renders filtered payload from /api/levels (see lib/drawing-levels.ts LEVEL DRAW CATALOG):
+ * - Lines: ORG top/CE/bottom, NWOG, session H/L, PDH/PDL/PDC/EQ, NDOG, REH/REL
+ * - Zones: daily FVGs, first presented 1m FVG, FHDR band
+ * Visibility toggles applied in content.js via DeskCopilotLevelToggles.filter().
  */
 (function () {
   const OVERLAY_ID = "dc-level-overlay";
@@ -233,6 +238,14 @@
   position: fixed; box-sizing: border-box; opacity: 0.92;
   border-top: 1px solid; border-bottom: 1px solid;
 }
+#${OVERLAY_ID} .dc-lvl-zone.dc-fhdr {
+  border-left: 1px solid; border-right: 1px solid;
+  opacity: 0.88;
+}
+#${OVERLAY_ID} .dc-lvl-label {
+  position: fixed; font: 10px/1.2 system-ui, sans-serif;
+  pointer-events: none; white-space: nowrap; opacity: 0.92;
+}
 #${OVERLAY_ID} .dc-lvl-ce {
   position: fixed; height: 0; border-top: 1px solid #e879f9; opacity: 0.95;
 }
@@ -272,6 +285,13 @@
       return { ok: false, method: "overlay", reason: "no_chart_pane" };
     }
 
+    assignStaggeredLabelAlign(levels, zones, {
+      priceMin: scale.minP,
+      priceMax: scale.maxP,
+      plotHeightPx: scale.yBot - scale.yTop,
+      yOffsetPx: scale.yTop,
+    });
+
     const { paneRect } = scale;
     const range = visibleRange || activeVisibleRange;
     let drawn = 0;
@@ -287,10 +307,15 @@
       if (yTop > paneRect.bottom + 2 && yBot > paneRect.bottom + 2) continue;
 
       const startX = timeToX(Number(zone.startTime), range, paneRect);
+      const zoneEndX = zone.endTime
+        ? timeToX(Number(zone.endTime), range, paneRect)
+        : endX;
+      const leftX = Math.min(startX, zoneEndX, endX);
+      const rightX = Math.max(startX, zoneEndX);
       const box = document.createElement("div");
-      box.className = "dc-lvl-zone";
-      box.style.left = `${Math.min(startX, endX)}px`;
-      box.style.width = `${Math.max(8, endX - Math.min(startX, endX))}px`;
+      box.className = zone.kind === "fhdr" ? "dc-lvl-zone dc-fhdr" : "dc-lvl-zone";
+      box.style.left = `${leftX}px`;
+      box.style.width = `${Math.max(8, Math.min(endX, rightX) - leftX)}px`;
       box.style.top = `${Math.min(yTop, yBot)}px`;
       box.style.height = `${Math.max(2, Math.abs(yBot - yTop))}px`;
       box.style.backgroundColor = zone.fill || "rgba(251, 191, 133, 0.38)";
@@ -302,10 +327,24 @@
         const ceY = priceToY(Number(zone.ce), scale);
         const ce = document.createElement("div");
         ce.className = "dc-lvl-ce";
-        ce.style.left = `${Math.min(startX, endX)}px`;
-        ce.style.width = `${Math.max(8, endX - Math.min(startX, endX))}px`;
+        ce.style.left = `${leftX}px`;
+        ce.style.width = `${Math.max(8, Math.min(endX, rightX) - leftX)}px`;
         ce.style.top = `${ceY}px`;
         root.appendChild(ce);
+      }
+
+      if (zone.showLabel !== false && zone.label) {
+        const zoneAlign = zone.labelAlign === "bottom" ? "bottom" : "top";
+        const zoneLane = Number.isFinite(Number(zone.labelLane)) ? Number(zone.labelLane) : 0;
+        appendLabel(
+          root,
+          zone.label,
+          leftX,
+          Math.min(yTop, yBot),
+          zone.borderColor || zone.color || "#78716c",
+          zoneAlign,
+          zoneLane
+        );
       }
     }
 
@@ -322,8 +361,25 @@
       line.style.width = `${Math.max(8, endX - Math.min(startX, endX))}px`;
       line.style.top = `${y}px`;
       line.style.borderColor = level.color || "#22d3ee";
+      if (level.group === "structure" || level.dash) {
+        line.style.borderTopStyle = "dashed";
+      }
       root.appendChild(line);
       drawn += 1;
+
+      if (level.showLabel !== false && level.label) {
+        const levelAlign = level.labelAlign === "bottom" ? "bottom" : "top";
+        const levelLane = Number.isFinite(Number(level.labelLane)) ? Number(level.labelLane) : 0;
+        appendLabel(
+          root,
+          level.label,
+          Math.min(startX, endX),
+          y,
+          level.color || "#22d3ee",
+          levelAlign,
+          levelLane
+        );
+      }
     }
 
     return {
@@ -410,6 +466,169 @@
     };
   }
 
+  const LABEL_CLUSTER_MIN = 4;
+  const LABEL_CLUSTER_DEFAULT = 8;
+  const LABEL_CLUSTER_MAX = 14;
+  const LABEL_CLUSTER_RATIO = 0.0035;
+  const LABEL_MIN_GAP_PX = 18;
+  const LABEL_OFFSET_TOP_PX = 4;
+  const LABEL_OFFSET_BOTTOM_PX = 14;
+  const LABEL_LANE_X_STEP_PX = 10;
+  const LABEL_EST_HEIGHT_PX = 12;
+  const LABEL_MAX_LANES = 24;
+
+  const LABEL_ID_PRIORITY = {
+    pdh: 100,
+    pdl: 100,
+    pdc: 96,
+    pdeq: 92,
+    cdeq: 92,
+    ndog_top: 88,
+    ndog_bot: 88,
+    org_top: 90,
+    org_bottom: 90,
+    org_ce: 82,
+    nwog_top: 86,
+    nwog_bottom: 86,
+  };
+
+  function labelPriorityForDraw(item) {
+    if (item.kind === "level") {
+      const id = item.ref.id;
+      if (LABEL_ID_PRIORITY[id] != null) return LABEL_ID_PRIORITY[id];
+      if (item.ref.group === "daily") return 90;
+      if (item.ref.group === "org") return 88;
+      if (item.ref.group === "gap") return 84;
+      if (item.ref.group === "structure") return 76;
+      if (item.ref.group === "session") return 52;
+      return 40;
+    }
+    if (item.ref.kind === "fhdr") return 68;
+    if (item.ref.id && String(item.ref.id).includes("fpfvg")) return 74;
+    if (item.ref.kind === "fvg") return 58;
+    return 48;
+  }
+
+  function labelLaneToAlign(lane) {
+    return lane % 2 === 0 ? "top" : "bottom";
+  }
+
+  function labelYOffsetPx(lineY, align, lane) {
+    const stack = Math.floor(Math.max(0, lane || 0) / 2);
+    const step = stack * LABEL_MIN_GAP_PX;
+    if (align === "bottom") return lineY + LABEL_OFFSET_BOTTOM_PX + step;
+    return lineY - LABEL_OFFSET_TOP_PX - step;
+  }
+
+  function labelOffsetXPx(lane) {
+    return 4 + Math.max(0, lane || 0) * LABEL_LANE_X_STEP_PX;
+  }
+
+  function priceToLineY(price, priceMin, priceMax, plotHeightPx, yOffsetPx) {
+    const plotH = plotHeightPx ?? 480;
+    const yOff = yOffsetPx ?? 0;
+    const range = priceMax - priceMin || 1;
+    return yOff + plotH * (1 - (price - priceMin) / range);
+  }
+
+  function labelBBox(lineY, align, lane) {
+    const top = labelYOffsetPx(lineY, align, lane);
+    return { top, bottom: top + LABEL_EST_HEIGHT_PX };
+  }
+
+  function labelBboxesOverlap(a, b) {
+    return a.bottom + LABEL_MIN_GAP_PX > b.top && b.bottom + LABEL_MIN_GAP_PX > a.top;
+  }
+
+  function findLabelLane(lineY, placed) {
+    for (let lane = 0; lane < LABEL_MAX_LANES; lane++) {
+      const bbox = labelBBox(lineY, labelLaneToAlign(lane), lane);
+      if (!placed.some((p) => labelBboxesOverlap(p, bbox))) return lane;
+    }
+    return LABEL_MAX_LANES - 1;
+  }
+
+  function appendLabel(root, text, x, lineY, color, align, lane) {
+    const el = document.createElement("div");
+    el.className = "dc-lvl-label";
+    el.textContent = text;
+    el.style.color = color;
+    el.style.left = `${x + labelOffsetXPx(lane)}px`;
+    el.style.top = `${labelYOffsetPx(lineY, align, lane)}px`;
+    root.appendChild(el);
+    return el;
+  }
+
+  function labelClusterThreshold(priceMin, priceMax, clusterPoints) {
+    if (clusterPoints != null && Number.isFinite(clusterPoints)) return clusterPoints;
+    const span = Math.max(0, priceMax - priceMin);
+    const adaptive = span * LABEL_CLUSTER_RATIO;
+    return Math.max(
+      LABEL_CLUSTER_MIN,
+      Math.min(LABEL_CLUSTER_MAX, adaptive || LABEL_CLUSTER_DEFAULT)
+    );
+  }
+
+  function assignStaggeredLabelAlign(levels, zones, opts) {
+    for (const level of levels || []) {
+      level.labelLane = undefined;
+      level.displayLabel = undefined;
+      if (level.showLabel !== false) level.showLabel = true;
+    }
+    for (const zone of zones || []) {
+      zone.labelLane = undefined;
+      zone.displayLabel = undefined;
+      if (zone.showLabel !== false) zone.showLabel = true;
+    }
+
+    const items = [];
+    for (const level of levels || []) {
+      if (!level.label || level.showLabel === false) continue;
+      items.push({ kind: "level", ref: level, price: level.price });
+    }
+    for (const zone of zones || []) {
+      if (!zone.label || zone.showLabel === false) continue;
+      items.push({ kind: "zone", ref: zone, price: Math.max(zone.top, zone.bottom) });
+    }
+    if (!items.length) return;
+
+    items.sort((a, b) => b.price - a.price);
+    const prices = items.map((i) => i.price);
+    const pMin = opts?.priceMin ?? Math.min(...prices);
+    const pMax = opts?.priceMax ?? Math.max(...prices);
+    const plotH = opts?.plotHeightPx ?? 480;
+    const yOff = opts?.yOffsetPx ?? 0;
+    const threshold = labelClusterThreshold(pMin, pMax, opts?.clusterPoints);
+
+    let clusterStart = 0;
+    for (let i = 1; i <= items.length; i++) {
+      const chained =
+        i < items.length && items[i - 1].price - items[i].price <= threshold;
+      if (chained) continue;
+
+      const cluster = items.slice(clusterStart, i);
+      cluster.sort((a, b) => labelPriorityForDraw(b) - labelPriorityForDraw(a));
+      const placed = [];
+      const seenLabelAtPrice = new Set();
+
+      for (const item of cluster) {
+        const lineY = priceToLineY(item.price, pMin, pMax, plotH, yOff);
+        const lane = findLabelLane(lineY, placed);
+        item.ref.labelLane = lane;
+        item.ref.labelAlign = labelLaneToAlign(lane);
+        placed.push(labelBBox(lineY, labelLaneToAlign(lane), lane));
+
+        const priceKey = `${item.ref.label}:${item.price.toFixed(2)}`;
+        if (seenLabelAtPrice.has(priceKey)) {
+          item.ref.displayLabel = item.price.toFixed(1);
+        } else {
+          seenLabelAtPrice.add(priceKey);
+        }
+      }
+      clusterStart = i;
+    }
+  }
+
   async function drawOnChart(input, preferOverlay) {
     const { levels, zones, priceHint } = normalizeInput(input);
     activeLevels = levels || [];
@@ -421,6 +640,14 @@
 
     await injectPageBridge();
     activeVisibleRange = await refreshVisibleRange();
+
+    const priceMin = priceHint?.visibleMin;
+    const priceMax = priceHint?.visibleMax;
+    if (Number.isFinite(priceMin) && Number.isFinite(priceMax)) {
+      assignStaggeredLabelAlign(activeLevels, activeZones, { priceMin, priceMax });
+    } else {
+      assignStaggeredLabelAlign(activeLevels, activeZones);
+    }
 
     if (!preferOverlay && (activeLevels.length || activeZones.length)) {
       window.postMessage(
@@ -456,7 +683,7 @@
       ...overlayResult,
       mode: "overlay",
       hint: overlayResult.ok
-        ? `Overlay (${sourceNote}) — lines only, no duplicate labels.`
+        ? `Overlay (${sourceNote}) — lines + staggered labels.`
         : "Could not find chart — zoom in on candles, or use Pine indicator",
     };
   }

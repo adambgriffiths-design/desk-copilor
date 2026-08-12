@@ -16,6 +16,32 @@ export type PremiumDiscountZone = "unknown" | "premium" | "discount" | "equilibr
 export type SessionBucket = "unknown" | "london" | "ny" | "asia" | "off_hours";
 export type DataQualityFlag = "good" | "degraded" | "stale" | "missing";
 
+export type RehRelLevelStatus = "active" | "swept" | "unknown";
+export type RehRelConfirmationStatus = "confirmed" | "unknown";
+
+export type RehRelLevelObservation = {
+  id: string;
+  type: "reh" | "rel";
+  level: number;
+  range: { low: number; high: number };
+  sourceSwingPrices: number[];
+  sourceSwingTimestamps: number[];
+  timeframe: string;
+  currentPriceAtDetection: number;
+  distanceFromCurrentPrice: number;
+  confirmationStatus: RehRelConfirmationStatus;
+  status: RehRelLevelStatus;
+};
+
+export type RehRelObservationBlock = {
+  status: "known" | "unknown";
+  nearest_reh_above: RehRelLevelObservation | null;
+  nearest_rel_below: RehRelLevelObservation | null;
+  reh_levels: RehRelLevelObservation[];
+  rel_levels: RehRelLevelObservation[];
+  all_levels: RehRelLevelObservation[];
+};
+
 export type MarketObservation = {
   market_structure: ObservationStructure;
   liquidity: {
@@ -44,6 +70,7 @@ export type MarketObservation = {
   session: SessionBucket;
   time_context: string;
   data_quality: DataQualityFlag;
+  reh_rel: RehRelObservationBlock;
   evidence: Record<string, string>;
   state_hash: string;
 };
@@ -123,6 +150,27 @@ export function freezeObservation(obs: MarketObservation): ReadonlyMarketObserva
   Object.freeze(obs.fvg);
   Object.freeze(obs.premium_discount);
   Object.freeze(obs.htf_bias);
+  Object.freeze(obs.reh_rel);
+  for (const lvl of obs.reh_rel.reh_levels) {
+    Object.freeze(lvl);
+    Object.freeze(lvl.range);
+  }
+  for (const lvl of obs.reh_rel.rel_levels) {
+    Object.freeze(lvl);
+    Object.freeze(lvl.range);
+  }
+  for (const lvl of obs.reh_rel.all_levels) {
+    Object.freeze(lvl);
+    Object.freeze(lvl.range);
+  }
+  if (obs.reh_rel.nearest_reh_above) {
+    Object.freeze(obs.reh_rel.nearest_reh_above);
+    Object.freeze(obs.reh_rel.nearest_reh_above.range);
+  }
+  if (obs.reh_rel.nearest_rel_below) {
+    Object.freeze(obs.reh_rel.nearest_rel_below);
+    Object.freeze(obs.reh_rel.nearest_rel_below.range);
+  }
   return Object.freeze(obs) as ReadonlyMarketObservation;
 }
 

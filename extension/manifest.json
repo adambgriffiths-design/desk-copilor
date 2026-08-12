@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "The Trading Desk",
-  "version": "1.0.47",
+  "version": "1.4.60",
   "description": "No signals. Just the read. ICT desk on TradingView.",
   "permissions": ["activeTab", "tabs", "storage", "scripting"],
   "host_permissions": [
@@ -30,7 +30,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["tv-bridge.js"],
+      "resources": ["tv-bridge.js", "desk-tracker.css"],
       "matches": [
         "https://www.tradingview.com/*",
         "https://*.tradingview.com/*"
@@ -52,7 +52,7 @@
         "https://www.tradingview.com/*",
         "https://*.tradingview.com/*"
       ],
-      "js": ["chart-intent.js", "voice-realtime.js", "voice.js", "chart-draw.js", "content.js"],
+      "js": ["plain-language.js", "desk-persona.js", "session-context.js", "connection-state.js", "request-trace.js", "weather-local.js", "casual-chat.js", "pending-request.js", "transcription-guard.js", "chart-intent.js", "desk-route-intent.js", "voice-context-fix.js", "voice-interpret.js", "voice-emotion.js", "voice-quick-reply.js", "voice-spoken-sanitize.js", "voice-latency.js", "voice-realtime.js", "voice.js", "desk-memory.js", "level-toggles.js", "chart-draw.js", "chart-price.js", "chart-snapshot.js", "desk-verdict-ui.js", "desk-tracker.js", "content.js"],
       "css": ["panel.css"],
       "run_at": "document_idle"
     }

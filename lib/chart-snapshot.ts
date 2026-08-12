@@ -19,7 +19,32 @@ export type ChartDrawing = {
   source?: string;
 };
 
-export type ChartQuality = "good" | "degraded" | "stale" | "missing";
+export type ChartQuality = "good" | "degraded" | "stale" | "missing" | "partial";
+
+/** Instrumentation record for each TradingView exportData attempt. */
+export type ChartExportTraceRecord = {
+  requestId: string;
+  symbol?: string | null;
+  timeframe?: string | null;
+  exportStartTs: number;
+  exportCompleteTs: number;
+  durationMs: number;
+  widgetFound: boolean;
+  candleCount: number;
+  firstCandleTs?: number | null;
+  lastCandleTs?: number | null;
+  currentLivePrice?: number | null;
+  barAgeMs?: number | null;
+  quality: ChartQuality;
+  qualityRejectionReasons: string[];
+  attempt: number;
+  success: boolean;
+  bridgeReason?: string;
+  expectedSymbol?: string | null;
+  expectedTimeframe?: string | null;
+  symbolMatch?: boolean;
+  timeframeMatch?: boolean;
+};
 
 export type ChartQualityMeta = {
   quality: ChartQuality;
@@ -85,7 +110,178 @@ export const CHART_NO_CALL_MESSAGE =
 
 export const MIN_CANDLES_FOR_STRUCTURED = 20;
 const STALE_BAR_SEC = 120;
-const TIMESTAMP_DRIFT_WARN_SEC = 180;
+
+/** Fast path when bridge is warm; retries use short backoff (measure-first). */
+export const EXPORT_FAST_TIMEOUT_MS = 3500;
+export const EXPORT_RETRY_TIMEOUT_MS = 4500;
+export const EXPORT_MAX_ATTEMPTS = 3;
+export const EXPORT_RETRY_BACKOFF_MS = [400, 900];
+
+export function computeBarAgeMs(lastBarTsSec: number | null | undefined, nowMs = Date.now()): number | null {
+  if (lastBarTsSec == null || !Number.isFinite(lastBarTsSec)) return null;
+  return Math.max(0, nowMs - lastBarTsSec * 1000);
+}
+
+export function computeExportRetryDelayMs(attempt: number): number {
+  if (attempt <= 0) return 0;
+  return EXPORT_RETRY_BACKOFF_MS[Math.min(attempt - 1, EXPORT_RETRY_BACKOFF_MS.length - 1)] ?? 900;
+}
+
+export function shouldRetryExportAttempt(
+  snap: { reason?: string; ok?: boolean; sync?: { widgetFound?: boolean } } | null | undefined,
+  attempt: number,
+  maxAttempts = EXPORT_MAX_ATTEMPTS
+): boolean {
+  if (attempt >= maxAttempts) return false;
+  if (!snap) return true;
+  const reason = snap.reason || "";
+  if (reason === "widget_not_found" || reason === "export_not_ready" || reason === "timeout") return true;
+  if (snap.ok === true) return false;
+  if (reason === "insufficient_candles" && attempt < 2) return true;
+  return false;
+}
+
+export function exportTimeoutForAttempt(attempt: number): number {
+  return attempt <= 0 ? EXPORT_FAST_TIMEOUT_MS : EXPORT_RETRY_TIMEOUT_MS;
+}
+
+export function normalizeTfKey(tf?: string | null): string {
+  if (tf == null) return "";
+  const s = String(tf).trim().toLowerCase();
+  if (s === "1m") return "1";
+  if (s === "5m") return "5";
+  if (s === "15m") return "15";
+  if (s === "1h" || s === "60m") return "60";
+  return s;
+}
+
+export function symbolKeysMatch(a?: string | null, b?: string | null): boolean {
+  if (!a || !b) return true;
+  const norm = (s: string) =>
+    s
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9!]/g, "");
+  const na = norm(a);
+  const nb = norm(b);
+  if (!na || !nb) return true;
+  return na === nb || na.includes(nb) || nb.includes(na);
+}
+
+export function timeframeKeysMatch(a?: string | null, b?: string | null): boolean {
+  if (!a || !b) return true;
+  return normalizeTfKey(a) === normalizeTfKey(b);
+}
+
+/** Classify export quality from bridge snapshot + meta (client + server aligned). */
+export function classifyExportQuality(input: {
+  source?: string;
+  reason?: string;
+  candleCount: number;
+  reasons: string[];
+  exportPartial?: boolean;
+}): ChartQuality {
+  const reasons = [...new Set(input.reasons)];
+  const exportFailed =
+    input.source === "none" ||
+    input.reason === "widget_not_found" ||
+    input.reason === "export_not_ready" ||
+    input.reason === "timeout" ||
+    reasons.includes("export_failed");
+  if (exportFailed || input.candleCount < MIN_CANDLES_FOR_STRUCTURED || reasons.includes("insufficient_candles")) {
+    return "missing";
+  }
+  if (reasons.includes("stale_last_bar")) return "stale";
+  if (input.exportPartial || reasons.includes("export_partial_failure") || reasons.includes("missing_ohlc_fields")) {
+    return "partial";
+  }
+  if (reasons.length) return "degraded";
+  return "good";
+}
+
+export function buildExportTraceRecord(input: {
+  requestId: string;
+  attempt: number;
+  exportStartTs: number;
+  exportCompleteTs: number;
+  snap: {
+    ok?: boolean;
+    symbol?: string | null;
+    timeframe?: string | null;
+    reason?: string;
+    candles?: ChartCandle[];
+    quality?: ChartQuality;
+    qualityMeta?: ChartQualityMeta;
+    sync?: ChartSnapshotPayload["sync"] & { widgetFound?: boolean };
+  };
+  currentLivePrice?: number | null;
+  expectedSymbol?: string | null;
+  expectedTimeframe?: string | null;
+}): ChartExportTraceRecord {
+  const candles = input.snap.candles || [];
+  const firstCandleTs = candles.length ? candles[0].t : null;
+  const lastCandleTs = candles.length ? candles[candles.length - 1].t : input.snap.sync?.lastBarTime ?? null;
+  const meta = input.snap.qualityMeta;
+  const qualityRejectionReasons = meta?.reasons?.length
+    ? [...meta.reasons]
+    : input.snap.reason
+      ? [input.snap.reason]
+      : [];
+  const quality = input.snap.quality || classifyExportQuality({
+    source: candles.length ? "tv_export" : "none",
+    reason: input.snap.reason,
+    candleCount: candles.length,
+    reasons: qualityRejectionReasons,
+    exportPartial: input.snap.sync?.exportPartial,
+  });
+  const widgetFound = input.snap.sync?.widgetFound !== false && input.snap.reason !== "widget_not_found";
+  const barAgeMs = computeBarAgeMs(lastCandleTs, input.exportCompleteTs);
+  const symbolMatch = symbolKeysMatch(input.snap.symbol, input.expectedSymbol);
+  const timeframeMatch = timeframeKeysMatch(input.snap.timeframe, input.expectedTimeframe);
+  if (!symbolMatch) qualityRejectionReasons.push("symbol_mismatch");
+  if (!timeframeMatch) qualityRejectionReasons.push("timeframe_mismatch");
+
+  return {
+    requestId: input.requestId,
+    symbol: input.snap.symbol ?? null,
+    timeframe: input.snap.timeframe ?? null,
+    exportStartTs: input.exportStartTs,
+    exportCompleteTs: input.exportCompleteTs,
+    durationMs: Math.max(0, input.exportCompleteTs - input.exportStartTs),
+    widgetFound,
+    candleCount: candles.length,
+    firstCandleTs,
+    lastCandleTs,
+    currentLivePrice: input.currentLivePrice ?? null,
+    barAgeMs,
+    quality,
+    qualityRejectionReasons: [...new Set(qualityRejectionReasons)],
+    attempt: input.attempt,
+    success: input.snap.ok === true,
+    bridgeReason: input.snap.reason,
+    expectedSymbol: input.expectedSymbol ?? null,
+    expectedTimeframe: input.expectedTimeframe ?? null,
+    symbolMatch,
+    timeframeMatch,
+  };
+}
+
+export function formatExportTraceForDiagnostics(trace: ChartExportTraceRecord | null | undefined): string {
+  if (!trace) return "No chart export recorded yet.";
+  const lines = [
+    `request: ${trace.requestId} · attempt ${trace.attempt}`,
+    `symbol/tf: ${trace.symbol || "—"} / ${trace.timeframe || "—"}${trace.expectedSymbol ? ` (expected ${trace.expectedSymbol}/${trace.expectedTimeframe || "—"})` : ""}`,
+    `duration: ${trace.durationMs}ms · widget: ${trace.widgetFound ? "yes" : "no"}`,
+    `candles: ${trace.candleCount}${trace.lastCandleTs != null ? ` · barAge ${trace.barAgeMs != null ? `${Math.round(trace.barAgeMs / 1000)}s` : "—"}` : ""}`,
+    `quality: ${trace.quality} · success: ${trace.success ? "yes" : "no"}`,
+  ];
+  if (trace.qualityRejectionReasons.length) {
+    lines.push(`reasons: ${trace.qualityRejectionReasons.join(", ")}`);
+  }
+  if (trace.bridgeReason) lines.push(`bridge: ${trace.bridgeReason}`);
+  if (trace.currentLivePrice != null) lines.push(`livePx: ${trace.currentLivePrice}`);
+  return lines.join("\n");
+}
 
 export function isMnqChartPrice(n: number): boolean {
   return Number.isFinite(n) && n >= 20000 && n <= 45000;
@@ -267,10 +463,14 @@ export function scoreChartQuality(
   } else if (reasons.includes("stale_last_bar")) {
     quality = "stale";
   } else if (
+    exportPartial ||
+    reasons.includes("export_partial_failure") ||
+    reasons.includes("missing_ohlc_fields")
+  ) {
+    quality = "partial";
+  } else if (
     reasons.includes("timestamp_drift") ||
     reasons.includes("candles_miss_visible_start") ||
-    reasons.includes("export_partial_failure") ||
-    reasons.includes("missing_ohlc_fields") ||
     reasons.includes("drawing_export_failed")
   ) {
     quality = "degraded";
@@ -292,7 +492,7 @@ export function scoreChartQuality(
 
 export function isChartQualityUsable(meta: ChartQualityMeta | undefined): boolean {
   if (!meta) return false;
-  return meta.quality === "good" || meta.quality === "degraded";
+  return meta.quality === "good" || meta.quality === "degraded" || meta.quality === "partial";
 }
 
 export function parseChartSnapshotInput(value: unknown): ChartSnapshotPayload | null {
@@ -445,6 +645,21 @@ export function formatChartSnapshotForPrompt(snap: ChartSnapshotPayload): string
     "Step-by-step: (1) recent price action from candles ONLY (2) structure/displacement (3) nearest levels from JSON + drawings (4) bias (5) call with confidence. Cite ONLY prices present in candles, drawings, or JSON — never invent levels."
   );
   return lines.join("\n");
+}
+
+export function buildChartExportUnavailableMessage(
+  reasons: string[] = [],
+  base = CHART_NO_CALL_MESSAGE
+): string {
+  const actionable = reasons.filter(
+    (r) =>
+      r &&
+      r !== "export_failed" &&
+      !/^insufficient/.test(r)
+  );
+  const snippet = actionable.slice(0, 2).join(", ");
+  if (!snippet) return base;
+  return `${base} (${snippet})`;
 }
 
 export function buildNoCallVerdictResult(input: {
