@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.41";
+  const DC_VERSION = "1.0.42";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.41</span>
+          <span class="dc-ver">v1.0.42</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
@@ -155,6 +155,7 @@
   let currentId = null;
   let lastVerdict = "";
   let lastSpokenBrief = "";
+  let lastVoiceTranscript = "";
   let voiceReady = false;
   let verdictBusy = false;
   let chatBusy = false;
@@ -821,7 +822,23 @@
     updateVoiceToggle(on, window.DeskCopilotVoice.isRecording?.());
   };
 
-  function clearVerdictTimer() {
+  function chartReadQuestion(argsQuestion) {
+    const fromTool = (argsQuestion || "").trim();
+    const generic =
+      !fromTool ||
+      /^(chart read|what do you see on the chart|read the chart|get the read)$/i.test(
+        fromTool
+      );
+    if (!generic) return fromTool;
+    return lastVoiceTranscript.trim() || "what do you see on the chart";
+  }
+
+  function formatRealtimeVoiceOutput(spokenBrief) {
+    return [
+      "ENGLISH ONLY. Read the following script verbatim — same words and numbers, no paraphrasing, no extra sentences:",
+      spokenBrief,
+    ].join("\n\n");
+  }
     if (verdictTimer) {
       clearTimeout(verdictTimer);
       verdictTimer = null;
@@ -1087,6 +1104,7 @@
         updateAgentStatus();
       },
       onTranscript: (text) => {
+        if (text?.trim()) lastVoiceTranscript = text.trim();
         recordUserTranscript(text);
       },
       onToolCall: async (name, args) => {
@@ -1095,14 +1113,13 @@
           return "Levels marked on the chart.";
         }
         if (name === "get_chart_read") {
-          const data = await runChartRead(args?.question || "what do you see on the chart", {
-            voice: true,
-          });
-          return (
+          const question = chartReadQuestion(args?.question);
+          const data = await runChartRead(question, { voice: true });
+          const script =
             data?.spokenBrief ||
             displayText(data?.verdict || "") ||
-            "Chart read complete."
-          );
+            "Chart read complete.";
+          return formatRealtimeVoiceOutput(script);
         }
         return "Done.";
       },

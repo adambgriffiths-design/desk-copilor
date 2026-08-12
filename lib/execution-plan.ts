@@ -229,8 +229,26 @@ function buildWaitFor(
   };
 }
 
-/** Pre-computed entry / target scaffold from live JSON — LLM must cite these prices or refine with chart. */
-export function formatExecutionPlan(ctx: MarketContext): string {
+export type ExecutionScaffold = {
+  lastPrice: number;
+  call: string;
+  bias: string;
+  entryLo: number;
+  entryHi: number;
+  entryLabel: string;
+  entryZone: string;
+  entryStatus: string;
+  entryStatusFull: string;
+  target1Price: number;
+  target1Label: string;
+  target1: string;
+  target2: string;
+  waitFor: string;
+  structureNote: string;
+};
+
+/** Live JSON prices for voice TTS — never read prices from the chart image. */
+export function getExecutionScaffold(ctx: MarketContext): ExecutionScaffold | null {
   const price = roundMnq(ctx.daily.lastClose);
   const dir = tradeDirection(ctx);
   const { support, resistance } = nearestPdLevels(price, ctx.htfPdArrays.levels);
@@ -238,6 +256,80 @@ export function formatExecutionPlan(ctx: MarketContext): string {
   const org = ctx.org;
   const fvgs = ctx.structureFacts.m1UnfilledFvgs;
   const pdLevels = [...ctx.htfPdArrays.levels].sort((a, b) => a.price - b.price);
+
+  if (!dir) return null;
+
+  const isLong = dir === "long";
+  const entryFvg = pickEntryFvg(fvgs, isLong ? "bullish" : "bearish", price, mss);
+  const entry = buildEntryPlan(ctx, price, isLong, entryFvg, support, resistance, mss);
+  const entryZone = `${entry.lo.toFixed(2)}–${entry.hi.toFixed(2)}`;
+  const entryLabel = entry.label;
+  const { status: entryStatusRaw, waitFor } = buildWaitFor(
+    entry,
+    `${entryZone} (${entryLabel})`,
+    isLong,
+    mss
+  );
+  const entryStatus = entryStatusRaw.startsWith("ACTIVE")
+    ? "ACTIVE"
+    : entryStatusRaw.startsWith("EXTENDED")
+      ? "EXTENDED"
+      : "WAIT";
+
+  const above = pdLevels.filter((l) => l.price > price + 0.01);
+  const below = pdLevels.filter((l) => l.price < price - 0.01).reverse();
+
+  let target1Price: number;
+  let target1Label: string;
+  let target2: string;
+  if (isLong) {
+    const t1 = above[0] ?? resistance;
+    const t2 = above[1] ?? (org ? { label: "opening range gap top", price: org.top } : null);
+    target1Price = t1 ? roundMnq(t1.price) : price;
+    target1Label = t1?.label || "next resistance";
+    target2 = t2
+      ? `${roundMnq(t2.price).toFixed(2)} (${t2.label})`
+      : `${ctx.htfPdArrays.previousDay.high.toFixed(2)} (previous day high)`;
+  } else {
+    const t1 = below[0] ?? support;
+    const t2 = below[1] ?? (org ? { label: "opening range gap bottom", price: org.bottom } : null);
+    target1Price = t1 ? roundMnq(t1.price) : price;
+    target1Label = t1?.label || "next support";
+    target2 = t2
+      ? `${roundMnq(t2.price).toFixed(2)} (${t2.label})`
+      : `${ctx.htfPdArrays.previousDay.low.toFixed(2)} (previous day low)`;
+  }
+
+  const target1 = `${target1Price.toFixed(2)} (${target1Label})`;
+  const structureNote = mss
+    ? `Active market structure shift: ${mss.description}`
+    : "No recent one-minute market structure shift in lookback";
+
+  return {
+    lastPrice: price,
+    call: isLong ? "potential buy" : "potential sell",
+    bias: ctx.biasStack.tradeableBias,
+    entryLo: entry.lo,
+    entryHi: entry.hi,
+    entryLabel,
+    entryZone,
+    entryStatus,
+    entryStatusFull: entryStatusRaw,
+    target1Price,
+    target1Label,
+    target1,
+    target2,
+    waitFor,
+    structureNote,
+  };
+}
+
+/** Pre-computed entry / target scaffold from live JSON — LLM must cite these prices or refine with chart. */
+export function formatExecutionPlan(ctx: MarketContext): string {
+  const scaffold = getExecutionScaffold(ctx);
+  const price = roundMnq(ctx.daily.lastClose);
+  const mss = ctx.structureFacts.mss;
+  const dir = tradeDirection(ctx);
 
   const header = [
     "### Execution scaffold (MNQ prices from live JSON — **must appear in your brief**)",
@@ -247,7 +339,7 @@ export function formatExecutionPlan(ctx: MarketContext): string {
     "**ICT entry rule:** For potential buy, never wait for a deep lower bullish fair value gap if that retrace would require bearish market structure shift first. **When two or more fair value gaps form, entry is retrace to the most recent gap only** — the older lower bullish (or higher bearish) gap may never fill. Mirror for sells. Shallow pullback to displacement fair value gap / MSS level, or EXTENDED — wait for new displacement.",
   ];
 
-  if (!dir) {
+  if (!dir || !scaffold) {
     return [
       ...header,
       "Tradeable bias neutral — if Call is still directional, give Wait for: exact shallow retrace aligned with active MSS; targets at named PD levels with prices.",
@@ -255,36 +347,13 @@ export function formatExecutionPlan(ctx: MarketContext): string {
   }
 
   const isLong = dir === "long";
-  const entryFvg = pickEntryFvg(fvgs, isLong ? "bullish" : "bearish", price, mss);
-  const entry = buildEntryPlan(ctx, price, isLong, entryFvg, support, resistance, mss);
-
-  const entryZone = `${entry.lo.toFixed(2)}–${entry.hi.toFixed(2)} (${entry.label})`;
-  const { status: entryStatus, waitFor } = buildWaitFor(entry, entryZone, isLong, mss);
-
-  const above = pdLevels.filter((l) => l.price > price + 0.01);
-  const below = pdLevels.filter((l) => l.price < price - 0.01).reverse();
-
-  let target1: string;
-  let target2: string;
-  if (isLong) {
-    const t1 = above[0] ?? resistance;
-    const t2 = above[1] ?? (org ? { label: "opening range gap top", price: org.top } : null);
-    target1 = t1
-      ? `${roundMnq(t1.price).toFixed(2)} (${t1.label})`
-      : "Next PD resistance — cite price from JSON";
-    target2 = t2
-      ? `${roundMnq(t2.price).toFixed(2)} (${t2.label})`
-      : `${ctx.htfPdArrays.previousDay.high.toFixed(2)} (previous day high)`;
-  } else {
-    const t1 = below[0] ?? support;
-    const t2 = below[1] ?? (org ? { label: "opening range gap bottom", price: org.bottom } : null);
-    target1 = t1
-      ? `${roundMnq(t1.price).toFixed(2)} (${t1.label})`
-      : "Next PD support — cite price from JSON";
-    target2 = t2
-      ? `${roundMnq(t2.price).toFixed(2)} (${t2.label})`
-      : `${ctx.htfPdArrays.previousDay.low.toFixed(2)} (previous day low)`;
-  }
+  const { support, resistance } = nearestPdLevels(price, ctx.htfPdArrays.levels);
+  const entryZone = `${scaffold.entryZone} (${scaffold.entryLabel})`;
+  const entryStatus = scaffold.entryStatusFull;
+  const waitFor = scaffold.waitFor;
+  const target1 = scaffold.target1;
+  const target2 = scaffold.target2;
+  const structureNote = scaffold.structureNote;
 
   const exitPlan = isLong
     ? `Scale 50% at Target 1; runner to Target 2 or exit on bearish one-minute market structure shift below ${mss?.direction === "bullish" ? roundMnq(mss.level).toFixed(2) : "structure level"}.`
@@ -301,10 +370,6 @@ export function formatExecutionPlan(ctx: MarketContext): string {
       : resistance
         ? `Thesis void above ${resistance.price.toFixed(2)} (${resistance.label}) — not a stop recommendation`
         : "Bearish structure break — not a stop recommendation";
-
-  const structureNote = mss
-    ? `Active MSS: ${mss.description}`
-    : "No recent one-minute MSS in lookback";
 
   return [
     ...header,

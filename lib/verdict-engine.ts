@@ -7,6 +7,7 @@ import { formatTrainingExamplesForPrompt } from "@/lib/training-examples";
 import { readLearnedRules, formatLearnedRulesForPrompt } from "@/lib/learned-rules-store";
 import { appendSessionLog, type SessionLogEntry } from "@/lib/session-store";
 import { liveVerdictUserTail, parseVerdictSections } from "@/lib/verdict-format";
+import { buildVoiceSpokenBrief } from "@/lib/voice-spoken-brief";
 
 export type VerdictResult = {
   id: string;
@@ -87,6 +88,15 @@ export async function generateLiveVerdict(input: {
   const parsed = input.voiceInput
     ? parseVerdictSections(raw)
     : { verdict: raw.trim(), spokenBrief: "" };
+
+  if (input.voiceInput && marketContext) {
+    const canonical = buildVoiceSpokenBrief(
+      marketContext,
+      parsed.verdict,
+      input.question
+    );
+    if (canonical) parsed.spokenBrief = canonical;
+  }
 
   const id = crypto.randomUUID();
   const entry: SessionLogEntry = {

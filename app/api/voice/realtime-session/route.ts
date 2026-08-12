@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
     const instructions = [
       VOICE_REALTIME_INSTRUCTIONS,
       `Chart symbol: ${symbol}`,
+      "Respond in English only.",
     ].join("\n\n");
 
     const res = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
@@ -67,8 +68,8 @@ export async function POST(request: NextRequest) {
                 type: "server_vad",
                 create_response: true,
                 interrupt_response: true,
-                silence_duration_ms: 600,
-                threshold: 0.55,
+                silence_duration_ms: 750,
+                threshold: 0.62,
                 prefix_padding_ms: 300,
               },
             },
