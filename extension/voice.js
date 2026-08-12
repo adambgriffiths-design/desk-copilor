@@ -1176,10 +1176,11 @@
       if (rtOk) {
         engineMode = "realtime";
         setListening(true);
-        onStatus?.("Agent live — talk anytime", true);
+        onStatus?.("● Voice live — talk anytime", true);
         return true;
       }
       window.DeskCopilotRealtime?.stop?.();
+      onStatus?.("Realtime unavailable — using voice fallback", null);
     }
 
     return startCascadeVoice();

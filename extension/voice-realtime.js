@@ -1,10 +1,11 @@
 /**
- * OpenAI Realtime voice — hands-free speech-to-speech with server VAD + barge-in.
+ * OpenAI Realtime voice — hands-free speech-to-speech (GA API).
  */
 (function () {
   const TARGET_RATE = 24000;
   const RECONNECT_MS = 2500;
   const MAX_RECONNECTS = 8;
+  const CONNECT_TIMEOUT_MS = 20000;
 
   let ws = null;
   let active = false;
@@ -14,6 +15,7 @@
   let sessionModel = "";
   let sessionKey = "";
   let sessionExpires = 0;
+  let handledCallIds = new Set();
 
   let micStream = null;
   let captureCtx = null;
@@ -107,8 +109,9 @@
     if (res?.error) throw new Error(res.error);
     if (!res?.client_secret) throw new Error("No realtime session");
     sessionKey = res.client_secret;
-    sessionModel = res.model || "gpt-4o-realtime-preview-2024-12-17";
-    sessionExpires = res.expires_at ? res.expires_at * 1000 : Date.now() + 55000;
+    sessionModel = res.model || "gpt-realtime";
+    sessionExpires = res.expires_at ? res.expires_at * 1000 : Date.now() + 550000;
+    handledCallIds = new Set();
     return res;
   }
 
@@ -215,6 +218,9 @@
   }
 
   async function handleFunctionCall(name, callId, argsJson) {
+    if (!callId || handledCallIds.has(callId)) return;
+    handledCallIds.add(callId);
+
     let output = "Done.";
     try {
       const args = argsJson ? JSON.parse(argsJson) : {};
@@ -246,7 +252,7 @@
   function scheduleReconnect() {
     if (!wantActive || reconnectTimer) return;
     if (reconnects >= MAX_RECONNECTS) {
-      onStatus?.("Voice reconnect failed — using fallback", false);
+      onStatus?.("Realtime failed — using voice fallback", false);
       wantActive = false;
       stop();
       window.DeskCopilotVoice?.startCascadeVoice?.();
@@ -260,6 +266,60 @@
     }, RECONNECT_MS);
   }
 
+  function handleServerMessage(msg) {
+    const type = msg.type || "";
+
+    if (type === "input_audio_buffer.speech_started") {
+      stopPlayback();
+      sendEvent({ type: "output_audio_buffer.clear" });
+      onInterim?.("…");
+      onStatus?.("Hearing you…", true);
+    }
+
+    if (
+      type === "conversation.item.input_audio_transcription.completed" ||
+      type === "conversation.item.input_audio_transcription.done"
+    ) {
+      const text = (msg.transcript || msg.item?.content?.[0]?.transcript || "").trim();
+      if (text) {
+        onInterim?.("");
+        onTranscript?.(text);
+      }
+    }
+
+    const audioDelta = msg.delta || msg.audio;
+    if (
+      (type === "response.output_audio.delta" ||
+        type === "response.audio.delta") &&
+      audioDelta
+    ) {
+      void playPcmDelta(audioDelta);
+    }
+
+    if (type === "response.output_audio.done" || type === "response.audio.done") {
+      setTimeout(() => {
+        if (playCtx && playCtx.currentTime >= playTime - 0.05) setSpeaking(false);
+      }, 120);
+    }
+
+    if (type === "response.done" && Array.isArray(msg.response?.output)) {
+      for (const item of msg.response.output) {
+        if (item.type === "function_call" && item.call_id) {
+          void handleFunctionCall(item.name, item.call_id, item.arguments || "{}");
+        }
+      }
+    }
+
+    if (type === "response.function_call_arguments.done") {
+      void handleFunctionCall(msg.name, msg.call_id, msg.arguments || "{}");
+    }
+
+    if (type === "error") {
+      const errMsg = msg.error?.message || "Realtime error";
+      onStatus?.(errMsg, false);
+    }
+  }
+
   async function connect(isReconnect = false) {
     if (active && ws?.readyState === WebSocket.OPEN) return true;
 
@@ -268,24 +328,32 @@
         await fetchSession(window.__dcSymbol?.() || "MNQ1!");
       }
 
-      onStatus?.(isReconnect ? "Reconnecting voice…" : "Starting voice…", null);
+      onStatus?.(isReconnect ? "Reconnecting voice…" : "Connecting realtime voice…", null);
 
       await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          reject(new Error("Realtime connection timed out"));
+        }, CONNECT_TIMEOUT_MS);
+
         ws = new WebSocket(
           `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(sessionModel)}`,
-          ["realtime", `openai-insecure-api-key.${sessionKey}`, "openai-beta.realtime-v1"]
+          ["realtime", `openai-insecure-api-key.${sessionKey}`]
         );
 
         ws.onopen = () => {
+          clearTimeout(timer);
           active = true;
           reconnects = 0;
           setListening(true);
           scheduleSessionRefresh();
-          onStatus?.("Agent live — talk anytime", true);
+          onStatus?.("● Voice live — talk anytime", true);
           resolve(true);
         };
 
-        ws.onerror = () => reject(new Error("Realtime connection failed"));
+        ws.onerror = () => {
+          clearTimeout(timer);
+          reject(new Error("Realtime connection failed"));
+        };
 
         ws.onclose = () => {
           const wasActive = active;
@@ -295,46 +363,10 @@
         };
 
         ws.onmessage = (ev) => {
-          let msg;
           try {
-            msg = JSON.parse(ev.data);
+            handleServerMessage(JSON.parse(ev.data));
           } catch {
-            return;
-          }
-
-          const type = msg.type || "";
-
-          if (type === "input_audio_buffer.speech_started") {
-            stopPlayback();
-            onInterim?.("…");
-            onStatus?.("Hearing you…", true);
-          }
-
-          if (type === "conversation.item.input_audio_transcription.completed") {
-            const text = (msg.transcript || "").trim();
-            if (text) {
-              onInterim?.("");
-              onTranscript?.(text);
-            }
-          }
-
-          if (type === "response.audio.delta" && msg.delta) {
-            void playPcmDelta(msg.delta);
-          }
-
-          if (type === "response.audio.done" || type === "response.done") {
-            setTimeout(() => {
-              if (playCtx && playCtx.currentTime >= playTime - 0.05) setSpeaking(false);
-            }, 120);
-          }
-
-          if (type === "response.function_call_arguments.done") {
-            void handleFunctionCall(msg.name, msg.call_id, msg.arguments || "{}");
-          }
-
-          if (type === "error") {
-            const errMsg = msg.error?.message || "Realtime error";
-            onStatus?.(errMsg, false);
+            /* ignore */
           }
         };
       });
@@ -343,7 +375,6 @@
       return true;
     } catch (e) {
       active = false;
-      wantActive = false;
       const msg = e instanceof Error ? e.message : String(e);
       onStatus?.(msg, false);
       cleanupSocket();
@@ -369,6 +400,10 @@
       clearTimeout(reconnectTimer);
       reconnectTimer = null;
     }
+    if (refreshTimer) {
+      clearTimeout(refreshTimer);
+      refreshTimer = null;
+    }
     stopPlayback();
     cleanupSocket();
     releaseMic();
@@ -389,7 +424,7 @@
   function scheduleSessionRefresh() {
     if (refreshTimer) clearTimeout(refreshTimer);
     if (!wantActive || !sessionExpires) return;
-    const ms = Math.max(15000, sessionExpires - Date.now() - 45000);
+    const ms = Math.max(15000, sessionExpires - Date.now() - 120000);
     refreshTimer = setTimeout(() => {
       refreshTimer = null;
       if (!wantActive) return;
