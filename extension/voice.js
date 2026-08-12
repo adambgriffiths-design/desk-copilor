@@ -123,6 +123,10 @@
   let onCascadeFallback = null;
 
   const UTTERANCE_WATCHDOG_MS = 30000;
+  const CASCADE_STATUS =
+    "Lower quality responses whilst in fallback — speak, then pause";
+  const CASCADE_FALLBACK_INTRO =
+    "Realtime unavailable — lower quality responses whilst in fallback";
 
   function supported() {
     return Boolean(
@@ -966,7 +970,7 @@
         setSpeaking(false);
         resumeNativeStt();
         await onNeedsChartRead?.(result.question || transcript);
-        if (listening) onStatus?.("Voice live — talk anytime", true);
+        if (listening) onStatus?.(CASCADE_STATUS, null);
         return;
       }
 
@@ -982,7 +986,7 @@
       if (gen === speakGeneration) {
         setSpeaking(false);
         resumeNativeStt();
-        if (listening) onStatus?.("Voice live — talk anytime", true);
+        if (listening) onStatus?.(CASCADE_STATUS, null);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -995,7 +999,7 @@
       clearTimeout(watchdog);
       setSpeaking(false);
       resumeNativeStt();
-      if (listening) onStatus?.("Voice live — talk anytime", true);
+      if (listening) onStatus?.(CASCADE_STATUS, null);
     }
   }
 
@@ -1128,7 +1132,7 @@
       speakDone = null;
       onDone?.();
       resumeNativeStt();
-      if (listening) onStatus?.("Voice live — talk anytime", true);
+      if (listening) onStatus?.(CASCADE_STATUS, null);
     });
   }
 
@@ -1136,7 +1140,7 @@
     window.DeskCopilotRealtime?.suspend?.();
     engineMode = "cascade";
     const ok = await startListening();
-    if (ok) onStatus?.("Voice live — talk anytime", true);
+    if (ok) onStatus?.(CASCADE_STATUS, null);
     return ok;
   }
 
@@ -1180,7 +1184,7 @@
         return true;
       }
       window.DeskCopilotRealtime?.stop?.();
-      onStatus?.("Realtime unavailable — using voice fallback", null);
+      onStatus?.("Realtime unavailable — lower quality responses whilst in fallback", null);
     }
 
     return startCascadeVoice();
@@ -1215,9 +1219,9 @@
     stopNativeStt();
     sttMode = "whisper";
     nativeSttErrors = 0;
-    onStatus?.(reason || "Using Whisper fallback…", null);
+    onStatus?.(reason || CASCADE_FALLBACK_INTRO, null);
     await startVad();
-    if (listening) onStatus?.("Listening… speak, then pause", true);
+    if (listening) onStatus?.(CASCADE_STATUS, null);
   }
 
   async function startListening() {
@@ -1241,7 +1245,7 @@
     // Whisper + noise-gated VAD — reliable with TV/chart background noise.
     sttMode = "whisper";
     await startVad();
-    onStatus?.("Voice live — speak, then pause", true);
+    onStatus?.(CASCADE_STATUS, null);
     return true;
   }
 

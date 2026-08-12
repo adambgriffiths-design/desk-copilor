@@ -252,7 +252,7 @@
   function scheduleReconnect() {
     if (!wantActive || reconnectTimer) return;
     if (reconnects >= MAX_RECONNECTS) {
-      onStatus?.("Realtime failed — using voice fallback", false);
+      onStatus?.("Realtime failed — lower quality responses whilst in fallback", false);
       wantActive = false;
       stop();
       window.DeskCopilotVoice?.startCascadeVoice?.();

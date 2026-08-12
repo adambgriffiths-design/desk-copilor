@@ -374,6 +374,23 @@
   color: #aaa;
 }
 
+.dc-voice-mode {
+  font-size: 10px;
+  color: #666;
+  margin: 2px 0 6px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+
+.dc-voice-mode.active {
+  color: #b8952e;
+}
+
+.dc-voice-fallback.dc-voice-on {
+  border-color: #886622 !important;
+  color: #b8952e !important;
+}
+
 .dc-voice-hint {
   font-size: 9px;
   color: #444;

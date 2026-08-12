@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.35";
+  const DC_VERSION = "1.0.39";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.35</span>
+          <span class="dc-ver">v1.0.39</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
@@ -46,6 +46,7 @@
       <button type="button" class="dc-btn dc-voice-test" id="dc-voice-test" title="Mic check">CHECK MIC</button>
     </div>
     <button type="button" class="dc-btn dc-stop-speak hidden" id="dc-stop-speak">KILL AUDIO</button>
+    <div class="dc-voice-mode hidden" id="dc-voice-mode" aria-live="polite"></div>
     <div class="dc-voice-live" id="dc-voice-live" aria-live="polite"></div>
     <label class="dc-voice-auto"><input type="checkbox" id="dc-auto-voice" checked /> Autonomous agent (hands-free)</label>
     <label class="dc-voice-auto"><input type="checkbox" id="dc-auto-read" checked /> Speak the brief</label>
@@ -361,8 +362,15 @@
     const agentOn = isAutoVoiceEnabled();
 
     if (backendOnline && voiceOn && agentOn) {
-      btn.textContent = "● AGENT LIVE";
-      btn.title = "Autonomous agent running — backend + voice connected";
+      const mode = window.DeskCopilotVoice?.getEngineMode?.() || "off";
+      if (mode === "cascade") {
+        btn.textContent = "● AGENT (FALLBACK)";
+        btn.title =
+          "Whisper fallback — lower quality responses whilst Realtime is unavailable";
+      } else {
+        btn.textContent = "● AGENT LIVE";
+        btn.title = "Autonomous agent running — backend + voice connected";
+      }
     } else if (backendOnline) {
       btn.textContent = "● LIVE";
       btn.title = agentOn
@@ -758,23 +766,50 @@
     }, 20000);
   }
 
+  function updateVoiceModeBanner() {
+    const el = document.getElementById("dc-voice-mode");
+    if (!el) return;
+    const mode = window.DeskCopilotVoice?.getEngineMode?.() || "off";
+    const listening = window.DeskCopilotVoice?.isListening?.();
+    if (mode === "cascade" && listening) {
+      el.textContent =
+        "Lower quality responses whilst in fallback — speak, then pause";
+      el.classList.add("active");
+      el.classList.remove("hidden");
+    } else if (mode === "realtime" && listening) {
+      el.textContent = "Full-quality Realtime voice — talk anytime";
+      el.classList.add("active");
+      el.classList.remove("hidden");
+    } else {
+      el.textContent = "";
+      el.classList.remove("active");
+      el.classList.add("hidden");
+    }
+  }
+
   function updateVoiceToggle(listening, recording) {
     const btn = document.getElementById("dc-voice-toggle");
     if (!btn) return;
     const mode = window.DeskCopilotVoice?.getEngineMode?.() || "off";
     btn.classList.toggle("dc-voice-on", listening);
     btn.classList.toggle("dc-voice-rec", Boolean(recording));
+    btn.classList.toggle("dc-voice-fallback", mode === "cascade" && listening);
     if (mode === "realtime") {
       btn.textContent = listening ? "● VOICE LIVE" : "VOICE OFF";
       btn.title = listening
-        ? "Realtime voice — click to stop"
+        ? "Full-quality Realtime — talk anytime, click to stop"
         : "Click to start hands-free voice";
+    } else if (mode === "cascade" && listening) {
+      btn.textContent = recording ? "● FALLBACK · REC" : "● FALLBACK";
+      btn.title =
+        "Whisper fallback — lower quality responses whilst Realtime is unavailable. Speak, then pause.";
     } else {
       btn.textContent = recording ? "● LIVE" : listening ? "VOICE ON" : "VOICE OFF";
       btn.title = listening
-        ? "Voice live — click to stop"
+        ? "Voice on — click to stop"
         : "Click to start hands-free voice";
     }
+    updateVoiceModeBanner();
   }
 
   document.getElementById("dc-voice-toggle").onclick = async () => {
@@ -1049,6 +1084,7 @@
       },
       onListeningChange: (active) => {
         updateVoiceToggle(active, window.DeskCopilotVoice?.isRecording?.());
+        updateAgentStatus();
       },
       onTranscript: (text) => {
         recordUserTranscript(text);
@@ -1084,6 +1120,7 @@
       },
       onListeningChange: (active) => {
         updateVoiceToggle(active, window.DeskCopilotVoice?.isRecording?.());
+        updateAgentStatus();
       },
       onRecordingChange: (active) => {
         updateVoiceToggle(window.DeskCopilotVoice?.isListening?.(), active);
