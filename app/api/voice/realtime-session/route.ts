@@ -4,6 +4,7 @@ import {
   VOICE_REALTIME_INSTRUCTIONS,
   VOICE_REALTIME_TOOLS,
 } from "@/lib/voice-instructions";
+import { realtimeVoiceForPreference } from "@/lib/voice-options";
 
 export const runtime = "nodejs";
 
@@ -38,6 +39,9 @@ export async function POST(request: NextRequest) {
       typeof body.symbol === "string" && body.symbol.trim()
         ? body.symbol.trim()
         : "MNQ1!";
+    const voice = realtimeVoiceForPreference(
+      typeof body.voice === "string" ? body.voice.trim() : undefined
+    );
 
     const instructions = [
       VOICE_REALTIME_INSTRUCTIONS,
@@ -47,7 +51,7 @@ export async function POST(request: NextRequest) {
     const openai = new OpenAI({ apiKey });
     const session = await openai.beta.realtime.sessions.create({
       model: REALTIME_MODEL,
-      voice: "marin",
+      voice,
       instructions,
       tools: VOICE_REALTIME_TOOLS,
       turn_detection: { type: "server_vad" },
@@ -59,6 +63,7 @@ export async function POST(request: NextRequest) {
         model: REALTIME_MODEL,
         client_secret: session.client_secret.value,
         expires_at: session.client_secret.expires_at,
+        voice,
       },
       { headers: cors }
     );

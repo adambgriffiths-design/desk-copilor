@@ -6,10 +6,12 @@ import { readAllFeedback, getTrainingExamples } from "@/lib/feedback-store";
 import { formatTrainingExamplesForPrompt } from "@/lib/training-examples";
 import { readLearnedRules, formatLearnedRulesForPrompt } from "@/lib/learned-rules-store";
 import { appendSessionLog, type SessionLogEntry } from "@/lib/session-store";
+import { liveVerdictUserTail, parseVerdictSections } from "@/lib/verdict-format";
 
 export type VerdictResult = {
   id: string;
   verdict: string;
+  spokenBrief?: string;
   marketContext: ReturnType<typeof buildMarketContext> | null;
   marketDataWarning: string | null;
   learnedRulesVersion: number;
@@ -21,6 +23,7 @@ export async function generateLiveVerdict(input: {
   symbol?: string;
   chartTime?: string;
   question?: string;
+  voiceInput?: boolean;
 }): Promise<VerdictResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not set");
@@ -57,7 +60,7 @@ export async function generateLiveVerdict(input: {
     input.chartTime && `Chart time (EST): ${input.chartTime}`,
     input.question &&
       `Trader asked: "${input.question}" — answer that directly in line 1 of your desk brief.`,
-    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. **Include Entry zone, Entry status (ACTIVE/WAIT/EXTENDED), Wait for, Target 1, Target 2, Exit plan** from Execution scaffold. **Do NOT recommend stops.** **Multiple FVGs: retrace to most recent gap only** — older lower bullish / higher bearish gaps may not fill. No deep retrace through opposite MSS. Respond with a dense labeled desk brief in full words (no abbreviations).",
+    liveVerdictUserTail(input.voiceInput),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -65,7 +68,7 @@ export async function generateLiveVerdict(input: {
   const openai = new OpenAI({ apiKey });
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
-    max_tokens: 1400,
+    max_tokens: input.voiceInput ? 900 : 1400,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       {
@@ -78,8 +81,12 @@ export async function generateLiveVerdict(input: {
     ],
   });
 
-  const verdict = response.choices[0]?.message?.content;
-  if (!verdict) throw new Error("No response from model");
+  const raw = response.choices[0]?.message?.content;
+  if (!raw) throw new Error("No response from model");
+
+  const parsed = input.voiceInput
+    ? parseVerdictSections(raw)
+    : { verdict: raw.trim(), spokenBrief: "" };
 
   const id = crypto.randomUUID();
   const entry: SessionLogEntry = {
@@ -87,7 +94,7 @@ export async function generateLiveVerdict(input: {
     createdAt: new Date().toISOString(),
     symbol: input.symbol,
     chartTime: input.chartTime,
-    verdict,
+    verdict: parsed.verdict,
     source: "live",
     marketContext,
   };
@@ -95,7 +102,8 @@ export async function generateLiveVerdict(input: {
 
   return {
     id,
-    verdict,
+    verdict: parsed.verdict,
+    spokenBrief: parsed.spokenBrief || undefined,
     marketContext,
     marketDataWarning: marketDataWarning || null,
     learnedRulesVersion: learned.version,

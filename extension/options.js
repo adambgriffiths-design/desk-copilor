@@ -1,4 +1,5 @@
 const PRODUCTION_BASE = "https://desk-copilor.vercel.app";
+const DEFAULT_VOICE = "marin";
 
 function setStatus(text, ok) {
   const el = document.getElementById("status");
@@ -27,16 +28,26 @@ function normalizeUrl(raw) {
 }
 
 async function load() {
-  const { apiBaseUrl } = await chrome.storage.sync.get("apiBaseUrl");
-  const url = normalizeUrl(apiBaseUrl) || PRODUCTION_BASE;
-  if (!normalizeUrl(apiBaseUrl)) {
+  const stored = await chrome.storage.sync.get(["apiBaseUrl", "voiceId"]);
+  const url = normalizeUrl(stored.apiBaseUrl) || PRODUCTION_BASE;
+  if (!normalizeUrl(stored.apiBaseUrl)) {
     await chrome.storage.sync.set({ apiBaseUrl: PRODUCTION_BASE });
   }
   document.getElementById("apiBaseUrl").value = url;
+
+  const voice = stored.voiceId || DEFAULT_VOICE;
+  const voiceEl = document.getElementById("voiceId");
+  voiceEl.value = [...voiceEl.options].some((o) => o.value === voice)
+    ? voice
+    : DEFAULT_VOICE;
+  if (!stored.voiceId) {
+    await chrome.storage.sync.set({ voiceId: DEFAULT_VOICE });
+  }
+
   await testConnection();
 }
 
-document.getElementById("save").addEventListener("click", async () => {
+async function saveSettings() {
   const raw = normalizeUrl(document.getElementById("apiBaseUrl").value);
   if (!raw) {
     setStatus("Enter your Vercel URL", false);
@@ -46,15 +57,21 @@ document.getElementById("save").addEventListener("click", async () => {
     setStatus("Use https:// (Vercel URL)", false);
     return;
   }
-  await chrome.storage.sync.set({ apiBaseUrl: raw });
+  const voiceId = document.getElementById("voiceId").value || DEFAULT_VOICE;
+  await chrome.storage.sync.set({ apiBaseUrl: raw, voiceId });
   await chrome.storage.local.remove("apiBaseLastGood");
-  setStatus(`Saved — ${raw}`, true);
+  setStatus(`Saved — ${raw}, voice ${voiceId}`, true);
   await testConnection();
+}
+
+document.getElementById("save").addEventListener("click", () => {
+  void saveSettings();
 });
 
 document.getElementById("reset").addEventListener("click", async () => {
   document.getElementById("apiBaseUrl").value = PRODUCTION_BASE;
-  await chrome.storage.sync.set({ apiBaseUrl: PRODUCTION_BASE });
+  document.getElementById("voiceId").value = DEFAULT_VOICE;
+  await chrome.storage.sync.set({ apiBaseUrl: PRODUCTION_BASE, voiceId: DEFAULT_VOICE });
   await chrome.storage.local.remove("apiBaseLastGood");
   setStatus(`Reset — ${PRODUCTION_BASE}`, true);
   await testConnection();

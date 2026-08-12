@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { ttsVoiceForPreference } from "@/lib/voice-options";
 
 export const runtime = "nodejs";
 
@@ -29,10 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "text required" }, { status: 400, headers: cors });
     }
 
+    const voice = ttsVoiceForPreference(
+      typeof body.voice === "string" ? body.voice.trim() : undefined
+    );
+
     const openai = new OpenAI({ apiKey });
     const speech = await openai.audio.speech.create({
       model: "tts-1",
-      voice: "nova",
+      voice,
       input: text.slice(0, 4096),
       response_format: "mp3",
     });

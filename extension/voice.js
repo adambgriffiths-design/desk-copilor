@@ -120,6 +120,9 @@
   let ttsQueue = [];
   let ttsPlaying = false;
   let chatStreamPort = null;
+  let onCascadeFallback = null;
+
+  const UTTERANCE_WATCHDOG_MS = 30000;
 
   function supported() {
     return Boolean(
@@ -745,7 +748,10 @@
       onInterim?.("");
       if (token !== transcribeToken) return;
       if (text && isLikelyHallucination(text)) {
-        if (listening) onStatus?.("Didn't catch that — speak again", null);
+        if (listening) {
+          onStatus?.("Didn't catch that — speak again", null);
+          if (autoRead) speakAck("Didn't catch that — speak again");
+        }
         return;
       }
       if (text) handleTranscript(text);
@@ -795,8 +801,18 @@
     return parts.length ? parts : [text.trim()];
   }
 
+  async function getStoredVoice() {
+    try {
+      const { voiceId } = await chrome.storage.sync.get("voiceId");
+      return typeof voiceId === "string" && voiceId.trim() ? voiceId.trim() : "marin";
+    } catch {
+      return "marin";
+    }
+  }
+
   async function fetchTtsAudio(text) {
-    const res = await bgSend({ type: "TTS", text: text.slice(0, 4096) }, 45000);
+    const voice = await getStoredVoice();
+    const res = await bgSend({ type: "TTS", text: text.slice(0, 4096), voice }, 45000);
     if (res?.error) throw new Error(res.error);
     if (!res?.audioBase64) throw new Error("Empty TTS");
     const binary = atob(res.audioBase64);
@@ -866,75 +882,50 @@
     }
   }
 
-  function streamChatViaPort(payload) {
+  function chatViaBackground(payload) {
     return new Promise((resolve, reject) => {
-      let port;
       const timeout = setTimeout(() => {
-        try {
-          port?.disconnect();
-        } catch {
-          /* ignore */
-        }
-        chatStreamPort = null;
         reject(new Error("Desk timed out — try again"));
       }, 90000);
 
-      try {
-        port = chrome.runtime.connect({ name: "desk-copilot-chat-stream" });
-      } catch (e) {
-        clearTimeout(timeout);
-        reject(e);
-        return;
-      }
-      chatStreamPort = port;
-
-      let reply = "";
-      let needsChartRead = null;
-
-      const finish = (fn) => {
-        clearTimeout(timeout);
-        chatStreamPort = null;
-        try {
-          port.disconnect();
-        } catch {
-          /* ignore */
-        }
-        fn();
-      };
-
-      port.onMessage.addListener((msg) => {
-        if (msg.type === "json" && msg.data?.needsChartRead) {
-          needsChartRead = msg.data;
-          return;
-        }
-        if (msg.type === "sse") {
-          const ev = msg.data;
-          if (ev.type === "understood" && ev.text) {
-            onStatus?.(`Understood: "${ev.text}"`, true);
-          }
-          if (ev.type === "delta" && ev.text) {
-            reply += ev.text;
-            onInterim?.(reply);
-          }
-          if (ev.type === "done" && ev.reply) reply = ev.reply;
-          if (ev.type === "error") finish(() => reject(new Error(ev.error || "Stream failed")));
-        }
-        if (msg.type === "error") finish(() => reject(new Error(msg.error || "Stream failed")));
-        if (msg.type === "done") {
-          if (needsChartRead) {
-            finish(() => resolve({ needsChartRead: true, question: needsChartRead.question, reply: "" }));
+      chrome.runtime.sendMessage(
+        { type: "CHAT", ...payload, voiceInput: true },
+        (res) => {
+          clearTimeout(timeout);
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message || "Extension error"));
             return;
           }
-          finish(() => resolve({ reply: reply.trim() }));
+          if (res?.error) {
+            reject(new Error(res.error));
+            return;
+          }
+          if (res?.needsChartRead) {
+            resolve({
+              needsChartRead: true,
+              question: res.question || "",
+              reply: "",
+            });
+            return;
+          }
+          resolve({ reply: (res?.reply || "").trim() });
         }
-      });
-
-      port.onDisconnect.addListener(() => {
-        chatStreamPort = null;
-      });
-
-      port.postMessage({ type: "START", ...payload });
+      );
     });
+  }
+
+  /** Quick browser-only ack — no API round-trip. */
+  function speakAck(text) {
+    if (!text || !window.speechSynthesis) return;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.05;
+      u.lang = VOICE_LANG;
+      window.speechSynthesis.speak(u);
+    } catch {
+      /* ignore */
+    }
   }
 
   async function respondWithCascade(transcript) {
@@ -953,16 +944,25 @@
     setSpeaking(true);
     pauseNativeStt();
     onStatus?.("Desk thinking…", null);
+    onInterim?.("");
+
+    let watchdogSpoke = false;
+    const watchdog = setTimeout(async () => {
+      if (gen !== speakGeneration || watchdogSpoke) return;
+      watchdogSpoke = true;
+      onStatus?.("Didn't get that — try again", null);
+      if (autoRead) await speakTextOnce("Didn't get that — try again", gen);
+    }, UTTERANCE_WATCHDOG_MS);
 
     try {
-      const result = await streamChatViaPort({
+      const result = await chatViaBackground({
         messages,
         symbol: ctx.symbol,
         lastVerdict: ctx.lastVerdict,
-        voiceInput: true,
       });
 
       if (result.needsChartRead) {
+        speakAck("One sec, reading the chart");
         setSpeaking(false);
         resumeNativeStt();
         await onNeedsChartRead?.(result.question || transcript);
@@ -987,8 +987,12 @@
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       onStatus?.(msg, false);
+      if (autoRead && gen === speakGeneration) {
+        await speakTextOnce("Didn't get that — try again", gen);
+      }
       onChat?.(transcript, { skipBubble: true });
     } finally {
+      clearTimeout(watchdog);
       setSpeaking(false);
       resumeNativeStt();
       if (listening) onStatus?.("Voice live — talk anytime", true);
@@ -1129,6 +1133,7 @@
   }
 
   async function startCascadeVoice() {
+    window.DeskCopilotRealtime?.suspend?.();
     engineMode = "cascade";
     const ok = await startListening();
     if (ok) onStatus?.("Voice live — talk anytime", true);
@@ -1162,7 +1167,21 @@
   async function startAutonomous(symbolResolver) {
     if (!supported() || !isAutonomousEnabled() || userVoiceOff) return false;
 
-    window.DeskCopilotRealtime?.suspend?.();
+    if (window.DeskCopilotRealtime?.start) {
+      const sym =
+        typeof symbolResolver === "function" ? symbolResolver() : "MNQ1!";
+      void window.DeskCopilotRealtime.prefetchSession?.(sym);
+      onStatus?.("Connecting voice…", null);
+      const rtOk = await window.DeskCopilotRealtime.start(symbolResolver);
+      if (rtOk) {
+        engineMode = "realtime";
+        setListening(true);
+        onStatus?.("Agent live — talk anytime", true);
+        return true;
+      }
+      window.DeskCopilotRealtime?.stop?.();
+    }
+
     return startCascadeVoice();
   }
 
@@ -1319,6 +1338,11 @@
     },
     getSttMode() {
       return sttMode;
+    },
+    speakAck,
+    startCascadeVoice,
+    setCascadeFallback(cb) {
+      onCascadeFallback = cb;
     },
   };
 })();

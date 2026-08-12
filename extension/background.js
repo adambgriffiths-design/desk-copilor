@@ -203,7 +203,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     apiFetch("/api/voice/realtime-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ symbol: msg.symbol || "MNQ1!" }),
+      body: JSON.stringify({
+        symbol: msg.symbol || "MNQ1!",
+        voice: msg.voice || undefined,
+      }),
       timeoutMs: 30000,
     })
       .then(sendResponse)
@@ -216,7 +219,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const res = await fetch(`${base}/api/voice/tts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: msg.text || "" }),
+          body: JSON.stringify({ text: msg.text || "", voice: msg.voice || undefined }),
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));

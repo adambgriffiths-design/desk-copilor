@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       symbol: body.symbol,
       chartTime: body.chartTime || estNow(),
       question,
+      voiceInput: body.voiceInput === true,
     });
 
     return NextResponse.json(

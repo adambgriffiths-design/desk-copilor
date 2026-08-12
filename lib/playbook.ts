@@ -121,4 +121,38 @@ Watch next: if WAIT — repeat the exact trigger level; if ACTIVE — confirmati
 
 Every brief must end with a **directional** META call (potential buy or potential sell) unless hard rule 1, 2 (before 9:45), or 5 forces stand aside.`;
 
+/** Compact panel brief for live extension reads (6–8 labeled lines). */
+export const PANEL_VERDICT_FORMAT = `Deliver a **compact ICT desk brief** — 6–8 labeled lines max. Facts and prices first. No greetings or filler.
+
+Required lines (skip only if truly N/A):
+Bias: daily + tradeable bias in one line
+Structure: one-minute market structure shift / displacement / fair value gap with prices
+Key levels: top 3 PD/session levels with exact prices
+Call: potential buy | potential sell | stand aside
+Entry zone: exact MNQ range + ACTIVE | WAIT | EXTENDED
+Target 1: exact price + level name
+Watch next: one trigger line
+
+Rules:
+- Exact prices to two decimals — never vague
+- No stop recommendations
+- Last line of panel section (before spoken block): no META here`;
+
+/** Spoken summary for text-to-speech (3–5 sentences). */
+export const SPOKEN_VERDICT_FORMAT = `After the panel section, add:
+
+===SPOKEN===
+Exactly 3–5 short sentences for spoken delivery: direct answer if they asked a question, then call, bias, entry zone with status, Target 1, one watch line. Plain speech — no labels, no markdown, no META line in this block.
+
+Then on its own final line:
+META: confidence=low|medium|high | call=potential buy|potential sell|stand aside | tradeableBias=bullish|bearish|conflicted|neutral`;
+
+export const LIVE_VERDICT_OUTPUT_WRAPPER = `Output format — use these exact section markers:
+
+===PANEL===
+(compact labeled brief — ${PANEL_VERDICT_FORMAT.split("\n")[0]})
+${PANEL_VERDICT_FORMAT}
+
+${SPOKEN_VERDICT_FORMAT}`;
+
 /** Hard rules in SYSTEM_PROMPT above; learned rules capped at 8 in data/learned-rules.json */

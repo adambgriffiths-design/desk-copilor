@@ -153,6 +153,7 @@
 
   let currentId = null;
   let lastVerdict = "";
+  let lastSpokenBrief = "";
   let voiceReady = false;
   let verdictBusy = false;
   let chatBusy = false;
@@ -803,6 +804,7 @@
     }
     currentId = data.id || null;
     lastVerdict = data.verdict || "";
+    lastSpokenBrief = data.spokenBrief || "";
     showRateRow(Boolean(currentId));
     const shown = displayText(lastVerdict);
     document.getElementById("dc-text").textContent = shown;
@@ -811,11 +813,12 @@
     refreshStats();
     if (voiceReady && window.DeskCopilotVoice?.autoRead) {
       const rtMode = window.DeskCopilotVoice?.getEngineMode?.() === "realtime";
+      const toSpeak = lastSpokenBrief || shown;
       if (rtMode) {
         setMsg("Agent live — talk anytime", true);
       } else {
         setMsg("Delivering brief… mic back when done", null);
-        window.DeskCopilotVoice.speak(lastVerdict, () => {
+        window.DeskCopilotVoice.speak(toSpeak, () => {
           setMsg("Agent live — talk anytime", true);
         });
       }
@@ -882,6 +885,13 @@
 
     setMsg("Capturing…", null);
 
+    if (
+      opts.voice &&
+      window.DeskCopilotVoice?.getEngineMode?.() === "cascade"
+    ) {
+      window.DeskCopilotVoice.speakAck?.("One sec, reading the chart");
+    }
+
     const sym = symbol();
     await bgSend({ type: "PREPARE_VERDICT", symbol }, 5000).catch(() => {});
 
@@ -922,6 +932,7 @@
         applyUnderstood(userQuestion, data.understoodAs);
       }
       applyVerdict(data);
+      return data;
     } catch (e) {
       verdictBusy = false;
       verdictWaiter = null;
@@ -991,13 +1002,18 @@
   function setVoiceLive(text) {
     const el = document.getElementById("dc-voice-live");
     if (!el) return;
-    if (text) {
-      el.textContent = `"${text}"`;
-      el.classList.add("active");
-    } else {
+    const t = String(text || "").trim();
+    if (!t) {
       el.textContent = "";
       el.classList.remove("active");
+      return;
     }
+    // Status / heard lines only — never stream partial assistant replies
+    if (t.length > 100 && !/^Heard:/i.test(t) && t !== "…") {
+      return;
+    }
+    el.textContent = t === "…" ? "…" : `"${t}"`;
+    el.classList.add("active");
   }
 
   document.getElementById("dc-voice-test").onclick = async () => {
@@ -1043,8 +1059,14 @@
           return "Levels marked on the chart.";
         }
         if (name === "get_chart_read") {
-          await runChartRead(args?.question || "what do you see on the chart", { voice: true });
-          return displayText(lastVerdict) || lastVerdict || "Chart read complete.";
+          const data = await runChartRead(args?.question || "what do you see on the chart", {
+            voice: true,
+          });
+          return (
+            data?.spokenBrief ||
+            displayText(data?.verdict || "") ||
+            "Chart read complete."
+          );
         }
         return "Done.";
       },
@@ -1084,16 +1106,20 @@
       },
       onCommand: (cmd, transcript) => {
         if (cmd === "verdict") {
-          sendChat(transcript || "what do you see", { voice: true });
+          void runChartRead(transcript || "what do you see on the chart", { voice: true });
         } else if (cmd === "levels") {
           void drawLevels();
         } else if (cmd === "read") {
           const last = chatHistory.at(-1);
           if (last?.role === "assistant") window.DeskCopilotVoice.speak(last.content);
+          else if (lastSpokenBrief) window.DeskCopilotVoice.speakBrief(lastSpokenBrief);
           else if (lastVerdict) window.DeskCopilotVoice.speakBrief(lastVerdict);
         }
       },
       onChat: (transcript, opts) => sendChat(transcript, { voice: true, ...opts }),
+    });
+    window.DeskCopilotVoice.setCascadeFallback?.(() => {
+      void window.DeskCopilotVoice.startCascadeVoice();
     });
     if (!voiceReady) {
       document.getElementById("dc-voice-toggle").disabled = true;

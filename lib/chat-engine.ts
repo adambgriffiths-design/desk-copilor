@@ -74,7 +74,7 @@ export async function buildChatSystemPrompt(
     input.lastVerdict &&
       `Their last chart read (may be stale — reference only if relevant):\n${input.lastVerdict.slice(0, 1200)}`,
     input.voiceInput &&
-      `Voice mode: trader spoke aloud — STT may garble words. Infer intent; respond with dense facts in full words, no abbreviations.`,
+      `Voice mode: respond in 2–4 short spoken sentences. Facts only — bias, levels with prices, call. No labels, no markdown, no bullet lists, no desk-brief format.`,
     input.voiceRaw &&
       input.voiceInput &&
       `Raw STT heard: "${input.voiceRaw}"`,
@@ -97,7 +97,7 @@ export async function generateChatReply(
   const openai = new OpenAI({ apiKey });
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
-    max_tokens: 550,
+    max_tokens: input.voiceInput ? 180 : 550,
     messages: [{ role: "system", content: system }, ...history],
   });
 
@@ -117,7 +117,7 @@ export async function streamChatReply(input: ChatPromptInput) {
   const openai = new OpenAI({ apiKey });
   return openai.chat.completions.create({
     model: "gpt-4o",
-    max_tokens: 550,
+    max_tokens: input.voiceInput ? 180 : 550,
     stream: true,
     messages: [{ role: "system", content: system }, ...history],
   });

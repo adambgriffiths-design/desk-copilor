@@ -96,7 +96,14 @@
   }
 
   async function fetchSession(symbol) {
-    const res = await bgSend({ type: "REALTIME_SESSION", symbol }, 25000);
+    let voice = "marin";
+    try {
+      const stored = await chrome.storage.sync.get("voiceId");
+      if (stored.voiceId) voice = stored.voiceId;
+    } catch {
+      /* ignore */
+    }
+    const res = await bgSend({ type: "REALTIME_SESSION", symbol, voice }, 25000);
     if (res?.error) throw new Error(res.error);
     if (!res?.client_secret) throw new Error("No realtime session");
     sessionKey = res.client_secret;
@@ -242,9 +249,11 @@
       onStatus?.("Voice reconnect failed — using fallback", false);
       wantActive = false;
       stop();
+      window.DeskCopilotVoice?.startCascadeVoice?.();
       return;
     }
     reconnects += 1;
+    onStatus?.("Reconnecting voice…", null);
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
       if (wantActive) void connect(true);

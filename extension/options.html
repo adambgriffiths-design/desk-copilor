@@ -67,6 +67,20 @@
         outline: none;
         border-color: #fff;
       }
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 0;
+        background: #0a0a0a;
+        color: #fff;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      select:focus {
+        outline: none;
+        border-color: #fff;
+      }
       button {
         margin-top: 12px;
         padding: 10px 16px;
@@ -133,6 +147,25 @@
     <p>
       Backend runs on Vercel:
       <strong>https://desk-copilor.vercel.app</strong>
+    </p>
+    <label for="voiceId">Voice</label>
+    <select id="voiceId">
+      <option value="marin">Marin (realtime default)</option>
+      <option value="cedar">Cedar</option>
+      <option value="nova">Nova</option>
+      <option value="alloy">Alloy</option>
+      <option value="echo">Echo</option>
+      <option value="shimmer">Shimmer</option>
+      <option value="coral">Coral</option>
+      <option value="sage">Sage</option>
+      <option value="verse">Verse</option>
+      <option value="ash">Ash</option>
+      <option value="ballad">Ballad</option>
+      <option value="fable">Fable (TTS fallback)</option>
+      <option value="onyx">Onyx (TTS fallback)</option>
+    </select>
+    <p style="font-size: 12px; color: #666; margin-top: 8px">
+      Realtime uses your pick directly. Cascade TTS fallback maps to the nearest OpenAI voice.
     </p>
     <label for="apiBaseUrl">API base URL</label>
     <input
