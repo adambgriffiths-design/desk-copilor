@@ -25,6 +25,7 @@
   let playCtx = null;
   let playTime = 0;
   let playGen = 0;
+  let responseActive = false;
 
   let onStatus = null;
   let onInterim = null;
@@ -128,6 +129,10 @@
       playCtx = null;
     }
     setSpeaking(false);
+    if (responseActive) {
+      sendEvent({ type: "response.cancel" });
+      responseActive = false;
+    }
   }
 
   async function ensurePlayCtx() {
@@ -271,9 +276,20 @@
 
     if (type === "input_audio_buffer.speech_started") {
       stopPlayback();
-      sendEvent({ type: "output_audio_buffer.clear" });
       onInterim?.("…");
       onStatus?.("Hearing you…", true);
+    }
+
+    if (type === "response.created" || type === "response.started") {
+      responseActive = true;
+    }
+
+    if (
+      type === "response.done" ||
+      type === "response.cancelled" ||
+      type === "response.canceled"
+    ) {
+      responseActive = false;
     }
 
     if (
