@@ -369,6 +369,8 @@ export function formatContextForPrompt(ctx: MarketContext): string {
 
   return `## LIVE MARKET CONTEXT (auto-fetched — use these levels, do not invent HTF prices)
 
+**Last MNQ price (1m): ${ctx.daily.lastClose.toFixed(2)}** — all cited levels must be near this range from JSON, not volume scales on the chart image.
+
 The trader only uploaded a 1m chart. **Lead HTF analysis with daily PD arrays below** — then session/ORG for execution on 1m.
 
 ${pdBrief}

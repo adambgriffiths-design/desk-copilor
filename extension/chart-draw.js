@@ -42,6 +42,26 @@
     return n;
   }
 
+  /** MNQ trades ~20k–45k; reject volume/indicator scales (often ~15k). */
+  function isMnqPrice(n, anchor) {
+    if (!Number.isFinite(n)) return false;
+    if (Number.isFinite(anchor) && anchor > 0) {
+      return n >= anchor * 0.88 && n <= anchor * 1.12;
+    }
+    return n >= 20000 && n <= 45000;
+  }
+
+  function priceAnchor(levels, zones, priceHint) {
+    if (Number.isFinite(priceHint?.last) && priceHint.last > 0) return priceHint.last;
+    const prices = [
+      ...(levels || []).map((l) => Number(l.price)),
+      ...(zones || []).flatMap((z) => [Number(z.top), Number(z.bottom)]),
+    ].filter(Number.isFinite);
+    if (!prices.length) return null;
+    prices.sort((a, b) => a - b);
+    return prices[Math.floor(prices.length / 2)];
+  }
+
   function findChartPane() {
     let bestCanvas = null;
     let bestArea = 0;
@@ -85,7 +105,7 @@
     return best;
   }
 
-  function scanPriceLabels(paneRect) {
+  function scanPriceLabels(paneRect, anchor) {
     const points = [];
     const seen = new Set();
     const minX = paneRect ? paneRect.right - Math.max(220, paneRect.width * 0.35) : window.innerWidth * 0.72;
@@ -105,7 +125,7 @@
         const text = (el.textContent || "").trim();
         if (!text || text.length > 18) continue;
         const price = parsePrice(text);
-        if (price == null) continue;
+        if (price == null || !isMnqPrice(price, anchor)) continue;
         const r = el.getBoundingClientRect();
         if (r.width < 2 || r.height < 2) continue;
         if (paneRect) {
@@ -142,14 +162,38 @@
     const paneRect = pane.getBoundingClientRect();
     if (paneRect.width < 100 || paneRect.height < 80) return null;
 
-    const axis = scanPriceLabels(paneRect);
+    const anchor = priceAnchor(levels, zones, priceHint);
+    const yTop = paneRect.top + 12;
+    const yBot = paneRect.bottom - 36;
+
+    // Prefer live API prices — avoids misreading volume (~15k) as MNQ price scale
+    if (
+      priceHint &&
+      Number.isFinite(priceHint.visibleMin) &&
+      Number.isFinite(priceHint.visibleMax) &&
+      priceHint.visibleMax > priceHint.visibleMin &&
+      isMnqPrice(priceHint.visibleMin, anchor) &&
+      isMnqPrice(priceHint.visibleMax, anchor)
+    ) {
+      return {
+        pane,
+        paneRect,
+        minP: priceHint.visibleMin,
+        maxP: priceHint.visibleMax,
+        yTop,
+        yBot,
+        source: "api",
+      };
+    }
+
+    const axis = scanPriceLabels(paneRect, anchor);
     if (axis) {
-      const yTop = Math.min(axis.top.y, axis.bot.y);
-      const yBot = Math.max(axis.top.y, axis.bot.y);
       const minP = Math.min(axis.top.price, axis.bot.price);
       const maxP = Math.max(axis.top.price, axis.bot.price);
-      if (maxP > minP && yBot > yTop) {
-        return { pane, paneRect, minP, maxP, yTop, yBot, source: "axis" };
+      const axisYTop = Math.min(axis.top.y, axis.bot.y);
+      const axisYBot = Math.max(axis.top.y, axis.bot.y);
+      if (maxP > minP && axisYBot > axisYTop && isMnqPrice(minP, anchor) && isMnqPrice(maxP, anchor)) {
+        return { pane, paneRect, minP, maxP, yTop: axisYTop, yBot: axisYBot, source: "axis" };
       }
     }
 
@@ -157,7 +201,7 @@
       ...(levels || []).map((l) => Number(l.price)),
       ...(zones || []).flatMap((z) => [Number(z.top), Number(z.bottom)]),
     ].filter(Number.isFinite);
-    if (!prices.length && !priceHint) return null;
+    if (!prices.length) return null;
 
     let minP = priceHint?.visibleMin;
     let maxP = priceHint?.visibleMax;
@@ -170,8 +214,6 @@
     }
     if (maxP <= minP) return null;
 
-    const yTop = paneRect.top + 12;
-    const yBot = paneRect.bottom - 36;
     return { pane, paneRect, minP, maxP, yTop, yBot, source: "hint" };
   }
 
@@ -404,7 +446,9 @@
     startSyncLoop();
 
     const sourceNote =
-      overlayResult.source === "axis"
+      overlayResult.source === "api"
+        ? "aligned to live MNQ prices"
+        : overlayResult.source === "axis"
         ? "aligned to price scale"
         : "aligned to level range — zoom chart if lines look off";
 

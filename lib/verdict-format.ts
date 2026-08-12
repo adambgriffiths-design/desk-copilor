@@ -39,7 +39,7 @@ export function parseVerdictSections(raw: string): {
 
 export function liveVerdictUserTail(voiceInput?: boolean): string {
   const base =
-    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. **Include Entry zone, Entry status (ACTIVE/WAIT/EXTENDED), Target 1** from Execution scaffold. **Do NOT recommend stops.** **Multiple FVGs: retrace to most recent gap only.**";
+    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **All MNQ prices must come from JSON (lastClose, PD arrays, Execution scaffold) — typically 25000–32000. Never cite volume-axis numbers (~15000) from the chart image.** **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. **Include Entry zone, Entry status (ACTIVE/WAIT/EXTENDED), Target 1** from Execution scaffold. **Do NOT recommend stops.** **Multiple FVGs: retrace to most recent gap only.**";
 
   if (voiceInput) {
     return `${base}\n\n${LIVE_VERDICT_OUTPUT_WRAPPER}`;

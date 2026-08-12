@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.39";
+  const DC_VERSION = "1.0.40";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.39</span>
+          <span class="dc-ver">v1.0.40</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
