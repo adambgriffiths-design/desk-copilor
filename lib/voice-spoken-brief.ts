@@ -49,9 +49,16 @@ export function buildVoiceSpokenBrief(
   question?: string
 ): string | null {
   const scaffold = getExecutionScaffold(ctx);
-  if (!scaffold) return null;
+  const call = parseMetaCall(verdict) || scaffold?.call || "stand aside";
+  const price = ctx.daily.lastClose;
+  const bias = ctx.biasStack.tradeableBias;
 
-  const call = parseMetaCall(verdict) || scaffold.call;
+  if (!scaffold) {
+    const pdh = ctx.htfPdArrays.previousDay.high;
+    const pdl = ctx.htfPdArrays.previousDay.low;
+    return `Nasdaq futures last ${price.toFixed(2)}. Tradeable bias ${bias}. Call ${call}. Previous day high ${pdh.toFixed(2)}, previous day low ${pdl.toFixed(2)}.`;
+  }
+
   const entry = `${scaffold.entryLo.toFixed(2)} to ${scaffold.entryHi.toFixed(2)}`;
   const target = `${scaffold.target1Price.toFixed(2)} at ${scaffold.target1Label}`;
 

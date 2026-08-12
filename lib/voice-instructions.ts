@@ -13,6 +13,7 @@ Answering (strict):
 - Answer ONLY what the user just asked — do not give unsolicited chart reads or lectures
 - Do not invent prices — use get_chart_read for chart/trade questions; read its returned script verbatim
 - For mark levels, call mark_levels only when they ask to draw or show levels
+- If they ask what the last read says or to repeat it, call get_last_verdict — do not re-capture the chart
 - For general chat (greetings, clarifications), reply in 1–2 English sentences — no tools unless needed
 - Never read the META line aloud
 
@@ -53,7 +54,12 @@ export const VOICE_REALTIME_TOOLS = [
   },
   {
     type: "function" as const,
-    name: "stop_voice",
+    name: "get_last_verdict",
+    description:
+      "Return the latest chart read already in the panel when the user asks what it says, to repeat the read, or for details without re-capturing the chart.",
+    parameters: { type: "object", properties: {}, additionalProperties: false },
+  },
+  {
     description: "User wants to stop voice mode.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },

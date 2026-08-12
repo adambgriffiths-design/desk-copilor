@@ -89,13 +89,16 @@ export async function generateLiveVerdict(input: {
     ? parseVerdictSections(raw)
     : { verdict: raw.trim(), spokenBrief: "" };
 
-  if (input.voiceInput && marketContext) {
+  if (marketContext) {
     const canonical = buildVoiceSpokenBrief(
       marketContext,
       parsed.verdict,
       input.question
     );
     if (canonical) parsed.spokenBrief = canonical;
+    else if (!parsed.spokenBrief.trim() && parsed.verdict.trim()) {
+      parsed.spokenBrief = parsed.verdict.replace(/\n+/g, " ").slice(0, 600);
+    }
   }
 
   const id = crypto.randomUUID();

@@ -34,6 +34,10 @@ export function parseVerdictSections(raw: string): {
     if (spokenBrief && !spokenBrief.endsWith(".")) spokenBrief += ".";
   }
 
+  if (!verdict.trim() && spokenBrief) {
+    verdict = spokenBrief;
+  }
+
   return { verdict, spokenBrief };
 }
 

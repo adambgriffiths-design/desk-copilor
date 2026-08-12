@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.44";
+  const DC_VERSION = "1.0.45";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.44</span>
+          <span class="dc-ver">v1.0.45</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
@@ -161,6 +161,8 @@
   let chatBusy = false;
   let verdictTimer = null;
   let verdictWaiter = null;
+  let verdictRequestTs = 0;
+  let lastHandledVerdictTs = 0;
   let chatHistory = [];
   let backendOnline = false;
   let lastBackendCheck = 0;
@@ -882,9 +884,9 @@
     lastVerdict = data.verdict || "";
     lastSpokenBrief = data.spokenBrief || "";
     showRateRow(Boolean(currentId));
-    const shown = displayText(lastVerdict);
+    const shown = displayText(lastVerdict) || lastSpokenBrief;
     document.getElementById("dc-text").textContent = shown;
-    recordAssistantReply(shown);
+    if (shown) recordAssistantReply(shown);
     refreshStats();
     if (voiceReady && window.DeskCopilotVoice?.autoRead) {
       const rtMode = window.DeskCopilotVoice?.getEngineMode?.() === "realtime";
@@ -923,6 +925,7 @@
 
   function onVerdictPayload(payload) {
     if (!payload) return;
+    if (payload.ts && payload.ts <= lastHandledVerdictTs) return;
     if (payload.status === "capturing") {
       setMsg("Capturing…", null);
       return;
@@ -931,6 +934,7 @@
       setMsg("Building brief… 15–60 sec", null);
       return;
     }
+    if (payload.ts) lastHandledVerdictTs = payload.ts;
     if (verdictWaiter) {
       const w = verdictWaiter;
       verdictWaiter = null;
@@ -943,17 +947,30 @@
     else if (payload.data) applyVerdict(payload.data);
   }
 
+  function chartReadScript(data) {
+    return (
+      data?.spokenBrief ||
+      displayText(data?.verdict || "") ||
+      lastSpokenBrief ||
+      displayText(lastVerdict || "")
+    );
+  }
+
   async function runChartRead(userQuestion, opts = {}) {
+    if (verdictBusy) {
+      throw new Error("Chart read already in progress — wait for it to finish");
+    }
     if (!(await ensureBackend())) {
       appendChatBubble("assistant", offlineChatMessage());
       setMsg("Backend offline — RECONNECT", false);
-      return;
+      return null;
     }
     verdictBusy = true;
     clearVerdictTimer();
     verdictWaiter = null;
+    verdictRequestTs = Date.now();
     try {
-      chrome.storage.session.remove("dcVerdictResult");
+      await chrome.storage.session.remove("dcVerdictResult");
     } catch {
       /* ignore */
     }
@@ -1019,6 +1036,7 @@
       } else {
         reportIssue(msg);
       }
+      throw e;
     } finally {
       panel.classList.remove("dc-capturing");
     }
@@ -1138,13 +1156,20 @@
           await drawLevels();
           return "Levels marked on the chart.";
         }
+        if (name === "get_last_verdict") {
+          const script = chartReadScript({});
+          if (!script) {
+            return "No chart read yet — say 'read the chart' or click GET THE READ first.";
+          }
+          return formatRealtimeVoiceOutput(script);
+        }
         if (name === "get_chart_read") {
           const question = chartReadQuestion(args?.question);
           const data = await runChartRead(question, { voice: true });
-          const script =
-            data?.spokenBrief ||
-            displayText(data?.verdict || "") ||
-            "Chart read complete.";
+          const script = chartReadScript(data);
+          if (!script) {
+            throw new Error("Chart read returned empty — try GET THE READ button");
+          }
           return formatRealtimeVoiceOutput(script);
         }
         return "Done.";
