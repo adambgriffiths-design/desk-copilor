@@ -1,7 +1,11 @@
 /**
- * Desk Copilot voice — toggle listening on once, then hands-free VAD + Whisper.
+ * Desk Copilot voice — continuous browser STT (ChatGPT-style) + Whisper fallback.
  */
 (function () {
+  const SpeechRecognition =
+    typeof window !== "undefined" &&
+    (window.SpeechRecognition || window.webkitSpeechRecognition);
+
   const VOICE_LANG =
     (typeof navigator !== "undefined" &&
       navigator.language &&
@@ -9,9 +13,9 @@
       navigator.language) ||
     "en-US";
 
-  const SILENCE_MS = 1400;
-  const MIN_SPEECH_MS = 400;
-  const MAX_UTTERANCE_MS = 28000;
+  const SILENCE_MS = 1800;
+  const MIN_SPEECH_MS = 350;
+  const MAX_UTTERANCE_MS = 45000;
   const VAD_INTERVAL_MS = 60;
   const VOLUME_THRESHOLD = 0.006;
   const BARGE_IN_THRESHOLD = 0.018;
@@ -21,8 +25,18 @@
       id: "verdict",
       patterns: [
         /\b(get|give|need)\s+(me\s+)?(a\s+)?(verdict|update)\b/i,
+        /\b(get|give|need)\s+(me\s+)?(the|a)\s+read\b/i,
         /\b(look at|check)\s+(the\s+)?chart\b/i,
         /\bwhat do you see\b/i,
+      ],
+    },
+    {
+      id: "levels",
+      patterns: [
+        /\bmark levels\b/i,
+        /\bdraw levels\b/i,
+        /\bshow levels\b/i,
+        /\bplot levels\b/i,
       ],
     },
     {
@@ -51,6 +65,12 @@
     [/\blook at the char\b/gi, "look at the chart"],
     [/\byour reed\b/gi, "your read"],
     [/\bgive me a reed\b/gi, "give me a read"],
+    [/\bmarket structure\b/gi, "market structure"],
+    [/\bliquidity sweep\b/gi, "liquidity sweep"],
+    [/\bfair value gap\b/gi, "fair value gap"],
+    [/\bopening range\b/gi, "opening range"],
+    [/\bget the read\b/gi, "get the read"],
+    [/\bget a read\b/gi, "get a read"],
   ];
 
   let micStream = null;
@@ -69,6 +89,7 @@
   let speakDone = null;
   let speakPollTimer = null;
   let speakMaxTimer = null;
+  let speakGeneration = 0;
   let autoRead = true;
   let onCommand = null;
   let onChat = null;
@@ -80,13 +101,59 @@
   let lastHeardAt = 0;
   let lastHeardText = "";
   let recordMimeType = "audio/webm";
+  let recognition = null;
+  let recognitionPaused = false;
+  let recognitionRestartTimer = null;
+  let sttMode = SpeechRecognition ? "native" : "whisper";
+  let noiseFloor = 0.004;
+  let noiseSamples = [];
+  let vadCalibrated = false;
+  let pendingTranscript = "";
+  let pendingTranscriptTimer = null;
+  let nativeSttErrors = 0;
+  let userVoiceOff = false;
+  let engineMode = "off"; // realtime | cascade | off
+  let finishingUtterance = false;
+  let utteranceBusy = false;
+  let transcribeToken = 0;
+  let streamTtsPlayed = false;
+  let getChatContext = null;
+  let onAssistantReply = null;
+  let onNeedsChartRead = null;
+  let onUserTranscript = null;
+  let ttsAudio = null;
+  let ttsQueue = [];
+  let ttsPlaying = false;
+  let chatStreamPort = null;
 
   function supported() {
     return Boolean(
-      navigator.mediaDevices?.getUserMedia &&
-        typeof MediaRecorder !== "undefined" &&
+      (SpeechRecognition || (navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined")) &&
         window.speechSynthesis
     );
+  }
+
+  function flushPendingTranscript() {
+    if (pendingTranscriptTimer) {
+      clearTimeout(pendingTranscriptTimer);
+      pendingTranscriptTimer = null;
+    }
+    const merged = pendingTranscript.trim();
+    pendingTranscript = "";
+    if (merged) handleTranscript(merged);
+  }
+
+  function enqueueTranscript(text) {
+    const t = text.trim();
+    if (!t) return;
+    pendingTranscript = pendingTranscript ? `${pendingTranscript} ${t}` : t;
+    if (pendingTranscriptTimer) clearTimeout(pendingTranscriptTimer);
+    pendingTranscriptTimer = setTimeout(() => {
+      pendingTranscriptTimer = null;
+      const merged = pendingTranscript.trim();
+      pendingTranscript = "";
+      if (merged) handleTranscript(merged);
+    }, 750);
   }
 
   function normalizeTranscript(text) {
@@ -95,6 +162,41 @@
       t = t.replace(pattern, replacement);
     }
     return t;
+  }
+
+  function isLikelyHallucination(text) {
+    const t = text.replace(/\s+/g, " ").trim();
+    if (!t) return true;
+    const lower = t.toLowerCase();
+    const words = lower.split(/\s+/).filter(Boolean);
+    const acronyms = (lower.match(/\b(fvg|org|ce|mss|ivfvg|ndog|nwog|ote|pdh|pdl|pdc)\b/gi) || [])
+      .length;
+    if (
+      acronyms >= 4 &&
+      words.length <= acronyms + 5 &&
+      !/\b(i|you|we|buy|sell|wait|hello|hey|thanks)\b/i.test(t)
+    ) {
+      return true;
+    }
+    const echoPhrases = [
+      "fair value gap",
+      "opening range gap",
+      "market structure shift",
+      "what do you see on the chart",
+      "what do you see",
+      "get the read",
+      "chart read",
+      "liquidity sweep",
+      "ict trading desk",
+    ];
+    let hits = 0;
+    for (const phrase of echoPhrases) {
+      if (lower.includes(phrase)) hits++;
+    }
+    if (hits >= 2 && words.length < 18) return true;
+    if (hits >= 1 && acronyms >= 2 && words.length < 14) return true;
+    if (/^(fvg|org|ce|mss|liquidity|bias|premium|discount)[\s,;]+/i.test(t)) return true;
+    return false;
   }
 
   function matchCommand(text) {
@@ -115,6 +217,45 @@
       .replace(/^\s*[-*]\s+/gm, "")
       .replace(/\n{3,}/g, "\n\n")
       .trim();
+  }
+
+  /** Chrome chokes on one huge utterance — split on sentences, cap chunk size. */
+  function chunkForSpeech(text, maxLen = 260) {
+    if (text.length <= maxLen) return [text];
+
+    const chunks = [];
+    const parts = text.split(/(?<=[.!?])\s+|\n+/);
+    let buf = "";
+
+    for (const part of parts) {
+      const piece = part.trim();
+      if (!piece) continue;
+      const next = buf ? `${buf} ${piece}` : piece;
+      if (next.length <= maxLen) {
+        buf = next;
+        continue;
+      }
+      if (buf) chunks.push(buf);
+      if (piece.length <= maxLen) {
+        buf = piece;
+        continue;
+      }
+      let rest = piece;
+      while (rest.length > maxLen) {
+        let cut = rest.lastIndexOf(" ", maxLen);
+        if (cut < Math.floor(maxLen * 0.45)) cut = maxLen;
+        chunks.push(rest.slice(0, cut).trim());
+        rest = rest.slice(cut).trim();
+      }
+      buf = rest;
+    }
+
+    if (buf) chunks.push(buf);
+    return chunks.length ? chunks : [text];
+  }
+
+  function estimateSpeakMs(text) {
+    return Math.min(180000, text.length * 95 + 4000);
   }
 
   function cleanMime(mime) {
@@ -175,20 +316,37 @@
     const source = audioContext.createMediaStreamSource(micStream);
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
-    analyser.smoothingTimeConstant = 0.35;
+    analyser.smoothingTimeConstant = 0.25;
     source.connect(analyser);
     lastLoudAt = 0;
+    noiseSamples = [];
+    vadCalibrated = false;
+    noiseFloor = 0.004;
 
     vadTimer = setInterval(() => {
       if (!listening || transcribing) return;
       const volume = measureVolume();
 
+      if (!vadCalibrated && !recording) {
+        noiseSamples.push(volume);
+        if (noiseSamples.length >= 40) {
+          const sorted = [...noiseSamples].sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)] || 0;
+          noiseFloor = Math.max(0.003, median * 2.4);
+          vadCalibrated = true;
+        }
+      }
+
+      const threshold = Math.max(VOLUME_THRESHOLD, noiseFloor);
+
       if (speaking) {
-        if (volume >= BARGE_IN_THRESHOLD) cancelSpeech();
+        if (volume >= Math.max(BARGE_IN_THRESHOLD, threshold * 1.8)) {
+          cancelSpeech();
+        }
         return;
       }
 
-      if (volume >= VOLUME_THRESHOLD) {
+      if (volume >= threshold) {
         lastLoudAt = Date.now();
         if (!recording) beginRecording();
         return;
@@ -198,6 +356,135 @@
         finishRecording();
       }
     }, VAD_INTERVAL_MS);
+  }
+
+  function clearRecognitionRestart() {
+    if (recognitionRestartTimer) {
+      clearTimeout(recognitionRestartTimer);
+      recognitionRestartTimer = null;
+    }
+  }
+
+  function scheduleRecognitionRestart() {
+    if (recognitionRestartTimer || !listening || speaking || recognitionPaused) return;
+    recognitionRestartTimer = setTimeout(() => {
+      recognitionRestartTimer = null;
+      if (!listening || speaking || recognitionPaused || !recognition) return;
+      try {
+        recognition.start();
+      } catch {
+        scheduleRecognitionRestart();
+      }
+    }, 200);
+  }
+
+  function stopNativeStt() {
+    clearRecognitionRestart();
+    recognitionPaused = false;
+    if (!recognition) return;
+    try {
+      recognition.onresult = null;
+      recognition.onerror = null;
+      recognition.onend = null;
+      recognition.stop();
+    } catch {
+      /* ignore */
+    }
+    recognition = null;
+  }
+
+  function pauseNativeStt() {
+    if (!recognition || sttMode !== "native") return;
+    recognitionPaused = true;
+    clearRecognitionRestart();
+    try {
+      recognition.stop();
+    } catch {
+      /* ignore */
+    }
+    setRecording(false);
+  }
+
+  function resumeNativeStt() {
+    if (!listening || sttMode !== "native" || speaking) return;
+    if (!recognition) {
+      if (!startNativeStt()) sttMode = "whisper";
+      return;
+    }
+    recognitionPaused = false;
+    scheduleRecognitionRestart();
+  }
+
+  function startNativeStt() {
+    if (!SpeechRecognition) return false;
+    stopNativeStt();
+
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = VOICE_LANG;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      if (speaking || !listening) return;
+
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        const text = (result[0]?.transcript || "").trim();
+        if (!text) continue;
+
+        if (result.isFinal) {
+          nativeSttErrors = 0;
+          setRecording(false);
+          onInterim?.("");
+          enqueueTranscript(normalizeTranscript(text));
+        } else {
+          interim += `${text} `;
+        }
+      }
+
+      if (interim.trim()) {
+        setRecording(true);
+        onInterim?.(interim.trim());
+        onStatus?.("Hearing you…", true);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      const err = event.error || "";
+      if (err === "no-speech" || err === "aborted") return;
+      if (err === "not-allowed" || err === "service-not-allowed") {
+        onStatus?.("Mic blocked — allow mic for tradingview.com", false);
+        stopListening();
+        return;
+      }
+      if (err === "network") {
+        nativeSttErrors += 1;
+        if (nativeSttErrors >= 2) {
+          void switchToWhisperMode("Browser STT flaky — using Whisper");
+          return;
+        }
+        onStatus?.("Speech network error — retrying…", null);
+        scheduleRecognitionRestart();
+        return;
+      }
+      if (listening && !speaking) scheduleRecognitionRestart();
+    };
+
+    recognition.onend = () => {
+      if (listening && !speaking && !recognitionPaused) scheduleRecognitionRestart();
+    };
+
+    recognitionPaused = false;
+    try {
+      recognition.start();
+      sttMode = "native";
+      return true;
+    } catch {
+      recognition = null;
+      return false;
+    }
   }
 
   function releaseMic() {
@@ -237,8 +524,9 @@
       micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
-          noiseSuppression: false,
+          noiseSuppression: true,
           autoGainControl: true,
+          channelCount: 1,
         },
       });
       micStream.getAudioTracks().forEach((t) => {
@@ -316,13 +604,25 @@
   }
 
   function cancelSpeech() {
-    if (!speaking && !window.speechSynthesis?.speaking) return false;
+    if (!speaking && !window.speechSynthesis?.speaking && !ttsAudio) return false;
+    speakGeneration += 1;
     window.speechSynthesis?.cancel();
+    stopTtsPlayback();
+    if (chatStreamPort) {
+      try {
+        chatStreamPort.disconnect();
+      } catch {
+        /* ignore */
+      }
+      chatStreamPort = null;
+    }
+    window.DeskCopilotRealtime?.cancelSpeech?.();
     clearSpeakTimers();
     const done = speakDone;
     speakDone = null;
     setSpeaking(false);
     done?.();
+    resumeNativeStt();
     if (listening) onStatus?.("Listening…", true);
     return true;
   }
@@ -331,16 +631,23 @@
     if (recording || transcribing || !listening || speaking) return;
     recordMimeType = cleanMime(pickMimeType() || "audio/webm");
     recordChunks = [];
+    const mime = pickMimeType();
+    const recorderOpts = mime
+      ? { mimeType: mime, audioBitsPerSecond: 128000 }
+      : { audioBitsPerSecond: 128000 };
     try {
-      const opts = pickMimeType() ? { mimeType: pickMimeType() } : undefined;
-      recorder = opts ? new MediaRecorder(micStream, opts) : new MediaRecorder(micStream);
+      recorder = new MediaRecorder(micStream, recorderOpts);
     } catch {
       try {
-        recorder = new MediaRecorder(micStream);
-        recordMimeType = "audio/webm";
+        recorder = mime ? new MediaRecorder(micStream, { mimeType: mime }) : new MediaRecorder(micStream);
       } catch {
-        onStatus?.("Recording not supported in this browser", false);
-        return;
+        try {
+          recorder = new MediaRecorder(micStream);
+          recordMimeType = "audio/webm";
+        } catch {
+          onStatus?.("Recording not supported in this browser", false);
+          return;
+        }
       }
     }
 
@@ -351,6 +658,7 @@
     recorder.onstop = () => {
       recorder = null;
       setRecording(false);
+      finishingUtterance = false;
       void transcribeChunks(recordMimeType);
     };
 
@@ -360,7 +668,7 @@
       onStatus?.("Recording error — try Voice off/on", false);
     };
 
-    recorder.start(200);
+    recorder.start(100);
     speechStartedAt = Date.now();
     lastLoudAt = Date.now();
     setRecording(true);
@@ -372,31 +680,36 @@
   }
 
   function finishRecording() {
-    if (!recording || !recorder) return;
+    if (!recording || !recorder || finishingUtterance) return;
+    finishingUtterance = true;
+    const activeRecorder = recorder;
     if (utteranceTimer) {
       clearTimeout(utteranceTimer);
       utteranceTimer = null;
     }
     if (Date.now() - speechStartedAt < MIN_SPEECH_MS) {
       try {
-        if (recorder.state === "recording") recorder.stop();
+        if (activeRecorder.state === "recording") activeRecorder.stop();
       } catch {
         /* ignore */
       }
       recordChunks = [];
       setRecording(false);
       recorder = null;
+      finishingUtterance = false;
       onInterim?.("");
       if (listening) onStatus?.("Listening…", true);
       return;
     }
     try {
-      if (recorder.state === "recording") {
-        recorder.requestData();
-        recorder.stop();
+      if (activeRecorder.state === "recording") {
+        activeRecorder.requestData();
+        activeRecorder.stop();
       }
     } catch {
       setRecording(false);
+      recorder = null;
+      finishingUtterance = false;
     }
   }
 
@@ -407,12 +720,13 @@
       return;
     }
 
+    const token = ++transcribeToken;
     transcribing = true;
     onStatus?.("Transcribing…", null);
     try {
       const blob = new Blob(recordChunks, { type: cleanMime(mimeType) });
       recordChunks = [];
-      if (blob.size < 500) {
+      if (blob.size < 900) {
         onInterim?.("");
         if (listening) onStatus?.("Didn't catch that — speak louder, then pause", null);
         return;
@@ -421,13 +735,20 @@
       const raw = await transcribeViaBackground(base64, mimeType);
       const text = normalizeTranscript(raw);
       onInterim?.("");
+      if (token !== transcribeToken) return;
+      if (text && isLikelyHallucination(text)) {
+        if (listening) onStatus?.("Didn't catch that — speak again", null);
+        return;
+      }
       if (text) handleTranscript(text);
       else if (listening) onStatus?.("Listening…", true);
     } catch (e) {
       onInterim?.("");
       const msg = e instanceof Error ? e.message : String(e);
-      if (/no speech detected|didn't catch/i.test(msg)) {
-        if (listening) onStatus?.("Didn't catch that — speak again", null);
+      if (/no speech detected|didn't catch|too short|OPENAI_API_KEY|fetch failed|Failed to fetch/i.test(msg)) {
+        if (/OPENAI_API_KEY|fetch failed|Failed to fetch/i.test(msg)) {
+          onStatus?.("Backend offline — run npm run dev", false);
+        } else if (listening) onStatus?.("Didn't catch that — speak again", null);
       } else if (/invalid file format/i.test(msg)) {
         if (listening) onStatus?.("Audio format error — reload extension", false);
       } else {
@@ -436,6 +757,221 @@
       if (listening) setTimeout(() => onStatus?.("Listening…", true), 1500);
     } finally {
       transcribing = false;
+    }
+  }
+
+  function isAutonomousEnabled() {
+    try {
+      return localStorage.getItem("dc-auto-voice") !== "0";
+    } catch {
+      return true;
+    }
+  }
+
+  function bgSend(msg, timeoutMs = 60000) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("Timed out")), timeoutMs);
+      chrome.runtime.sendMessage(msg, (res) => {
+        clearTimeout(timer);
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message || "Extension error"));
+          return;
+        }
+        resolve(res);
+      });
+    });
+  }
+
+  function splitSentences(text) {
+    const parts = text.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
+    return parts.length ? parts : [text.trim()];
+  }
+
+  async function fetchTtsAudio(text) {
+    const res = await bgSend({ type: "TTS", text: text.slice(0, 4096) }, 45000);
+    if (res?.error) throw new Error(res.error);
+    if (!res?.audioBase64) throw new Error("Empty TTS");
+    const binary = atob(res.audioBase64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: res.mimeType || "audio/mpeg" });
+  }
+
+  function stopTtsPlayback() {
+    ttsQueue = [];
+    ttsPlaying = false;
+    if (ttsAudio) {
+      try {
+        ttsAudio.pause();
+        ttsAudio.src = "";
+      } catch {
+        /* ignore */
+      }
+      ttsAudio = null;
+    }
+  }
+
+  async function playTtsBlob(blob, gen) {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      ttsAudio = audio;
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        if (ttsAudio === audio) ttsAudio = null;
+        resolve();
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      audio.play().catch(() => resolve());
+    });
+  }
+
+  async function drainTtsQueue(gen) {
+    if (ttsPlaying || gen !== speakGeneration) return;
+    ttsPlaying = true;
+    while (ttsQueue.length && gen === speakGeneration) {
+      const blob = ttsQueue.shift();
+      await playTtsBlob(blob, gen);
+    }
+    ttsPlaying = false;
+  }
+
+  async function enqueueTtsSentence(sentence, gen) {
+    if (!sentence.trim() || gen !== speakGeneration) return;
+    try {
+      const blob = await fetchTtsAudio(sentence);
+      if (gen !== speakGeneration) return;
+      streamTtsPlayed = true;
+      ttsQueue.push(blob);
+      void drainTtsQueue(gen);
+    } catch {
+      /* fallback handled by caller */
+    }
+  }
+
+  function streamChatViaPort(payload) {
+    return new Promise((resolve, reject) => {
+      let port;
+      try {
+        port = chrome.runtime.connect({ name: "desk-copilot-chat-stream" });
+      } catch (e) {
+        reject(e);
+        return;
+      }
+      chatStreamPort = port;
+
+      let reply = "";
+      let sentenceBuf = "";
+      let needsChartRead = null;
+
+      port.onMessage.addListener((msg) => {
+        if (msg.type === "json" && msg.data?.needsChartRead) {
+          needsChartRead = msg.data;
+          return;
+        }
+        if (msg.type === "sse") {
+          const ev = msg.data;
+          if (ev.type === "understood" && ev.text) {
+            onStatus?.(`Understood: "${ev.text}"`, true);
+          }
+          if (ev.type === "delta" && ev.text) {
+            reply += ev.text;
+            sentenceBuf += ev.text;
+            onInterim?.(reply);
+            const m = sentenceBuf.match(/(.+?[.!?])(?:\s+|$)/);
+            if (m) {
+              const sentence = m[1].trim();
+              sentenceBuf = sentenceBuf.slice(m[0].length);
+              void enqueueTtsSentence(sentence, speakGeneration);
+            }
+          }
+          if (ev.type === "done" && ev.reply) reply = ev.reply;
+          if (ev.type === "error") reject(new Error(ev.error || "Stream failed"));
+        }
+        if (msg.type === "error") reject(new Error(msg.error || "Stream failed"));
+        if (msg.type === "done") {
+          chatStreamPort = null;
+          try {
+            port.disconnect();
+          } catch {
+            /* ignore */
+          }
+          if (needsChartRead) {
+            resolve({ needsChartRead: true, question: needsChartRead.question, reply: "" });
+            return;
+          }
+          const tail = sentenceBuf.trim();
+          if (tail) void enqueueTtsSentence(tail, speakGeneration);
+          resolve({ reply: reply.trim() });
+        }
+      });
+
+      port.onDisconnect.addListener(() => {
+        chatStreamPort = null;
+      });
+
+      port.postMessage({ type: "START", ...payload });
+    });
+  }
+
+  async function respondWithCascade(transcript) {
+    if (!getChatContext) {
+      onChat?.(transcript);
+      return;
+    }
+
+    const ctx = getChatContext();
+    const messages = [...(ctx.messages || []), { role: "user", content: transcript }];
+    onUserTranscript?.(transcript);
+
+    cancelSpeech();
+    const gen = ++speakGeneration;
+    streamTtsPlayed = false;
+    speakDone = null;
+    setSpeaking(true);
+    pauseNativeStt();
+    onStatus?.("Desk thinking…", null);
+
+    try {
+      const result = await streamChatViaPort({
+        messages,
+        symbol: ctx.symbol,
+        lastVerdict: ctx.lastVerdict,
+        voiceInput: true,
+      });
+
+      if (result.needsChartRead) {
+        setSpeaking(false);
+        resumeNativeStt();
+        await onNeedsChartRead?.(result.question || transcript);
+        if (listening) onStatus?.("Voice live — talk anytime", true);
+        return;
+      }
+
+      const reply = (result.reply || "").trim();
+      if (!reply) throw new Error("Empty reply");
+
+      onAssistantReply?.(reply, transcript);
+      onStatus?.("Speaking — talk to interrupt", null);
+
+      await drainTtsQueue(gen);
+      if (gen === speakGeneration && autoRead && !streamTtsPlayed && reply) {
+        await new Promise((resolve) => speakWithBrowserTts(reply, resolve));
+      }
+      if (gen === speakGeneration) {
+        setSpeaking(false);
+        resumeNativeStt();
+        if (listening) onStatus?.("Voice live — talk anytime", true);
+      }
+    } catch (e) {
+      setSpeaking(false);
+      const msg = e instanceof Error ? e.message : String(e);
+      onStatus?.(msg, false);
+      onChat?.(transcript, { skipBubble: true });
+      resumeNativeStt();
     }
   }
 
@@ -457,20 +993,29 @@
 
     const now = Date.now();
     const norm = t.toLowerCase();
-    if (norm === lastHeardText && now - lastHeardAt < 2000) {
+    if (utteranceBusy || (norm === lastHeardText && now - lastHeardAt < 8000)) {
       if (listening) onStatus?.("Listening…", true);
       return;
     }
     lastHeardAt = now;
     lastHeardText = norm;
+    utteranceBusy = true;
 
     onStatus?.(`Heard: "${t}"`, true);
-    onInterim?.(t);
+    onInterim?.("");
 
     if (cmd) {
+      utteranceBusy = false;
       onCommand?.(cmd, t);
       return;
     }
+    if (engineMode === "cascade" && getChatContext) {
+      void respondWithCascade(t).finally(() => {
+        utteranceBusy = false;
+      });
+      return;
+    }
+    utteranceBusy = false;
     if (onChat) {
       onChat(t);
       onStatus?.("Got it…", true);
@@ -478,17 +1023,13 @@
     }
   }
 
-  function speak(text, onDone) {
-    const line = toSpeakable(text);
-    if (!line || !window.speechSynthesis) {
-      onDone?.();
-      return;
-    }
-
-    cancelSpeech();
-    const excerpt = line.slice(0, 420);
+  function speakWithBrowserTts(line, onDone) {
+    const gen = speakGeneration;
+    const chunks = chunkForSpeech(line);
+    let chunkIndex = 0;
     speakDone = onDone;
     setSpeaking(true);
+    pauseNativeStt();
     onStatus?.("Speaking — talk to interrupt", null);
 
     try {
@@ -499,32 +1040,178 @@
     }
     window.speechSynthesis.cancel();
 
-    const u = new SpeechSynthesisUtterance(excerpt);
-    u.rate = 1;
-    u.pitch = 1;
-    u.lang = VOICE_LANG;
-
     let finished = false;
     const finish = () => {
-      if (finished) return;
+      if (finished || gen !== speakGeneration) return;
       finished = true;
       clearSpeakTimers();
       const done = speakDone;
       speakDone = null;
       setSpeaking(false);
       done?.();
+      resumeNativeStt();
       if (listening) onStatus?.("Listening…", true);
     };
 
-    u.onend = finish;
-    u.onerror = finish;
+    const speakNext = () => {
+      if (finished || gen !== speakGeneration) return;
+      if (chunkIndex >= chunks.length) {
+        finish();
+        return;
+      }
 
+      const excerpt = chunks[chunkIndex++];
+      const u = new SpeechSynthesisUtterance(excerpt);
+      u.rate = 1;
+      u.pitch = 1;
+      u.lang = VOICE_LANG;
+      u.onend = () => {
+        if (gen !== speakGeneration) return;
+        speakNext();
+      };
+      u.onerror = () => {
+        if (gen !== speakGeneration) return;
+        speakNext();
+      };
+      window.speechSynthesis.speak(u);
+    };
+
+    // Chrome pauses synthesis on long reads — keep it alive; don't infer "done" from polling.
     speakPollTimer = setInterval(() => {
-      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) finish();
-    }, 300);
+      if (gen !== speakGeneration || finished) return;
+      try {
+        window.speechSynthesis.resume();
+      } catch {
+        /* ignore */
+      }
+    }, 8000);
 
-    speakMaxTimer = setTimeout(finish, Math.min(35000, excerpt.length * 85 + 1500));
-    window.speechSynthesis.speak(u);
+    speakMaxTimer = setTimeout(finish, estimateSpeakMs(line));
+    speakNext();
+  }
+
+  async function speakWithOpenAiTts(line, onDone) {
+    const gen = ++speakGeneration;
+    speakDone = onDone;
+    setSpeaking(true);
+    pauseNativeStt();
+    stopTtsPlayback();
+    onStatus?.("Speaking — talk to interrupt", null);
+
+    const sentences = splitSentences(line);
+    for (const sentence of sentences) {
+      if (gen !== speakGeneration) break;
+      try {
+        const blob = await fetchTtsAudio(sentence);
+        if (gen !== speakGeneration) break;
+        await playTtsBlob(blob, gen);
+      } catch {
+        speakWithBrowserTts(line, onDone);
+        return;
+      }
+    }
+
+    if (gen !== speakGeneration) return;
+    const done = speakDone;
+    speakDone = null;
+    setSpeaking(false);
+    done?.();
+    resumeNativeStt();
+    if (listening) onStatus?.("Voice live — talk anytime", true);
+  }
+
+  function speak(text, onDone) {
+    const line = toSpeakable(text);
+    if (!line) {
+      onDone?.();
+      return;
+    }
+    cancelSpeech();
+    void speakWithOpenAiTts(line, onDone);
+  }
+
+  async function startCascadeVoice() {
+    engineMode = "cascade";
+    const ok = await startListening();
+    if (ok) onStatus?.("Voice live — talk anytime", true);
+    return ok;
+  }
+
+  function stopVoiceSession() {
+    engineMode = "off";
+    if (chatStreamPort) {
+      try {
+        chatStreamPort.disconnect();
+      } catch {
+        /* ignore */
+      }
+      chatStreamPort = null;
+    }
+    if (window.DeskCopilotRealtime?.suspend) {
+      window.DeskCopilotRealtime.suspend();
+    } else if (window.DeskCopilotRealtime?.isActive?.()) {
+      window.DeskCopilotRealtime.stop();
+    }
+    setListening(false);
+    flushPendingTranscript();
+    stopNativeStt();
+    cancelSpeech();
+    finishRecording();
+    releaseMic();
+    onInterim?.("");
+  }
+
+  async function startAutonomous(symbolResolver) {
+    if (!supported() || !isAutonomousEnabled() || userVoiceOff) return false;
+
+    window.DeskCopilotRealtime?.suspend?.();
+
+    if (window.DeskCopilotRealtime?.start) {
+      const rtOk = await window.DeskCopilotRealtime.start(symbolResolver);
+      if (rtOk) {
+        engineMode = "realtime";
+        setListening(true);
+        onStatus?.("Agent live — talk anytime", true);
+        return true;
+      }
+      window.DeskCopilotRealtime?.stop?.();
+    }
+
+    return startCascadeVoice();
+  }
+
+  function stopAutonomous() {
+    userVoiceOff = true;
+    stopVoiceSession();
+    onStatus?.("Agent off", null);
+  }
+
+  function resumeAutonomousAgent() {
+    userVoiceOff = false;
+  }
+
+  async function toggleAutonomous(symbolResolver) {
+    if (
+      engineMode !== "off" ||
+      listening ||
+      window.DeskCopilotRealtime?.isActive?.() ||
+      window.DeskCopilotRealtime?.wantsActive?.()
+    ) {
+      stopAutonomous();
+      return false;
+    }
+    resumeAutonomousAgent();
+    return startAutonomous(symbolResolver);
+  }
+
+  async function switchToWhisperMode(reason) {
+    if (sttMode === "whisper" || !listening) return;
+    stopNativeStt();
+    sttMode = "whisper";
+    nativeSttErrors = 0;
+    onStatus?.(reason || "Using Whisper fallback…", null);
+    await startVad();
+    if (listening) onStatus?.("Listening… speak, then pause", true);
   }
 
   async function startListening() {
@@ -540,6 +1227,10 @@
       return false;
     }
 
+    nativeSttErrors = 0;
+    stopNativeStt();
+    // Whisper + VAD is reliable on TradingView; browser STT often starts but never hears.
+    sttMode = "whisper";
     setListening(true);
     await startVad();
     onStatus?.("Listening… speak, then pause", true);
@@ -547,7 +1238,10 @@
   }
 
   function stopListening() {
+    if (engineMode === "realtime") return;
     setListening(false);
+    flushPendingTranscript();
+    stopNativeStt();
     cancelSpeech();
     finishRecording();
     releaseMic();
@@ -596,17 +1290,28 @@
       onSpeakingChange = handlers.onSpeakingChange;
       onListeningChange = handlers.onListeningChange;
       onRecordingChange = handlers.onRecordingChange;
+      getChatContext = handlers.getChatContext;
+      onAssistantReply = handlers.onAssistantReply;
+      onNeedsChartRead = handlers.onNeedsChartRead;
+      onUserTranscript = handlers.onUserTranscript;
+      userVoiceOff = handlers.autonomous === false;
       return true;
     },
     testMic,
     startListening,
-    toggleListening,
-    stopListening,
+    startAutonomous,
+    stopAutonomous,
+    stopVoiceSession,
+    resumeAutonomousAgent,
+    toggleAutonomous,
+    toggleListening: toggleAutonomous,
+    stopListening: stopAutonomous,
+    isAgentEnabled: isAutonomousEnabled,
     cancelSpeech,
     speakBrief: speak,
     speak,
     isSpeaking() {
-      return speaking;
+      return speaking || Boolean(ttsAudio) || window.DeskCopilotRealtime?.isSpeaking?.();
     },
     isRecording() {
       return recording;
@@ -619,7 +1324,13 @@
     },
     supported,
     isListening() {
-      return listening;
+      return listening || window.DeskCopilotRealtime?.isActive?.();
+    },
+    getEngineMode() {
+      return engineMode;
+    },
+    getSttMode() {
+      return sttMode;
     },
   };
 })();

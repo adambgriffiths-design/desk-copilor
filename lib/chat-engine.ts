@@ -29,17 +29,18 @@ function wantsMarketContext(text: string): boolean {
   );
 }
 
-export async function generateChatReply(input: {
+export type ChatPromptInput = {
   messages: ChatMessage[];
   symbol?: string;
   lastVerdict?: string;
   forceMarket?: boolean;
   voiceInput?: boolean;
   voiceRaw?: string;
-}): Promise<ChatReply> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY not set");
+};
 
+export async function buildChatSystemPrompt(
+  input: ChatPromptInput
+): Promise<{ system: string; marketDataWarning: string | null }> {
   const recentUser = input.messages
     .filter((m) => m.role === "user")
     .slice(-3)
@@ -63,7 +64,7 @@ export async function generateChatReply(input: {
   const learned = await readLearnedRules();
   const learnedText = formatLearnedRulesForPrompt(learned);
 
-  const systemParts = [
+  const system = [
     CHAT_SYSTEM_PROMPT,
     learnedText && `Learned desk rules:\n${learnedText}`,
     input.symbol && `Chart symbol: ${input.symbol}`,
@@ -81,17 +82,43 @@ export async function generateChatReply(input: {
     .filter(Boolean)
     .join("\n\n");
 
+  return { system, marketDataWarning };
+}
+
+export async function generateChatReply(
+  input: ChatPromptInput
+): Promise<ChatReply> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("OPENAI_API_KEY not set");
+
+  const { system, marketDataWarning } = await buildChatSystemPrompt(input);
   const history = input.messages.slice(-16);
 
   const openai = new OpenAI({ apiKey });
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
     max_tokens: 550,
-    messages: [{ role: "system", content: systemParts }, ...history],
+    messages: [{ role: "system", content: system }, ...history],
   });
 
   const reply = response.choices[0]?.message?.content?.trim();
   if (!reply) throw new Error("No response from model");
 
   return { reply, marketDataWarning };
+}
+
+export async function streamChatReply(input: ChatPromptInput) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("OPENAI_API_KEY not set");
+
+  const { system } = await buildChatSystemPrompt(input);
+  const history = input.messages.slice(-16);
+
+  const openai = new OpenAI({ apiKey });
+  return openai.chat.completions.create({
+    model: "gpt-4o",
+    max_tokens: 550,
+    stream: true,
+    messages: [{ role: "system", content: system }, ...history],
+  });
 }

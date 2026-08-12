@@ -57,7 +57,7 @@ export async function generateLiveVerdict(input: {
     input.chartTime && `Chart time (EST): ${input.chartTime}`,
     input.question &&
       `Trader asked: "${input.question}" — answer that directly in line 1 of your desk brief.`,
-    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. Respond with a dense labeled desk brief in full words (no abbreviations).",
+    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. **Include Entry zone, Entry status (ACTIVE/WAIT/EXTENDED), Wait for, Target 1, Target 2, Exit plan** from Execution scaffold. **Do NOT recommend stops.** **Multiple FVGs: retrace to most recent gap only** — older lower bullish / higher bearish gaps may not fill. No deep retrace through opposite MSS. Respond with a dense labeled desk brief in full words (no abbreviations).",
   ]
     .filter(Boolean)
     .join("\n\n");

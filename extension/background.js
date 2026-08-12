@@ -24,6 +24,100 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
+/** Keep service worker alive while a TradingView tab has the panel open. */
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === "desk-copilot-keepalive") {
+    port.onMessage.addListener(() => {});
+    port.onDisconnect.addListener(() => {});
+    return;
+  }
+
+  if (port.name !== "desk-copilot-chat-stream") return;
+
+  let portOpen = true;
+  port.onDisconnect.addListener(() => {
+    portOpen = false;
+  });
+
+  function safePortPost(message) {
+    if (!portOpen) return false;
+    try {
+      port.postMessage(message);
+      return true;
+    } catch {
+      portOpen = false;
+      return false;
+    }
+  }
+
+  port.onMessage.addListener(async (msg) => {
+    if (msg.type !== "START") return;
+    try {
+      const base = await resolveApiBase();
+      const res = await fetch(`${base}/api/chat/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: msg.messages,
+          symbol: msg.symbol,
+          lastVerdict: msg.lastVerdict,
+          voiceInput: msg.voiceInput === true,
+        }),
+      });
+
+      const ct = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        safePortPost({ type: "error", error: err.error || `HTTP ${res.status}` });
+        return;
+      }
+
+      if (ct.includes("application/json")) {
+        const data = await res.json();
+        safePortPost({ type: "json", data });
+        safePortPost({ type: "done" });
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) {
+        safePortPost({ type: "error", error: "No stream body" });
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (portOpen) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data: ")) continue;
+          try {
+            if (!safePortPost({ type: "sse", data: JSON.parse(line.slice(6)) })) break;
+          } catch {
+            /* ignore malformed chunk */
+          }
+        }
+      }
+      try {
+        await reader.cancel();
+      } catch {
+        /* ignore */
+      }
+      safePortPost({ type: "done" });
+    } catch (e) {
+      safePortPost({
+        type: "error",
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+  });
+});
+
 async function captureChartPng(tab) {
   if (!tab?.id) throw new Error("Open a TradingView chart tab");
 
@@ -57,7 +151,7 @@ async function captureChartPng(tab) {
   );
   throw new Error(
     needsClick
-      ? "Click the Desk Copilot icon in Chrome toolbar (grants screenshot), then Get verdict"
+      ? "Click The Trading Desk icon in Chrome toolbar (grants screenshot), then Get verdict"
       : errors[0] || "Screenshot failed"
   );
 }
@@ -105,6 +199,41 @@ chrome.action.onClicked.addListener(async (tab) => {
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === "REALTIME_SESSION") {
+    apiFetch("/api/voice/realtime-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol: msg.symbol || "MNQ1!" }),
+      timeoutMs: 30000,
+    })
+      .then(sendResponse)
+      .catch((e) => sendResponse({ error: e.message }));
+    return true;
+  }
+  if (msg.type === "TTS") {
+    resolveApiBase()
+      .then(async (base) => {
+        const res = await fetch(`${base}/api/voice/tts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: msg.text || "" }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `TTS ${res.status}`);
+        }
+        const buf = await res.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const step = 0x8000;
+        for (let i = 0; i < bytes.length; i += step) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + step));
+        }
+        sendResponse({ audioBase64: btoa(binary), mimeType: "audio/mpeg" });
+      })
+      .catch((e) => sendResponse({ error: e.message }));
+    return true;
+  }
   if (msg.type === "TRANSCRIBE") {
     apiFetch("/api/transcribe", {
       method: "POST",
@@ -198,13 +327,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
-  if (msg.type === "PING" || msg.type === "STATS") {
-    const path = msg.type === "PING" ? "/api/health" : "/api/session";
-    apiFetch(path)
-      .then((data) => sendResponse(msg.type === "PING" ? { ok: true, data } : data))
-      .catch((e) =>
-        sendResponse(msg.type === "PING" ? { ok: false, error: e.message } : { error: e.message })
-      );
+  if (msg.type === "PING" || msg.type === "RECONNECT") {
+    if (msg.type === "RECONNECT") clearApiCache();
+    pingHealth()
+      .then((result) => sendResponse(result))
+      .catch((e) => sendResponse({ ok: false, error: e.message }));
+    return true;
+  }
+  if (msg.type === "STATS") {
+    apiFetch("/api/session", { timeoutMs: 120000 })
+      .then((data) => sendResponse(data))
+      .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
   if (msg.type === "RATE") {

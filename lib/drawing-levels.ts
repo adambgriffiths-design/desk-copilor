@@ -1,5 +1,17 @@
 import type { Bar, MarketContext } from "./types";
-import { estTimeOnDateKey, fvgFormationTime, getEstDateKey } from "./market-data";
+import {
+  barTimeSec,
+  barsInEstWindow,
+  estTimeOnDateKey,
+  findExtremeBarInWindow,
+  findFormationBarAtPrice,
+  findBarClosestTo,
+  fvgFormationTime,
+  getEstDateKey,
+  priorEstDateKey,
+  resolvePdLevelAnchorTimes,
+  RTH_CLOSE_MIN,
+} from "./market-data";
 
 const FVG_PRICE_TOL = 1.5;
 
@@ -110,33 +122,84 @@ function push(
   out.push(level);
 }
 
+function sessionBarWindows(m1: Bar[], fetchedAt: string) {
+  const today = getEstDateKey(new Date(fetchedAt));
+  const yesterday = priorEstDateKey(m1, today) ?? today;
+  return {
+    asia: [
+      ...barsInEstWindow(m1, 18 * 60, 24 * 60, yesterday),
+      ...barsInEstWindow(m1, 0, 60, today),
+    ],
+    london: barsInEstWindow(m1, 2 * 60, 5 * 60, today),
+    nyPre: barsInEstWindow(m1, 7 * 60, 9 * 60 + 30, today),
+    nyRth: barsInEstWindow(m1, 9 * 60 + 30, 16 * 60, today),
+    nyPm: barsInEstWindow(m1, 13 * 60 + 30, 16 * 60, today),
+  };
+}
+
+function anchorFromSessionWindow(
+  windowBars: Bar[],
+  price: number,
+  kind: "high" | "low",
+  timeHint?: number
+): number | undefined {
+  const extremeBar = findExtremeBarInWindow(windowBars, kind, price);
+  if (extremeBar) return barTimeSec(extremeBar);
+  const formed = findFormationBarAtPrice(windowBars, price, kind);
+  if (formed != null) return formed;
+  return timeHint;
+}
+
 /** Level prices from one-minute execution data (ORG, sessions) + daily arrays for HTF. */
-export function buildDrawingLevels(ctx: MarketContext): DrawingLevel[] {
+export function buildDrawingLevels(ctx: MarketContext, m1: Bar[] = []): DrawingLevel[] {
   const levels: DrawingLevel[] = [];
   const seen = new Set<string>();
-  const dayStart = ctx.daily.currentDayStartTime;
+  const pdAnchors = resolvePdLevelAnchorTimes(m1, {
+    fetchedAt: ctx.fetchedAt,
+    orgFormedAt: ctx.org?.formedAtTime,
+    hasNdog: ctx.htfPdArrays.ndog != null,
+  });
 
   if (ctx.org) {
-    const orgStart = ctx.org.formedAtTime ?? dayStart;
-    for (const [id, price, label, dash, color] of [
-      ["org_top", ctx.org.top, "Opening range gap top", "4 3", LEVEL_COLORS.org],
-      ["org_bottom", ctx.org.bottom, "Opening range gap bottom", "4 3", LEVEL_COLORS.org],
-      ["org_ce", ctx.org.ce, "ORG midpoint (50%)", "6 4", LEVEL_COLORS.orgCe],
-    ] as const) {
-      push(levels, seen, {
-        id,
-        label,
-        price,
-        color,
-        dash,
-        group: "org",
-        startTime: orgStart,
-      });
-    }
+    const todayKey = getEstDateKey(new Date(ctx.fetchedAt));
+    const priorKey = priorEstDateKey(m1, todayKey);
+    const close415Bar = priorKey ? findBarClosestTo(m1, RTH_CLOSE_MIN, priorKey) : null;
+    const close415Time = close415Bar ? barTimeSec(close415Bar) : undefined;
+    const open930Time = ctx.org.formedAtTime;
+    const topFromClose = Math.abs(ctx.org.top - ctx.org.close415) < 0.01;
+    const bottomFromClose = Math.abs(ctx.org.bottom - ctx.org.close415) < 0.01;
+
+    push(levels, seen, {
+      id: "org_top",
+      label: "Opening range gap top",
+      price: ctx.org.top,
+      color: LEVEL_COLORS.org,
+      dash: "4 3",
+      group: "org",
+      startTime: topFromClose ? close415Time : open930Time,
+    });
+    push(levels, seen, {
+      id: "org_bottom",
+      label: "Opening range gap bottom",
+      price: ctx.org.bottom,
+      color: LEVEL_COLORS.org,
+      dash: "4 3",
+      group: "org",
+      startTime: bottomFromClose ? close415Time : open930Time,
+    });
+    push(levels, seen, {
+      id: "org_ce",
+      label: "ORG midpoint (50%)",
+      price: ctx.org.ce,
+      color: LEVEL_COLORS.orgCe,
+      dash: "6 4",
+      group: "org",
+      startTime: open930Time,
+    });
   }
 
   if (ctx.nwog) {
-    const nwogStart = ctx.nwog.startTime ?? dayStart;
+    const nwogStart = ctx.nwog.startTime;
     push(levels, seen, {
       id: "nwog_top",
       label: "New week opening gap top",
@@ -157,15 +220,24 @@ export function buildDrawingLevels(ctx: MarketContext): DrawingLevel[] {
     });
   }
 
-  const sessionLines: Array<[string, number, string, number | undefined]> = [
-    ["asia_high", ctx.sessions.asiaHigh, "Asia session high", ctx.sessions.asiaHighTime],
-    ["asia_low", ctx.sessions.asiaLow, "Asia session low", ctx.sessions.asiaLowTime],
-    ["london_high", ctx.sessions.londonHigh, "London session high", ctx.sessions.londonHighTime],
-    ["london_low", ctx.sessions.londonLow, "London session low", ctx.sessions.londonLowTime],
-    ["ny_pre_high", ctx.sessions.nyPreHigh, "New York pre-market high", ctx.sessions.nyPreHighTime],
-    ["ny_pre_low", ctx.sessions.nyPreLow, "New York pre-market low", ctx.sessions.nyPreLowTime],
+  const sessionWindows = sessionBarWindows(m1, ctx.fetchedAt);
+
+  const sessionLines: Array<
+    [string, number, string, Bar[], number | undefined, "high" | "low"]
+  > = [
+    ["asia_high", ctx.sessions.asiaHigh, "Asia session high", sessionWindows.asia, ctx.sessions.asiaHighTime, "high"],
+    ["asia_low", ctx.sessions.asiaLow, "Asia session low", sessionWindows.asia, ctx.sessions.asiaLowTime, "low"],
+    ["london_high", ctx.sessions.londonHigh, "London session high", sessionWindows.london, ctx.sessions.londonHighTime, "high"],
+    ["london_low", ctx.sessions.londonLow, "London session low", sessionWindows.london, ctx.sessions.londonLowTime, "low"],
+    ["ny_pre_high", ctx.sessions.nyPreHigh, "New York pre-market high", sessionWindows.nyPre, ctx.sessions.nyPreHighTime, "high"],
+    ["ny_pre_low", ctx.sessions.nyPreLow, "New York pre-market low", sessionWindows.nyPre, ctx.sessions.nyPreLowTime, "low"],
+    ["ny_rth_high", ctx.sessions.nyRthHigh, "New York RTH high", sessionWindows.nyRth, ctx.sessions.nyRthHighTime, "high"],
+    ["ny_rth_low", ctx.sessions.nyRthLow, "New York RTH low", sessionWindows.nyRth, ctx.sessions.nyRthLowTime, "low"],
+    ["ny_pm_high", ctx.sessions.nyPmHigh, "New York PM high", sessionWindows.nyPm, ctx.sessions.nyPmHighTime, "high"],
+    ["ny_pm_low", ctx.sessions.nyPmLow, "New York PM low", sessionWindows.nyPm, ctx.sessions.nyPmLowTime, "low"],
   ];
-  for (const [id, price, label, startTime] of sessionLines) {
+  for (const [id, price, label, windowBars, timeHint, kind] of sessionLines) {
+    const startTime = anchorFromSessionWindow(windowBars, price, kind, timeHint);
     push(levels, seen, {
       id,
       label,
@@ -173,7 +245,7 @@ export function buildDrawingLevels(ctx: MarketContext): DrawingLevel[] {
       color: LEVEL_COLORS.session,
       dash: "2 3",
       group: "session",
-      startTime: startTime ?? dayStart,
+      startTime,
     });
   }
 
@@ -195,7 +267,7 @@ export function buildDrawingLevels(ctx: MarketContext): DrawingLevel[] {
       color: LEVEL_COLORS.daily,
       dash: pd.id === "pdc" || pd.id.startsWith("ndog") ? "4 2" : "2 3",
       group: "daily",
-      startTime: dayStart,
+      startTime: pdAnchors[pd.id],
     });
   }
 

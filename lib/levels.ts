@@ -2,6 +2,7 @@ import type { Bar, FvgZone, MarketContext } from "./types";
 import { computeBiasStack } from "./bias-analysis";
 import { detectUnfilledIntradayFvgs } from "./gap-zones";
 import { computeHtfPdArrays, computePremiumDiscount, formatPdArrayBrief, pdArrayDirectionHint } from "./pd-arrays";
+import { formatExecutionPlan } from "./execution-plan";
 import { resolveSessionContext, sessionPhaseSummary } from "./sessions";
 import { buildStructureFacts } from "./structure";
 import {
@@ -11,6 +12,9 @@ import {
   findBarClosestTo,
   formatEst,
   getEstDateKey,
+  priorEstDateKey,
+  RTH_CLOSE_MIN,
+  RTH_OPEN_MIN,
   sessionHighLow,
 } from "./market-data";
 
@@ -31,13 +35,8 @@ function detectUnfilledFvgs(bars: Bar[], timeframe: FvgZone["timeframe"], lookba
   return detectUnfilledIntradayFvgs(bars, timeframe, lookback, 5);
 }
 
-const RTH_CLOSE_MIN = 16 * 60 + 15; // 4:15 PM ET
-const RTH_OPEN_MIN = 9 * 60 + 30; // 9:30 AM ET (cash open)
-
 function priorTradingDayKey(m1: Bar[], todayKey: string): string | null {
-  const keys = [...new Set(m1.map((b) => getEstDateKey(b.time)))].sort();
-  const idx = keys.indexOf(todayKey);
-  return idx > 0 ? keys[idx - 1]! : null;
+  return priorEstDateKey(m1, todayKey);
 }
 
 /** ORG = prior session 4:15 PM close → today 9:30 AM open. */
@@ -74,11 +73,11 @@ function sessionHighLowWithTimes(bars: Bar[]) {
   let lowTime = highTime;
   for (const bar of bars) {
     const t = Math.floor(bar.time.getTime() / 1000);
-    if (bar.high >= high) {
+    if (bar.high > high) {
       high = bar.high;
       highTime = t;
     }
-    if (bar.low <= low) {
+    if (bar.low < low) {
       low = bar.low;
       lowTime = t;
     }
@@ -363,6 +362,7 @@ export function buildMarketContext(
 
 export function formatContextForPrompt(ctx: MarketContext): string {
   const pdBrief = formatPdArrayBrief(ctx);
+  const execPlan = formatExecutionPlan(ctx);
   const biasAlert = ctx.biasStack.biasConflict
     ? `\n⚠️ **Partial bias conflict** (${ctx.biasStack.conflictPairs.join(", ")}) — tradeableBias: **${ctx.biasStack.tradeableBias}**. Still call in this direction at medium confidence unless chop at opening range gap fifty percent.\n`
     : `\n**Tradeable bias:** ${ctx.biasStack.tradeableBias} (${ctx.biasStack.alignedCount}/3 aligned). ${ctx.biasStack.summary}\n`;
@@ -373,6 +373,7 @@ The trader only uploaded a 1m chart. **Lead HTF analysis with daily PD arrays be
 
 ${pdBrief}
 ${biasAlert}
+${execPlan}
 \`\`\`json
 ${JSON.stringify(ctx, null, 2)}
 \`\`\`
@@ -382,6 +383,7 @@ Use biasStack.tradeableBias for tradeable bias. Chart image = one-minute executi
 
 export function formatContextForBacktestPrompt(ctx: MarketContext, m1Snapshot: string): string {
   const pdBrief = formatPdArrayBrief(ctx);
+  const execPlan = formatExecutionPlan(ctx);
   const biasAlert = ctx.biasStack.biasConflict
     ? `⚠️ BIAS CONFLICT (${ctx.biasStack.conflictPairs.join(", ")}) — tradeableBias: conflicted\n`
     : `Tradeable bias: ${ctx.biasStack.tradeableBias} (${ctx.biasStack.alignedCount}/3 aligned)\n`;
@@ -390,6 +392,7 @@ export function formatContextForBacktestPrompt(ctx: MarketContext, m1Snapshot: s
 
 ${pdBrief}
 ${biasAlert}
+${execPlan}
 \`\`\`json
 ${JSON.stringify(ctx, null, 2)}
 \`\`\`

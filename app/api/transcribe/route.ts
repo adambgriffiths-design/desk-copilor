@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI, { toFile } from "openai";
+import {
+  isTranscriptionHallucination,
+  TRANSCRIBE_PROMPT,
+} from "@/lib/transcription-guard";
 
 export const runtime = "nodejs";
 
@@ -9,11 +13,45 @@ const cors = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-const WHISPER_PROMPT =
-  "MNQ Nasdaq mini futures ICT trading desk. Chart read, FVG, ORG, CE, MSS, liquidity, bias, premium, discount, what do you see.";
+const TRANSCRIBE_MODELS = ["gpt-4o-mini-transcribe", "whisper-1"] as const;
+const MIN_AUDIO_BYTES = 1200;
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: cors });
+}
+
+async function transcribeBuffer(
+  openai: OpenAI,
+  buffer: Buffer,
+  mime: string,
+  ext: string
+): Promise<string> {
+  const file = await toFile(buffer, `voice.${ext}`, { type: mime });
+  let lastError: unknown;
+
+  for (const model of TRANSCRIBE_MODELS) {
+    try {
+      const transcription = await openai.audio.transcriptions.create({
+        file,
+        model,
+        language: "en",
+        prompt: TRANSCRIBE_PROMPT,
+      });
+      const text =
+        "text" in transcription && typeof transcription.text === "string"
+          ? transcription.text.trim()
+          : "";
+      if (text && !isTranscriptionHallucination(text)) return text;
+      if (text && isTranscriptionHallucination(text)) {
+        throw new Error("No speech detected");
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  if (lastError instanceof Error) throw lastError;
+  throw new Error("Transcription failed");
 }
 
 export async function POST(request: NextRequest) {
@@ -37,10 +75,16 @@ export async function POST(request: NextRequest) {
 
     const rawMime = (body.mimeType as string) || "audio/webm";
     const mime = rawMime.split(";")[0].trim() || "audio/webm";
-    const ext = mime.includes("wav") ? "wav" : mime.includes("mp4") ? "mp4" : mime.includes("ogg") ? "ogg" : "webm";
+    const ext = mime.includes("wav")
+      ? "wav"
+      : mime.includes("mp4")
+        ? "mp4"
+        : mime.includes("ogg")
+          ? "ogg"
+          : "webm";
     const buffer = Buffer.from(audioBase64, "base64");
 
-    if (buffer.length < 500) {
+    if (buffer.length < MIN_AUDIO_BYTES) {
       return NextResponse.json(
         { error: "Recording too short — speak longer, then pause" },
         { status: 400, headers: cors }
@@ -48,14 +92,8 @@ export async function POST(request: NextRequest) {
     }
 
     const openai = new OpenAI({ apiKey });
-    const transcription = await openai.audio.transcriptions.create({
-      file: await toFile(buffer, `voice.${ext}`, { type: mime }),
-      model: "whisper-1",
-      language: "en",
-      prompt: WHISPER_PROMPT,
-    });
+    const text = await transcribeBuffer(openai, buffer, mime, ext);
 
-    const text = transcription.text?.trim() || "";
     if (!text) {
       return NextResponse.json({ error: "No speech detected" }, { status: 400, headers: cors });
     }
@@ -63,6 +101,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ text }, { headers: cors });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Transcription failed";
-    return NextResponse.json({ error: message }, { status: 500, headers: cors });
+    const status =
+      message.includes("No speech detected") || message.includes("too short") ? 400 : 500;
+    return NextResponse.json({ error: message }, { status, headers: cors });
   }
 }

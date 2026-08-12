@@ -1,41 +1,61 @@
 (function () {
-  const DC_VERSION = "0.9.8";
-  const existing = document.getElementById("dc-panel");
-  if (existing?.dataset.dcVersion === DC_VERSION) return;
-  if (existing) existing.remove();
+  const DC_VERSION = "1.0.33";
+  const BOOT = `dc-boot-${DC_VERSION}`;
+  if (window[BOOT]) return;
+  window[BOOT] = true;
+  const WOLF_LOGO = `<svg class="dc-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true"><rect width="64" height="64" fill="#000"/><polygon fill="#fff" points="18,20 12,2 28,16"/><polygon fill="#fff" points="46,20 52,2 36,16"/><polygon fill="#000" points="17,17 14,7 22,15"/><polygon fill="#000" points="47,17 50,7 42,15"/><polygon fill="#fff" points="32,14 44,20 48,32 44,44 32,58 20,44 16,32 20,20"/><polygon fill="#000" points="19,27 27,29 25,33 17,31"/><polygon fill="#000" points="45,27 37,29 39,33 47,31"/><ellipse cx="22" cy="30" rx="3.2" ry="2.6" fill="#38B6FF"/><ellipse cx="42" cy="30" rx="3.2" ry="2.6" fill="#38B6FF"/><circle cx="23" cy="29" r="1" fill="#D4F0FF"/><circle cx="43" cy="29" r="1" fill="#D4F0FF"/><ellipse cx="32" cy="44" rx="3.5" ry="2.5" fill="#000"/><polygon fill="#fff" points="28,47 29,52 30,47"/><polygon fill="#fff" points="34,47 35,52 36,47"/></svg>`;
+
+  document.getElementById("dc-panel")?.remove();
 
   const panel = document.createElement("div");
   panel.id = "dc-panel";
   panel.dataset.dcVersion = DC_VERSION;
   panel.innerHTML = `
     <div class="dc-header" id="dc-header">
-      <span>Desk Copilot <span class="dc-ver">v0.9.8</span></span>
+      <div class="dc-brand-row">
+        ${WOLF_LOGO}
+        <div class="dc-brand">
+          <span class="dc-brand-title">The Trading Desk</span>
+          <span class="dc-tagline">No signals. Just the read.</span>
+          <span class="dc-ver">v1.0.33</span>
+        </div>
+      </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
     </div>
+    <div class="dc-primary" id="dc-primary">
+      <div class="dc-stats" id="dc-stats">SESSION READS: —</div>
+      <button type="button" class="dc-btn dc-reconnect" id="dc-reconnect" title="Force reconnect to backend">RECONNECT</button>
+      <button type="button" class="dc-btn dc-verdict-btn" id="dc-get-verdict" title="Screenshot + desk brief (Alt+Shift+R)">GET THE READ</button>
+      <div class="dc-msg" id="dc-msg"></div>
+    </div>
     <div class="dc-body" id="dc-body">
-    <div class="dc-stats" id="dc-stats">Chart reads today: —</div>
+    <div class="dc-rate-row hidden" id="dc-rate-row">
+      <span class="dc-rate-label">Grade this read</span>
+      <button type="button" class="dc-rate-btn dc-rate-up" id="dc-rate-up" title="Desk was right">👍</button>
+      <button type="button" class="dc-rate-btn dc-rate-down" id="dc-rate-down" title="Desk was wrong">👎</button>
+    </div>
     <div class="dc-levels-row">
-      <button type="button" class="dc-btn dc-levels-draw" id="dc-levels-draw" title="Fetch backend levels and draw on chart">Draw levels</button>
-      <button type="button" class="dc-btn dc-levels-copy" id="dc-levels-copy" title="Copy level prices">Copy</button>
-      <button type="button" class="dc-btn dc-levels-clear" id="dc-levels-clear" title="Remove overlay / native lines">Clear</button>
+      <button type="button" class="dc-btn dc-levels-draw" id="dc-levels-draw" title="Fetch + draw PD / session levels">MARK LEVELS</button>
+      <button type="button" class="dc-btn dc-levels-copy" id="dc-levels-copy" title="Copy prices">COPY</button>
+      <button type="button" class="dc-btn dc-levels-clear" id="dc-levels-clear" title="Remove lines">STRIP</button>
     </div>
-    <label class="dc-levels-auto"><input type="checkbox" id="dc-auto-levels" /> Auto-draw on load</label>
-    <div class="dc-levels-hint" id="dc-levels-hint">Stable lines: Pine Editor → paste <strong>pine/desk-copilot-levels.pine</strong> → Add to chart</div>
+    <label class="dc-levels-auto"><input type="checkbox" id="dc-auto-levels" /> Auto-mark on load</label>
+    <div class="dc-levels-hint" id="dc-levels-hint">Permanent lines → Pine Editor → <strong>pine/desk-copilot-levels.pine</strong></div>
     <div class="dc-voice-row">
-      <button type="button" class="dc-btn dc-voice" id="dc-voice-toggle">🎤 Voice off</button>
-      <button type="button" class="dc-btn dc-voice-test" id="dc-voice-test" title="Mic test">Test</button>
+      <button type="button" class="dc-btn dc-voice" id="dc-voice-toggle">VOICE OFF</button>
+      <button type="button" class="dc-btn dc-voice-test" id="dc-voice-test" title="Mic check">CHECK MIC</button>
     </div>
-    <button type="button" class="dc-btn dc-stop-speak hidden" id="dc-stop-speak">⏹ Stop speaking</button>
+    <button type="button" class="dc-btn dc-stop-speak hidden" id="dc-stop-speak">KILL AUDIO</button>
     <div class="dc-voice-live" id="dc-voice-live" aria-live="polite"></div>
-    <label class="dc-voice-auto"><input type="checkbox" id="dc-auto-read" checked /> Speak replies</label>
+    <label class="dc-voice-auto"><input type="checkbox" id="dc-auto-voice" checked /> Autonomous agent (hands-free)</label>
+    <label class="dc-voice-auto"><input type="checkbox" id="dc-auto-read" checked /> Speak the brief</label>
     <div class="dc-chat" id="dc-chat"></div>
     <div class="dc-chat-input-row">
-      <input type="text" id="dc-chat-input" class="dc-chat-input" placeholder="Chat or ask what you see…" autocomplete="off" />
-      <button type="button" id="dc-chat-send" class="dc-chat-send">Send</button>
+      <input type="text" id="dc-chat-input" class="dc-chat-input" placeholder="What's the read?" autocomplete="off" />
+      <button type="button" id="dc-chat-send" class="dc-chat-send">SEND</button>
     </div>
     <pre class="dc-verdict hidden" id="dc-text"></pre>
-    <div class="dc-msg" id="dc-msg"></div>
-    <div class="dc-voice-hint">Voice · Alt+Shift+V · Levels · Alt+Shift+L · Read · Alt+Shift+R · Options: right-click extension icon</div>
+    <div class="dc-voice-hint">Hands-free when LIVE · Alt+Shift+V · READ · Alt+Shift+R · LEVELS · Alt+Shift+L</div>
     </div>
   `;
   document.body.appendChild(panel);
@@ -64,16 +84,24 @@
     );
   }
 
+  function isPanelDragBlocked(target) {
+    return Boolean(
+      target?.closest?.(
+        "button, input, textarea, select, label, a, .dc-chat, .dc-bubble, .dc-rate-row"
+      )
+    );
+  }
+
   function initPanelDrag() {
-    const header = document.getElementById("dc-header");
     let dragging = false;
     let startX = 0;
     let startY = 0;
     let startLeft = 0;
     let startBottom = 0;
 
-    header.addEventListener("mousedown", (e) => {
-      if (e.target.closest(".dc-icon-btn")) return;
+    panel.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      if (isPanelDragBlocked(e.target)) return;
       dragging = true;
       const rect = panel.getBoundingClientRect();
       startX = e.clientX;
@@ -83,7 +111,7 @@
       panel.style.right = "auto";
       panel.style.left = `${startLeft}px`;
       panel.style.bottom = `${startBottom}px`;
-      header.classList.add("dc-dragging");
+      panel.classList.add("dc-dragging");
       e.preventDefault();
     });
 
@@ -98,7 +126,7 @@
     window.addEventListener("mouseup", () => {
       if (!dragging) return;
       dragging = false;
-      header.classList.remove("dc-dragging");
+      panel.classList.remove("dc-dragging");
       savePanelPos();
     });
   }
@@ -109,8 +137,19 @@
     document.getElementById("dc-collapse").title = collapsed ? "Expand panel" : "Minimize panel";
   };
 
+  document.getElementById("dc-header").ondblclick = () => {
+    panel.classList.remove("dc-collapsed");
+    document.getElementById("dc-collapse").textContent = "−";
+    const body = document.getElementById("dc-body");
+    if (body) body.scrollTop = 0;
+    panel.scrollTop = 0;
+  };
+
   restorePanelPos();
   initPanelDrag();
+  const bodyEl = document.getElementById("dc-body");
+  if (bodyEl) bodyEl.scrollTop = 0;
+  panel.scrollTop = 0;
 
   let currentId = null;
   let lastVerdict = "";
@@ -120,6 +159,43 @@
   let verdictTimer = null;
   let verdictWaiter = null;
   let chatHistory = [];
+  let backendOnline = false;
+  let lastBackendCheck = 0;
+  let lastBackendFail = 0;
+  let lastOnlineAt = 0;
+  let pingFailStreak = 0;
+  let pingInFlight = false;
+  let heartbeatTimer = null;
+  let agentLoopTimer = null;
+
+  function showTyping(show) {
+    const chat = document.getElementById("dc-chat");
+    let el = document.getElementById("dc-typing");
+    if (show) {
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "dc-typing";
+        el.className = "dc-bubble dc-bubble-bot dc-typing";
+        el.textContent = "Desk thinking…";
+        chat.appendChild(el);
+      }
+      chat.scrollTop = chat.scrollHeight;
+    } else if (el) {
+      el.remove();
+    }
+  }
+
+  async function ensureBackend(force = false) {
+    if (!force && backendOnline && Date.now() - lastBackendCheck < 45000) {
+      return true;
+    }
+    return pingBackend(force);
+  }
+
+  function offlineChatMessage() {
+    return "Backend offline — run npm run dev in the desk-copilot folder, then click ● OFFLINE — RECONNECT. I can't reply until the server is live.";
+  }
+
   let msgQueue = [];
   let processingQueue = false;
 
@@ -187,8 +263,16 @@
       return;
     }
 
+    if (!(await ensureBackend())) {
+      const msg = offlineChatMessage();
+      appendChatBubble("assistant", msg);
+      setMsg("Backend offline — RECONNECT", false);
+      return;
+    }
+
     chatBusy = true;
-    setMsg(voice ? "Interpreting…" : "Thinking…", null);
+    showTyping(true);
+    setMsg(voice ? "Parsing…" : "Desk thinking…", null);
     try {
       const res = await bgSend(
         {
@@ -198,16 +282,18 @@
           lastVerdict: lastVerdict || undefined,
           voiceInput: voice,
         },
-        60000
+        90000
       );
       if (res.understoodAs) applyUnderstood(text, res.understoodAs);
 
       if (res.needsChartRead) {
         chatBusy = false;
+        showTyping(false);
         await runChartRead(res.question || res.understoodAs || text, { voice });
         return;
       }
-      const reply = res.reply || "";
+      const reply = (res.reply || "").trim();
+      if (!reply) throw new Error("Empty reply from desk — try again");
       chatHistory.push({ role: "assistant", content: reply });
       trimHistory();
       appendChatBubble("assistant", reply);
@@ -217,9 +303,11 @@
       }
     } catch (e) {
       const err = e instanceof Error ? e.message : String(e);
-      appendChatBubble("assistant", `Sorry — ${err}`);
-      setMsg(err, false);
+      const friendly = isInfraError(err) ? offlineChatMessage() : err;
+      appendChatBubble("assistant", friendly);
+      setMsg(friendly, false);
     } finally {
+      showTyping(false);
       chatBusy = false;
     }
   }
@@ -234,6 +322,58 @@
       document.querySelector(".js-symbol-edit") ||
       document.querySelector('[data-name="legend-source-title"]');
     return el?.textContent?.trim() || "MNQ1!";
+  }
+
+  function isInfraError(msg) {
+    const m = String(msg || "").toLowerCase();
+    return (
+      m.includes("backend offline") ||
+      m.includes("backend down") ||
+      m.includes("backend error") ||
+      m.includes("npm run dev") ||
+      m.includes("extension context") ||
+      m.includes("timed out") ||
+      m.includes("openai_api_key")
+    );
+  }
+
+  function reportIssue(msg, { chat = false } = {}) {
+    setMsg(msg, false);
+    if (chat && !isInfraError(msg)) appendChatBubble("assistant", msg);
+  }
+
+  function setBackendStatus(online) {
+    backendOnline = online;
+    if (online) {
+      lastBackendFail = 0;
+      pingFailStreak = 0;
+      lastOnlineAt = Date.now();
+    }
+    updateAgentStatus();
+  }
+
+  function updateAgentStatus() {
+    const btn = document.getElementById("dc-reconnect");
+    if (!btn) return;
+    btn.classList.toggle("dc-online", backendOnline);
+    const voiceOn = window.DeskCopilotVoice?.isListening?.();
+    const agentOn = isAutoVoiceEnabled();
+
+    if (backendOnline && voiceOn && agentOn) {
+      btn.textContent = "● AGENT LIVE";
+      btn.title = "Autonomous agent running — backend + voice connected";
+    } else if (backendOnline) {
+      btn.textContent = "● LIVE";
+      btn.title = agentOn
+        ? "Backend connected — agent will restart voice automatically"
+        : "Backend connected — click to force reconnect";
+    } else if (agentOn) {
+      btn.textContent = "● RECONNECTING…";
+      btn.title = "Agent reconnecting to backend — run npm run dev if needed";
+    } else {
+      btn.textContent = "● OFFLINE — RECONNECT";
+      btn.title = "Backend offline — run npm run dev or set API URL in extension options";
+    }
   }
 
   function setMsg(t, ok) {
@@ -277,6 +417,14 @@
               reject(err);
               return;
             }
+            if (res?.error && !Object.prototype.hasOwnProperty.call(res, "ok")) {
+              reject(new Error(res.error));
+              return;
+            }
+            if (res?.ok === false) {
+              resolve(res);
+              return;
+            }
             if (res?.error) reject(new Error(res.error));
             else resolve(res);
           } catch (e) {
@@ -304,10 +452,26 @@
     chat.scrollTop = chat.scrollHeight;
   }
 
+  let lastRecordedUserText = "";
+  let lastRecordedUserAt = 0;
+
+  function recordUserTranscript(text) {
+    const t = displayText(text).trim();
+    if (!t) return false;
+    const norm = t.toLowerCase();
+    const now = Date.now();
+    if (norm === lastRecordedUserText && now - lastRecordedUserAt < 8000) return false;
+    lastRecordedUserText = norm;
+    lastRecordedUserAt = now;
+    appendChatBubble("user", t);
+    chatHistory.push({ role: "user", content: t });
+    trimHistory();
+    return true;
+  }
+
   function seedWelcome() {
     if (chatHistory.length) return;
-    const welcome =
-      "Nasdaq futures desk copilot. Ask what I see on the chart for a live read, or ask about bias, levels, and structure.";
+    const welcome = "GET THE READ for the ICT brief. Grade it. You pull the trigger.";
     chatHistory.push({ role: "assistant", content: welcome });
     appendChatBubble("assistant", welcome);
   }
@@ -315,24 +479,151 @@
   async function refreshStats() {
     try {
       const s = await bgSend({ type: "STATS" });
-      document.getElementById("dc-stats").textContent =
-        `${s.total} chart read${s.total === 1 ? "" : "s"} today`;
+      const parts = [`${s.total} READ${s.total === 1 ? "" : "S"} TODAY`];
+      if (s.pending) parts.push(`${s.pending} UNGRADED`);
+      if (s.up) parts.push(`${s.up} 👍`);
+      if (s.down) parts.push(`${s.down} 👎`);
+      document.getElementById("dc-stats").textContent = parts.join(" · ");
     } catch {
       /* quiet on load */
     }
   }
 
-  async function pingBackend() {
+  function showRateRow(show) {
+    document.getElementById("dc-rate-row")?.classList.toggle("hidden", !show);
+    document.getElementById("dc-rate-up")?.classList.remove("dc-rated");
+    document.getElementById("dc-rate-down")?.classList.remove("dc-rated");
+  }
+
+  async function rateVerdict(rating) {
+    if (!currentId) {
+      setMsg("No read yet — hit GET THE READ first", false);
+      return;
+    }
+    setMsg("Saving rating…", null);
     try {
-      const r = await bgSend({ type: "PING" });
-      if (!r?.ok) setMsg(r?.error || "Backend offline — run npm run dev", false);
-      else if (document.getElementById("dc-auto-levels")?.checked) {
-        drawLevels().catch(() => {});
-      }
+      const res = await bgSend({ type: "RATE", id: currentId, rating }, 15000);
+      if (res?.error) throw new Error(res.error);
+      showRateRow(false);
+      document.getElementById(`dc-rate-${rating === "up" ? "up" : "down"}`)?.classList.add("dc-rated");
+      setMsg(
+        rating === "up"
+          ? "Logged — desk learns from wins"
+          : "Logged — desk learns from misses",
+        true
+      );
+      refreshStats();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : String(e), false);
     }
   }
+
+  function friendlyConnectError(err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (/invalidated|extension context/i.test(msg)) {
+      return "Extension updated — refresh TradingView (Ctrl+Shift+R)";
+    }
+    if (/timed out/i.test(msg)) {
+      return "Backend slow to respond — is npm run dev running? Then RECONNECT";
+    }
+    return msg;
+  }
+
+  async function pingBackend(reconnect = false) {
+    if (pingInFlight) return backendOnline;
+    pingInFlight = true;
+    try {
+      const r = await bgSend({ type: reconnect ? "RECONNECT" : "PING" }, 12000);
+      lastBackendCheck = Date.now();
+      if (r?.ok) {
+        setBackendStatus(true);
+        if (reconnect) setMsg(`Desk online (${r.base || "localhost"})`, true);
+        else setMsg("", null);
+        void tryStartAutonomousVoice();
+        return true;
+      }
+      throw new Error(r?.error || "Backend not reachable");
+    } catch (e) {
+      pingFailStreak += 1;
+      lastBackendFail = Date.now();
+      const sticky =
+        !reconnect &&
+        backendOnline &&
+        Date.now() - lastOnlineAt < 90000 &&
+        pingFailStreak < 3;
+      if (sticky) {
+        setMsg(friendlyConnectError(e), false);
+        return true;
+      }
+      setBackendStatus(false);
+      window.DeskCopilotVoice?.stopVoiceSession?.();
+      setMsg(friendlyConnectError(e), false);
+      updateAgentStatus();
+      return false;
+    } finally {
+      pingInFlight = false;
+    }
+  }
+
+  function startServiceWorkerKeepalive() {
+    let port = null;
+    let timer = null;
+
+    function connect() {
+      try {
+        port = chrome.runtime.connect({ name: "desk-copilot-keepalive" });
+      } catch {
+        port = null;
+        return;
+      }
+      port.onDisconnect.addListener(() => {
+        port = null;
+        setTimeout(connect, 1500);
+      });
+    }
+
+    connect();
+    timer = setInterval(() => {
+      try {
+        port?.postMessage({ t: Date.now() });
+      } catch {
+        connect();
+      }
+    }, 20000);
+
+    window.addEventListener("beforeunload", () => {
+      if (timer) clearInterval(timer);
+      try {
+        port?.disconnect();
+      } catch {
+        /* ignore */
+      }
+    });
+  }
+
+  async function initBackend() {
+    if (await pingBackend(true)) {
+      setTimeout(() => refreshStats(), 2500);
+      if (document.getElementById("dc-auto-levels")?.checked) {
+        setTimeout(() => drawLevels().catch(() => {}), 6000);
+      }
+      return;
+    }
+    setTimeout(() => void pingBackend(true), 4000);
+  }
+
+  function startHeartbeat() {
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
+    heartbeatTimer = setInterval(() => {
+      if (document.hidden || pingInFlight) return;
+      void pingBackend(false);
+    }, 60000);
+  }
+
+  document.getElementById("dc-reconnect").onclick = () => {
+    setMsg("Reconnecting…", null);
+    void pingBackend(true);
+  };
 
   async function fetchLevelsPayload() {
     return bgSend({ type: "LEVELS" }, 65000);
@@ -343,21 +634,33 @@
       setMsg("Draw module not loaded — reload extension", false);
       return null;
     }
-    setMsg("Fetching levels…", null);
+    setMsg("Pulling levels…", null);
     try {
       let payload = opts.cached || null;
+      let usedCache = false;
       if (!payload) {
-        payload = await fetchLevelsPayload();
-        if (payload?.error) throw new Error(payload.error);
-        window.DeskCopilotDraw.cache(payload);
+        try {
+          payload = await fetchLevelsPayload();
+          if (payload?.error) throw new Error(payload.error);
+          window.DeskCopilotDraw.cache(payload);
+        } catch (fetchErr) {
+          payload = window.DeskCopilotDraw.loadCache?.();
+          if (!payload?.levels?.length && !payload?.zones?.length) throw fetchErr;
+          usedCache = true;
+        }
       }
       const result = await window.DeskCopilotDraw.draw(payload, opts.overlayOnly === true);
       const n = result.count || (payload.levels?.length || 0) + (payload.zones?.length || 0);
       if (result.ok) {
         const mode = result.mode === "native" ? "TradingView lines" : "overlay";
-        setMsg(`${n} levels · ${mode}${result.hint ? " — " + result.hint : ""}`, true);
+        const cacheNote = usedCache ? " · cached" : "";
+        setMsg(`${result.count ?? n} levels marked · ${mode}${cacheNote}${result.hint ? " — " + result.hint : ""}`, true);
       } else {
-        setMsg(result.hint || result.reason || "Could not draw — use Pine indicator", false);
+        const hint =
+          result.reason === "no_chart_pane"
+            ? "Chart not found — maximize chart pane, then MARK LEVELS again"
+            : result.hint || result.reason || "Mark failed — backend online? Try RECONNECT";
+        setMsg(hint, false);
       }
       return payload;
     } catch (e) {
@@ -366,12 +669,26 @@
     }
   }
 
+  document.getElementById("dc-get-verdict").onclick = () => {
+    if (verdictBusy || chatBusy) {
+      setMsg("Wait for current request to finish", false);
+      return;
+    }
+    void runChartRead("what do you see on the chart", { voice: voiceReady });
+  };
+  document.getElementById("dc-rate-up").onclick = () => {
+    void rateVerdict("up");
+  };
+  document.getElementById("dc-rate-down").onclick = () => {
+    void rateVerdict("down");
+  };
+
   document.getElementById("dc-levels-draw").onclick = () => {
     void drawLevels();
   };
   document.getElementById("dc-levels-clear").onclick = () => {
     window.DeskCopilotDraw?.clear();
-    setMsg("Levels cleared", null);
+    setMsg("Levels stripped", null);
   };
   document.getElementById("dc-levels-copy").onclick = async () => {
     try {
@@ -398,27 +715,70 @@
     if (e.target.checked) void drawLevels();
   };
 
+  function isAutoVoiceEnabled() {
+    try {
+      return localStorage.getItem("dc-auto-voice") !== "0";
+    } catch {
+      return true;
+    }
+  }
+
+  async function tryStartAutonomousVoice() {
+    if (!voiceReady || !backendOnline || !isAutoVoiceEnabled()) return;
+    if (window.DeskCopilotVoice?.isListening?.()) return;
+    window.DeskCopilotVoice?.resumeAutonomousAgent?.();
+    const ok = await window.DeskCopilotVoice.startAutonomous?.(symbol);
+    if (ok) {
+      updateVoiceToggle(true, window.DeskCopilotVoice?.isRecording?.());
+      updateAgentStatus();
+    }
+  }
+
+  function startAgentLoop() {
+    if (agentLoopTimer) return;
+    agentLoopTimer = setInterval(() => {
+      if (!isAutoVoiceEnabled()) {
+        updateAgentStatus();
+        return;
+      }
+      if (!backendOnline && !pingInFlight) {
+        void pingBackend(true);
+        return;
+      }
+      if (backendOnline && voiceReady && !verdictBusy && !chatBusy) {
+        if (!window.DeskCopilotVoice?.isListening?.()) {
+          void tryStartAutonomousVoice();
+        }
+      }
+      updateAgentStatus();
+    }, 20000);
+  }
+
   function updateVoiceToggle(listening, recording) {
     const btn = document.getElementById("dc-voice-toggle");
     if (!btn) return;
+    const mode = window.DeskCopilotVoice?.getEngineMode?.() || "off";
     btn.classList.toggle("dc-voice-on", listening);
     btn.classList.toggle("dc-voice-rec", Boolean(recording));
-    btn.textContent = recording
-      ? "🔴 Hearing you…"
-      : listening
-        ? "🎤 Listening"
-        : "🎤 Voice off";
-    btn.title = listening
-      ? "Voice on — click to turn off"
-      : "Click once to turn voice on, then speak naturally";
+    if (mode === "realtime") {
+      btn.textContent = listening ? "● VOICE LIVE" : "VOICE OFF";
+      btn.title = listening
+        ? "Realtime voice — click to stop"
+        : "Click to start hands-free voice";
+    } else {
+      btn.textContent = recording ? "● LIVE" : listening ? "VOICE ON" : "VOICE OFF";
+      btn.title = listening
+        ? "Voice live — click to stop"
+        : "Click to start hands-free voice";
+    }
   }
 
   document.getElementById("dc-voice-toggle").onclick = async () => {
     if (!voiceReady) {
-      setMsg("Voice not available — use Chrome", false);
+      setMsg("Voice dead — use Chrome", false);
       return;
     }
-    const on = await window.DeskCopilotVoice.toggleListening();
+    const on = await window.DeskCopilotVoice.toggleAutonomous(symbol);
     updateVoiceToggle(on, window.DeskCopilotVoice.isRecording?.());
   };
 
@@ -434,24 +794,30 @@
     verdictBusy = false;
 
     if (data?.error) {
-      appendChatBubble("assistant", data.error);
-      setMsg(data.error, false);
+      appendChatBubble("assistant", isInfraError(data.error) ? offlineChatMessage() : data.error);
+      reportIssue(data.error);
       return;
     }
-    currentId = data.id;
+    currentId = data.id || null;
     lastVerdict = data.verdict || "";
+    showRateRow(Boolean(currentId));
     const shown = displayText(lastVerdict);
     document.getElementById("dc-text").textContent = shown;
     chatHistory.push({ role: "assistant", content: shown });
     appendChatBubble("assistant", shown);
     refreshStats();
     if (voiceReady && window.DeskCopilotVoice?.autoRead) {
-      setMsg("Speaking… mic resumes when done", null);
-      window.DeskCopilotVoice.speak(lastVerdict, () => {
-        setMsg("Listening — ask another question", true);
-      });
+      const rtMode = window.DeskCopilotVoice?.getEngineMode?.() === "realtime";
+      if (rtMode) {
+        setMsg("Agent live — talk anytime", true);
+      } else {
+        setMsg("Delivering brief… mic back when done", null);
+        window.DeskCopilotVoice.speak(lastVerdict, () => {
+          setMsg("Agent live — talk anytime", true);
+        });
+      }
     } else {
-      setMsg("Ask another question anytime", true);
+      setMsg("Your move.", true);
     }
   }
 
@@ -477,11 +843,11 @@
   function onVerdictPayload(payload) {
     if (!payload) return;
     if (payload.status === "capturing") {
-      setMsg("Capturing chart…", null);
+      setMsg("Capturing…", null);
       return;
     }
     if (payload.status === "analyzing") {
-      setMsg("Reading chart… (15–60 sec)", null);
+      setMsg("Building brief… 15–60 sec", null);
       return;
     }
     if (verdictWaiter) {
@@ -497,6 +863,11 @@
   }
 
   async function runChartRead(userQuestion, opts = {}) {
+    if (!(await ensureBackend())) {
+      appendChatBubble("assistant", offlineChatMessage());
+      setMsg("Backend offline — RECONNECT", false);
+      return;
+    }
     verdictBusy = true;
     clearVerdictTimer();
     verdictWaiter = null;
@@ -506,7 +877,7 @@
       /* ignore */
     }
 
-    setMsg("Capturing chart…", null);
+    setMsg("Capturing…", null);
 
     const sym = symbol();
     await bgSend({ type: "PREPARE_VERDICT", symbol }, 5000).catch(() => {});
@@ -517,17 +888,19 @@
       await new Promise((r) => setTimeout(r, 100));
 
       const cap = await bgSend({ type: "CAPTURE_CHART" }, 12000);
+      panel.classList.remove("dc-capturing");
+      setMsg("Building brief… 15–60 sec", null);
+
       if (!cap?.base64) {
-        throw new Error("Screenshot empty — click Desk Copilot in Chrome toolbar once, then ask again");
+        throw new Error("Screenshot empty — click The Trading Desk icon in Chrome toolbar once, then ask again");
       }
 
-      setMsg("Reading chart… (15–60 sec)", null);
       verdictTimer = setTimeout(() => {
         if (!verdictBusy) return;
         verdictBusy = false;
         verdictWaiter = null;
         setMsg("Timed out — try again", false);
-        appendChatBubble("assistant", "Chart read timed out — try again.");
+        reportIssue("Chart read timed out — try again.");
       }, 130000);
 
       const resultPromise = waitForVerdict(130000);
@@ -552,12 +925,10 @@
       clearVerdictTimer();
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes("toolbar") || msg.includes("activeTab") || msg.includes("all_urls")) {
-        const hint = "Click Desk Copilot in Chrome toolbar ↑ once, then ask again";
-        appendChatBubble("assistant", hint);
-        setMsg(hint, false);
+        const hint = "Click The Trading Desk in toolbar ↑ once — then GET THE READ";
+        reportIssue(hint);
       } else {
-        appendChatBubble("assistant", msg);
-        setMsg(msg, false);
+        reportIssue(msg);
       }
     } finally {
       panel.classList.remove("dc-capturing");
@@ -590,6 +961,26 @@
     }
   };
 
+  try {
+    document.getElementById("dc-auto-voice").checked = isAutoVoiceEnabled();
+  } catch {
+    /* ignore */
+  }
+  document.getElementById("dc-auto-voice").onchange = (e) => {
+    try {
+      localStorage.setItem("dc-auto-voice", e.target.checked ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+    if (e.target.checked) {
+      window.DeskCopilotVoice?.resumeAutonomousAgent?.();
+      if (backendOnline) void tryStartAutonomousVoice();
+    } else {
+      window.DeskCopilotVoice?.stopAutonomous?.();
+    }
+    updateAgentStatus();
+  };
+
   document.getElementById("dc-auto-read").onchange = (e) => {
     if (window.DeskCopilotVoice) window.DeskCopilotVoice.autoRead = e.target.checked;
   };
@@ -608,7 +999,7 @@
 
   document.getElementById("dc-voice-test").onclick = async () => {
     if (!window.DeskCopilotVoice?.testMic) {
-      setMsg("Voice not available — use Chrome", false);
+      setMsg("Voice dead — use Chrome", false);
       return;
     }
     if (!window.DeskCopilotVoice.isListening?.()) {
@@ -630,6 +1021,33 @@
     window.DeskCopilotVoice?.cancelSpeech?.();
   };
 
+  if (window.DeskCopilotRealtime?.init) {
+    window.DeskCopilotRealtime.init({
+      onStatus: (text, ok) => setMsg(text, ok),
+      onInterim: (text) => setVoiceLive(text),
+      onSpeakingChange: (active) => {
+        document.getElementById("dc-stop-speak")?.classList.toggle("hidden", !active);
+      },
+      onListeningChange: (active) => {
+        updateVoiceToggle(active, window.DeskCopilotVoice?.isRecording?.());
+      },
+      onTranscript: (text) => {
+        recordUserTranscript(text);
+      },
+      onToolCall: async (name, args) => {
+        if (name === "mark_levels") {
+          await drawLevels();
+          return "Levels marked on the chart.";
+        }
+        if (name === "get_chart_read") {
+          await runChartRead(args?.question || "what do you see on the chart", { voice: true });
+          return displayText(lastVerdict) || lastVerdict || "Chart read complete.";
+        }
+        return "Done.";
+      },
+    });
+  }
+
   if (window.DeskCopilotVoice?.init) {
     voiceReady = window.DeskCopilotVoice.init({
       onStatus: (text, ok) => {
@@ -645,16 +1063,34 @@
       onRecordingChange: (active) => {
         updateVoiceToggle(window.DeskCopilotVoice?.isListening?.(), active);
       },
+      getChatContext: () => ({
+        messages: chatHistory,
+        symbol: symbol(),
+        lastVerdict: lastVerdict || undefined,
+      }),
+      onUserTranscript: (text) => {
+        recordUserTranscript(text);
+      },
+      onAssistantReply: (reply, userText) => {
+        chatHistory.push({ role: "assistant", content: reply });
+        trimHistory();
+        appendChatBubble("assistant", reply);
+      },
+      onNeedsChartRead: async (question) => {
+        await runChartRead(question, { voice: true });
+      },
       onCommand: (cmd, transcript) => {
         if (cmd === "verdict") {
           sendChat(transcript || "what do you see", { voice: true });
+        } else if (cmd === "levels") {
+          void drawLevels();
         } else if (cmd === "read") {
           const last = chatHistory.at(-1);
           if (last?.role === "assistant") window.DeskCopilotVoice.speak(last.content);
           else if (lastVerdict) window.DeskCopilotVoice.speakBrief(lastVerdict);
         }
       },
-      onChat: (transcript) => sendChat(transcript, { voice: true }),
+      onChat: (transcript, opts) => sendChat(transcript, { voice: true, ...opts }),
     });
     if (!voiceReady) {
       document.getElementById("dc-voice-toggle").disabled = true;
@@ -662,7 +1098,15 @@
   }
 
   seedWelcome();
-  pingBackend().then(refreshStats);
+  startServiceWorkerKeepalive();
+  initBackend();
+  startHeartbeat();
+  startAgentLoop();
+  setTimeout(() => void tryStartAutonomousVoice(), 2500);
+
+  window.addEventListener("focus", () => {
+    if (!backendOnline && !pingInFlight) void pingBackend(true);
+  });
 
   document.addEventListener("keydown", (e) => {
     if (!e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey) return;

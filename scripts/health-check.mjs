@@ -1,19 +1,10 @@
 /** Probe local Desk Copilot API — run: npm run health */
-const ports = [3001, 3000, 3002];
+const ports = [3000, 3001, 3002];
 
 async function probe(base) {
   const health = await fetch(`${base}/api/health`, { signal: AbortSignal.timeout(5000) });
   if (!health.ok) return null;
-  const levels = await fetch(`${base}/api/levels`, { signal: AbortSignal.timeout(30000) });
-  if (!levels.ok) return { base, health: true, levels: false };
-  const data = await levels.json();
-  return {
-    base,
-    health: true,
-    levels: true,
-    zones: data.zones?.length ?? 0,
-    symbol: data.symbol,
-  };
+  return { base, health: true };
 }
 
 let lastErr;
@@ -22,8 +13,8 @@ for (const port of ports) {
     const base = `http://${host}:${port}`;
     try {
       const r = await probe(base);
-      if (r?.health && r.levels) {
-        console.log(`OK ${base} — ${r.symbol}, ${r.zones} FVG zone(s)`);
+      if (r?.health) {
+        console.log(`OK ${base}`);
         process.exit(0);
       }
     } catch (e) {

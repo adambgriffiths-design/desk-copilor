@@ -2,79 +2,146 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Desk Copilot — API settings</title>
+    <title>The Trading Desk — API settings</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
         max-width: 480px;
-        margin: 24px auto;
-        padding: 0 16px;
-        font-family: system-ui, sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
+        margin: 32px auto;
+        padding: 0 20px 40px;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #000;
+        color: #fff;
         font-size: 14px;
         line-height: 1.5;
       }
+      .logo-wrap {
+        margin-bottom: 12px;
+      }
+      .logo-wrap svg {
+        display: block;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #444;
+      }
       h1 {
-        font-size: 18px;
-        margin: 0 0 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        margin: 0 0 4px;
+      }
+      .sub {
+        font-size: 10px;
+        color: #666;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
       }
       p {
         margin: 0 0 16px;
-        color: #94a3b8;
+        color: #888;
+        font-size: 13px;
       }
       label {
         display: block;
         margin-bottom: 6px;
         font-weight: 600;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #aaa;
       }
       input {
         width: 100%;
-        box-sizing: border-box;
         padding: 10px;
-        border: 1px solid #334155;
-        border-radius: 6px;
-        background: #1e293b;
-        color: #f8fafc;
+        border: 1px solid #444;
+        border-radius: 0;
+        background: #0a0a0a;
+        color: #fff;
         font-size: 14px;
+      }
+      input:focus {
+        outline: none;
+        border-color: #fff;
       }
       button {
         margin-top: 12px;
         padding: 10px 16px;
-        border: none;
-        border-radius: 6px;
-        background: #3b82f6;
-        color: white;
-        font-weight: 600;
+        border: 1px solid #fff;
+        border-radius: 0;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
         cursor: pointer;
       }
+      button:hover {
+        background: #000;
+        color: #fff;
+      }
       button.secondary {
-        background: #334155;
+        background: #000;
+        color: #aaa;
+        border-color: #444;
         margin-left: 8px;
       }
+      button.secondary:hover {
+        border-color: #fff;
+        color: #fff;
+      }
       #status {
-        margin-top: 12px;
+        margin-top: 16px;
         min-height: 1.2em;
+        font-size: 12px;
       }
       .ok {
-        color: #86efac;
+        color: #fff;
       }
       .err {
-        color: #fca5a5;
+        color: #888;
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
-    <h1>Desk Copilot API</h1>
+    <div class="logo-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true">
+        <rect width="64" height="64" fill="#000"/>
+        <polygon fill="#fff" points="18,20 12,2 28,16"/>
+        <polygon fill="#fff" points="46,20 52,2 36,16"/>
+        <polygon fill="#000" points="17,17 14,7 22,15"/>
+        <polygon fill="#000" points="47,17 50,7 42,15"/>
+        <polygon fill="#fff" points="32,14 44,20 48,32 44,44 32,58 20,44 16,32 20,20"/>
+        <polygon fill="#000" points="19,27 27,29 25,33 17,31"/>
+        <polygon fill="#000" points="45,27 37,29 39,33 47,31"/>
+        <ellipse cx="22" cy="30" rx="3.2" ry="2.6" fill="#38B6FF"/>
+        <ellipse cx="42" cy="30" rx="3.2" ry="2.6" fill="#38B6FF"/>
+        <circle cx="23" cy="29" r="1" fill="#D4F0FF"/>
+        <circle cx="43" cy="29" r="1" fill="#D4F0FF"/>
+        <ellipse cx="32" cy="44" rx="3.5" ry="2.5" fill="#000"/>
+        <polygon fill="#fff" points="28,47 29,52 30,47"/>
+        <polygon fill="#fff" points="34,47 35,52 36,47"/>
+      </svg>
+    </div>
+    <h1>The Trading Desk</h1>
+    <p class="sub">No signals. Just the read.</p>
     <p>
-      Leave blank to use localhost (npm run dev). Set your hosted URL after deploying
-      the Next.js backend (e.g. https://your-app.vercel.app).
+      Backend runs on Vercel. Default:
+      <strong>https://desk-copilor.vercel.app</strong>
+      — paste it below if the field is empty, then Save.
     </p>
     <label for="apiBaseUrl">API base URL</label>
     <input
       id="apiBaseUrl"
       type="url"
-      placeholder="https://your-app.vercel.app"
+      placeholder="https://desk-copilor.vercel.app"
       autocomplete="off"
+      value="https://desk-copilor.vercel.app"
     />
     <div>
       <button id="save">Save</button>

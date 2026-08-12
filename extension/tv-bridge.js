@@ -120,7 +120,7 @@
           linewidth: 1,
           fillBackground: true,
           transparency: 75,
-          showLabel: Boolean(zone.label),
+          showLabel: Boolean(zone.label && zone.showLabel !== false),
           textcolor: color,
         },
         disableSelection: true,
@@ -178,7 +178,7 @@
           linecolor: color,
           linewidth: level.id && String(level.id).includes("ce") ? 2 : 1,
           linestyle: 2,
-          showLabel: Boolean(level.label),
+          showLabel: Boolean(level.label && level.showLabel !== false),
           textcolor: color,
         },
         disableSelection: true,
@@ -208,6 +208,11 @@
       const chart = getActiveChart();
       const range = getVisibleRange(chart);
       window.postMessage({ type: "DC_VISIBLE_RANGE", range }, "*");
+      return;
+    }
+
+    if (event.data.type === "DC_PING_BRIDGE") {
+      window.postMessage({ type: "DC_PING_BRIDGE_RESULT", ok: true }, "*");
       return;
     }
 

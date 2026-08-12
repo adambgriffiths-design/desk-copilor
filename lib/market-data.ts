@@ -235,6 +235,125 @@ export function findBarClosestTo(bars: Bar[], targetMinutes: number, dateKey: st
   return bestDiff <= 2 ? best : null;
 }
 
+export function barTimeSec(bar: Bar): number {
+  return Math.floor(bar.time.getTime() / 1000);
+}
+
+export const RTH_CLOSE_MIN = 16 * 60 + 15;
+export const RTH_OPEN_MIN = 9 * 60 + 30;
+
+export function priorEstDateKey(m1: Bar[], todayKey: string): string | null {
+  const keys = [...new Set(m1.map((b) => getEstDateKey(b.time)))].sort();
+  const idx = keys.indexOf(todayKey);
+  return idx > 0 ? keys[idx - 1]! : null;
+}
+
+/** Bar on `dateKey` where the day high or low was first printed. */
+export function findDayExtremeBar(
+  m1: Bar[],
+  dateKey: string,
+  kind: "high" | "low"
+): Bar | null {
+  const dayBars = m1.filter((b) => getEstDateKey(b.time) === dateKey);
+  if (!dayBars.length) return null;
+  if (kind === "high") {
+    const target = Math.max(...dayBars.map((b) => b.high));
+    return findExtremeBarInWindow(dayBars, "high", target);
+  }
+  const target = Math.min(...dayBars.map((b) => b.low));
+  return findExtremeBarInWindow(dayBars, "low", target);
+}
+
+/** Bar in `bars` that first printed the window high or low. */
+export function findExtremeBarInWindow(
+  bars: Bar[],
+  kind: "high" | "low",
+  targetPrice?: number
+): Bar | null {
+  if (!bars.length) return null;
+
+  if (kind === "high") {
+    const target = targetPrice ?? Math.max(...bars.map((b) => b.high));
+    for (const bar of bars) {
+      if (bar.high >= target - 0.01) return bar;
+    }
+    return null;
+  }
+
+  const target = targetPrice ?? Math.min(...bars.map((b) => b.low));
+  for (const bar of bars) {
+    if (bar.low <= target + 0.01) return bar;
+  }
+  return null;
+}
+
+/** Find the earliest m1 bar in `bars` that printed a level price. */
+export function findFormationBarAtPrice(
+  bars: Bar[],
+  price: number,
+  kind: "high" | "low",
+  tolerance = 1.5
+): number | null {
+  for (const bar of bars) {
+    const match =
+      kind === "high"
+        ? Math.abs(bar.high - price) <= tolerance
+        : Math.abs(bar.low - price) <= tolerance;
+    if (match) return barTimeSec(bar);
+  }
+  return null;
+}
+
+/** Find the m1 bar that printed a level price (for session H/L lines). */
+export function findBarAtPrice(
+  m1: Bar[],
+  price: number,
+  kind: "high" | "low",
+  tolerance = 1.5
+): number | null {
+  return findFormationBarAtPrice(m1, price, kind, tolerance);
+}
+
+/** Unix seconds when each HTF PD level was established on the 1m chart. */
+export function resolvePdLevelAnchorTimes(
+  m1: Bar[],
+  input: {
+    fetchedAt: string;
+    orgFormedAt?: number;
+    hasNdog: boolean;
+  }
+): Record<string, number> {
+  const todayKey = getEstDateKey(new Date(input.fetchedAt));
+  const priorKey = priorEstDateKey(m1, todayKey);
+  const anchors: Record<string, number> = {};
+
+  if (priorKey) {
+    const pdhBar = findDayExtremeBar(m1, priorKey, "high");
+    const pdlBar = findDayExtremeBar(m1, priorKey, "low");
+    const pdcBar = findBarClosestTo(m1, RTH_CLOSE_MIN, priorKey);
+    if (pdhBar) anchors.pdh = barTimeSec(pdhBar);
+    if (pdlBar) anchors.pdl = barTimeSec(pdlBar);
+    if (pdcBar) {
+      anchors.pdc = barTimeSec(pdcBar);
+      anchors.pdeq = barTimeSec(pdcBar);
+    }
+  }
+
+  const openBar = findBarClosestTo(m1, RTH_OPEN_MIN, todayKey);
+  const gapComplete =
+    input.orgFormedAt ?? (openBar ? barTimeSec(openBar) : undefined);
+  if (openBar) {
+    anchors.cdo = barTimeSec(openBar);
+    anchors.cdeq = barTimeSec(openBar);
+  }
+  if (gapComplete != null && input.hasNdog) {
+    anchors.ndog_top = gapComplete;
+    anchors.ndog_bot = gapComplete;
+  }
+
+  return anchors;
+}
+
 function estWeekdayShort(date: Date): string {
   return date.toLocaleDateString("en-US", {
     timeZone: "America/New_York",

@@ -120,9 +120,9 @@ export default function Home() {
 
   return (
     <main>
-      <h1>Desk Copilot v0</h1>
+      <h1>The Trading Desk</h1>
       <p className="subtitle">
-        Upload 1m chart only — daily, 15m & 5m levels fetched automatically
+        No signals. Just the read. Upload 1m — levels auto-load, desk delivers the brief.
         {stats && stats.trainingExamples > 0 && (
           <> · {stats.trainingExamples} training examples loaded</>
         )}
@@ -192,10 +192,10 @@ export default function Home() {
 
         <button type="submit" disabled={loading || !image}>
           {loading
-            ? "Fetching levels & analyzing…"
+            ? "Pulling levels + building brief…"
             : predictMode
-              ? "Predict from left half"
-              : "Get verdict"}
+              ? "RUN PREDICT"
+              : "GET THE READ"}
         </button>
       </form>
 
@@ -221,7 +221,7 @@ export default function Home() {
                 onClick={handleReveal}
                 disabled={grading}
               >
-                {grading ? "Grading outcome…" : "Reveal & auto-grade outcome"}
+                {grading ? "Grading…" : "REVEAL OUTCOME"}
               </button>
             )}
             {wasPredictMode && revealed && (

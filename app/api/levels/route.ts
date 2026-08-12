@@ -25,7 +25,7 @@ export async function GET() {
   try {
     const data = await fetchAllTimeframes();
     const ctx = buildMarketContext(data);
-    const levels = buildDrawingLevels(ctx);
+    const levels = buildDrawingLevels(ctx, data.m1);
     const fvgDaily = buildFvgDailyBars(data.daily, data.m1);
     const zones = buildDrawingZones(ctx, data.m1, fvgDaily);
 

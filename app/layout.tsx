@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Desk Copilot v0",
-  description: "ICT discretionary trading copilot — verdict machine",
+  title: "The Trading Desk",
+  description: "No signals. Just the read.",
 };
 
 export default function RootLayout({

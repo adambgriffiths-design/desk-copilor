@@ -1,6 +1,7 @@
 /** Shared API base URL resolution — import via importScripts in service worker. */
-const LOCAL_HOSTS = ["127.0.0.1", "localhost"];
-const LOCAL_PORTS = [3000, 3001, 3002];
+const PRODUCTION_BASE = "https://desk-copilor.vercel.app";
+const LOCAL_BASE = "http://127.0.0.1:3000";
+const LOCAL_FALLBACK = "http://localhost:3000";
 
 let cachedBase = null;
 
@@ -10,21 +11,32 @@ function normalizeBase(url) {
     .replace(/\/+$/, "");
 }
 
-function localBases() {
-  const bases = [];
-  for (const host of LOCAL_HOSTS) {
-    for (const port of LOCAL_PORTS) {
-      bases.push(`http://${host}:${port}`);
-    }
-  }
-  return bases;
+function rememberBase(base) {
+  const normalized = normalizeBase(base);
+  if (!normalized) return;
+  cachedBase = normalized;
+  chrome.storage.local.set({ apiBaseLastGood: normalized }).catch(() => {});
 }
 
-async function getApiBases() {
-  const stored = await chrome.storage.sync.get("apiBaseUrl");
-  const custom = normalizeBase(stored.apiBaseUrl);
-  if (custom) return [custom, ...localBases()];
-  return localBases();
+async function getCustomBase() {
+  const { apiBaseUrl } = await chrome.storage.sync.get("apiBaseUrl");
+  return normalizeBase(apiBaseUrl);
+}
+
+function isLocalBase(base) {
+  const b = normalizeBase(base);
+  return (
+    b === LOCAL_BASE ||
+    b === LOCAL_FALLBACK ||
+    b.startsWith("http://127.0.0.1:") ||
+    b.startsWith("http://localhost:")
+  );
+}
+
+async function getApiCandidates() {
+  const custom = await getCustomBase();
+  if (custom) return [custom];
+  return [PRODUCTION_BASE, LOCAL_BASE, LOCAL_FALLBACK];
 }
 
 async function probeBase(base, timeoutMs) {
@@ -32,45 +44,48 @@ async function probeBase(base, timeoutMs) {
     signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return base;
+  return normalizeBase(base);
 }
 
-/** Find first reachable backend — parallel probe so dead ports don't stack timeouts. */
-async function resolveApiBase(probeTimeoutMs = 3500) {
-  if (cachedBase) {
+/** Health check — saved URL first, then production Vercel, localhost last. */
+async function pingHealth() {
+  const candidates = await getApiCandidates();
+  const ordered = [];
+
+  if (cachedBase && candidates.includes(cachedBase)) {
+    ordered.push(cachedBase);
+  }
+  for (const base of candidates) {
+    if (!ordered.includes(base)) ordered.push(base);
+  }
+
+  for (const base of ordered) {
     try {
-      await probeBase(cachedBase, 2000);
-      return cachedBase;
+      const ok = await probeBase(base, 8000);
+      rememberBase(ok);
+      return { ok: true, base: ok };
     } catch {
-      cachedBase = null;
+      /* try next */
     }
   }
 
-  try {
-    const session = await chrome.storage.session.get("apiBaseResolved");
-    if (session.apiBaseResolved) {
-      await probeBase(session.apiBaseResolved, 2000);
-      cachedBase = session.apiBaseResolved;
-      return cachedBase;
-    }
-  } catch {
-    /* try full discovery */
-  }
+  cachedBase = null;
+  const hint = normalizeBase(await getCustomBase()) || PRODUCTION_BASE;
+  return {
+    ok: false,
+    error: `Backend offline — check ${hint} is up (Extension Options → Save)`,
+  };
+}
 
-  const bases = await getApiBases();
-  const unique = [...new Set(bases)];
-  const results = await Promise.allSettled(
-    unique.map((base) => probeBase(base, probeTimeoutMs))
-  );
-  for (const r of results) {
-    if (r.status === "fulfilled") {
-      cachedBase = r.value;
-      chrome.storage.session.set({ apiBaseResolved: cachedBase }).catch(() => {});
-      return cachedBase;
-    }
-  }
+function clearApiCache() {
+  cachedBase = null;
+  chrome.storage.local.remove("apiBaseLastGood").catch(() => {});
+}
 
-  throw new Error("Backend offline — run npm run dev or set API URL in extension options");
+async function resolveApiBase() {
+  const ping = await pingHealth();
+  if (!ping.ok) throw new Error(ping.error);
+  return ping.base;
 }
 
 async function apiFetch(path, options = {}) {
@@ -87,10 +102,9 @@ async function apiFetch(path, options = {}) {
     const msg =
       data.error ||
       data.message ||
-      (res.status === 500
-        ? "Backend error — check server logs or run npm run dev"
-        : `HTTP ${res.status}`);
+      (res.status === 500 ? `Backend error at ${base}` : `HTTP ${res.status}`);
     throw new Error(msg);
   }
+  rememberBase(base);
   return data;
 }
