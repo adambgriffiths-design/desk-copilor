@@ -4,6 +4,7 @@ import {
   VOICE_REALTIME_TOOLS,
 } from "@/lib/voice-instructions";
 import { realtimeVoiceForPreference } from "@/lib/voice-options";
+import { formatVoiceDeskContext } from "@/lib/voice-desk-context";
 
 export const runtime = "nodejs";
 
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
     const instructions = [
       VOICE_REALTIME_INSTRUCTIONS,
       `Chart symbol: ${symbol}`,
+      formatVoiceDeskContext(),
       "Respond in English only.",
     ].join("\n\n");
 

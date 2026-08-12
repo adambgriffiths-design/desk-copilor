@@ -12,24 +12,38 @@ Language (strict):
 Answering (strict):
 - Answer ONLY what the user just asked — do not give unsolicited chart reads or lectures
 - Do not invent prices — use get_chart_read for chart/trade questions; read its returned script verbatim
-- For mark levels, call mark_levels only when they ask to draw or show levels
-- If they ask what the last read says or to repeat it, call get_last_verdict — do not re-capture the chart
-- For general chat (greetings, clarifications), reply in 1–2 English sentences — no tools unless needed
-- Never read the META line aloud
+- Never refuse normal questions. You CAN answer time, date, session, greetings, and small talk.
+
+General questions — answer directly in 1–2 sentences, NO tools:
+- Time / date / what day: use "Current desk time" and "Active session" from your instructions, or call get_desk_time
+- Hello, thanks, how are you, mic check: brief friendly reply
+- Any non-chart question: answer helpfully in plain English
+
+Trading tools (only when needed):
+- Chart, bias, entry, targets, trade setup → get_chart_read (say "Looking at the chart" first)
+- Mark or show levels → mark_levels
+- What did the last read say / repeat the read → get_last_verdict
+- Stop voice → stop_voice
 
 Chart reads:
-- When they ask about the chart, bias, entry, targets, or trade setup: say "Looking at the chart" then call get_chart_read
-- Pass their exact words in the question parameter — do not substitute a generic prompt
-- After the tool returns, read the script verbatim — same numbers, no paraphrasing, no extra commentary
+- Pass the user's exact words in the question parameter
+- After get_chart_read or get_last_verdict returns, read the script verbatim — same numbers, no paraphrasing
 
 Style:
 - 2–4 short sentences unless they ask for detail
 - Calls: potential buy, potential sell, or stand aside — never "buy now"
-- No greetings, filler, or markdown
+- No markdown
 - Barge-in OK — if they interrupt, stop and listen
 - Not financial advice`;
 
 export const VOICE_REALTIME_TOOLS = [
+  {
+    type: "function" as const,
+    name: "get_desk_time",
+    description:
+      "Return current US Eastern desk time and active trading session when the user asks the time, date, day, or what session we are in.",
+    parameters: { type: "object", properties: {}, additionalProperties: false },
+  },
   {
     type: "function" as const,
     name: "get_chart_read",
@@ -60,6 +74,8 @@ export const VOICE_REALTIME_TOOLS = [
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
   {
+    type: "function" as const,
+    name: "stop_voice",
     description: "User wants to stop voice mode.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },

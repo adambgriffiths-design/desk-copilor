@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.0.45";
+  const DC_VERSION = "1.0.46";
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
@@ -17,7 +17,7 @@
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
           <span class="dc-tagline">No signals. Just the read.</span>
-          <span class="dc-ver">v1.0.45</span>
+          <span class="dc-ver">v1.0.46</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
@@ -846,6 +846,21 @@
     updateVoiceToggle(on, window.DeskCopilotVoice.isRecording?.());
   };
 
+  function deskTimeReply() {
+    const now = new Date();
+    const est = now.toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZoneName: "short",
+    });
+    return `It's ${est} US Eastern on the desk clock.`;
+  }
+
   function chartReadQuestion(argsQuestion) {
     const fromTool = (argsQuestion || "").trim();
     const generic =
@@ -1152,6 +1167,9 @@
         recordAssistantReply(text);
       },
       onToolCall: async (name, args) => {
+        if (name === "get_desk_time") {
+          return deskTimeReply();
+        }
         if (name === "mark_levels") {
           await drawLevels();
           return "Levels marked on the chart.";
