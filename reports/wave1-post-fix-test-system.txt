@@ -1,0 +1,56 @@
+﻿=== Wave 1 post-fix test:system --prod ===
+Started: 08/13/2026 01:16:25
+node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> desk-copilot@1.4.60 test:system
+> npx tsx scripts/test-system-health.ts --prod
+
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` 
+for supported config options.
+
+=== Desk Copilot system health ===
+
+Score: 90/100 ┬╖ FAIL
+Time: 2026-08-13T00:20:46.272Z
+
+Γ£à routing-golden (9890ms) ΓÇö pass
+Γ£à conversation-chains (8410ms) ΓÇö pass
+Γ£à observation-engine (9082ms) ΓÇö pass
+Γ£à reh-rel (10110ms) ΓÇö pass
+Γ£à chart-snapshot (8141ms) ΓÇö pass
+Γ£à decision-pipeline (16879ms) ΓÇö pass
+Γ£à contamination-guard (10369ms) ΓÇö pass
+Γ£à chart-export-quality (10296ms) ΓÇö pass
+Γ£à request-trace (9390ms) ΓÇö pass
+Γ£à connection-state (9046ms) ΓÇö pass
+Γ¥î prod:health (22417ms) ΓÇö jor version of npm. See `npm help npmrc` for supported config options.
+Backend not ready ΓÇö run: npm run dev
+fetch failed
+Γ£à prod:desk-tracker (125832ms) ΓÇö probe ok
+
+--- Release checklist ---
+FAIL ┬╖ No open critical failures
+       1 open P0/P1
+PASS ┬╖ Voice latency Γëñ 3000ms (recent max)
+       no voice traces
+PASS ┬╖ Chart export success ΓëÑ 85%
+       100% (0 exports)
+FAIL ┬╖ Golden tests pass
+       failures detected
+
+--- Failures ---
+  ΓÇó prod health failed
+
+System health FAILED ΓÇö resolve P0/P1 before release.
+
+JSON: C:\Users\adamg\Projects\desk-copilot\reports\system-health-latest.json
+Thresholds: voiceΓëñ3000ms exportΓëÑ85% criticalsΓëñ0
+Exit: 1
+Finished: 08/13/2026 01:20:48

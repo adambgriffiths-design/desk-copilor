@@ -1,7 +1,7 @@
 {
-  "at": "2026-08-12T23:18:16.789Z",
-  "pass": true,
-  "score": 100,
+  "at": "2026-08-13T00:20:46.272Z",
+  "pass": false,
+  "score": 90,
   "subsystems": [
     {
       "name": "routing-golden",
@@ -9,7 +9,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 8128
+      "ms": 9890
     },
     {
       "name": "conversation-chains",
@@ -17,7 +17,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 6095
+      "ms": 8410
     },
     {
       "name": "observation-engine",
@@ -25,7 +25,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 3817
+      "ms": 9082
     },
     {
       "name": "reh-rel",
@@ -33,7 +33,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P1",
-      "ms": 3893
+      "ms": 10110
     },
     {
       "name": "chart-snapshot",
@@ -41,7 +41,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 5683
+      "ms": 8141
     },
     {
       "name": "decision-pipeline",
@@ -49,7 +49,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 4252
+      "ms": 16879
     },
     {
       "name": "contamination-guard",
@@ -57,7 +57,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 6660
+      "ms": 10369
     },
     {
       "name": "chart-export-quality",
@@ -65,7 +65,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P1",
-      "ms": 6107
+      "ms": 10296
     },
     {
       "name": "request-trace",
@@ -73,7 +73,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P2",
-      "ms": 4097
+      "ms": 9390
     },
     {
       "name": "connection-state",
@@ -81,17 +81,33 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P2",
-      "ms": 6065
+      "ms": 9046
+    },
+    {
+      "name": "prod:health",
+      "status": "fail",
+      "icon": "❌",
+      "detail": "jor version of npm. See `npm help npmrc` for supported config options.\nBackend not ready — run: npm run dev\nfetch failed",
+      "priority": "P0",
+      "ms": 22417
+    },
+    {
+      "name": "prod:desk-tracker",
+      "status": "pass",
+      "icon": "✅",
+      "detail": "probe ok",
+      "priority": "P1",
+      "ms": 125832
     }
   ],
   "checklist": {
-    "pass": true,
+    "pass": false,
     "items": [
       {
         "id": "criticals",
         "label": "No open critical failures",
-        "pass": true,
-        "detail": "0 open P0/P1",
+        "pass": false,
+        "detail": "1 open P0/P1",
         "severity": "P0"
       },
       {
@@ -111,13 +127,15 @@
       {
         "id": "golden",
         "label": "Golden tests pass",
-        "pass": true,
-        "detail": "all pass",
+        "pass": false,
+        "detail": "failures detected",
         "severity": "P0"
       }
     ],
-    "openCriticals": 0
+    "openCriticals": 2
   },
-  "summary": "System health OK — ready for release review.",
-  "failures": []
+  "summary": "System health FAILED — resolve P0/P1 before release.",
+  "failures": [
+    "prod health failed"
+  ]
 }

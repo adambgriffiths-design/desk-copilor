@@ -7,6 +7,8 @@ import {
   getLatestTimelineEntry,
 } from "@/lib/desk-tracker-engine";
 import { getTimelineEntry } from "@/lib/decision-timeline";
+import { attachApiDataQuality, resolveApiDataQuality } from "@/lib/api-data-quality";
+import { buildDeskMarketIntelligence } from "@/lib/market-intelligence";
 
 export const runtime = "nodejs";
 
@@ -43,19 +45,38 @@ export async function POST(request: NextRequest) {
     const lastBarTime =
       typeof body.lastBarTime === "number" ? body.lastBarTime : Number(body.lastBarTime) || null;
 
-    const state = await runDeskTracker({
+    const intel = await buildDeskMarketIntelligence({
       chartSnapshot,
       chartLastPrice,
-      candleClosed: body.candleClosed === true,
-      lastBarTime,
-      freeze: body.freeze === true,
+      forceFresh: body.candleClosed === true || chartLastPrice != null,
     });
+    const dq = resolveApiDataQuality(intel, chartLastPrice);
+
+    const state = dq.canDecide
+      ? await runDeskTracker({
+          chartSnapshot,
+          chartLastPrice,
+          candleClosed: body.candleClosed === true,
+          lastBarTime,
+          freeze: body.freeze === true,
+        })
+      : {
+          phase: "no_trade",
+          verdict: "NO_TRADE",
+          blocked: true,
+          blockReason: dq.reasons.join("; ") || dq.dataQuality,
+          dataQuality: dq.dataQuality,
+        };
 
     return NextResponse.json(
-      {
-        ...state,
-        timeline: getDecisionTimeline(),
-      },
+      attachApiDataQuality(
+        {
+          ...state,
+          timeline: dq.canDecide ? getDecisionTimeline() : [],
+          pipelineBlocked: !dq.canDecide,
+        },
+        dq
+      ),
       { headers: cors }
     );
   } catch (err) {

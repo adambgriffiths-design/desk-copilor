@@ -9,6 +9,7 @@ import { expandTradingAbbreviations } from "@/lib/plain-language";
 import { resolveSnapshotFromQuestion } from "@/lib/market-snapshot";
 import { applyVoiceRules, interpretVoiceInput, needsVoiceInterpret } from "@/lib/voice-interpret";
 import { buildDeskMarketIntelligence } from "@/lib/market-intelligence";
+import { attachApiDataQuality, resolveApiDataQuality } from "@/lib/api-data-quality";
 import {
   answerFromIntelligence,
   classifyQueryMode,
@@ -71,12 +72,13 @@ export async function POST(request: NextRequest) {
 
     const forceFresh = intent === "price" || chartLastPrice != null;
     const intel = await buildDeskMarketIntelligence({ chartLastPrice, forceFresh });
+    const dq = resolveApiDataQuality(intel, chartLastPrice);
     const intelMode = classifyQueryMode(question, conversationContext);
 
     if (intelMode !== "legacy_snapshot" || needsMarketIntelligenceAnswer(question)) {
       const answer = answerFromIntelligence(intel, question, conversationContext);
       if (answer) {
-        const payload = {
+        let payload = {
           intent: answer.intent || intent,
           spoken: answer.spoken,
           panel: answer.panel,
@@ -93,6 +95,17 @@ export async function POST(request: NextRequest) {
             ? { fpfvg: true }
             : {}),
         };
+        if (!dq.canDecide) {
+          payload = {
+            ...payload,
+            tradeable_bias: "unknown",
+            spoken:
+              dq.dataQuality === "UNAVAILABLE" || dq.dataQuality === "STALE"
+                ? "Live market data is unavailable � I can't quote that yet."
+                : payload.spoken,
+          };
+        }
+        payload = attachApiDataQuality(payload, dq);
         snapshotResponseCache = {
           key: cacheKey,
           body: payload,
@@ -128,6 +141,16 @@ export async function POST(request: NextRequest) {
         ? { fpfvg: true }
         : {}),
     };
+    if (!dq.canDecide) {
+      payload = {
+        ...payload,
+        spoken:
+          dq.dataQuality === "UNAVAILABLE" || dq.dataQuality === "STALE"
+            ? "Live market data is unavailable � I can't quote that yet."
+            : payload.spoken,
+      };
+    }
+    payload = attachApiDataQuality(payload, dq);
     snapshotResponseCache = {
       key: cacheKey,
       body: payload,

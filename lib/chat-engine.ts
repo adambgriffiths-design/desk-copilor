@@ -47,6 +47,7 @@ import { classifyAnalysisDepth, requiresDeepAnalysisPipeline } from "@/lib/analy
 import {
   evaluateAnalysisQualityGate,
   formatQualityGateForPrompt,
+  type QualityGateResult,
 } from "@/lib/analysis-quality-gate";
 import { CASUAL_CHAT_SYSTEM_PROMPT } from "@/lib/casual-chat-prompt";
 import { formatMemoryForPrompt, normalizeMemory, userMemoryReply, isUserMemoryQuestion, type DeskMemory } from "@/lib/desk-memory";
@@ -101,6 +102,7 @@ export async function buildChatSystemPrompt(
   let marketBlock = "";
   let marketDataWarning: string | null = null;
   let qualityGateBlock = "";
+  let qualityGateResult: QualityGateResult | undefined;
 
   const analysisDepth = classifyAnalysisDepth({ text: lastUser });
   const richTrading =
@@ -121,6 +123,7 @@ export async function buildChatSystemPrompt(
       marketBlock = formatIntelligenceForPrompt(intel);
       if (richTrading || requiresDeepAnalysisPipeline(analysisDepth)) {
         const gate = evaluateAnalysisQualityGate(intel, analysisDepth);
+        qualityGateResult = gate;
         qualityGateBlock = formatQualityGateForPrompt(gate);
       }
     } catch (err) {
@@ -162,7 +165,7 @@ export async function buildChatSystemPrompt(
     .filter(Boolean)
     .join("\n\n");
 
-  return { system, marketDataWarning };
+  return { system, marketDataWarning, qualityGate: qualityGateResult, richTrading, analysisDepth };
 }
 
 /** JSON-only reply for narrow chart questions — skips GPT. */
@@ -415,11 +418,22 @@ export async function generateChatReply(
     return { reply: snapshotReply, marketDataWarning: null };
   }
 
-  const { system, marketDataWarning } = await buildChatSystemPrompt(input);
+  const { system, marketDataWarning, qualityGate, richTrading, analysisDepth } =
+    await buildChatSystemPrompt(input);
   const history = input.messages.slice(-16);
 
   const richVoice =
     input.voiceInput && prefersRichTradingAnswer(lastUser);
+  const richPath =
+    richTrading ||
+    requiresDeepAnalysisPipeline(analysisDepth) ||
+    mustUseTradingStream(lastUser);
+  if (richPath && qualityGate && !qualityGate.canDeliverVerdict) {
+    const reply =
+      qualityGate.waitReason ??
+      `WAIT — ${qualityGate.missing.slice(0, 4).join("; ")}`;
+    return { reply: expandTradingAbbreviations(reply), marketDataWarning };
+  }
   const openai = new OpenAI({ apiKey });
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
@@ -437,12 +451,22 @@ export async function streamChatReply(input: ChatPromptInput) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not set");
 
-  const { system } = await buildChatSystemPrompt(input);
+  const { system, qualityGate, richTrading, analysisDepth } = await buildChatSystemPrompt(input);
   const history = input.messages.slice(-16);
   const lastUser =
     [...input.messages].reverse().find((m) => m.role === "user")?.content ?? "";
   const richVoice =
     input.voiceInput && prefersRichTradingAnswer(lastUser);
+  const richPath =
+    richTrading ||
+    requiresDeepAnalysisPipeline(analysisDepth) ||
+    mustUseTradingStream(lastUser);
+  if (richPath && qualityGate && !qualityGate.canDeliverVerdict) {
+    const reply =
+      qualityGate.waitReason ??
+      `WAIT — ${qualityGate.missing.slice(0, 4).join("; ")}`;
+    throw new Error(`QUALITY_GATE:${reply}`);
+  }
 
   const openai = new OpenAI({ apiKey });
   return openai.chat.completions.create({

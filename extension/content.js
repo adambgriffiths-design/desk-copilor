@@ -2532,12 +2532,42 @@
       );
       if (turnGen != null && turnGen !== voiceTurnGen) return;
       if (!out?.reply) {
+        if (
+          mustUseTradingStream(text) ||
+          mustUseTradingStream(routeText || "") ||
+          mustUseTradingStream(routeForIntent)
+        ) {
+          await publishAssistantReply(
+            "WAIT — I need validated live chart data before a trading read.",
+            voice,
+            { pauseMic: true, instant: true }
+          );
+          return;
+        }
         await publishAssistantReply(localCasualReply(text), voice, { pauseMic: true, instant: true });
       }
       setMsg("", null);
     } catch (e) {
       voiceLog("casual stream fallback:", e?.message || e);
       setMsg("", null);
+      const gateMsg =
+        typeof e?.message === "string" && e.message.startsWith("QUALITY_GATE:")
+          ? e.message.slice("QUALITY_GATE:".length)
+          : null;
+      if (
+        gateMsg ||
+        mustUseTradingStream(text) ||
+        mustUseTradingStream(routeText || "") ||
+        mustUseTradingStream(routeForIntent)
+      ) {
+        await publishAssistantReply(
+          gateMsg || "WAIT — I need validated live chart data before a trading read.",
+          voice,
+          { pauseMic: true, instant: true },
+          () => setKarenPhase("listening")
+        );
+        return;
+      }
       await publishAssistantReply(localCasualReply(text), voice, { pauseMic: true, instant: true }, () =>
         setKarenPhase("listening")
       );
@@ -3266,11 +3296,13 @@
       dataStatus = "LIVE";
     } else if (conn.state === "DEGRADED") {
       dataStatus = "STALE";
-    } else if (Number.isFinite(px)) {
+    } else if (conn.state === "RECONNECTING" || conn.state === "CONNECTING") {
+      dataStatus = "STALE";
+    } else if (Number.isFinite(px) && isLiveDataAvailable()) {
       const age = Date.now() - contextStripPriceTs;
       dataStatus = age < 8000 ? "LIVE" : "STALE";
     } else {
-      dataStatus = "ERROR";
+      dataStatus = conn?.backendUp ? "UNAVAILABLE" : "ERROR";
     }
     const ageMs = conn?.dataAge ?? (contextStripPriceTs > 0 ? Date.now() - contextStripPriceTs : null);
     const updated =
@@ -3285,7 +3317,7 @@
         : "";
     window.DeskCopilotVerdictUI?.updateMarketBar?.({
       symbol: shortSymbol(symbol()),
-      price: conn?.state === "CONNECTED" || Number.isFinite(px) ? px : null,
+      price: isLiveDataAvailable() && (conn?.state === "CONNECTED" || Number.isFinite(px)) ? px : null,
       session: ctx.label || "—",
       tf: "1m",
       dataStatus: dataStatus === "OFFLINE" ? "LIVE DATA: OFFLINE" : dataStatus,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseChartPriceInput } from "@/lib/chart-live-price";
 import { applyVoiceRules, interpretVoiceInput, needsVoiceInterpret } from "@/lib/voice-interpret";
 import { buildDeskMarketIntelligence } from "@/lib/market-intelligence";
+import { attachApiDataQuality, resolveApiDataQuality } from "@/lib/api-data-quality";
 import {
   answerFromIntelligence,
   type ConversationContext,
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
       forceFresh: chartLastPrice != null,
     });
 
+    const dq = resolveApiDataQuality(intel, chartLastPrice);
     const answer = answerFromIntelligence(intel, question, conversationContext);
     if (!answer) {
       return NextResponse.json(
@@ -59,11 +61,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const payload = {
-      ...answer,
-      observation_summary: intel.observation.data_quality,
-      tradeable_bias: intel.observation.htf_bias.tradeable_bias,
-    };
+    const safeAnswer =
+      dq.dataQuality === "UNAVAILABLE" || dq.dataQuality === "STALE"
+        ? {
+            ...answer,
+            spoken: "Live market data is unavailable — I can't quote price or bias yet.",
+            facts: [],
+            tradeable_bias: "unknown",
+          }
+        : dq.dataQuality === "DEGRADED" && intel.observation.htf_bias.tradeable_bias === "unknown"
+          ? { ...answer, tradeable_bias: "unknown" }
+          : answer;
+
+    const payload = attachApiDataQuality(
+      {
+        ...safeAnswer,
+        observation_summary: intel.observation.data_quality,
+        tradeable_bias:
+          dq.canDecide && intel.observation.htf_bias.tradeable_bias !== "unknown"
+            ? intel.observation.htf_bias.tradeable_bias
+            : "unknown",
+      },
+      dq
+    );
 
     cache = { key: cacheKey, body: payload, expires: now + CACHE_MS };
     return NextResponse.json(payload, { headers: cors });

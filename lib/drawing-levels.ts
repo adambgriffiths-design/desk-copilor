@@ -391,8 +391,13 @@ export function buildDrawingLevels(
     });
   }
 
+  const currentPrice = resolveDrawingCurrentPrice(ctx, m1, opts?.currentPrice);
+  const rehRelPools = filterRelativeEqualPoolsByPrice(
+    ctx.structureFacts.relativeEqualPools ?? [],
+    currentPrice
+  );
   const rehRelCounts = { reh: 0, rel: 0 };
-  for (const pool of ctx.structureFacts.relativeEqualPools ?? []) {
+  for (const pool of rehRelPools) {
     const idx = rehRelCounts[pool.type]++;
     push(levels, seen, {
       id: `${pool.type}_${idx}`,

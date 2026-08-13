@@ -156,11 +156,17 @@ export function runDeskPipeline(ctx: MarketContext, state: MarketState): DeskPip
   const interpretation = buildMarketInterpretation(observation);
 
   const contamination = validateInterpretationContamination(observation, interpretation);
-  if (!contamination.passed) {
-    interpretation.reasoning += ` [contamination warnings: ${contamination.violations.join("; ")}]`;
-  }
-
-  const decision = buildTradingDecision(observation, interpretation, ctx);
+  const decision = !contamination.passed
+    ? {
+        verdict: "NO_TRADE" as const,
+        verdict_reason: `Interpretation contamination blocked: ${contamination.violations.join("; ")}`,
+        invalidation: null,
+        entry_zone: null,
+        target: null,
+        observation_ref: observation,
+        interpretation_ref: interpretation,
+      }
+    : buildTradingDecision(observation, interpretation, ctx);
   const contradiction_report = buildContradictionReport(observation, interpretation);
   const explainability = buildExplainabilityReport(observation, interpretation, decision, contradiction_report);
   const uncertainty = buildUncertaintyReport(observation, data_quality_report);
