@@ -4,7 +4,8 @@ import {
   isSnapshotIntent,
   resolveSnapshotIntent,
 } from "@/lib/chart-question-intent";
-import { parseChartPriceInput } from "@/lib/chart-live-price";
+import { parseChartPriceInput, parseChartPriceMeta, formatAuthoritativePriceAnswer } from "@/lib/chart-live-price";
+import { parseChartSnapshotInput } from "@/lib/chart-snapshot";
 import { expandTradingAbbreviations } from "@/lib/plain-language";
 import { resolveSnapshotFromQuestion } from "@/lib/market-snapshot";
 import { applyVoiceRules, interpretVoiceInput, needsVoiceInterpret } from "@/lib/voice-interpret";
@@ -15,6 +16,7 @@ import {
   classifyQueryMode,
   needsMarketIntelligenceAnswer,
   type ConversationContext,
+  type MarketIntelligenceAnswer,
 } from "@/lib/conversational-query";
 
 export const runtime = "nodejs";
@@ -59,6 +61,9 @@ export async function POST(request: NextRequest) {
 
     const intent = resolveSnapshotIntent(question);
     const chartLastPrice = parseChartPriceInput(body.chartLastPrice);
+    const priceMeta = parseChartPriceMeta(body);
+    const chartSnapshot = parseChartSnapshotInput(body.chartSnapshot);
+    const chartExportFailed = body.chartExportFailed === true;
     const conversationContext: ConversationContext | undefined = body.conversationContext;
     const cacheKey = `${intent}|${question}|${chartLastPrice ?? "none"}|${conversationContext?.lastTopic ?? ""}`;
     const now = Date.now();
@@ -71,14 +76,21 @@ export async function POST(request: NextRequest) {
     }
 
     const forceFresh = intent === "price" || chartLastPrice != null;
-    const intel = await buildDeskMarketIntelligence({ chartLastPrice, forceFresh });
-    const dq = resolveApiDataQuality(intel, chartLastPrice);
+    const intel = await buildDeskMarketIntelligence({
+      chartLastPrice,
+      chartLastPriceSource: priceMeta.source,
+      chartLastPriceTs: priceMeta.timestamp,
+      chartSnapshot,
+      chartExportFailed,
+      forceFresh,
+    });
+    const dq = resolveApiDataQuality(intel, chartLastPrice, priceMeta);
     const intelMode = classifyQueryMode(question, conversationContext);
 
     if (intelMode !== "legacy_snapshot" || needsMarketIntelligenceAnswer(question)) {
       const answer = answerFromIntelligence(intel, question, conversationContext);
       if (answer) {
-        let payload = {
+        let payload: Omit<MarketIntelligenceAnswer, "updated_at"> & { fpfvg?: boolean } = {
           intent: answer.intent || intent,
           spoken: answer.spoken,
           panel: answer.panel,
@@ -101,8 +113,14 @@ export async function POST(request: NextRequest) {
             tradeable_bias: "unknown",
             spoken:
               dq.dataQuality === "UNAVAILABLE" || dq.dataQuality === "STALE"
-                ? "Live market data is unavailable � I can't quote that yet."
+                ? "Live market data is unavailable — I can't quote that yet."
                 : payload.spoken,
+          };
+        } else if (intent === "price" && intel.authoritativePrice) {
+          payload = {
+            ...payload,
+            spoken: formatAuthoritativePriceAnswer(intel.ctx.daily.lastClose, intel.authoritativePrice),
+            panel: formatAuthoritativePriceAnswer(intel.ctx.daily.lastClose, intel.authoritativePrice),
           };
         }
         payload = attachApiDataQuality(payload, dq);
@@ -131,7 +149,7 @@ export async function POST(request: NextRequest) {
     const ctx = intel.ctx;
     const snapshot = resolveSnapshotFromQuestion(ctx, question);
 
-    const payload = {
+    let payload: Record<string, unknown> = {
       intent: snapshot.intent,
       spoken: expandTradingAbbreviations(snapshot.spoken),
       panel: expandTradingAbbreviations(snapshot.panel),
@@ -146,8 +164,15 @@ export async function POST(request: NextRequest) {
         ...payload,
         spoken:
           dq.dataQuality === "UNAVAILABLE" || dq.dataQuality === "STALE"
-            ? "Live market data is unavailable � I can't quote that yet."
+            ? "Live market data is unavailable — I can't quote that yet."
             : payload.spoken,
+      };
+    } else if (intent === "price" && intel.authoritativePrice) {
+      const spoken = formatAuthoritativePriceAnswer(intel.ctx.daily.lastClose, intel.authoritativePrice);
+      payload = {
+        ...payload,
+        spoken: expandTradingAbbreviations(spoken),
+        panel: expandTradingAbbreviations(spoken),
       };
     }
     payload = attachApiDataQuality(payload, dq);

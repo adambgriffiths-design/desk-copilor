@@ -219,6 +219,7 @@ function prefersRichTradingAnswer(question) {
     .trim()
     .toLowerCase();
   if (!q) return false;
+  if (window.DeskCopilotCasual?.isPersonaQuestion?.(q)) return false;
   if (/\btell me about\b/.test(q) && /\b(market|chart|structure|trade|setup|bias|session|mnq|nasdaq|futures|price|level|fvg|liquidity)\b/.test(q)) {
     return true;
   }

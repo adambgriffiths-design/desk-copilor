@@ -20,7 +20,9 @@
     "test:chart-export-quality": "npx tsx scripts/test-chart-export-quality.ts",
     "test:decision": "npx tsx scripts/test-decision-pipeline.ts",
     "test:observation": "npx tsx scripts/test-observation-engine.ts",
+    "test:observation-proof": "npx tsx scripts/test-observation-chart-proof.ts",
     "test:reh-rel": "npx tsx scripts/test-reh-rel.ts",
+    "test:rc-price": "npx tsx scripts/test-rc-price.ts",
     "test:contamination": "npx tsx scripts/test-contamination-guard.ts",
     "test:replay": "npx tsx scripts/test-replay-decisions.ts",
     "test:replay:scale": "npx tsx scripts/test-replay-decisions.ts --scale 50",
@@ -39,17 +41,27 @@
     "test:regression": "npx tsx scripts/test-regression-session.ts",
     "test:routing": "npx tsx scripts/test-routing-golden.ts",
     "test:conversation-routing": "npx tsx scripts/test-conversation-routing.ts",
+    "test:casual-fallback": "npx tsx scripts/test-casual-fallback.ts",
     "test:conversation-chains": "npx tsx scripts/test-conversation-chains.ts",
     "test:request-trace": "npx tsx scripts/test-request-trace.ts",
     "test:system": "npx tsx scripts/test-system-health.ts",
-    "pm:scan": "npx tsx scripts/pm-engine/scan.ts"
+    "pm:scan": "npx tsx scripts/pm-engine/scan.ts",
+    "test:tickstream-mnq": "npx tsx scripts/test-tickstream-mnq.ts",
+    "test:tickstream-aggregate": "npx tsx scripts/test-tickstream-aggregate.ts",
+    "test:tickstream-historical-mnq": "npx tsx scripts/test-tickstream-historical-mnq.ts",
+    "test:tickstream-historical-unit": "npx tsx scripts/test-tickstream-historical-unit.ts",
+    "tickstream:quote": "tsx scripts/tickstream-quote-mnq.ts",
+    "test:tickstream-quote-unit": "npx tsx scripts/test-tickstream-quote-unit.ts",
+    "test:acceptance-price-tickstream": "npx tsx scripts/test-acceptance-price-tickstream-fallback.ts"
   },
   "dependencies": {
+    "@tickstream/client": "^0.1.0",
     "next": "^15.1.0",
     "openai": "^4.77.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

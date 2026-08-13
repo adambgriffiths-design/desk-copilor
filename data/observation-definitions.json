@@ -1,0 +1,352 @@
+{
+  "$schema": "./observation-definitions.schema.json",
+  "version": "2026-08-13",
+  "source": "docs/OBSERVATION_DEFINITIONS.md",
+  "tolerance_formulas": {
+    "reh_rel": {
+      "formula": "max(2, min(4, referencePrice × 0.001))",
+      "code": "lib/structure.ts:rehRelTolerance",
+      "unit": "points",
+      "example": "@ 29807.25 → 4 pts; highs 29887.00 & 29886.25 qualify"
+    },
+    "fvg_min_gap": {
+      "formula": "c3.low - c1.high >= 3 (bullish) OR c1.low - c3.high >= 3 (bearish)",
+      "code": "lib/gap-zones.ts:MIN_GAP_POINTS",
+      "unit": "points"
+    },
+    "displacement_body": {
+      "formula": "body > avgBody × 1.5 over prior candles (excluding last 3)",
+      "code": "lib/observation-engine.ts:detectDisplacement",
+      "unit": "points"
+    },
+    "price_eps": {
+      "formula": "0.25",
+      "code": "lib/drawing-levels.ts:REH_REL_PRICE_EPS",
+      "unit": "points",
+      "note": "MNQ tick — REH/REL above/below price filter"
+    }
+  },
+  "state_enums": {
+    "observation_structure": ["unknown", "bullish", "bearish", "unclear"],
+    "displacement": ["unknown", "present", "absent"],
+    "fvg_status": ["unknown", "present", "absent", "invalidated"],
+    "order_block": ["unknown", "relevant", "irrelevant", "unclear"],
+    "premium_discount": ["unknown", "premium", "discount", "equilibrium"],
+    "data_quality": ["good", "degraded", "stale", "missing"],
+    "reh_rel_block": ["known", "unknown"],
+    "reh_rel_level": ["active", "swept", "unknown"],
+    "fact_status": ["active", "invalidated", "swept", "absent", "unknown"]
+  },
+  "concepts": [
+    {
+      "id": "mss",
+      "name": "Market Structure Shift (MSS)",
+      "aliases": ["CHoCH", "market_structure"],
+      "implemented": true,
+      "code_refs": ["lib/structure.ts:detectMss", "lib/structure.ts:mssFromBar", "lib/observation-engine.ts:mapStructure"],
+      "detection_rules": [
+        "Timeframe: 1m only",
+        "Swing wing: 2 bars each side (5-bar pivot)",
+        "Scan: last 12 bars of 80-bar lookback, most recent MSS wins",
+        "Bullish MSS: candle body close > prior swing high (index before break bar)",
+        "Bearish MSS: candle body close < prior swing low",
+        "Wick-only pierce does NOT qualify — close required"
+      ],
+      "required_data": {
+        "timeframe": "1m",
+        "min_candles": 10,
+        "body_vs_wick": "close only"
+      },
+      "confirmation_policy": {
+        "type": "candle_close",
+        "affects_verdict": true,
+        "code": "lib/confirmation-policy.ts:mss"
+      },
+      "states": {
+        "unknown": "data_quality missing/stale OR insufficient candles",
+        "bullish": "bullish MSS detected OR tradeable_bias fallback when no MSS",
+        "bearish": "bearish MSS detected OR tradeable_bias fallback",
+        "unclear": "no MSS and tradeable_bias not bullish/bearish",
+        "pending": "NOT IMPLEMENTED — no pending MSS state in engine",
+        "confirmed": "MSS present on last qualifying close (same as detected)",
+        "invalidated": "price closed back through MSS level (observation-facts only)"
+      },
+      "accept_criteria": [
+        "Body close beyond most recent qualifying swing high/low",
+        "Swing exists before break bar (index < barIndex - 1)"
+      ],
+      "reject_criteria": [
+        "Wick through swing without body close",
+        "No prior swing in lookback",
+        "Break outside last-12-bar scan window"
+      ],
+      "gaps": [
+        "No pending/intrabar MSS state",
+        "mapStructure falls back to tradeable_bias when MSS null — may mask absent MSS",
+        "Not distinguished from CHoCH in code (comment says not CHoCH but same logic)"
+      ]
+    },
+    {
+      "id": "reh",
+      "name": "Relative Equal High (REH)",
+      "aliases": ["relative equal highs", "buy-side liquidity pool"],
+      "implemented": true,
+      "code_refs": ["lib/reh-rel.ts:detectRehRel", "lib/reh-rel.ts:groupEqualSwings", "lib/structure.ts:detectRelativeEqualPools"],
+      "detection_rules": [
+        "Two implementations: observation-engine uses clustering (reh-rel.ts); structureFacts uses paired 3-bar swings (structure.ts)",
+        "Observation path: 3-bar swing highs (wing=1), cluster via union-find when pairwise diff ≤ tolerance",
+        "REH level = max(high) in cluster; requires ≥2 swings",
+        "Active REH: level ≥ currentPrice + 0.25 (REH_REL_PRICE_EPS)",
+        "Swept: last candle close > REH level (candle_close policy)"
+      ],
+      "required_data": {
+        "timeframe": "1m",
+        "min_candles": 5,
+        "lookback": 120,
+        "body_vs_wick": "swing uses high/low extremes"
+      },
+      "confirmation_policy": {
+        "type": "candle_close",
+        "affects_verdict": true,
+        "code": "lib/confirmation-policy.ts:liquidity_sweep"
+      },
+      "tolerance": "reh_rel",
+      "states": {
+        "unknown": "reh_rel.status unknown — <5 candles or bad price",
+        "known_absent": "reh_rel.status known, nearest_reh_above null",
+        "active": "pool above price, not swept",
+        "swept": "close crossed above REH level",
+        "pending": "NOT IMPLEMENTED"
+      },
+      "accept_criteria": [
+        "≥2 swing highs within tolerance",
+        "Pool level strictly above current price (+ eps)"
+      ],
+      "reject_criteria": [
+        "Single swing high",
+        "Swings differ by more than tolerance",
+        "Price already closed above level"
+      ],
+      "gaps": [
+        "structure.ts paired-swing REH differs from reh-rel.ts clustering — two algorithms",
+        "structureFacts.relativeEqualPools not wired into observation reh_rel block"
+      ]
+    },
+    {
+      "id": "rel",
+      "name": "Relative Equal Low (REL)",
+      "aliases": ["relative equal lows", "sell-side liquidity pool"],
+      "implemented": true,
+      "code_refs": ["lib/reh-rel.ts:detectRehRel", "lib/structure.ts:detectRelativeEqualPools"],
+      "detection_rules": [
+        "Mirror of REH on swing lows",
+        "REL level = min(low) in cluster",
+        "Active REL: level ≤ currentPrice - 0.25",
+        "Swept: last candle close < REL level"
+      ],
+      "required_data": {
+        "timeframe": "1m",
+        "min_candles": 5,
+        "lookback": 120
+      },
+      "confirmation_policy": {
+        "type": "candle_close",
+        "affects_verdict": true,
+        "code": "lib/confirmation-policy.ts:liquidity_sweep"
+      },
+      "tolerance": "reh_rel",
+      "states": {
+        "unknown": "insufficient data",
+        "known_absent": "no REL below price",
+        "active": "pool below price",
+        "swept": "close crossed below REL"
+      },
+      "gaps": ["Same dual-algorithm gap as REH"]
+    },
+    {
+      "id": "liquidity_sweep",
+      "name": "Liquidity sweep",
+      "aliases": ["PDH sweep", "PDL sweep", "stop run", "liquidity taken"],
+      "implemented": true,
+      "code_refs": ["lib/structure.ts:detectLiquiditySweeps", "lib/observation-engine.ts:buildLiquidityLevels"],
+      "detection_rules": [
+        "Levels: PDH, PDL, PDC (+ session highs/lows listed but not sweep-scanned by default)",
+        "Sell-side sweep (below level): bar.low ≤ level AND bar.close < level",
+        "Buy-side sweep (above level): bar.high ≥ level AND bar.close > level",
+        "Lookback: 40 bars, most recent per level",
+        "Observation liquidity_swept = any level.taken === true"
+      ],
+      "required_data": {
+        "timeframe": "1m",
+        "min_candles": 1,
+        "body_vs_wick": "wick pierce + close confirmation through/beyond level"
+      },
+      "confirmation_policy": {
+        "type": "candle_close",
+        "affects_verdict": true,
+        "code": "lib/confirmation-policy.ts:liquidity_sweep"
+      },
+      "states": {
+        "taken": "sweep detected — level.taken true",
+        "active": "level present, not swept",
+        "unknown": "data_quality missing/stale"
+      },
+      "gaps": [
+        "Session highs/lows in observation levels always taken=false unless in liquiditySweeps",
+        "REH/REL sweeps tracked separately in reh_rel block"
+      ]
+    },
+    {
+      "id": "fvg",
+      "name": "Fair Value Gap (FVG)",
+      "aliases": ["imbalance", "inefficiency"],
+      "implemented": true,
+      "code_refs": ["lib/gap-zones.ts:detectUnfilledIntradayFvgs", "lib/gap-zones.ts:fvgAtIndex", "lib/observation-engine.ts:mapFvg"],
+      "detection_rules": [
+        "3-candle pattern on 1m",
+        "Bullish: c1.high < c3.low AND gap ≥ 3 pts",
+        "Bearish: c1.low > c3.high AND gap ≥ 3 pts",
+        "Unfilled: <50% overlap fill OR no full traverse (isGapFilled)",
+        "Inverted: body closed through gap → IFVG (m1InvertedFvgs)",
+        "Observation reports most recent unfilled FVG; if only inverted → status invalidated"
+      ],
+      "required_data": {
+        "timeframe": "1m",
+        "min_candles": 3,
+        "lookback": 80,
+        "body_vs_wick": "gap measured on wick extremes (high/low)"
+      },
+      "confirmation_policy": {
+        "formation": "candle_close",
+        "entry": "intrabar_wick",
+        "code": "lib/confirmation-policy.ts:fvg_formation,fvg_entry"
+      },
+      "states": {
+        "present": "unfilled FVG in lookback",
+        "absent": "no qualifying unfilled gap",
+        "invalidated": "inverted / filled",
+        "unknown": "data_quality missing/stale"
+      },
+      "accept_criteria": ["Gap ≥ 3 pts", "Not filled per isGapFilled"],
+      "reject_criteria": ["Gap < 3 pts", "Subsequent price filled ≥50% of zone"],
+      "gaps": [
+        "SPEC_NOT_BUILT: fvg_validity tradeability (valid vs present_not_tradeable) — labeled in fixtures but NOT in observation engine",
+        "first_presented_fvg tracked in facts but not in observation.fvg field",
+        "Volume imbalance flag exists in types but not enforced in detection"
+      ]
+    },
+    {
+      "id": "order_block",
+      "name": "Order block relevance",
+      "implemented": "partial",
+      "code_refs": ["lib/observation-engine.ts:inferOrderBlock"],
+      "detection_rules": [
+        "Heuristic only — no OB zone geometry",
+        "relevant if MSS present (with or without FVG)",
+        "unclear if FVG without MSS",
+        "irrelevant otherwise"
+      ],
+      "confirmation_policy": { "type": "candle_close", "affects_verdict": false },
+      "states": { "unknown": "bad data", "relevant": "MSS present", "unclear": "FVG only", "irrelevant": "neither" },
+      "gaps": ["SPEC_NOT_BUILT: no actual order block detection — placeholder heuristic"]
+    },
+    {
+      "id": "displacement",
+      "name": "Displacement",
+      "implemented": true,
+      "code_refs": ["lib/observation-engine.ts:detectDisplacement"],
+      "detection_rules": [
+        "Last 12 candles, check last 5 for impulsive body",
+        "Body = |close - open|",
+        "Present if any body > avgBody × 1.5 (avg excludes last 3 candles)",
+        "Reports displacement_points as body size in points"
+      ],
+      "required_data": { "min_candles": 5, "body_vs_wick": "body only" },
+      "confirmation_policy": { "type": "candle_close", "affects_verdict": true, "code": "lib/confirmation-policy.ts:displacement" },
+      "states": { "present": "impulsive candle found", "absent": "none in window", "unknown": "bad data or <5 candles" },
+      "gaps": ["Direction not captured in observation (narrative assumes upward)", "No link to MSS leg"]
+    },
+    {
+      "id": "premium_discount",
+      "name": "Premium / discount",
+      "implemented": true,
+      "code_refs": ["lib/observation-engine.ts:mapPremiumZone"],
+      "detection_rules": ["From ctx.premiumDiscount.vsCurrentDayRange — precomputed in levels pipeline", "Maps premium | discount | equilibrium"],
+      "confirmation_policy": { "type": "candle_close", "affects_verdict": false },
+      "states": { "unknown": "bad data", "premium": "price in upper range", "discount": "lower range", "equilibrium": "mid/default" },
+      "gaps": ["Not computed from OHLC in observation-engine — depends on MarketContext build"]
+    },
+    {
+      "id": "nwog",
+      "name": "New Week Opening Gap (NWOG)",
+      "implemented": "partial",
+      "code_refs": ["lib/observation-engine.ts evidence gaps.nwog", "lib/observation-facts.ts"],
+      "detection_rules": ["Computed in levels/market pipeline — observation records zone if ctx.nwog present"],
+      "confirmation_policy": { "type": "candle_close", "affects_verdict": false },
+      "states": { "active": "gap bounds in evidence", "unknown": "ctx.nwog null" },
+      "gaps": ["Not in core MarketObservation fields — evidence/facts only"]
+    },
+    {
+      "id": "ndog",
+      "name": "New Day Opening Gap (NDOG)",
+      "implemented": "partial",
+      "code_refs": ["lib/observation-engine.ts evidence gaps.ndog", "lib/observation-facts.ts"],
+      "detection_rules": ["From ctx.htfPdArrays.ndog"],
+      "confirmation_policy": { "type": "candle_close", "affects_verdict": false },
+      "states": { "active": "gap in evidence", "unknown": "null" },
+      "gaps": ["Not in core MarketObservation fields"]
+    },
+    {
+      "id": "confirmation",
+      "name": "Confirmation policy (cross-cutting)",
+      "implemented": true,
+      "code_refs": ["lib/confirmation-policy.ts"],
+      "detection_rules": ["Per-concept candle_close vs intrabar_wick/touch", "MSS, sweep, displacement, FVG formation = candle_close", "FVG entry = intrabar_wick, does not affect verdict"],
+      "states": { "confirmed": "close-confirmed concepts", "pending": "NOT IMPLEMENTED as observation state" },
+      "gaps": ["No unified pending→confirmed lifecycle in observation JSON"]
+    },
+    {
+      "id": "wick_entry",
+      "name": "Wick entry (FVG retrace)",
+      "implemented": "partial",
+      "code_refs": ["lib/confirmation-policy.ts:fvg_entry"],
+      "detection_rules": ["Policy allows intrabar wick into FVG zone for entry trigger", "Does NOT update official observation bias/MSS"],
+      "confirmation_policy": { "type": "intrabar_wick", "affects_verdict": false },
+      "states": { "unknown": "no intrabar price feed in observation layer" },
+      "gaps": ["SPEC_NOT_BUILT: wick entry not observable in Layer 1 — policy only"]
+    },
+    {
+      "id": "htf_bias",
+      "name": "HTF bias stack",
+      "implemented": true,
+      "code_refs": ["lib/observation-engine.ts htf_bias", "lib/ict-rules-engine.ts:extractFeatures"],
+      "detection_rules": ["daily / m15 / m5 from ctx.biasStack", "aligned = alignedCount >= 2", "tradeable_bias propagated"],
+      "confirmation_policy": { "type": "candle_close", "affects_verdict": true, "code": "lib/confirmation-policy.ts:htf_bias" },
+      "states": { "unknown": "bad data", "bullish/bearish/conflicted/neutral": "from bias stack" },
+      "gaps": []
+    },
+    {
+      "id": "session",
+      "name": "Session bucket",
+      "implemented": true,
+      "code_refs": ["lib/observation-engine.ts:mapSession"],
+      "detection_rules": ["Maps activeSession.id → london | ny | asia | off_hours", "ny_pre, ny_am, ny_pm → ny"],
+      "confirmation_policy": { "type": "candle_close", "affects_verdict": false },
+      "states": { "unknown": "bad data", "london/ny/asia/off_hours": "mapped bucket" },
+      "gaps": []
+    }
+  ],
+  "gap_report": [
+    { "concept": "MSS", "code_implements": true, "spec_documented": true, "chart_proof_test": true, "gap": "Bias fallback masks absent MSS; no pending state" },
+    { "concept": "REH/REL", "code_implements": true, "spec_documented": true, "chart_proof_test": true, "gap": "Dual algorithms (structure.ts vs reh-rel.ts)" },
+    { "concept": "Liquidity sweep", "code_implements": true, "spec_documented": true, "chart_proof_test": true, "gap": "Session levels not auto-sweep scanned" },
+    { "concept": "FVG presence", "code_implements": true, "spec_documented": true, "chart_proof_test": true, "gap": "OK for presence" },
+    { "concept": "FVG validity (tradeable)", "code_implements": false, "spec_documented": true, "chart_proof_test": false, "gap": "SPEC_NOT_BUILT — fixture label only" },
+    { "concept": "Order block", "code_implements": "partial", "spec_documented": true, "chart_proof_test": false, "gap": "SPEC_NOT_BUILT — heuristic placeholder" },
+    { "concept": "Displacement", "code_implements": true, "spec_documented": true, "chart_proof_test": true, "gap": "Direction not in observation field" },
+    { "concept": "Premium/discount", "code_implements": true, "spec_documented": true, "chart_proof_test": true, "gap": "Requires MarketContext precompute" },
+    { "concept": "NWOG/NDOG", "code_implements": "partial", "spec_documented": true, "chart_proof_test": false, "gap": "Evidence-only, not core observation fields" },
+    { "concept": "Wick entry", "code_implements": false, "spec_documented": true, "chart_proof_test": false, "gap": "SPEC_NOT_BUILT — policy doc only" },
+    { "concept": "Confirmation lifecycle", "code_implements": "partial", "spec_documented": true, "chart_proof_test": false, "gap": "No pending→confirmed in observation JSON" }
+  ]
+}

@@ -36,6 +36,8 @@ export type MarketIntelligenceAnswer = {
   scoped: true;
   intent?: string;
   last_fact_ids: string[];
+  /** Set when data quality blocks a directional bias decision. */
+  tradeable_bias?: string;
 };
 
 export type QueryMode =
@@ -78,6 +80,8 @@ function resolveFollowUpTarget(
   }
 
   if (/\b(mss|structure shift|market structure)\b/.test(q)) return findFact(facts, "structure.mss");
+  if (/\b(reh|relative equal high|eqh|equal high)\b/.test(q)) return findFact(facts, "liquidity.reh");
+  if (/\b(rel|relative equal low|eql|equal low)\b/.test(q)) return findFact(facts, "liquidity.rel");
   if (/\b(fvg|fair value gap|gap)\b/.test(q)) return findFact(facts, "structure.fvg");
   if (/\b(nwog|week gap)\b/.test(q)) return findFact(facts, "gaps.nwog");
   if (/\b(ndog|day gap)\b/.test(q)) return findFact(facts, "gaps.ndog");
@@ -101,6 +105,8 @@ function classifyFactTopic(question: string): string | null {
   if (/\b(pdh|previous day high)\b/.test(q)) return "liquidity.pdh";
   if (/\b(pdl|previous day low)\b/.test(q)) return "liquidity.pdl";
   if (/\b(pdc|previous day close)\b/.test(q)) return "liquidity.pdc";
+  if (/\b(reh|relative equal high|relative equal highs|eqh|equal high)\b/.test(q)) return "liquidity.reh";
+  if (/\b(rel|relative equal low|relative equal lows|eql|equal low)\b/.test(q)) return "liquidity.rel";
   if (/\b(sweep|swept|liquidity)\b/.test(q)) return "liquidity";
   if (/\b(asia high|asia low)\b/.test(q)) return "session.asia";
   if (/\b(london high|london low)\b/.test(q)) return "session.london";

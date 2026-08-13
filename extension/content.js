@@ -1928,7 +1928,8 @@
   function localCasualReply(text) {
     return (
       window.DeskCopilotCasual?.localCasualReply?.(text, chatHistory) ||
-      "Ha — say more, I'm listening."
+      window.DeskCopilotCasual?.CASUAL_LLM_FAILURE_REPLY ||
+      "I'm having trouble responding right now — try that again."
     );
   }
 
@@ -2903,24 +2904,34 @@
 
     if (isPriceQuestion(intentText)) {
       window.DeskCopilotChartPrice?.invalidate?.();
-      const live = await window.DeskCopilotChartPrice?.read?.();
-      if (live) {
-        noteLivePrice(live);
-        const reply = formatLocalPriceAnswer(live);
-        lastSnapshotAnswer = reply;
-        lastSpokenBrief = reply;
-        lastSnapshotIntent = "price";
-        suppressAssistantEchoUntil = Date.now() + 20000;
-        setMsg("", null);
-        await publishAssistantReply(reply, voice, { pauseMic: true, instant: true, traceSource: "local", groundingPath: "local", grounded: true, skipExport: true }, () => setMsg("", null));
-        return;
-      }
+      const quote = window.DeskCopilotChartPrice?.readQuote?.();
+      const maxAge = window.DeskCopilotChartPrice?.LIVE_PRICE_MAX_AGE_MS ?? 60000;
+      const pricePayload =
+        quote && quote.ageMs <= maxAge
+          ? {
+              chartLastPrice: quote.value,
+              chartLastPriceSource: quote.source,
+              chartLastPriceTs: quote.timestamp,
+            }
+          : undefined;
       try {
-        await runMarketSnapshot(intentText, { voice, pricePayload: turnPricePayload });
+        await runMarketSnapshot(intentText, { voice, turnGen, pricePayload });
         return;
       } catch {
-        /* fall through to chat */
+        /* backend + TickStream fallback failed — show unavailable below */
       }
+      const blocked = window.DeskCopilotConnection?.LIVE_DATA_UNAVAILABLE_VERDICT;
+      const msg =
+        blocked?.spokenBrief ||
+        "Wait — live data unavailable. I need a fresh TradingView last print before quoting price.";
+      setMsg("", null);
+      await publishAssistantReply(
+        msg,
+        voice,
+        { pauseMic: true, instant: true, traceSource: "local", groundingPath: "local", grounded: false },
+        () => setMsg("", null)
+      );
+      return;
     }
 
     if (needsScopedChartAnswer(intentText) && !tradingQ) {
@@ -3144,10 +3155,14 @@
 
   async function primeChartPriceForTurn(opts = {}) {
     if (opts.forceRefresh) window.DeskCopilotChartPrice?.invalidate?.();
-    const sync = window.DeskCopilotChartPrice?.readSync?.();
-    if (Number.isFinite(sync)) {
-      noteLivePrice(sync);
-      return { chartLastPrice: sync };
+    const quote = window.DeskCopilotChartPrice?.readQuote?.();
+    if (quote) {
+      noteLivePrice(quote.value);
+      return {
+        chartLastPrice: quote.value,
+        chartLastPriceSource: quote.source,
+        chartLastPriceTs: quote.timestamp,
+      };
     }
     if (priceTurnInflight) return priceTurnInflight;
     priceTurnInflight = (async () => {
@@ -3391,22 +3406,45 @@
   }
 
   async function chartPricePayload() {
-    const sync = window.DeskCopilotChartPrice?.readSync?.();
-    if (Number.isFinite(sync)) {
-      noteLivePrice(sync);
-      return { chartLastPrice: sync };
-    }
-    if (
-      Number.isFinite(contextStripPrice) &&
-      Date.now() - contextStripPriceTs < 3000
-    ) {
-      return { chartLastPrice: contextStripPrice };
+    const quote = window.DeskCopilotChartPrice?.readQuote?.();
+    if (quote) {
+      noteLivePrice(quote.value);
+      return {
+        chartLastPrice: quote.value,
+        chartLastPriceSource: quote.source,
+        chartLastPriceTs: quote.timestamp,
+      };
     }
     window.DeskCopilotChartPrice?.invalidate?.();
     const payload = (await window.DeskCopilotChartPrice?.payload?.()) || {};
     const px = Number(payload.chartLastPrice);
     if (Number.isFinite(px)) noteLivePrice(px);
     return payload;
+  }
+
+  async function marketSnapshotExtras(pricePayload) {
+    const snapshotPayload =
+      (await window.DeskCopilotChartSnapshot?.payload?.({ maxBars: 120 })) || null;
+    const rejectionReasons =
+      snapshotPayload?.exportTrace?.qualityRejectionReasons ||
+      snapshotPayload?.chartSnapshot?.qualityMeta?.reasons ||
+      [];
+    const candleCount = snapshotPayload?.chartSnapshot?.candles?.length ?? 0;
+    const chartExportFailed =
+      rejectionReasons.includes("export_failed") ||
+      snapshotPayload?.chartSnapshot?.reason === "export_failed" ||
+      candleCount === 0;
+    return {
+      ...pricePayload,
+      chartSnapshot: snapshotPayload?.chartSnapshot ?? undefined,
+      chartExportFailed: chartExportFailed || undefined,
+      chartLastPrice:
+        pricePayload?.chartLastPrice ?? snapshotPayload?.chartLastPrice ?? undefined,
+      chartLastPriceSource:
+        pricePayload?.chartLastPriceSource ??
+        (snapshotPayload?.chartLastPrice != null ? "tradingview_live" : undefined),
+      chartLastPriceTs: pricePayload?.chartLastPriceTs ?? Date.now(),
+    };
   }
 
   async function memoryPayload() {
@@ -4876,13 +4914,14 @@
 
     if (opts.voice && !opts.skipWorkingAck) voiceSpeakAck(karenWorkingAck("snapshot"));
 
+    const apiPayload = await marketSnapshotExtras(pricePayload);
     const snap = await bgSend(
       {
         type: "MARKET_SNAPSHOT",
         question,
         voiceInput: false,
         conversationContext: getConversationContext(),
-        ...pricePayload,
+        ...apiPayload,
       },
       15000
     );

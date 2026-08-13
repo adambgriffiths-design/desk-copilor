@@ -11,6 +11,8 @@ import type { MarketContext } from "./types";
 import type { MarketState } from "./market-state";
 import type { MarketInterpretation, ReadonlyMarketObservation } from "./desk-schema";
 import type { ChartSnapshotPayload } from "./chart-snapshot";
+import type { AuthoritativePrice } from "./chart-live-price";
+import { maybeResolveTickstreamFallback } from "./tickstream/stream-snapshot";
 
 export type DeskMarketIntelligence = {
   ctx: MarketContext;
@@ -20,12 +22,16 @@ export type DeskMarketIntelligence = {
   facts: ObservationFact[];
   built_at: string;
   state_hash: string;
+  authoritativePrice?: AuthoritativePrice | null;
 };
 
 export type BuildIntelligenceInput = {
   estNow?: string;
   chartLastPrice?: number | null;
+  chartLastPriceSource?: string | null;
+  chartLastPriceTs?: number | null;
   chartSnapshot?: ChartSnapshotPayload | null;
+  chartExportFailed?: boolean;
   forceFresh?: boolean;
 };
 
@@ -44,10 +50,35 @@ export async function buildDeskMarketIntelligence(
 ): Promise<DeskMarketIntelligence> {
   const forceFresh = input.forceFresh ?? input.chartLastPrice != null;
   const data = await fetchAllTimeframesCached(forceFresh, input.chartLastPrice);
-  const ctx = buildMarketContext(data, input.estNow ?? estNowDefault(), input.chartLastPrice);
+
+  let chartLastPrice = input.chartLastPrice;
+  let chartLastPriceSource = input.chartLastPriceSource;
+  let chartLastPriceTs = input.chartLastPriceTs;
+  let authoritativePrice: AuthoritativePrice | null = null;
+
+  const tickstream = await maybeResolveTickstreamFallback({
+    chartLastPrice,
+    chartLastPriceSource,
+    chartLastPriceTs,
+    chartSnapshot: input.chartSnapshot ?? null,
+    chartExportFailed: input.chartExportFailed,
+    barClose: data.m1?.at(-1)?.close ?? data.daily?.at(-1)?.close ?? null,
+  });
+  if (tickstream) {
+    chartLastPrice = tickstream.value;
+    chartLastPriceSource = tickstream.source;
+    chartLastPriceTs = tickstream.timestamp;
+    authoritativePrice = tickstream;
+  }
+
+  const ctx = buildMarketContext(data, input.estNow ?? estNowDefault(), chartLastPrice);
   const state = buildMarketState({
     ctx,
     chartSnapshot: input.chartSnapshot ?? null,
+    chartLastPrice,
+    chartLastPriceSource,
+    chartLastPriceTs,
+    authoritativePrice,
   });
   const observation = buildMarketObservation(ctx, state);
   const interpretation = buildMarketInterpretation(observation);
@@ -61,6 +92,7 @@ export async function buildDeskMarketIntelligence(
     facts,
     built_at: new Date().toISOString(),
     state_hash: state.stateHash,
+    authoritativePrice,
   };
 }
 

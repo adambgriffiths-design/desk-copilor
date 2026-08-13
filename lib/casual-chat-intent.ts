@@ -5,8 +5,19 @@ import { isIdentityQuestion, isPersonaQuestion, needsWebSearch } from "@/lib/web
 import { userMemoryReply } from "@/lib/desk-memory";
 import { stripAssistantNamePrefix } from "@/lib/desk-persona";
 
+/** Explicit reply when casual LLM stream fails for a general question — not a clarification prompt. */
+export const CASUAL_LLM_FAILURE_REPLY =
+  "I'm having trouble responding right now — try that again.";
+
+const CLARIFY_MORE_REPLY = "Ha — say more, I'm listening.";
+
+function unresolvedCasualFallback(question: string): string {
+  if (isGeneralConversation(question)) return CASUAL_LLM_FAILURE_REPLY;
+  return CLARIFY_MORE_REPLY;
+}
+
 const TRADING_WORDS =
-  /\b(mnq|nasdaq|futures|chart|bias|entry|target|pdh|pdl|fvg|fair value gap|level|price|trade|long|short|support|resistance|setup|verdict|read the chart|get the read|session|liquidity|displacement|mss|market structure|structure shift|order block|opening range|premium|discount|ndog|nwog|kill zone|choch|change of character)\b/i;
+  /\b(mnq|nasdaq|futures|chart|bias|entry|target|pdh|pdl|fvg|fair value gap|level|price|trade|long|short|support|resistance|setup|verdict|read the chart|get the read|session|liquidity|displacement|mss|market structure|structure shift|order block|opening range|premium|discount|ndog|nwog|kill zone|choch|change of character|reh|rel|relative equal high|relative equal low|eqh|eql|equal high|equal low)\b/i;
 
 const CHART_READ_COMMANDS =
   /\b(get the read|full read|what do you see|mark levels|draw levels|show levels|strip levels|should i (buy|sell|trade|long|short)|give me a read|market read|quick read|what'?s the move)\b/i;
@@ -408,22 +419,22 @@ function followUpReply(q: string, recentText: string): string {
     if (FOOD_WORDS.test(q) || isCasualFollowUp(q)) {
       return "I'm still team hot food over sad desk snacks. What's your go-to?";
     }
-    return "Ha — say more, I'm listening.";
+    return CLARIFY_MORE_REPLY;
   }
   if (topic === "music") {
     if (/\b(music|song|band|artist|beat)\b/.test(q) || isCasualFollowUp(q)) {
       return "Something with a beat — keeps me awake when the session drags.";
     }
-    return "Ha — say more, I'm listening.";
+    return CLARIFY_MORE_REPLY;
   }
   if (topic === "greeting" && !qTopic) return "All good here — what's on your mind?";
   if (topic === "color") {
     if (isCasualFollowUp(q) && !userPreferenceReply(q)) {
       return "Still team navy — what's yours?";
     }
-    return "Ha — say more, I'm listening.";
+    return CLARIFY_MORE_REPLY;
   }
-  return "Ha — say more, I'm listening.";
+  return CLARIFY_MORE_REPLY;
 }
 
 export function sanitizeCasualReply(text: string, question: string, recentText?: string): string {
@@ -548,5 +559,5 @@ export function casualChatFallback(
   if (recent && recentCasualContext(recent) && isCasualFollowUp(q) && !isPersonaQuestion(q) && !needsWebSearch(q)) {
     return followUpReply(q, recent);
   }
-  return "Ha — say more, I'm listening.";
+  return unresolvedCasualFallback(question);
 }

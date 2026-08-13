@@ -31,6 +31,11 @@ async function main() {
   assert(needsMarketIntelligenceAnswer("what is MSS?"), "MSS teaching");
   assert(needsMarketIntelligenceAnswer("has that been invalidated?"), "invalidation follow-up route");
   assert(needsScopedChartAnswer("where is the last MSS?"), "scoped chart includes MSS");
+  assert(needsMarketIntelligenceAnswer("where is the nearest REH?"), "REH fact question");
+  assert(needsMarketIntelligenceAnswer("where is the nearest relative equal high?"), "relative equal high fact question");
+  assert(needsMarketIntelligenceAnswer("where is the last EQH?"), "EQH fact question");
+  assert(needsScopedChartAnswer("is there a relative equal high near current price?"), "REH near price scoped");
+  assert(classifyQueryMode("where is the nearest REH?") === "fact_lookup", "REH query mode fact_lookup");
   assert(!needsScopedChartAnswer("why is the market moving like this today"), "rich trading excluded");
   assert(detectTeachingConcept("what is a fair value gap?") === "fvg", "teaching detects FVG");
   assert(detectTeachingConcept("where is NWOG?") === null, "live NWOG not teaching");

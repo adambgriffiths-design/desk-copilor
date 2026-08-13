@@ -131,7 +131,7 @@ function mapDataQuality(state: MarketState, ok: boolean): DataQualityFlag {
 function mapRehRel(state: MarketState, quality: DataQualityFlag) {
   if (isUnknownQuality(quality) || state.candles.length < 5) {
     return {
-      status: "unknown",
+      status: "unknown" as const,
       nearest_reh_above: null,
       nearest_rel_below: null,
       reh_levels: [],
@@ -139,9 +139,11 @@ function mapRehRel(state: MarketState, quality: DataQualityFlag) {
       all_levels: [],
     };
   }
+  // state.lastPrice is authoritative (TradingView live when extension attached).
+  const currentPrice = state.lastPrice;
   return detectRehRel({
     candles: state.candles,
-    currentPrice: state.lastPrice,
+    currentPrice,
     timeframe: state.timeframe || "1m",
   });
 }

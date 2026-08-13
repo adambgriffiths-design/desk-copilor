@@ -1,4 +1,5 @@
 import { stripLeadingGreeting, stripSocialOpener } from "./casual-chat-intent";
+import { isPersonaQuestion } from "./web-search-intent";
 
 export type ChartQuestionIntent =
   | "price"
@@ -95,6 +96,7 @@ const ANALYTICAL_STRUCTURE =
 export function prefersRichTradingAnswer(question: string): boolean {
   const q = stripSocialOpener(stripLeadingGreeting(question)).trim().toLowerCase();
   if (!q) return false;
+  if (isPersonaQuestion(q)) return false;
   if (/\btell me about\b/.test(q) && /\b(market|chart|structure|trade|setup|bias|session|mnq|nasdaq|futures|price|level|fvg|liquidity)\b/.test(q)) {
     return true;
   }

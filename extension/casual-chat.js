@@ -1,7 +1,11 @@
 /** Casual conversation — mirrored from lib/casual-chat-intent.ts + lib/web-search-intent.ts (v1.4.0) */
 (function () {
+  const CASUAL_LLM_FAILURE_REPLY =
+    "I'm having trouble responding right now — try that again.";
+  const CLARIFY_MORE_REPLY = "Ha — say more, I'm listening.";
+
   const TRADING_WORDS =
-    /\b(mnq|nasdaq|futures|chart|bias|entry|target|pdh|pdl|fvg|fair value gap|level|price|trade|long|short|support|resistance|setup|verdict|read the chart|get the read|session|liquidity|displacement|mss|market structure|structure shift|order block|opening range|premium|discount|ndog|nwog|kill zone|choch|change of character)\b/i;
+    /\b(mnq|nasdaq|futures|chart|bias|entry|target|pdh|pdl|fvg|fair value gap|level|price|trade|long|short|support|resistance|setup|verdict|read the chart|get the read|session|liquidity|displacement|mss|market structure|structure shift|order block|opening range|premium|discount|ndog|nwog|kill zone|choch|change of character|reh|rel|relative equal high|relative equal low|eqh|eql|equal high|equal low)\b/i;
 
   const CHART_READ_COMMANDS =
     /\b(get the read|full read|what do you see|mark levels|draw levels|show levels|strip levels|should i (buy|sell|trade|long|short)|give me a read|market read|quick read|what'?s the move)\b/i;
@@ -128,7 +132,22 @@
   }
 
   function isGeneralConversation(text) {
-    return isNonTradingConversation(text);
+    const q = stripLeadingGreeting(text).trim().toLowerCase();
+    if (!q || q.length < 2) return false;
+    if (typeof isChartReadCommand === "function" && isChartReadCommand(q)) return false;
+    if (isClearlyTrading(q)) return false;
+    if (isPersonaQuestion(q)) return true;
+    if (needsWebSearch(q)) return true;
+    if (/\?\s*$/.test(q)) return true;
+    if (
+      /^(what|who|where|when|why|how|tell me|explain|describe|define|can you|could you|do you know|is there|are there)\b/i.test(
+        q
+      )
+    ) {
+      return true;
+    }
+    if (/\b(recommend|suggestion|best|top \d|favorite|favourite)\b/i.test(q)) return true;
+    return false;
   }
 
   function isCasualMessage(text, _history) {
@@ -268,10 +287,10 @@
       }
       return "Your desk co-pilot.";
     }
-    if (isNonTradingConversation(question)) {
-      return "Ha — say more, I'm listening.";
+    if (isGeneralConversation(question)) {
+      return CASUAL_LLM_FAILURE_REPLY;
     }
-    return "Ha — say more, I'm listening.";
+    return CLARIFY_MORE_REPLY;
   }
 
   function sanitizeCasualReply(text, question, _history) {
@@ -482,6 +501,7 @@
   }
 
   window.DeskCopilotCasual = {
+    CASUAL_LLM_FAILURE_REPLY,
     isCasualMessage,
     isNonTradingConversation,
     isClearlyTrading,

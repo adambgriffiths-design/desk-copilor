@@ -8,6 +8,8 @@ import { casualChatFallback } from "../lib/casual-chat-intent";
 import { detectTeachingConcept } from "../lib/ict-teaching";
 import { needsScopedChartAnswer } from "../lib/chart-read-intent";
 import { needsMarketIntelligenceAnswer } from "../lib/conversational-query";
+import { mustUseTradingStream } from "../lib/routing";
+import { tryCasualChatReplyInstant } from "../lib/chat-engine";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -23,6 +25,7 @@ type Case = {
   teaching?: boolean;
   scopedSnapshot?: boolean;
   marketIntel?: boolean;
+  expectNotCasualStream?: boolean;
 };
 
 const CASES: Case[] = [
@@ -61,6 +64,38 @@ const CASES: Case[] = [
     marketIntel: true,
   },
   {
+    phrase: "Where is the nearest REH?",
+    expectRoute: "snapshot",
+    expectDepth: "FAST_FACT",
+    scopedSnapshot: true,
+    marketIntel: true,
+    expectNotCasualStream: true,
+  },
+  {
+    phrase: "Where is the nearest relative equal high?",
+    expectRoute: "snapshot",
+    expectDepth: "FAST_FACT",
+    scopedSnapshot: true,
+    marketIntel: true,
+    expectNotCasualStream: true,
+  },
+  {
+    phrase: "Where is the last EQH?",
+    expectRoute: "snapshot",
+    expectDepth: "FAST_FACT",
+    scopedSnapshot: true,
+    marketIntel: true,
+    expectNotCasualStream: true,
+  },
+  {
+    phrase: "Is there a relative equal high near current price?",
+    expectRoute: "snapshot",
+    expectDepth: "FAST_FACT",
+    scopedSnapshot: true,
+    marketIntel: true,
+    expectNotCasualStream: true,
+  },
+  {
     phrase: "Give me the current market verdict.",
     expectRoute: "trading",
     expectDepth: "DEEP_ANALYSIS",
@@ -73,6 +108,7 @@ const CASES: Case[] = [
 
 let failed = 0;
 
+async function runCases() {
 for (const c of CASES) {
   const route = classifyDeskRoute({ text: c.phrase, routeText: c.phrase });
   const depth = classifyAnalysisDepth({ text: c.phrase, routeText: c.phrase });
@@ -95,6 +131,11 @@ for (const c of CASES) {
     if (c.marketIntel) {
       assert(needsMarketIntelligenceAnswer(c.phrase), "expected market intelligence");
     }
+    if (c.expectNotCasualStream) {
+      assert(mustUseTradingStream(c.phrase), "must use trading stream, not casual GPT");
+      const instant = await tryCasualChatReplyInstant(c.phrase);
+      assert(instant === null, "instant casual must be null for REH fact query");
+    }
     if (c.expectNotReply) {
       assert(!c.expectNotReply.test(fallback.trim()), `fallback must not match ${c.expectNotReply}: "${fallback}"`);
     }
@@ -114,3 +155,9 @@ if (failed > 0) {
 }
 
 console.log(`\nAll ${CASES.length} conversation routing tests passed.`);
+}
+
+runCases().catch((e) => {
+  console.error(e instanceof Error ? e.message : e);
+  process.exit(1);
+});

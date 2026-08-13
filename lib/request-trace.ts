@@ -143,7 +143,10 @@ export function recordApiCall(
   ok: boolean,
   reason?: string
 ): void {
-  const calls = [...(trace.stages.apis.calls || []), { endpoint, status: ok ? "pass" : "fail", ms }];
+  const calls: Array<{ endpoint: string; status: StageStatus; ms: number }> = [
+    ...(trace.stages.apis.calls || []),
+    { endpoint, status: (ok ? "pass" : "fail") as StageStatus, ms },
+  ];
   const allOk = calls.every((c) => c.status === "pass");
   markStage(trace, "apis", {
     status: allOk ? "pass" : "fail",

@@ -12,10 +12,21 @@ import {
   type ChartSnapshotPayload,
 } from "./chart-snapshot";
 import { nearestPdLevels } from "./pd-arrays";
+import {
+  isLiveTvPriceSource,
+  isTickstreamLiveSource,
+  resolveAuthoritativePrice,
+  type AuthoritativePrice,
+  type LivePriceSource,
+} from "./chart-live-price";
 
 export function buildMarketState(input: {
   ctx: MarketContext;
   chartSnapshot?: ChartSnapshotPayload | null;
+  chartLastPrice?: number | null;
+  chartLastPriceSource?: LivePriceSource | string | null;
+  chartLastPriceTs?: number | null;
+  authoritativePrice?: AuthoritativePrice | null;
   symbol?: string;
   timeframe?: string;
 }): MarketState {
@@ -31,12 +42,25 @@ export function buildMarketState(input: {
         reason: "no_chart_export",
       });
 
-  const tvPrice = snap?.lastPrice;
-  const yahooPrice = input.ctx.daily.lastClose;
-  const lastPrice =
-    tvPrice != null && tvPrice > 0 ? tvPrice : yahooPrice;
-  const lastPriceSource: MarketState["lastPriceSource"] =
-    snap?.source === "tv_export" && tvPrice != null ? "tradingview" : "yahoo";
+  const requireTvLive = input.chartLastPrice != null || snap != null;
+  const auth =
+    input.authoritativePrice ??
+    resolveAuthoritativePrice({
+      chartLastPrice: input.chartLastPrice,
+      chartLastPriceSource: input.chartLastPriceSource,
+      chartLastPriceTs: input.chartLastPriceTs,
+      barClose: input.ctx.daily.lastClose,
+      snapLastPrice: snap?.lastPrice,
+      requireTvLive,
+    });
+  const lastPrice = auth?.value ?? 0;
+  const lastPriceSource: MarketState["lastPriceSource"] = auth
+    ? isLiveTvPriceSource(auth.source)
+      ? "tradingview"
+      : isTickstreamLiveSource(auth.source)
+        ? "tickstream"
+        : "yahoo"
+    : "yahoo";
 
   const pd = input.ctx.htfPdArrays.previousDay;
   const { support, resistance } = nearestPdLevels(lastPrice, input.ctx.htfPdArrays.levels);

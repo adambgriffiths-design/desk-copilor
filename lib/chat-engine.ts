@@ -19,6 +19,7 @@ import {
   isGeneralConversation,
   isStaleCasualMismatch,
   isClearlyTrading,
+  CASUAL_LLM_FAILURE_REPLY,
 } from "@/lib/casual-chat-intent";
 import { isLiveWeatherReply, isWeatherGuessReply, tryWebSearchReply } from "@/lib/web-search-reply";
 import {
@@ -43,7 +44,7 @@ import {
   tryIntelligenceReply,
 } from "@/lib/conversational-query";
 import { buildDeskMarketIntelligence, formatIntelligenceForPrompt } from "@/lib/market-intelligence";
-import { classifyAnalysisDepth, requiresDeepAnalysisPipeline } from "@/lib/analysis-depth";
+import { classifyAnalysisDepth, requiresDeepAnalysisPipeline, type AnalysisDepth } from "@/lib/analysis-depth";
 import {
   evaluateAnalysisQualityGate,
   formatQualityGateForPrompt,
@@ -90,7 +91,13 @@ export type ChatPromptInput = {
 
 export async function buildChatSystemPrompt(
   input: ChatPromptInput
-): Promise<{ system: string; marketDataWarning: string | null }> {
+): Promise<{
+  system: string;
+  marketDataWarning: string | null;
+  qualityGate?: QualityGateResult;
+  richTrading: boolean;
+  analysisDepth: ReturnType<typeof classifyAnalysisDepth>;
+}> {
   const recentUser = input.messages
     .filter((m) => m.role === "user")
     .slice(-3)
@@ -268,7 +275,12 @@ export async function tryCasualChatReplyInstant(
 
   const fallback = casualChatFallback(question, recentText, messages);
   if (!fallback) return null;
-  if (/^Ha — say more/i.test(fallback) && isGeneralConversation(question)) return null;
+  if (
+    isGeneralConversation(question) &&
+    (fallback === CASUAL_LLM_FAILURE_REPLY || /^Ha — say more/i.test(fallback))
+  ) {
+    return null;
+  }
   if (/^Ha — say more/i.test(fallback)) return null;
   return fallback;
 }
