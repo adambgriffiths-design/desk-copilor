@@ -108,7 +108,8 @@ export function auditDataQuality(
     });
   }
 
-  const flag = state.quality?.flag ?? flagFromIssues(issues);
+  const rawFlag = state.quality?.flag ?? flagFromIssues(issues);
+  const flag: DataQualityFlag = rawFlag === "partial" ? "degraded" : rawFlag;
   const criticalCount = issues.filter((i) => i.severity === "critical").length;
   const score = Math.max(0, 100 - criticalCount * 35 - (issues.length - criticalCount) * 10);
 

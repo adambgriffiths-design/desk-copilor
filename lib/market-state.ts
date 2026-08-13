@@ -22,7 +22,7 @@ export type MarketState = {
   symbol: string;
   timeframe: string;
   lastPrice: number;
-  lastPriceSource: "tradingview" | "yahoo";
+  lastPriceSource: "tradingview" | "yahoo" | "tickstream";
   updatedAt: string;
   candles: ChartCandle[];
   session: {
