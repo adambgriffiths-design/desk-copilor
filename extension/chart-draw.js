@@ -10,6 +10,7 @@
   const OVERLAY_ID = "dc-level-overlay";
   const PAGE_SCRIPT_ID = "dc-tv-page-bridge";
   const STORAGE_KEY = "dc-levels-cache";
+  const PRICE_HINT_MAX_AGE_MS = 60000;
 
   let activeLevels = [];
   let activeZones = [];
@@ -56,8 +57,7 @@
     return n >= 20000 && n <= 45000;
   }
 
-  function priceAnchor(levels, zones, priceHint) {
-    if (Number.isFinite(priceHint?.last) && priceHint.last > 0) return priceHint.last;
+  function priceAnchor(levels, zones, _priceHint) {
     const prices = [
       ...(levels || []).map((l) => Number(l.price)),
       ...(zones || []).flatMap((z) => [Number(z.top), Number(z.bottom)]),
@@ -734,7 +734,19 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
-      return JSON.parse(raw)?.payload || null;
+      const parsed = JSON.parse(raw);
+      const age = Date.now() - (parsed?.ts ?? 0);
+      const payload = parsed?.payload || null;
+      if (!payload) return null;
+      if (
+        age > PRICE_HINT_MAX_AGE_MS &&
+        payload.priceHint &&
+        Number.isFinite(payload.priceHint.last)
+      ) {
+        const { last: _drop, ...restHint } = payload.priceHint;
+        return { ...payload, priceHint: Object.keys(restHint).length ? restHint : null };
+      }
+      return payload;
     } catch {
       return null;
     }
