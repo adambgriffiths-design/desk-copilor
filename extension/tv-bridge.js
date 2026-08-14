@@ -341,7 +341,7 @@
       if (rawRowCount > 0 && candles.length < Math.min(rawRowCount, maxBars) * 0.5) exportPartial = true;
       return { candles, rawRowCount, exportPartial, exportError: candles.length ? null : exportError };
     } catch (e) {
-      return { candles: [], rawRowCount, exportPartial: true, exportError: String(e?.message || e || "export_failed") };
+      return { candles: [], rawRowCount, exportPartial: false, exportError: String(e?.message || e || "export_failed") };
     }
   }
 
@@ -424,7 +424,7 @@
         candles: [],
         drawings: [],
         source: "none",
-        sync: { drawingExportFailed: true, exportPartial: true, widgetFound: false },
+        sync: { drawingExportFailed: true, widgetFound: false },
         exportStartTs,
         exportCompleteTs: Date.now(),
       };
@@ -437,7 +437,7 @@
         candles: [],
         drawings: [],
         source: "none",
-        sync: { drawingExportFailed: true, exportPartial: true, widgetFound },
+        sync: { drawingExportFailed: true, widgetFound },
         exportStartTs,
         exportCompleteTs: Date.now(),
       };
@@ -834,7 +834,7 @@
             candles: [],
             drawings: [],
             source: "none",
-            sync: { exportPartial: true, drawingExportFailed: true, widgetFound: Boolean(findChartWidget()) },
+            sync: { drawingExportFailed: true, widgetFound: Boolean(findChartWidget()) },
           },
           "*"
         );

@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.4.60";
+  const DC_VERSION = "1.4.62";
   const DESK_VERDICT_SPEAK_SPEED = 0.85;
   const DESK_BROWSER_TTS_RATE = 0.88;
   const BOOT = `dc-boot-${DC_VERSION}`;
@@ -837,6 +837,7 @@
 
   function applyConnectionSnapshot(snap) {
     if (!snap) return;
+    const prevState = connectionSnapshot?.state;
     connectionSnapshot = snap;
     backendOnline = snap.backendUp === true;
     if (backendOnline) {
@@ -847,6 +848,9 @@
     updateAgentStatus();
     updateConnectionDiagnostics();
     updateMarketBarUI();
+    if (backendOnline && snap.state === "DEGRADED" && prevState !== "CONNECTED") {
+      void fetchBackendPriceFallback();
+    }
   }
 
   async function refreshConnectionState() {
@@ -3525,9 +3529,10 @@
 
   function updateMarketBarUI() {
     const ctx = window.DeskCopilotSession?.resolve?.() || { label: "—" };
+    const quote = window.DeskCopilotChartPrice?.readQuoteSync?.() || null;
+    if (quote?.value != null) noteLivePrice(quote.value, quote.source);
     const px = contextStripPriceDisplay();
     const conn = connectionSnapshot;
-    const quote = window.DeskCopilotChartPrice?.readQuoteSync?.() || null;
     const priceSourceRaw = quote?.source || contextStripPriceSource || conn?.marketMeta?.source || null;
     const liveQuote =
       quote &&
@@ -3573,7 +3578,7 @@
         : "";
     const dataSource =
       formatPriceSourceLabel(priceSourceRaw) ||
-      (conn?.state === "CONNECTED" ? "TradingView + desk" : conn?.backendUp ? "Desk backend" : "");
+      (hasChartPrice ? "TV Last" : conn?.backendUp ? "Awaiting chart price" : "");
     window.DeskCopilotVerdictUI?.updateMarketBar?.({
       symbol: "MNQ",
       price: hasChartPrice ? px : null,
@@ -4234,7 +4239,7 @@
 
   async function pingBackend(reconnect = false) {
     if (pingInFlight) {
-      const deadline = Date.now() + (reconnect ? 12000 : 6500);
+      const deadline = Date.now() + (reconnect ? 12000 : 10000);
       while (pingInFlight && Date.now() < deadline) {
         await new Promise((r) => setTimeout(r, 80));
       }
@@ -4243,10 +4248,11 @@
     }
     pingInFlight = true;
     try {
-      const r = await bgSend({ type: reconnect ? "RECONNECT" : "PING" }, reconnect ? 12000 : 6500);
+      const r = await bgSend({ type: reconnect ? "RECONNECT" : "PING" }, reconnect ? 12000 : 10000);
       lastBackendCheck = Date.now();
+      if (r?.diagnostics) applyConnectionSnapshot(r.diagnostics);
+      else if (r?.connectionState) applyConnectionSnapshot(r);
       if (r?.ok) {
-        applyConnectionSnapshot(r.diagnostics || r);
         if (reconnect) {
           setMsg(r.statusLine || `Desk online (${r.base || "Vercel"})`, r.liveDataAvailable !== false);
           void window.DeskCopilotTracker?.refresh?.({ freeze: true, forceClose: true });
@@ -4264,8 +4270,22 @@
         }
         return r.liveDataAvailable !== false || r.ok;
       }
-      throw new Error(r?.error || "Backend not reachable");
+      throw new Error(
+        r?.error || r?.statusLine || r?.diagnostics?.lastError || "Backend not reachable"
+      );
     } catch (e) {
+      const errMsg = e instanceof Error ? e.message : String(e);
+      if (/timed out/i.test(errMsg)) {
+        try {
+          const snap = await bgSend({ type: "GET_CONNECTION_STATE" }, 5000);
+          if (snap?.backendUp) {
+            applyConnectionSnapshot(snap);
+            return snap.state === "CONNECTED" || snap.state === "DEGRADED";
+          }
+        } catch {
+          /* service worker still waking */
+        }
+      }
       pingFailStreak += 1;
       lastBackendFail = Date.now();
       if (connectionSnapshot) {
@@ -4273,7 +4293,7 @@
           ...connectionSnapshot,
           backendUp: false,
           state: "DISCONNECTED",
-          lastError: e instanceof Error ? e.message : String(e),
+          lastError: errMsg,
         });
       } else {
         setBackendStatus(false);
@@ -5356,6 +5376,82 @@
     return cap;
   }
 
+  function hasLocalChartPrice() {
+    const quote = window.DeskCopilotChartPrice?.readQuoteSync?.();
+    if (quote?.value != null && Number.isFinite(Number(quote.value))) return true;
+    const sync = window.DeskCopilotChartPrice?.readSync?.();
+    if (Number.isFinite(sync)) return true;
+    return Number.isFinite(contextStripPrice);
+  }
+
+  /** When TV OHLC export fails, fall back to screenshot vision or desk levels + TV Last. */
+  async function tryChartReadExportFallback(userQuestion, opts, pricePayload, requestId) {
+    const sym = symbol();
+    const mergedPrice = { ...pricePayload };
+
+    try {
+      setKarenPhase("capturing");
+      setMsg("Karen · screenshot fallback…", null);
+      const cap = await captureChartScreenshot(true);
+      if (cap?.base64 && requestId === currentVerdictRequestId) {
+        setKarenPhase("analyzing");
+        setMsg("Karen · reading chart image… 8–15 sec", null);
+        const resultPromise = waitForVerdict(90000);
+        await bgSend(
+          {
+            type: "VERDICT_ASYNC",
+            symbol: sym,
+            base64: cap.base64,
+            question: userQuestion,
+            voiceInput: opts.voice === true,
+            debug: routeDebugEnabled,
+            ...mergedPrice,
+          },
+          8000
+        );
+        const data = await resultPromise;
+        if (requestId !== currentVerdictRequestId) return null;
+        if (data && !data.noCall && (data.verdict || data.spokenBrief)) {
+          voiceLog("chart read fallback: screenshot vision");
+          window.DeskCopilotUI?.updateMarketDataCard?.({ visible: false });
+          return data;
+        }
+      }
+    } catch (e) {
+      voiceLog("screenshot fallback failed:", e?.message || e);
+    }
+
+    const livePx = Number(mergedPrice?.chartLastPrice);
+    if (!Number.isFinite(livePx) && hasLocalChartPrice()) {
+      const primed = await primeChartPriceForTurn({ forceRefresh: true });
+      Object.assign(mergedPrice, primed || {});
+    }
+    if (Number.isFinite(Number(mergedPrice?.chartLastPrice)) || connectionSnapshot?.backendUp) {
+      try {
+        setKarenPhase("snapshot");
+        setMsg("Karen · desk levels read (OHLC unavailable)…", null);
+        const snap = await runMarketSnapshot(
+          "what's the bias and where is price relative to key levels",
+          { ...opts, pricePayload: mergedPrice, forceRefresh: true, skipWorkingAck: true }
+        );
+        if (snap?.spoken || snap?.spokenBrief) {
+          voiceLog("chart read fallback: market snapshot");
+          window.DeskCopilotUI?.updateMarketDataCard?.({
+            status: "Degraded",
+            reason: "Chart OHLC export failed — using desk levels + live price",
+            action: "Maximize chart · try ANALYSE MARKET for full pipeline read",
+            visible: true,
+          });
+          return snap;
+        }
+      } catch (e) {
+        voiceLog("levels snapshot fallback failed:", e?.message || e);
+      }
+    }
+
+    return null;
+  }
+
   async function runChartRead(userQuestion, opts = {}) {
     const turnGen = opts.turnGen;
     if (shouldRouteCasual(userQuestion)) {
@@ -5399,19 +5495,22 @@
       return null;
     }
     if (!isLiveDataAvailable()) {
-      const blocked = window.DeskCopilotConnection?.LIVE_DATA_UNAVAILABLE_VERDICT;
-      if (opts.voice) {
-        await publishAssistantReply(
-          blocked?.spokenBrief || "Wait — live data unavailable.",
-          true,
-          { pauseMic: true, instant: true },
-          () => setKarenPhase("listening")
-        );
-      } else {
-        recordAssistantReply(blocked?.spokenBrief || "WAIT / NO TRADE — LIVE DATA UNAVAILABLE");
+      if (!hasLocalChartPrice()) {
+        const blocked = window.DeskCopilotConnection?.LIVE_DATA_UNAVAILABLE_VERDICT;
+        if (opts.voice) {
+          await publishAssistantReply(
+            blocked?.spokenBrief || "Wait — live data unavailable.",
+            true,
+            { pauseMic: true, instant: true },
+            () => setKarenPhase("listening")
+          );
+        } else {
+          recordAssistantReply(blocked?.spokenBrief || "WAIT / NO TRADE — LIVE DATA UNAVAILABLE");
+        }
+        setMsg("LIVE DATA: OFFLINE", false);
+        return null;
       }
-      setMsg("LIVE DATA: OFFLINE", false);
-      return null;
+      voiceLog("chart read: DEGRADED connection — proceeding with TV Last / levels fallback");
     }
 
     verdictBusy = true;
@@ -5525,8 +5624,32 @@
           exportTrace?.qualityRejectionReasons ||
           chartSnapshot?.qualityMeta?.reasons ||
           (chartSnapshot?.reason ? [chartSnapshot.reason] : ["export_failed"]);
+        const bridgeReason = exportTrace?.bridgeReason || chartSnapshot?.reason;
+
+        const fallback = await tryChartReadExportFallback(
+          userQuestion,
+          opts,
+          mergedPrice,
+          requestId
+        );
+        if (fallback && requestId === currentVerdictRequestId) {
+          if (turnGen != null && turnGen !== voiceTurnGen) {
+            verdictBusy = false;
+            return null;
+          }
+          verdictBusy = false;
+          currentVerdictRequestId = 0;
+          lastVerdictStatusPhase = "";
+          if (fallback.scoped) applySnapshotAnswer(fallback);
+          else applyVerdict(fallback);
+          return fallback;
+        }
+
         const noCall =
-          window.DeskCopilotChartSnapshot?.buildUnavailableMessage?.(rejectionReasons) ||
+          window.DeskCopilotChartSnapshot?.buildUnavailableMessage?.(
+            rejectionReasons,
+            bridgeReason
+          ) ||
           window.DeskCopilotChartSnapshot?.NO_CALL ||
           "No call — couldn't read the chart data right now.";
         window.DeskCopilotChartSnapshot?.pushReasoningLog?.({

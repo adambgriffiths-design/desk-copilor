@@ -1,6 +1,6 @@
 {
   "name": "desk-copilot",
-  "version": "1.4.60",
+  "version": "1.4.62",
   "private": true,
   "scripts": {
     "dev": "next dev",

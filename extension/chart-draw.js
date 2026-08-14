@@ -891,7 +891,7 @@
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       const age = Date.now() - (parsed?.ts ?? 0);
-      const payload = parsed?.payload || null;
+      let payload = parsed?.payload || null;
       if (!payload) return null;
       if (
         age > PRICE_HINT_MAX_AGE_MS &&
@@ -899,7 +899,11 @@
         Number.isFinite(payload.priceHint.last)
       ) {
         const { last: _drop, ...restHint } = payload.priceHint;
-        return { ...payload, priceHint: Object.keys(restHint).length ? restHint : null };
+        payload = { ...payload, priceHint: Object.keys(restHint).length ? restHint : null };
+      }
+      if (age > PRICE_HINT_MAX_AGE_MS && Number.isFinite(payload.lastPrice1m)) {
+        const { lastPrice1m: _drop, ...rest } = payload;
+        payload = rest;
       }
       return payload;
     } catch {

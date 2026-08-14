@@ -139,7 +139,7 @@
             candles: [],
             drawings: [],
             source: "none",
-            sync: { exportPartial: true, drawingExportFailed: true, widgetFound: false },
+            sync: { drawingExportFailed: true, widgetFound: false },
             exportStartTs: Date.now(),
             exportCompleteTs: Date.now(),
           }),
@@ -192,7 +192,7 @@
       reasons.push("export_failed");
     }
     if (candles.length < MIN_CANDLES) reasons.push("insufficient_candles");
-    if (snap.sync?.exportPartial) reasons.push("export_partial_failure");
+    if (snap.sync?.exportPartial && candles.length >= MIN_CANDLES) reasons.push("export_partial_failure");
     if (snap.sync?.drawingExportFailed) reasons.push("drawing_export_failed");
 
     if (lastBarTime != null && snap.visibleRange?.to != null) {
@@ -319,12 +319,38 @@
     }
   }
 
-  function buildUnavailableMessage(reasons) {
+  const EXPORT_REASON_LABELS = {
+    timeout: "chart export timed out",
+    widget_not_found: "TradingView chart widget not found",
+    export_not_ready: "chart not ready for export yet",
+    export_failed: "chart export failed",
+    export_partial_failure: "partial OHLC export",
+    insufficient_candles: "not enough candles exported",
+    stale_last_bar: "last bar is stale",
+    drawing_export_failed: "user drawings unavailable",
+  };
+
+  function buildUnavailableMessage(reasons, bridgeReason) {
     const base = "No call — couldn't read the chart data right now.";
+    const br = bridgeReason != null ? String(bridgeReason).trim() : "";
+    if (br && br !== "insufficient_candles") {
+      const label = EXPORT_REASON_LABELS[br] || br.replace(/_/g, " ");
+      return `${base} (${label})`;
+    }
+    const hasHardFailure =
+      (reasons || []).includes("export_failed") ||
+      (reasons || []).some((r) => /^insufficient/.test(r));
     const actionable = (reasons || []).filter(
-      (r) => r && r !== "export_failed" && !/^insufficient/.test(r)
+      (r) =>
+        r &&
+        r !== "export_failed" &&
+        !/^insufficient/.test(r) &&
+        !(hasHardFailure && r === "export_partial_failure")
     );
-    const snippet = actionable.slice(0, 2).join(", ");
+    const snippet = actionable
+      .slice(0, 2)
+      .map((r) => EXPORT_REASON_LABELS[r] || r.replace(/_/g, " "))
+      .join(", ");
     return snippet ? `${base} (${snippet})` : base;
   }
 

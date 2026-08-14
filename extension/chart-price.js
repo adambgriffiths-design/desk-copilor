@@ -25,16 +25,32 @@
     return !isContractYearNoise(n);
   }
 
+  function loadLevelCacheMeta() {
+    try {
+      const raw = localStorage.getItem("dc-levels-cache");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return { ts: Number(parsed?.ts) || 0, payload: parsed?.payload || null };
+    } catch {
+      return null;
+    }
+  }
+
   function getAnchor() {
     try {
-      const cached = window.DeskCopilotDraw?.loadCache?.();
-      const last = Number(cached?.lastPrice1m);
-      if (isTrustedAnchor(last)) return last;
-      const levels = cached?.levels || [];
-      const prices = levels.map((l) => Number(l.price)).filter(isTrustedAnchor);
-      if (prices.length) {
-        prices.sort((a, b) => a - b);
-        return prices[Math.floor(prices.length / 2)];
+      const meta = loadLevelCacheMeta();
+      const cached = meta?.payload || window.DeskCopilotDraw?.loadCache?.();
+      const cacheAge = meta ? Date.now() - meta.ts : Number.POSITIVE_INFINITY;
+      const freshCache = cacheAge <= PRICE_HINT_MAX_AGE_MS;
+      if (freshCache && cached) {
+        const last = Number(cached?.lastPrice1m);
+        if (isTrustedAnchor(last)) return last;
+        const levels = cached.levels || [];
+        const prices = levels.map((l) => Number(l.price)).filter(isTrustedAnchor);
+        if (prices.length) {
+          prices.sort((a, b) => a - b);
+          return prices[Math.floor(prices.length / 2)];
+        }
       }
     } catch {
       /* ignore */
@@ -107,6 +123,25 @@
     return { value: roundMnq(value), source, timestamp: ts, ageMs };
   }
 
+  function collectDomRoots() {
+    const roots = [document];
+    for (const iframe of document.querySelectorAll("iframe")) {
+      try {
+        if (iframe.contentDocument) roots.push(iframe.contentDocument);
+      } catch {
+        /* cross-origin */
+      }
+    }
+    const withShadow = [];
+    for (const root of roots) {
+      withShadow.push(root);
+      for (const el of root.querySelectorAll?.("*") || []) {
+        if (el.shadowRoot) withShadow.push(el.shadowRoot);
+      }
+    }
+    return withShadow;
+  }
+
   function findChartPaneForPrice() {
     let bestCanvas = null;
     let bestArea = 0;
@@ -138,14 +173,7 @@
     const midY = paneRect.top + paneRect.height / 2;
     const trustedAnchor = isTrustedAnchor(anchor) ? anchor : null;
 
-    const roots = [document];
-    for (const iframe of document.querySelectorAll("iframe")) {
-      try {
-        if (iframe.contentDocument) roots.push(iframe.contentDocument);
-      } catch {
-        /* cross-origin */
-      }
-    }
+    const roots = collectDomRoots();
 
     const hits = [];
     for (const root of roots) {
@@ -318,7 +346,10 @@
       bridgeInflight = null;
       const price = Number(res?.price);
       const trustedAnchor = isTrustedAnchor(anchor) ? anchor : null;
-      if (Number.isFinite(price) && isMnqPrice(price, trustedAnchor)) {
+      const ok =
+        Number.isFinite(price) &&
+        (isMnqPrice(price, trustedAnchor) || (trustedAnchor != null && isMnqPrice(price, null)));
+      if (ok) {
         const rounded = roundMnq(price);
         const src = res?.source === "tv_api" ? "tv_api" : "tv_bar_close";
         bridgeCache = { price: rounded, ts: Date.now(), source: src };
@@ -334,21 +365,29 @@
     return source === "tradingview_live" || source === "tradingview_quote";
   }
 
+  function readDomPriceSync(anchor) {
+    const header = readFromHeaderLast(anchor);
+    if (header != null) return { value: header, source: "tradingview_live" };
+
+    const strip = readFromQuoteStrip(anchor);
+    if (strip != null) return { value: strip, source: "tradingview_quote" };
+
+    const axis = readFromPriceScale(anchor);
+    if (axis != null) return { value: axis, source: "tradingview_live" };
+
+    return null;
+  }
+
   /** Sync quote read — header/quote/axis last; cached bar close when DOM empty. */
   function readQuoteSync() {
     const anchor = priceAnchor();
     const now = Date.now();
 
-    const header = readFromHeaderLast(anchor);
-    if (header != null) return makeQuote(header, "tradingview_live", now);
+    let hit = readDomPriceSync(anchor);
+    if (!hit && anchor != null) hit = readDomPriceSync(null);
+    if (hit) return makeQuote(hit.value, hit.source, now);
 
-    const strip = readFromQuoteStrip(anchor);
-    if (strip != null) return makeQuote(strip, "tradingview_quote", now);
-
-    const axis = readFromPriceScale(anchor);
-    if (axis != null) return makeQuote(axis, "tradingview_live", now);
-
-    const cachedBridge = readBridgeCacheSync(anchor);
+    const cachedBridge = readBridgeCacheSync(anchor) ?? readBridgeCacheSync(null);
     if (cachedBridge != null) {
       return makeQuote(cachedBridge, bridgeCache.source || "tv_bar_close", bridgeCache.ts);
     }
@@ -365,14 +404,16 @@
     }
 
     const anchor = priceAnchor();
-    const bridge = await readFromBridge(anchor);
+    let bridge = await readFromBridge(anchor);
+    if (bridge == null && anchor != null) bridge = await readFromBridge(null);
     if (bridge != null) {
       const q = makeQuote(bridge, "tv_bar_close", bridgeCache.ts || Date.now());
       lastQuote = q;
       return q;
     }
 
-    const legend = readFromLegendClose(anchor);
+    let legend = readFromLegendClose(anchor);
+    if (legend == null && anchor != null) legend = readFromLegendClose(null);
     if (legend != null) {
       const q = makeQuote(legend, "tv_bar_close");
       lastQuote = q;

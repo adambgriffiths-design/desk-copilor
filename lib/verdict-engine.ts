@@ -418,17 +418,25 @@ export async function generateChartAnswer(input: {
   }
 
   if (isFullRead) {
-    if (!hasStructuredChartData(chartSnapshot)) {
-      return noCallResult(chartSnapshot, intent);
+    if (hasStructuredChartData(chartSnapshot)) {
+      return generatePipelineVerdict({
+        chartSnapshot: chartSnapshot!,
+        symbol: input.symbol,
+        chartTime: input.chartTime,
+        question,
+        intent,
+        chartLastPrice: input.chartLastPrice,
+      });
     }
-    return generatePipelineVerdict({
-      chartSnapshot: chartSnapshot!,
-      symbol: input.symbol,
-      chartTime: input.chartTime,
-      question,
-      intent,
-      chartLastPrice: input.chartLastPrice,
-    });
+    if (input.imageBase64) {
+      return generateLiveVerdict({
+        ...input,
+        imageBase64: input.imageBase64,
+        question,
+        intent,
+      });
+    }
+    return noCallResult(chartSnapshot, intent);
   }
 
   if (hasStructuredChartData(chartSnapshot)) {

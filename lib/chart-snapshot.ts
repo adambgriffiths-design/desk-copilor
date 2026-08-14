@@ -425,7 +425,7 @@ export function scoreChartQuality(
     exportPartial = true;
     reasons.push("missing_ohlc_fields");
   }
-  if (exportPartial) reasons.push("export_partial_failure");
+  if (exportPartial && candles.length >= MIN_CANDLES_FOR_STRUCTURED) reasons.push("export_partial_failure");
 
   const drawingExportFailed = snap.sync?.drawingExportFailed === true;
   if (drawingExportFailed) reasons.push("drawing_export_failed");
@@ -650,17 +650,39 @@ export function formatChartSnapshotForPrompt(snap: ChartSnapshotPayload): string
   return lines.join("\n");
 }
 
+const EXPORT_REASON_LABELS: Record<string, string> = {
+  timeout: "chart export timed out",
+  widget_not_found: "TradingView chart widget not found",
+  export_not_ready: "chart not ready for export yet",
+  export_failed: "chart export failed",
+  export_partial_failure: "partial OHLC export",
+  insufficient_candles: "not enough candles exported",
+  stale_last_bar: "last bar is stale",
+  drawing_export_failed: "user drawings unavailable",
+};
+
 export function buildChartExportUnavailableMessage(
   reasons: string[] = [],
-  base = CHART_NO_CALL_MESSAGE
+  base = CHART_NO_CALL_MESSAGE,
+  bridgeReason?: string
 ): string {
+  const br = bridgeReason?.trim();
+  if (br && br !== "insufficient_candles") {
+    const label = EXPORT_REASON_LABELS[br] || br.replace(/_/g, " ");
+    return `${base} (${label})`;
+  }
+  const hasHardFailure = reasons.includes("export_failed") || reasons.some((r) => /^insufficient/.test(r));
   const actionable = reasons.filter(
     (r) =>
       r &&
       r !== "export_failed" &&
-      !/^insufficient/.test(r)
+      !/^insufficient/.test(r) &&
+      !(hasHardFailure && r === "export_partial_failure")
   );
-  const snippet = actionable.slice(0, 2).join(", ");
+  const snippet = actionable
+    .slice(0, 2)
+    .map((r) => EXPORT_REASON_LABELS[r] || r.replace(/_/g, " "))
+    .join(", ");
   if (!snippet) return base;
   return `${base} (${snippet})`;
 }
