@@ -1,0 +1,81 @@
+{
+  "runId": "baseline-2026-08-13T17-48-11-508Z",
+  "datasetId": "2562961408b256ac94f1",
+  "chunkSize": 100,
+  "totalBars": 1381,
+  "gitRevision": "018310a672e9274c8e3c537d04d085b39658fa14",
+  "strategyVersion": "phase1-decision-pipeline@spec-1.0.0+pipeline-1.0.0",
+  "createdAt": "2026-08-13T17:48:14.383Z",
+  "chunks": [
+    {
+      "startIndex": 0,
+      "endIndex": 99,
+      "chunkIndex": 0
+    },
+    {
+      "startIndex": 100,
+      "endIndex": 199,
+      "chunkIndex": 1
+    },
+    {
+      "startIndex": 200,
+      "endIndex": 299,
+      "chunkIndex": 2
+    },
+    {
+      "startIndex": 300,
+      "endIndex": 399,
+      "chunkIndex": 3
+    },
+    {
+      "startIndex": 400,
+      "endIndex": 499,
+      "chunkIndex": 4
+    },
+    {
+      "startIndex": 500,
+      "endIndex": 599,
+      "chunkIndex": 5
+    },
+    {
+      "startIndex": 600,
+      "endIndex": 699,
+      "chunkIndex": 6
+    },
+    {
+      "startIndex": 700,
+      "endIndex": 799,
+      "chunkIndex": 7
+    },
+    {
+      "startIndex": 800,
+      "endIndex": 899,
+      "chunkIndex": 8
+    },
+    {
+      "startIndex": 900,
+      "endIndex": 999,
+      "chunkIndex": 9
+    },
+    {
+      "startIndex": 1000,
+      "endIndex": 1099,
+      "chunkIndex": 10
+    },
+    {
+      "startIndex": 1100,
+      "endIndex": 1199,
+      "chunkIndex": 11
+    },
+    {
+      "startIndex": 1200,
+      "endIndex": 1299,
+      "chunkIndex": 12
+    },
+    {
+      "startIndex": 1300,
+      "endIndex": 1380,
+      "chunkIndex": 13
+    }
+  ]
+}

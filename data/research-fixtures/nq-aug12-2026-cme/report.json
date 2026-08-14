@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "dataset_id": "2562961408b256ac94f1",
+    "source_symbol": "NQ",
+    "target_instrument": "MNQ-equivalent",
+    "symbol": "NQ",
+    "source": "tickstream",
+    "source_version": "tickstream-historical-v1",
+    "timeframe": "1m",
+    "start_timestamp": 1786485600,
+    "end_timestamp": 1786572000,
+    "timezone": "America/New_York",
+    "session_definition": "CME_GLOBEX_18:00_ET",
+    "created_at": "2026-08-13T07:28:25.122Z",
+    "code_version": "1.0.0",
+    "data_version": "2dbbd59249d84137",
+    "versions": {
+      "dataset_version": "1.0.0",
+      "source": "tickstream",
+      "source_version": "tickstream-historical-v1",
+      "loader_version": "1.0.0",
+      "aggregation_version": "1.0.0",
+      "session_definition_version": "1.0.0",
+      "git_revision": "018310a672e9274c8e3c537d04d085b39658fa14"
+    }
+  },
+  "candleCount": 1381,
+  "first": 1786485600,
+  "last": 1786572000,
+  "missingMinutes": 60,
+  "duplicateCount": 0,
+  "invalidCount": 0,
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-12 → 2026-08-13)",
+      "timestamp": 1786572000
+    }
+  ],
+  "versions": {
+    "dataset_version": "1.0.0",
+    "source": "tickstream",
+    "source_version": "tickstream-historical-v1",
+    "loader_version": "1.0.0",
+    "aggregation_version": "1.0.0",
+    "session_definition_version": "1.0.0",
+    "git_revision": "018310a672e9274c8e3c537d04d085b39658fa14"
+  },
+  "integrityStatus": "WARNING"
+}

@@ -1,0 +1,307 @@
+[
+  {
+    "asOf": "2026-08-06T02:00:00.000Z",
+    "label": "Overnight mid",
+    "rationale": "Low-liquidity overnight"
+  },
+  {
+    "asOf": "2026-08-06T06:00:00.000Z",
+    "label": "Early morning",
+    "rationale": "Pre-London globex"
+  },
+  {
+    "asOf": "2026-08-06T11:00:00.000Z",
+    "label": "Pre-market",
+    "rationale": "Pre-RTH PD context"
+  },
+  {
+    "asOf": "2026-08-06T13:00:00.000Z",
+    "label": "Pre-NY open",
+    "rationale": "Final pre-open"
+  },
+  {
+    "asOf": "2026-08-06T14:30:00.000Z",
+    "label": "NY open",
+    "rationale": "Canonical NY RTH anchor"
+  },
+  {
+    "asOf": "2026-08-06T14:36:00.000Z",
+    "label": "Regime shift ΓåÆ range",
+    "rationale": "Adaptive candidate on regime proxy change (no outcome filter)"
+  },
+  {
+    "asOf": "2026-08-06T15:30:00.000Z",
+    "label": "Post-open hour",
+    "rationale": "First hour displacement"
+  },
+  {
+    "asOf": "2026-08-06T16:30:00.000Z",
+    "label": "Mid-morning RTH",
+    "rationale": "Trend vs range"
+  },
+  {
+    "asOf": "2026-08-06T17:30:00.000Z",
+    "label": "Lunch",
+    "rationale": "Liquidity dip"
+  },
+  {
+    "asOf": "2026-08-06T19:00:00.000Z",
+    "label": "PM session",
+    "rationale": "Afternoon continuation"
+  },
+  {
+    "asOf": "2026-08-06T20:51:00.000Z",
+    "label": "Regime shift ΓåÆ quiet",
+    "rationale": "Adaptive candidate on regime proxy change (no outcome filter)"
+  },
+  {
+    "asOf": "2026-08-06T20:59:00.000Z",
+    "label": "Session end",
+    "rationale": "Last RTH minute"
+  },
+  {
+    "asOf": "2026-08-06T22:00:00.000Z",
+    "label": "Globex open",
+    "rationale": "CME session open ΓÇö minimal RTH context"
+  },
+  {
+    "asOf": "2026-08-06T23:00:00.000Z",
+    "label": "Regime shift ΓåÆ trend_up",
+    "rationale": "Adaptive candidate on regime proxy change (no outcome filter)"
+  },
+  {
+    "asOf": "2026-08-07T02:00:00.000Z",
+    "label": "Overnight mid",
+    "rationale": "Low-liquidity overnight"
+  },
+  {
+    "asOf": "2026-08-07T06:00:00.000Z",
+    "label": "Early morning",
+    "rationale": "Pre-London globex"
+  },
+  {
+    "asOf": "2026-08-07T11:00:00.000Z",
+    "label": "Pre-market",
+    "rationale": "Pre-RTH PD context"
+  },
+  {
+    "asOf": "2026-08-07T13:00:00.000Z",
+    "label": "Pre-NY open",
+    "rationale": "Final pre-open"
+  },
+  {
+    "asOf": "2026-08-07T14:30:00.000Z",
+    "label": "NY open",
+    "rationale": "Canonical NY RTH anchor"
+  },
+  {
+    "asOf": "2026-08-07T15:30:00.000Z",
+    "label": "Post-open hour",
+    "rationale": "First hour displacement"
+  },
+  {
+    "asOf": "2026-08-07T16:30:00.000Z",
+    "label": "Mid-morning RTH",
+    "rationale": "Trend vs range"
+  },
+  {
+    "asOf": "2026-08-07T17:30:00.000Z",
+    "label": "Lunch",
+    "rationale": "Liquidity dip"
+  },
+  {
+    "asOf": "2026-08-07T19:00:00.000Z",
+    "label": "PM session",
+    "rationale": "Afternoon continuation"
+  },
+  {
+    "asOf": "2026-08-07T20:59:00.000Z",
+    "label": "Session end",
+    "rationale": "Last RTH minute"
+  },
+  {
+    "asOf": "2026-08-10T00:10:00.000Z",
+    "label": "Regime shift ΓåÆ volatile",
+    "rationale": "Adaptive candidate on regime proxy change (no outcome filter)"
+  },
+  {
+    "asOf": "2026-08-10T00:25:00.000Z",
+    "label": "Regime shift ΓåÆ range",
+    "rationale": "Adaptive candidate on regime proxy change (no outcome filter)"
+  },
+  {
+    "asOf": "2026-08-10T02:00:00.000Z",
+    "label": "Overnight mid",
+    "rationale": "Low-liquidity overnight"
+  },
+  {
+    "asOf": "2026-08-10T06:00:00.000Z",
+    "label": "Early morning",
+    "rationale": "Pre-London globex"
+  },
+  {
+    "asOf": "2026-08-10T11:00:00.000Z",
+    "label": "Pre-market",
+    "rationale": "Pre-RTH PD context"
+  },
+  {
+    "asOf": "2026-08-10T13:00:00.000Z",
+    "label": "Pre-NY open",
+    "rationale": "Final pre-open"
+  },
+  {
+    "asOf": "2026-08-10T14:30:00.000Z",
+    "label": "NY open",
+    "rationale": "Canonical NY RTH anchor"
+  },
+  {
+    "asOf": "2026-08-10T15:30:00.000Z",
+    "label": "Post-open hour",
+    "rationale": "First hour displacement"
+  },
+  {
+    "asOf": "2026-08-10T16:30:00.000Z",
+    "label": "Mid-morning RTH",
+    "rationale": "Trend vs range"
+  },
+  {
+    "asOf": "2026-08-10T17:30:00.000Z",
+    "label": "Lunch",
+    "rationale": "Liquidity dip"
+  },
+  {
+    "asOf": "2026-08-10T19:00:00.000Z",
+    "label": "PM session",
+    "rationale": "Afternoon continuation"
+  },
+  {
+    "asOf": "2026-08-10T20:59:00.000Z",
+    "label": "Session end",
+    "rationale": "Last RTH minute"
+  },
+  {
+    "asOf": "2026-08-10T22:00:00.000Z",
+    "label": "Globex open",
+    "rationale": "CME session open ΓÇö minimal RTH context"
+  },
+  {
+    "asOf": "2026-08-10T23:00:00.000Z",
+    "label": "Regime shift ΓåÆ trend_down",
+    "rationale": "Adaptive candidate on regime proxy change (no outcome filter)"
+  },
+  {
+    "asOf": "2026-08-11T02:00:00.000Z",
+    "label": "Overnight mid",
+    "rationale": "Low-liquidity overnight"
+  },
+  {
+    "asOf": "2026-08-11T06:00:00.000Z",
+    "label": "Early morning",
+    "rationale": "Pre-London globex"
+  },
+  {
+    "asOf": "2026-08-11T11:00:00.000Z",
+    "label": "Pre-market",
+    "rationale": "Pre-RTH PD context"
+  },
+  {
+    "asOf": "2026-08-11T13:00:00.000Z",
+    "label": "Pre-NY open",
+    "rationale": "Final pre-open"
+  },
+  {
+    "asOf": "2026-08-11T14:30:00.000Z",
+    "label": "NY open",
+    "rationale": "Canonical NY RTH anchor"
+  },
+  {
+    "asOf": "2026-08-11T15:30:00.000Z",
+    "label": "Post-open hour",
+    "rationale": "First hour displacement"
+  },
+  {
+    "asOf": "2026-08-11T16:30:00.000Z",
+    "label": "Mid-morning RTH",
+    "rationale": "Trend vs range"
+  },
+  {
+    "asOf": "2026-08-11T17:30:00.000Z",
+    "label": "Lunch",
+    "rationale": "Liquidity dip"
+  },
+  {
+    "asOf": "2026-08-11T19:00:00.000Z",
+    "label": "PM session",
+    "rationale": "Afternoon continuation"
+  },
+  {
+    "asOf": "2026-08-11T20:59:00.000Z",
+    "label": "Session end",
+    "rationale": "Last RTH minute"
+  },
+  {
+    "asOf": "2026-08-11T22:00:00.000Z",
+    "label": "Globex open",
+    "rationale": "CME session open ΓÇö minimal RTH context"
+  },
+  {
+    "asOf": "2026-08-12T00:15:00.000Z",
+    "label": "Regime shift ΓåÆ volatile",
+    "rationale": "Adaptive candidate on regime proxy change (no outcome filter)"
+  },
+  {
+    "asOf": "2026-08-12T02:00:00.000Z",
+    "label": "Overnight mid",
+    "rationale": "Low-liquidity overnight"
+  },
+  {
+    "asOf": "2026-08-12T06:00:00.000Z",
+    "label": "Early morning",
+    "rationale": "Pre-London globex"
+  },
+  {
+    "asOf": "2026-08-12T11:00:00.000Z",
+    "label": "Pre-market",
+    "rationale": "Pre-RTH PD context"
+  },
+  {
+    "asOf": "2026-08-12T13:00:00.000Z",
+    "label": "Pre-NY open",
+    "rationale": "Final pre-open"
+  },
+  {
+    "asOf": "2026-08-12T14:30:00.000Z",
+    "label": "NY open",
+    "rationale": "Canonical NY RTH anchor"
+  },
+  {
+    "asOf": "2026-08-12T15:30:00.000Z",
+    "label": "Post-open hour",
+    "rationale": "First hour displacement"
+  },
+  {
+    "asOf": "2026-08-12T16:30:00.000Z",
+    "label": "Mid-morning RTH",
+    "rationale": "Trend vs range"
+  },
+  {
+    "asOf": "2026-08-12T17:30:00.000Z",
+    "label": "Lunch",
+    "rationale": "Liquidity dip"
+  },
+  {
+    "asOf": "2026-08-12T19:00:00.000Z",
+    "label": "PM session",
+    "rationale": "Afternoon continuation"
+  },
+  {
+    "asOf": "2026-08-12T20:59:00.000Z",
+    "label": "Session end",
+    "rationale": "Last RTH minute"
+  },
+  {
+    "asOf": "2026-08-12T22:00:00.000Z",
+    "label": "Globex open",
+    "rationale": "CME session open ΓÇö minimal RTH context"
+  }
+]

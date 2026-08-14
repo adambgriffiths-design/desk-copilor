@@ -1,0 +1,115 @@
+{
+  "periods": {
+    "full": {
+      "window": {
+        "start": "2026-08-12T13:30:00.000Z",
+        "end": "2026-08-12T15:29:00.000Z"
+      },
+      "statistics": {
+        "totalSetups": 0,
+        "wins": 0,
+        "losses": 0,
+        "ambiguous": 0,
+        "cancelled": 0,
+        "expired": 0,
+        "neutral": 0,
+        "open": 0,
+        "winRate": 0,
+        "avgR": 0,
+        "expectancy": 0,
+        "profitFactor": 0,
+        "maxDrawdownR": 0,
+        "avgMfe": 0,
+        "avgMae": 0,
+        "avgBarsHeld": 0,
+        "avgTimeHeldMs": 0,
+        "maxConsecutiveWins": 0,
+        "maxConsecutiveLosses": 0,
+        "medianR": 0,
+        "breakdown": {
+          "byDirection": {},
+          "byTimeframe": {},
+          "bySetupType": {},
+          "bySession": {},
+          "byMonth": {},
+          "byWeekDay": {}
+        }
+      },
+      "setups": []
+    },
+    "train": {
+      "window": {
+        "start": "2026-08-12T13:30:00.000Z",
+        "end": "2026-08-12T14:53:00.000Z"
+      },
+      "statistics": {
+        "totalSetups": 0,
+        "wins": 0,
+        "losses": 0,
+        "ambiguous": 0,
+        "cancelled": 0,
+        "expired": 0,
+        "neutral": 0,
+        "open": 0,
+        "winRate": 0,
+        "avgR": 0,
+        "expectancy": 0,
+        "profitFactor": 0,
+        "maxDrawdownR": 0,
+        "avgMfe": 0,
+        "avgMae": 0,
+        "avgBarsHeld": 0,
+        "avgTimeHeldMs": 0,
+        "maxConsecutiveWins": 0,
+        "maxConsecutiveLosses": 0,
+        "medianR": 0,
+        "breakdown": {
+          "byDirection": {},
+          "byTimeframe": {},
+          "bySetupType": {},
+          "bySession": {},
+          "byMonth": {},
+          "byWeekDay": {}
+        }
+      },
+      "setups": []
+    },
+    "test": {
+      "window": {
+        "start": "2026-08-12T14:54:00.000Z",
+        "end": "2026-08-12T15:29:00.000Z"
+      },
+      "statistics": {
+        "totalSetups": 0,
+        "wins": 0,
+        "losses": 0,
+        "ambiguous": 0,
+        "cancelled": 0,
+        "expired": 0,
+        "neutral": 0,
+        "open": 0,
+        "winRate": 0,
+        "avgR": 0,
+        "expectancy": 0,
+        "profitFactor": 0,
+        "maxDrawdownR": 0,
+        "avgMfe": 0,
+        "avgMae": 0,
+        "avgBarsHeld": 0,
+        "avgTimeHeldMs": 0,
+        "maxConsecutiveWins": 0,
+        "maxConsecutiveLosses": 0,
+        "medianR": 0,
+        "breakdown": {
+          "byDirection": {},
+          "byTimeframe": {},
+          "bySetupType": {},
+          "bySession": {},
+          "byMonth": {},
+          "byWeekDay": {}
+        }
+      },
+      "setups": []
+    }
+  }
+}

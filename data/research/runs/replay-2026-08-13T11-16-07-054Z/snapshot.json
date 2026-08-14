@@ -1,0 +1,40 @@
+{
+  "runId": "replay-2026-08-13T11-16-07-054Z",
+  "datasetId": "2562961408b256ac94f1",
+  "asOf": "2026-08-11T22:00:00.000Z",
+  "barIndex": 0,
+  "symbol": "MNQ-equivalent:NQ",
+  "currentPrice": 29647.5,
+  "structureSummary": "Bias: bullish | MSS: none | FVGs: 0 | PD: discount",
+  "features": {
+    "bias": "bullish",
+    "currentDayHigh": 29661,
+    "currentDayLow": 29641,
+    "sessionHighAtCutoff": 29661,
+    "sessionLowAtCutoff": 29641,
+    "m1FvgCount": 0,
+    "mssDirection": null,
+    "pdVsRange": "discount",
+    "pdh": 29647.5,
+    "pdl": 29647.5
+  },
+  "karen": {
+    "entryIdea": "Pullback long near 29642.5",
+    "invalidation": "29632.5",
+    "target": "29667.5",
+    "fvgEvidence": "No FVG at cutoff",
+    "pdEvidence": "PDH/PDL 29647.5/29647.5",
+    "structureEvidence": "Bias stack bullish",
+    "confidence": 62,
+    "candlesUsed": [
+      "2026-08-11T22:00:00.000Z C:29647.5"
+    ],
+    "levelsUsed": [
+      "Last 29647.5",
+      "PDH 29647.5"
+    ],
+    "pipelineVerdict": "LONG",
+    "source": "deterministic"
+  },
+  "barCountAtCutoff": 1
+}

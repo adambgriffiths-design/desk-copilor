@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "dataset_id": "229d1bea359bcc6777ff",
+    "source_symbol": "NQ",
+    "target_instrument": "MNQ-equivalent",
+    "symbol": "NQ",
+    "source": "tickstream",
+    "source_version": "tickstream-historical-v1",
+    "timeframe": "1m",
+    "start_timestamp": 1785967200,
+    "end_timestamp": 1786572000,
+    "timezone": "America/New_York",
+    "session_definition": "CME_GLOBEX_18:00_ET",
+    "created_at": "2026-08-13T23:30:19.577Z",
+    "code_version": "1.0.0",
+    "data_version": "295f66b7aa9381c1",
+    "versions": {
+      "dataset_version": "1.0.0",
+      "source": "tickstream",
+      "source_version": "tickstream-historical-v1",
+      "loader_version": "1.0.0",
+      "aggregation_version": "1.0.0",
+      "session_definition_version": "1.0.0",
+      "git_revision": "018310a672e9274c8e3c537d04d085b39658fa14"
+    }
+  },
+  "candleCount": 6880,
+  "first": 1785967200,
+  "last": 1786572000,
+  "missingMinutes": 3201,
+  "duplicateCount": 0,
+  "invalidCount": 0,
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 4 minute(s) between 1786002480 and 1786002780",
+      "timestamp": 1786002780
+    },
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 2 minute(s) between 1786018920 and 1786019100",
+      "timestamp": 1786019100
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-06 → 2026-08-07)",
+      "timestamp": 1786053600
+    },
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 2 minute(s) between 1786086300 and 1786086480",
+      "timestamp": 1786086480
+    },
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 3 minute(s) between 1786127880 and 1786128120",
+      "timestamp": 1786128120
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 2950 minute(s) across CME session boundary (2026-08-07 → 2026-08-10)",
+      "timestamp": 1786313400
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-10 → 2026-08-11)",
+      "timestamp": 1786399200
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-11 → 2026-08-12)",
+      "timestamp": 1786485600
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-12 → 2026-08-13)",
+      "timestamp": 1786572000
+    }
+  ],
+  "versions": {
+    "dataset_version": "1.0.0",
+    "source": "tickstream",
+    "source_version": "tickstream-historical-v1",
+    "loader_version": "1.0.0",
+    "aggregation_version": "1.0.0",
+    "session_definition_version": "1.0.0",
+    "git_revision": "018310a672e9274c8e3c537d04d085b39658fa14"
+  },
+  "integrityStatus": "WARNING"
+}

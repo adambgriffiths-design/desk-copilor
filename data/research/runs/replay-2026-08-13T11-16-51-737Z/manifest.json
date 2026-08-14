@@ -1,0 +1,31 @@
+{
+  "runId": "replay-2026-08-13T11-16-51-737Z",
+  "runType": "replay",
+  "createdAt": "2026-08-13T11:16:51.742Z",
+  "gitHash": null,
+  "dataset": {
+    "id": "2562961408b256ac94f1",
+    "symbol": "MNQ-equivalent:NQ",
+    "barCount": 1381,
+    "dateRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T22:00:00.000Z"
+    }
+  },
+  "strategy": {
+    "id": "n/a",
+    "name": "point-in-time snapshot",
+    "parameters": {}
+  },
+  "sessionDefinition": "NY AM RTH (ICT session boundaries via buildMarketContextAt)",
+  "timeframe": "1m",
+  "window": {
+    "start": "2026-08-12T07:00:00.000Z",
+    "end": "2026-08-12T07:00:00.000Z"
+  },
+  "config": {
+    "barIndex": 540,
+    "datasetId": "nq-aug12-2026-cme"
+  },
+  "fingerprint": "2026-08-12T07:00:00.000Z"
+}

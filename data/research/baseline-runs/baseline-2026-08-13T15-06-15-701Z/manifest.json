@@ -1,0 +1,90 @@
+{
+  "runId": "baseline-2026-08-13T15-06-15-701Z",
+  "runType": "baseline-backtest",
+  "createdAt": "2026-08-13T15:33:30.472Z",
+  "gitRevision": "018310a672e9274c8e3c537d04d085b39658fa14",
+  "strategy_definition_version": "phase1-decision-pipeline@spec-1.0.0+pipeline-1.0.0",
+  "strategy_rules": {
+    "layers": [
+      "observation-engine",
+      "interpretation-engine",
+      "decision-layer",
+      "execution-plan"
+    ],
+    "verdicts_traded": [
+      "LONG",
+      "SHORT"
+    ],
+    "entry_gate": "execution.entryStatus === ACTIVE (not WAIT or EXTENDED)",
+    "entry_price": "execution entry anchor — long: entryHi, short: entryLo",
+    "stop": "decision.invalidation",
+    "target": "execution.target1Price",
+    "required_fields": [
+      "invalidation",
+      "target1Price",
+      "finite risk > 0"
+    ]
+  },
+  "documented_ambiguities": [
+    "Stop uses decision-layer invalidation (sweep/MSS ±5) per ICT spec canonical example; execution-plan labels invalidation as thesis-only, not a stop.",
+    "Entry fill at execution-scaffold anchor (long=zone top, short=zone bottom) when verdict LONG|SHORT and entryStatus ACTIVE only.",
+    "WAIT and NO_TRADE verdicts produce no setup — not counted as missed trades.",
+    "MarketState for observation uses sliced 1m OHLC as chart candles; no TradingView export — displacement may read unknown on thin history.",
+    "Target 1 from execution scaffold (nearest PD/session level ≥45pt from anchor); not interpretation.target (always null in Phase 1).",
+    "1m timeframe only; HTF bias from existing buildMarketContextAt — Yahoo/CME daily boundary conflicts documented in MARKET_STRUCTURE_DATA_REQUIREMENTS.md."
+  ],
+  "dataset": {
+    "id": "synthetic-ny-am",
+    "label": "Synthetic NY AM Mini (Aug 12 2026)",
+    "symbol": "MNQ=F",
+    "dateRange": {
+      "start": "2026-08-12T13:30:00.000Z",
+      "end": "2026-08-12T15:29:00.000Z"
+    },
+    "barCount": 120
+  },
+  "data_quality": {
+    "totalCandles": 120,
+    "missingMinutes": 0,
+    "duplicateCount": 0,
+    "invalidOhlcCount": 0,
+    "sessionGapCount": 0,
+    "partialFirst": false,
+    "partialLast": false,
+    "integrityStatus": "VALID",
+    "issues": [],
+    "ambiguousOutcomesNote": "Intrabar stop+target on same candle → AMBIGUOUS (no open-proximity heuristic in baseline outcome.ts)"
+  },
+  "split": {
+    "train": {
+      "startIndex": 0,
+      "endIndex": 83,
+      "startTime": "2026-08-12T13:30:00.000Z",
+      "endTime": "2026-08-12T14:53:00.000Z"
+    },
+    "test": {
+      "startIndex": 84,
+      "endIndex": 119,
+      "startTime": "2026-08-12T14:54:00.000Z",
+      "endTime": "2026-08-12T15:29:00.000Z"
+    }
+  },
+  "look_ahead_test": {
+    "pass": true,
+    "detail": "historical decisions unchanged when future candle poisoned"
+  },
+  "reproducibility": {
+    "pass": true,
+    "fingerprint": "9a9966b41a1b8e34616376f8b262d1f870b20fd85c8090e9a06e19e5443608d0",
+    "detail": "identical setup outcomes on repeat run"
+  },
+  "interpretation": "INSUFFICIENT DATA — zero decisive setups in out-of-sample window; cannot assess edge.",
+  "session_definition": "ICT sessions via buildMarketContextAt / resolveSessionContext",
+  "timeframe": "1m",
+  "entry_exit_assumptions": {
+    "entry": "limit fill at execution scaffold anchor when ACTIVE",
+    "stop": "decision-layer invalidation",
+    "target": "execution scaffold target1",
+    "ambiguous_intrabar": "AMBIGUOUS — no tick order, no open-proximity heuristic"
+  }
+}

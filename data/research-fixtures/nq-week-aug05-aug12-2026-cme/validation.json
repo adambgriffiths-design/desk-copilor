@@ -1,0 +1,63 @@
+{
+  "status": "WARNING",
+  "issues": [
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 4 minute(s) between 1786002480 and 1786002780",
+      "timestamp": 1786002780
+    },
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 2 minute(s) between 1786018920 and 1786019100",
+      "timestamp": 1786019100
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-06 → 2026-08-07)",
+      "timestamp": 1786053600
+    },
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 2 minute(s) between 1786086300 and 1786086480",
+      "timestamp": 1786086480
+    },
+    {
+      "severity": "WARNING",
+      "code": "MISSING_MINUTES",
+      "message": "Missing 3 minute(s) between 1786127880 and 1786128120",
+      "timestamp": 1786128120
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 2950 minute(s) across CME session boundary (2026-08-07 → 2026-08-10)",
+      "timestamp": 1786313400
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-10 → 2026-08-11)",
+      "timestamp": 1786399200
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-11 → 2026-08-12)",
+      "timestamp": 1786485600
+    },
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-12 → 2026-08-13)",
+      "timestamp": 1786572000
+    }
+  ],
+  "candleCount": 6880,
+  "duplicateCount": 0,
+  "missingMinuteCount": 3201,
+  "invalidOhlcCount": 0
+}

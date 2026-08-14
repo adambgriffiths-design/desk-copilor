@@ -1,0 +1,655 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+{
+  "datasetId": "nq-week-aug05-aug12-2026-cme",
+  "barCount": 6880,
+  "summary": {
+    "total": 61,
+    "bySession": {
+      "2026-08-06": 12,
+      "2026-08-07": 12,
+      "2026-08-10": 12,
+      "2026-08-11": 12,
+      "2026-08-12": 12,
+      "2026-08-13": 1
+    },
+    "byPhase": {
+      "overnight": 5,
+      "early_globex": 5,
+      "pre_market": 5,
+      "pre_ny_open": 5,
+      "ny_open": 5,
+      "pm_session": 12,
+      "post_open": 5,
+      "mid_morning": 5,
+      "lunch": 5,
+      "session_end": 5,
+      "globex_open": 4
+    },
+    "byRegime": {
+      "range": 45,
+      "volatile": 5,
+      "trend_up": 5,
+      "quiet": 5,
+      "trend_down": 1
+    }
+  },
+  "cutoffs": [
+    {
+      "asOf": "2026-08-06T02:00:00.000Z",
+      "barIndex": 240,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "overnight",
+      "regimeProxy": "range",
+      "label": "Overnight mid",
+      "rationale": "Low-liquidity overnight",
+      "stratum": "session_phase:overnight"
+    },
+    {
+      "asOf": "2026-08-06T06:00:00.000Z",
+      "barIndex": 480,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "early_globex",
+      "regimeProxy": "range",
+      "label": "Early morning",
+      "rationale": "Pre-London globex",
+      "stratum": "session_phase:early_globex"
+    },
+    {
+      "asOf": "2026-08-06T11:00:00.000Z",
+      "barIndex": 776,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "pre_market",
+      "regimeProxy": "volatile",
+      "label": "Pre-market",
+      "rationale": "Pre-RTH PD context",
+      "stratum": "session_phase:pre_market"
+    },
+    {
+      "asOf": "2026-08-06T13:00:00.000Z",
+      "barIndex": 894,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "pre_ny_open",
+      "regimeProxy": "range",
+      "label": "Pre-NY open",
+      "rationale": "Final pre-open",
+      "stratum": "session_phase:pre_ny_open"
+    },
+    {
+      "asOf": "2026-08-06T14:30:00.000Z",
+      "barIndex": 984,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "ny_open",
+      "regimeProxy": "trend_up",
+      "label": "NY open",
+      "rationale": "Canonical NY RTH anchor",
+      "stratum": "session_phase:ny_open"
+    },
+    {
+      "asOf": "2026-08-06T14:36:00.000Z",
+      "barIndex": 990,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "range",
+      "label": "Regime shift ΓåÆ range",
+      "rationale": "Adaptive candidate on regime proxy change (no outcome filter)",
+      "stratum": "regime_shift:range"
+    },
+    {
+      "asOf": "2026-08-06T15:30:00.000Z",
+      "barIndex": 1044,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "post_open",
+      "regimeProxy": "range",
+      "label": "Post-open hour",
+      "rationale": "First hour displacement",
+      "stratum": "session_phase:post_open"
+    },
+    {
+      "asOf": "2026-08-06T16:30:00.000Z",
+      "barIndex": 1104,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "mid_morning",
+      "regimeProxy": "range",
+      "label": "Mid-morning RTH",
+      "rationale": "Trend vs range",
+      "stratum": "session_phase:mid_morning"
+    },
+    {
+      "asOf": "2026-08-06T17:30:00.000Z",
+      "barIndex": 1164,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "lunch",
+      "regimeProxy": "range",
+      "label": "Lunch",
+      "rationale": "Liquidity dip",
+      "stratum": "session_phase:lunch"
+    },
+    {
+      "asOf": "2026-08-06T19:00:00.000Z",
+      "barIndex": 1254,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "range",
+      "label": "PM session",
+      "rationale": "Afternoon continuation",
+      "stratum": "session_phase:pm_session"
+    },
+    {
+      "asOf": "2026-08-06T20:51:00.000Z",
+      "barIndex": 1365,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "quiet",
+      "label": "Regime shift ΓåÆ quiet",
+      "rationale": "Adaptive candidate on regime proxy change (no outcome filter)",
+      "stratum": "regime_shift:quiet"
+    },
+    {
+      "asOf": "2026-08-06T20:59:00.000Z",
+      "barIndex": 1373,
+      "sessionDate": "2026-08-06",
+      "sessionPhase": "session_end",
+      "regimeProxy": "quiet",
+      "label": "Session end",
+      "rationale": "Last RTH minute",
+      "stratum": "session_phase:session_end"
+    },
+    {
+      "asOf": "2026-08-06T22:00:00.000Z",
+      "barIndex": 1374,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "globex_open",
+      "regimeProxy": "range",
+      "label": "Globex open",
+      "rationale": "CME session open ΓÇö minimal RTH context",
+      "stratum": "session_phase:globex_open"
+    },
+    {
+      "asOf": "2026-08-06T23:00:00.000Z",
+      "barIndex": 1434,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "trend_up",
+      "label": "Regime shift ΓåÆ trend_up",
+      "rationale": "Adaptive candidate on regime proxy change (no outcome filter)",
+      "stratum": "regime_shift:trend_up"
+    },
+    {
+      "asOf": "2026-08-07T02:00:00.000Z",
+      "barIndex": 1614,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "overnight",
+      "regimeProxy": "range",
+      "label": "Overnight mid",
+      "rationale": "Low-liquidity overnight",
+      "stratum": "session_phase:overnight"
+    },
+    {
+      "asOf": "2026-08-07T06:00:00.000Z",
+      "barIndex": 1854,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "early_globex",
+      "regimeProxy": "range",
+      "label": "Early morning",
+      "rationale": "Pre-London globex",
+      "stratum": "session_phase:early_globex"
+    },
+    {
+      "asOf": "2026-08-07T11:00:00.000Z",
+      "barIndex": 2152,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "pre_market",
+      "regimeProxy": "range",
+      "label": "Pre-market",
+      "rationale": "Pre-RTH PD context",
+      "stratum": "session_phase:pre_market"
+    },
+    {
+      "asOf": "2026-08-07T13:00:00.000Z",
+      "barIndex": 2272,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "pre_ny_open",
+      "regimeProxy": "trend_up",
+      "label": "Pre-NY open",
+      "rationale": "Final pre-open",
+      "stratum": "session_phase:pre_ny_open"
+    },
+    {
+      "asOf": "2026-08-07T14:30:00.000Z",
+      "barIndex": 2362,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "ny_open",
+      "regimeProxy": "range",
+      "label": "NY open",
+      "rationale": "Canonical NY RTH anchor",
+      "stratum": "session_phase:ny_open"
+    },
+    {
+      "asOf": "2026-08-07T15:30:00.000Z",
+      "barIndex": 2422,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "post_open",
+      "regimeProxy": "range",
+      "label": "Post-open hour",
+      "rationale": "First hour displacement",
+      "stratum": "session_phase:post_open"
+    },
+    {
+      "asOf": "2026-08-07T16:30:00.000Z",
+      "barIndex": 2482,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "mid_morning",
+      "regimeProxy": "volatile",
+      "label": "Mid-morning RTH",
+      "rationale": "Trend vs range",
+      "stratum": "session_phase:mid_morning"
+    },
+    {
+      "asOf": "2026-08-07T17:30:00.000Z",
+      "barIndex": 2542,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "lunch",
+      "regimeProxy": "range",
+      "label": "Lunch",
+      "rationale": "Liquidity dip",
+      "stratum": "session_phase:lunch"
+    },
+    {
+      "asOf": "2026-08-07T19:00:00.000Z",
+      "barIndex": 2629,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "range",
+      "label": "PM session",
+      "rationale": "Afternoon continuation",
+      "stratum": "session_phase:pm_session"
+    },
+    {
+      "asOf": "2026-08-07T20:59:00.000Z",
+      "barIndex": 2748,
+      "sessionDate": "2026-08-07",
+      "sessionPhase": "session_end",
+      "regimeProxy": "range",
+      "label": "Session end",
+      "rationale": "Last RTH minute",
+      "stratum": "session_phase:session_end"
+    },
+    {
+      "asOf": "2026-08-10T00:10:00.000Z",
+      "barIndex": 2869,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "volatile",
+      "label": "Regime shift ΓåÆ volatile",
+      "rationale": "Adaptive candidate on regime proxy change (no outcome filter)",
+      "stratum": "regime_shift:volatile"
+    },
+    {
+      "asOf": "2026-08-10T00:25:00.000Z",
+      "barIndex": 2884,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "range",
+      "label": "Regime shift ΓåÆ range",
+      "rationale": "Adaptive candidate on regime proxy change (no outcome filter)",
+      "stratum": "regime_shift:range"
+    },
+    {
+      "asOf": "2026-08-10T02:00:00.000Z",
+      "barIndex": 2979,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "overnight",
+      "regimeProxy": "quiet",
+      "label": "Overnight mid",
+      "rationale": "Low-liquidity overnight",
+      "stratum": "session_phase:overnight"
+    },
+    {
+      "asOf": "2026-08-10T06:00:00.000Z",
+      "barIndex": 3219,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "early_globex",
+      "regimeProxy": "trend_up",
+      "label": "Early morning",
+      "rationale": "Pre-London globex",
+      "stratum": "session_phase:early_globex"
+    },
+    {
+      "asOf": "2026-08-10T11:00:00.000Z",
+      "barIndex": 3519,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "pre_market",
+      "regimeProxy": "volatile",
+      "label": "Pre-market",
+      "rationale": "Pre-RTH PD context",
+      "stratum": "session_phase:pre_market"
+    },
+    {
+      "asOf": "2026-08-10T13:00:00.000Z",
+      "barIndex": 3639,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "pre_ny_open",
+      "regimeProxy": "range",
+      "label": "Pre-NY open",
+      "rationale": "Final pre-open",
+      "stratum": "session_phase:pre_ny_open"
+    },
+    {
+      "asOf": "2026-08-10T14:30:00.000Z",
+      "barIndex": 3729,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "ny_open",
+      "regimeProxy": "range",
+      "label": "NY open",
+      "rationale": "Canonical NY RTH anchor",
+      "stratum": "session_phase:ny_open"
+    },
+    {
+      "asOf": "2026-08-10T15:30:00.000Z",
+      "barIndex": 3789,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "post_open",
+      "regimeProxy": "range",
+      "label": "Post-open hour",
+      "rationale": "First hour displacement",
+      "stratum": "session_phase:post_open"
+    },
+    {
+      "asOf": "2026-08-10T16:30:00.000Z",
+      "barIndex": 3849,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "mid_morning",
+      "regimeProxy": "range",
+      "label": "Mid-morning RTH",
+      "rationale": "Trend vs range",
+      "stratum": "session_phase:mid_morning"
+    },
+    {
+      "asOf": "2026-08-10T17:30:00.000Z",
+      "barIndex": 3909,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "lunch",
+      "regimeProxy": "range",
+      "label": "Lunch",
+      "rationale": "Liquidity dip",
+      "stratum": "session_phase:lunch"
+    },
+    {
+      "asOf": "2026-08-10T19:00:00.000Z",
+      "barIndex": 3999,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "range",
+      "label": "PM session",
+      "rationale": "Afternoon continuation",
+      "stratum": "session_phase:pm_session"
+    },
+    {
+      "asOf": "2026-08-10T20:59:00.000Z",
+      "barIndex": 4118,
+      "sessionDate": "2026-08-10",
+      "sessionPhase": "session_end",
+      "regimeProxy": "range",
+      "label": "Session end",
+      "rationale": "Last RTH minute",
+      "stratum": "session_phase:session_end"
+    },
+    {
+      "asOf": "2026-08-10T22:00:00.000Z",
+      "barIndex": 4119,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "globex_open",
+      "regimeProxy": "range",
+      "label": "Globex open",
+      "rationale": "CME session open ΓÇö minimal RTH context",
+      "stratum": "session_phase:globex_open"
+    },
+    {
+      "asOf": "2026-08-10T23:00:00.000Z",
+      "barIndex": 4179,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "trend_down",
+      "label": "Regime shift ΓåÆ trend_down",
+      "rationale": "Adaptive candidate on regime proxy change (no outcome filter)",
+      "stratum": "regime_shift:trend_down"
+    },
+    {
+      "asOf": "2026-08-11T02:00:00.000Z",
+      "barIndex": 4359,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "overnight",
+      "regimeProxy": "range",
+      "label": "Overnight mid",
+      "rationale": "Low-liquidity overnight",
+      "stratum": "session_phase:overnight"
+    },
+    {
+      "asOf": "2026-08-11T06:00:00.000Z",
+      "barIndex": 4599,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "early_globex",
+      "regimeProxy": "range",
+      "label": "Early morning",
+      "rationale": "Pre-London globex",
+      "stratum": "session_phase:early_globex"
+    },
+    {
+      "asOf": "2026-08-11T11:00:00.000Z",
+      "barIndex": 4899,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "pre_market",
+      "regimeProxy": "trend_up",
+      "label": "Pre-market",
+      "rationale": "Pre-RTH PD context",
+      "stratum": "session_phase:pre_market"
+    },
+    {
+      "asOf": "2026-08-11T13:00:00.000Z",
+      "barIndex": 5019,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "pre_ny_open",
+      "regimeProxy": "range",
+      "label": "Pre-NY open",
+      "rationale": "Final pre-open",
+      "stratum": "session_phase:pre_ny_open"
+    },
+    {
+      "asOf": "2026-08-11T14:30:00.000Z",
+      "barIndex": 5109,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "ny_open",
+      "regimeProxy": "range",
+      "label": "NY open",
+      "rationale": "Canonical NY RTH anchor",
+      "stratum": "session_phase:ny_open"
+    },
+    {
+      "asOf": "2026-08-11T15:30:00.000Z",
+      "barIndex": 5169,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "post_open",
+      "regimeProxy": "range",
+      "label": "Post-open hour",
+      "rationale": "First hour displacement",
+      "stratum": "session_phase:post_open"
+    },
+    {
+      "asOf": "2026-08-11T16:30:00.000Z",
+      "barIndex": 5229,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "mid_morning",
+      "regimeProxy": "range",
+      "label": "Mid-morning RTH",
+      "rationale": "Trend vs range",
+      "stratum": "session_phase:mid_morning"
+    },
+    {
+      "asOf": "2026-08-11T17:30:00.000Z",
+      "barIndex": 5289,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "lunch",
+      "regimeProxy": "range",
+      "label": "Lunch",
+      "rationale": "Liquidity dip",
+      "stratum": "session_phase:lunch"
+    },
+    {
+      "asOf": "2026-08-11T19:00:00.000Z",
+      "barIndex": 5379,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "range",
+      "label": "PM session",
+      "rationale": "Afternoon continuation",
+      "stratum": "session_phase:pm_session"
+    },
+    {
+      "asOf": "2026-08-11T20:59:00.000Z",
+      "barIndex": 5498,
+      "sessionDate": "2026-08-11",
+      "sessionPhase": "session_end",
+      "regimeProxy": "range",
+      "label": "Session end",
+      "rationale": "Last RTH minute",
+      "stratum": "session_phase:session_end"
+    },
+    {
+      "asOf": "2026-08-11T22:00:00.000Z",
+      "barIndex": 5499,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "globex_open",
+      "regimeProxy": "range",
+      "label": "Globex open",
+      "rationale": "CME session open ΓÇö minimal RTH context",
+      "stratum": "session_phase:globex_open"
+    },
+    {
+      "asOf": "2026-08-12T00:15:00.000Z",
+      "barIndex": 5634,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "volatile",
+      "label": "Regime shift ΓåÆ volatile",
+      "rationale": "Adaptive candidate on regime proxy change (no outcome filter)",
+      "stratum": "regime_shift:volatile"
+    },
+    {
+      "asOf": "2026-08-12T02:00:00.000Z",
+      "barIndex": 5739,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "overnight",
+      "regimeProxy": "range",
+      "label": "Overnight mid",
+      "rationale": "Low-liquidity overnight",
+      "stratum": "session_phase:overnight"
+    },
+    {
+      "asOf": "2026-08-12T06:00:00.000Z",
+      "barIndex": 5979,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "early_globex",
+      "regimeProxy": "range",
+      "label": "Early morning",
+      "rationale": "Pre-London globex",
+      "stratum": "session_phase:early_globex"
+    },
+    {
+      "asOf": "2026-08-12T11:00:00.000Z",
+      "barIndex": 6279,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "pre_market",
+      "regimeProxy": "range",
+      "label": "Pre-market",
+      "rationale": "Pre-RTH PD context",
+      "stratum": "session_phase:pre_market"
+    },
+    {
+      "asOf": "2026-08-12T13:00:00.000Z",
+      "barIndex": 6399,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "pre_ny_open",
+      "regimeProxy": "quiet",
+      "label": "Pre-NY open",
+      "rationale": "Final pre-open",
+      "stratum": "session_phase:pre_ny_open"
+    },
+    {
+      "asOf": "2026-08-12T14:30:00.000Z",
+      "barIndex": 6489,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "ny_open",
+      "regimeProxy": "range",
+      "label": "NY open",
+      "rationale": "Canonical NY RTH anchor",
+      "stratum": "session_phase:ny_open"
+    },
+    {
+      "asOf": "2026-08-12T15:30:00.000Z",
+      "barIndex": 6549,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "post_open",
+      "regimeProxy": "range",
+      "label": "Post-open hour",
+      "rationale": "First hour displacement",
+      "stratum": "session_phase:post_open"
+    },
+    {
+      "asOf": "2026-08-12T16:30:00.000Z",
+      "barIndex": 6609,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "mid_morning",
+      "regimeProxy": "range",
+      "label": "Mid-morning RTH",
+      "rationale": "Trend vs range",
+      "stratum": "session_phase:mid_morning"
+    },
+    {
+      "asOf": "2026-08-12T17:30:00.000Z",
+      "barIndex": 6669,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "lunch",
+      "regimeProxy": "range",
+      "label": "Lunch",
+      "rationale": "Liquidity dip",
+      "stratum": "session_phase:lunch"
+    },
+    {
+      "asOf": "2026-08-12T19:00:00.000Z",
+      "barIndex": 6759,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "pm_session",
+      "regimeProxy": "range",
+      "label": "PM session",
+      "rationale": "Afternoon continuation",
+      "stratum": "session_phase:pm_session"
+    },
+    {
+      "asOf": "2026-08-12T20:59:00.000Z",
+      "barIndex": 6878,
+      "sessionDate": "2026-08-12",
+      "sessionPhase": "session_end",
+      "regimeProxy": "quiet",
+      "label": "Session end",
+      "rationale": "Last RTH minute",
+      "stratum": "session_phase:session_end"
+    },
+    {
+      "asOf": "2026-08-12T22:00:00.000Z",
+      "barIndex": 6879,
+      "sessionDate": "2026-08-13",
+      "sessionPhase": "globex_open",
+      "regimeProxy": "range",
+      "label": "Globex open",
+      "rationale": "CME session open ΓÇö minimal RTH context",
+      "stratum": "session_phase:globex_open"
+    }
+  ]
+}

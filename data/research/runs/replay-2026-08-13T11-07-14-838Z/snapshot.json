@@ -1,0 +1,42 @@
+{
+  "runId": "replay-2026-08-13T11-07-14-838Z",
+  "datasetId": "synthetic-ny-am",
+  "asOf": "2026-08-12T14:20:00.000Z",
+  "barIndex": 50,
+  "symbol": "MNQ=F",
+  "currentPrice": 25006.90000000001,
+  "structureSummary": "Bias: bearish | MSS: none | FVGs: 0 | PD: premium",
+  "features": {
+    "bias": "bearish",
+    "currentDayHigh": 25011.89999999998,
+    "currentDayLow": 24998.5,
+    "sessionHighAtCutoff": 25011.89999999998,
+    "sessionLowAtCutoff": 24998.5,
+    "m1FvgCount": 0,
+    "mssDirection": null,
+    "pdVsRange": "premium",
+    "pdh": 25100,
+    "pdl": 24900
+  },
+  "karen": {
+    "entryIdea": "Fade rally near 25011.9",
+    "invalidation": "25021.9",
+    "target": "24986.9",
+    "fvgEvidence": "No FVG at cutoff",
+    "pdEvidence": "PDH/PDL 25100/24900",
+    "structureEvidence": "Bias stack bearish",
+    "confidence": 58,
+    "candlesUsed": [
+      "2026-08-12T14:18:00.000Z C:25008.1",
+      "2026-08-12T14:19:00.000Z C:25007.5",
+      "2026-08-12T14:20:00.000Z C:25006.9"
+    ],
+    "levelsUsed": [
+      "Last 25006.9",
+      "PDH 25100.0"
+    ],
+    "pipelineVerdict": "SHORT",
+    "source": "deterministic"
+  },
+  "barCountAtCutoff": 51
+}

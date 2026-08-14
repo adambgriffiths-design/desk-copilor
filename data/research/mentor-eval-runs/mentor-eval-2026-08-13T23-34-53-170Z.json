@@ -1,0 +1,1892 @@
+{
+  "datasetId": "nq-week-aug05-aug12-2026-cme",
+  "cases": [
+    {
+      "asOf": "2026-08-11T22:00:00.000Z",
+      "label": "Globex open",
+      "rationale": "First bar of CME session — minimal RTH context, tests overnight framing",
+      "price": 29647.5,
+      "barsAvailable": 5500,
+      "karen": {
+        "entryIdea": "29658.25–29663.00",
+        "invalidation": "Below 29533.5",
+        "target": "29702.5",
+        "fvgEvidence": "bullish FVG 29658.3–29663.0 (formed 16:23)",
+        "pdEvidence": "vs today range: discount; vs prev day range: discount; vs NDOG: inside (PDH 29886.8 / PDL 29533.5)",
+        "structureEvidence": "Bearish MSS — body close below swing low 29664.50 at 18:00",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-11T20:56:00.000Z O:29651.5 H:29653.5 L:29649.5 C:29651.25",
+          "2026-08-11T20:57:00.000Z O:29651 H:29651.5 L:29648.25 C:29650.25",
+          "2026-08-11T20:58:00.000Z O:29650 H:29650.5 L:29647 C:29648",
+          "2026-08-11T20:59:00.000Z O:29648 H:29651.5 L:29643.5 C:29646.75",
+          "2026-08-11T22:00:00.000Z O:29657.75 H:29661 L:29641 C:29647.5"
+        ],
+        "levelsUsed": [
+          "ORG top 29839.25",
+          "ORG CE 29793.75",
+          "ORG bottom 29748.25",
+          "Previous day high (PDH) 29886.8",
+          "Previous day low (PDL) 29533.5",
+          "Previous day close (PDC) 29646.8",
+          "Previous day open (PDO) 29764.5"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "SHORT bias — wait for retrace into 29658.25–29663.00. This resembles Displacement + FVG retrace entry because PDH liquidity at 29886.75 was swept. PDL liquidity at 29533.50 was swept. PDC liquidity at 29646.75 was swept. Price displaced upward by 10.25 points. A bullish FVG exists between 29658.25–29663.00. I would consider SHORT because Observed market structure is bearish; Liquidity sweep observed at PDH, PDL, PDC; Displacement present after sweep. I rejected LONG because Bearish structure opposes bullish tradeable bias.",
+        "dataQuality": "good",
+        "marketStructure": "bearish",
+        "longSupported": false,
+        "shortSupported": true,
+        "entryModel": "Displacement + FVG retrace entry"
+      },
+      "eval": {
+        "asOf": "2026-08-11T22:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 1380,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T02:00:00.000Z",
+      "label": "Overnight mid",
+      "rationale": "Low-liquidity overnight — should not over-trade",
+      "price": 29663.75,
+      "barsAvailable": 5740,
+      "karen": {
+        "entryIdea": "29663.50–29673.75",
+        "invalidation": "Below 29533.5",
+        "target": "29702.5",
+        "fvgEvidence": "bullish FVG 29663.5–29673.8 (formed 21:44)",
+        "pdEvidence": "vs today range: discount; vs prev day range: discount; vs NDOG: inside (PDH 29886.8 / PDL 29533.5)",
+        "structureEvidence": "Bearish MSS — body close below swing low 29664.50 at 21:59",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T01:56:00.000Z O:29662.5 H:29667 L:29654 C:29655.5",
+          "2026-08-12T01:57:00.000Z O:29656.25 H:29660.5 L:29653.25 C:29653.5",
+          "2026-08-12T01:58:00.000Z O:29652.75 H:29659.75 L:29646.75 C:29656.5",
+          "2026-08-12T01:59:00.000Z O:29657.25 H:29659.25 L:29655.25 C:29658.25",
+          "2026-08-12T02:00:00.000Z O:29659 H:29664.75 L:29657.75 C:29663.75"
+        ],
+        "levelsUsed": [
+          "ORG top 29839.25",
+          "ORG CE 29793.75",
+          "ORG bottom 29748.25",
+          "Previous day high (PDH) 29886.8",
+          "Previous day low (PDL) 29533.5",
+          "Previous day close (PDC) 29646.8",
+          "Previous day open (PDO) 29764.5"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "SHORT bias — wait for retrace into 29663.50–29673.75. This resembles bearish structure continuation because PDH liquidity at 29886.75 was swept. PDL liquidity at 29533.50 was swept. PDC liquidity at 29646.75 was swept. No impulsive displacement detected in lookback. A bullish FVG exists between 29663.50–29673.75. I would consider SHORT because Observed market structure is bearish; Liquidity sweep observed at PDH, PDL, PDC. I rejected LONG because Bearish structure opposes bullish tradeable bias.",
+        "dataQuality": "good",
+        "marketStructure": "bearish",
+        "longSupported": false,
+        "shortSupported": true,
+        "entryModel": "bearish structure continuation"
+      },
+      "eval": {
+        "asOf": "2026-08-12T02:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 1140,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T06:00:00.000Z",
+      "label": "Early morning",
+      "rationale": "Pre-London / early globex — structure still forming",
+      "price": 29719.75,
+      "barsAvailable": 5980,
+      "karen": {
+        "entryIdea": "29703.50–29706.75",
+        "invalidation": "Below 29668.3",
+        "target": "29805.75",
+        "fvgEvidence": "bullish FVG 29703.5–29706.8 (formed 01:52)",
+        "pdEvidence": "vs today range: premium; vs prev day range: discount; vs NDOG: inside (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bullish MSS — body close above swing high 29718.00 at 02:00",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T05:56:00.000Z O:29714.5 H:29717.5 L:29713 C:29715.75",
+          "2026-08-12T05:57:00.000Z O:29714.75 H:29715 L:29710.5 C:29714",
+          "2026-08-12T05:58:00.000Z O:29714.75 H:29715 L:29712.5 C:29713.25",
+          "2026-08-12T05:59:00.000Z O:29712.75 H:29717.25 L:29712.75 C:29717.25",
+          "2026-08-12T06:00:00.000Z O:29715 H:29721.25 L:29713.75 C:29719.75"
+        ],
+        "levelsUsed": [
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "Conflicting cases — wait for clarity. ",
+        "dataQuality": "good",
+        "marketStructure": "bullish",
+        "longSupported": true,
+        "shortSupported": true,
+        "entryModel": "Displacement + FVG retrace entry"
+      },
+      "eval": {
+        "asOf": "2026-08-12T06:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "both cases supported — WAIT/NO_TRADE appropriate"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 900,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T11:00:00.000Z",
+      "label": "Pre-market",
+      "rationale": "~7 AM ET — pre-RTH positioning, PD arrays relevant",
+      "price": 29828,
+      "barsAvailable": 6280,
+      "karen": {
+        "entryIdea": "29827.75–29835.50",
+        "invalidation": "Below 29668.3",
+        "target": "30001.75",
+        "fvgEvidence": "bullish FVG 29827.8–29835.5 (formed 06:11)",
+        "pdEvidence": "vs today range: premium; vs prev day range: equilibrium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bullish MSS — body close above swing high 29819.00 at 07:00",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T10:56:00.000Z O:29816.5 H:29816.5 L:29813.5 C:29814.75",
+          "2026-08-12T10:57:00.000Z O:29814 H:29814 L:29812 C:29814",
+          "2026-08-12T10:58:00.000Z O:29814.25 H:29814.25 L:29810.5 C:29812",
+          "2026-08-12T10:59:00.000Z O:29811.5 H:29816.5 L:29803.25 C:29814.5",
+          "2026-08-12T11:00:00.000Z O:29816 H:29831.75 L:29814 C:29828"
+        ],
+        "levelsUsed": [
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "Conflicting cases — wait for clarity. ",
+        "dataQuality": "good",
+        "marketStructure": "bullish",
+        "longSupported": true,
+        "shortSupported": true,
+        "entryModel": "NY open sweep + displacement + FVG retrace (Adam reversal model)"
+      },
+      "eval": {
+        "asOf": "2026-08-12T11:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "both cases supported — WAIT/NO_TRADE appropriate"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 600,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T13:00:00.000Z",
+      "label": "Pre-NY open",
+      "rationale": "~9 AM ET — final pre-open context before RTH",
+      "price": 29920.75,
+      "barsAvailable": 6400,
+      "karen": {
+        "entryIdea": "29887.00–29893.75",
+        "invalidation": "Below 29668.3",
+        "target": "30001.75",
+        "fvgEvidence": "bullish FVG 29887.0–29893.8 (formed 08:39)",
+        "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bullish MSS — body close above swing high 29916.00 at 08:54",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T12:56:00.000Z O:29917.75 H:29917.75 L:29910.5 C:29912.25",
+          "2026-08-12T12:57:00.000Z O:29912 H:29913.75 L:29908 C:29908.5",
+          "2026-08-12T12:58:00.000Z O:29908.75 H:29917.5 L:29907.25 C:29914.5",
+          "2026-08-12T12:59:00.000Z O:29914.75 H:29921.75 L:29914.75 C:29919.25",
+          "2026-08-12T13:00:00.000Z O:29920 H:29930.5 L:29918.75 C:29920.75"
+        ],
+        "levelsUsed": [
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "Conflicting cases — wait for clarity. ",
+        "dataQuality": "good",
+        "marketStructure": "bullish",
+        "longSupported": true,
+        "shortSupported": true,
+        "entryModel": "NY open sweep + displacement + FVG retrace (Adam reversal model)"
+      },
+      "eval": {
+        "asOf": "2026-08-12T13:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "both cases supported — WAIT/NO_TRADE appropriate"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 480,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T14:30:00.000Z",
+      "label": "NY open anchor",
+      "rationale": "Canonical research anchor — NY RTH active, high information density",
+      "price": 29907.5,
+      "barsAvailable": 6490,
+      "karen": {
+        "entryIdea": "29927.50–29931.25",
+        "invalidation": "Below 29847.8",
+        "target": "29991.75",
+        "fvgEvidence": "bearish FVG 29927.5–29931.3 (formed 10:29)",
+        "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bullish MSS — body close above swing high 29918.50 at 10:27",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T14:26:00.000Z O:29919.75 H:29945.75 L:29917 C:29941.5",
+          "2026-08-12T14:27:00.000Z O:29942.25 H:29943.5 L:29931.25 C:29935.25",
+          "2026-08-12T14:28:00.000Z O:29935.5 H:29944 L:29921 C:29925",
+          "2026-08-12T14:29:00.000Z O:29923.75 H:29927.5 L:29904.75 C:29916.25",
+          "2026-08-12T14:30:00.000Z O:29916 H:29924.75 L:29901.5 C:29907.5"
+        ],
+        "levelsUsed": [
+          "ORG top 29991.75",
+          "ORG CE 29819",
+          "ORG bottom 29646.25",
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "Conflicting cases — wait for clarity. ",
+        "dataQuality": "good",
+        "marketStructure": "bullish",
+        "longSupported": true,
+        "shortSupported": true,
+        "entryModel": "NY open sweep + displacement + FVG retrace (Adam reversal model)"
+      },
+      "eval": {
+        "asOf": "2026-08-12T14:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "both cases supported — WAIT/NO_TRADE appropriate"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 390,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T15:30:00.000Z",
+      "label": "Post-open hour",
+      "rationale": "First hour post-open — displacement / ORG context",
+      "price": 29864.25,
+      "barsAvailable": 6550,
+      "karen": {
+        "entryIdea": "29857.50–29861.50",
+        "invalidation": "Below 29828.3",
+        "target": "Toward 30001.8",
+        "fvgEvidence": "bearish FVG 29857.5–29861.5 (formed 11:23)",
+        "pdEvidence": "vs today range: equilibrium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bearish MSS — body close below swing low 29848.75 at 11:25",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T15:26:00.000Z O:29848.25 H:29857.5 L:29845.5 C:29854.75",
+          "2026-08-12T15:27:00.000Z O:29855 H:29858.75 L:29846.5 C:29853",
+          "2026-08-12T15:28:00.000Z O:29852.75 H:29861.25 L:29845.5 C:29858.5",
+          "2026-08-12T15:29:00.000Z O:29859 H:29874.75 L:29852.75 C:29874",
+          "2026-08-12T15:30:00.000Z O:29874.25 H:29879 L:29859 C:29864.25"
+        ],
+        "levelsUsed": [
+          "ORG top 29991.75",
+          "ORG CE 29819",
+          "ORG bottom 29646.25",
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "Conflicting cases — wait for clarity. Higher timeframe biases not aligned",
+        "dataQuality": "good",
+        "marketStructure": "bearish",
+        "longSupported": true,
+        "shortSupported": true,
+        "entryModel": "Displacement + FVG retrace entry"
+      },
+      "eval": {
+        "asOf": "2026-08-12T15:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "both cases supported — WAIT/NO_TRADE appropriate"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 330,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T16:30:00.000Z",
+      "label": "Mid-morning RTH",
+      "rationale": "Mid-session trend vs range assessment",
+      "price": 29875,
+      "barsAvailable": 6610,
+      "karen": {
+        "entryIdea": "29867.50–29871.00",
+        "invalidation": "Below 29818.5",
+        "target": "29991.75",
+        "fvgEvidence": "bullish FVG 29867.5–29871.0 (formed 12:22)",
+        "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bullish MSS — body close above swing high 29877.75 at 12:26",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T16:26:00.000Z O:29885.75 H:29886 L:29878.75 C:29878.75",
+          "2026-08-12T16:27:00.000Z O:29878.75 H:29879 L:29869.5 C:29873.25",
+          "2026-08-12T16:28:00.000Z O:29874.25 H:29878.5 L:29872.75 C:29875.25",
+          "2026-08-12T16:29:00.000Z O:29874.5 H:29876.25 L:29873 C:29873.5",
+          "2026-08-12T16:30:00.000Z O:29874 H:29880.5 L:29873.5 C:29875"
+        ],
+        "levelsUsed": [
+          "ORG top 29991.75",
+          "ORG CE 29819",
+          "ORG bottom 29646.25",
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "LONG bias — wait for retrace into 29867.50–29871.00. This resembles bullish structure continuation because PDH liquidity at 30001.75 was swept. PDL liquidity at 29624.50 was swept. PDC liquidity at 29805.75 was swept. No impulsive displacement detected in lookback. A bullish FVG exists between 29867.50–29871.00. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; Liquidity sweep observed at PDH, PDL, PDC. I rejected SHORT because Higher timeframe biases not aligned.",
+        "dataQuality": "good",
+        "marketStructure": "bullish",
+        "longSupported": true,
+        "shortSupported": false,
+        "entryModel": "bullish structure continuation"
+      },
+      "eval": {
+        "asOf": "2026-08-12T16:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 270,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T17:30:00.000Z",
+      "label": "Lunch",
+      "rationale": "Typical liquidity dip — uncertainty should be expressed",
+      "price": 29906,
+      "barsAvailable": 6670,
+      "karen": {
+        "entryIdea": "29907.25–29913.75",
+        "invalidation": "Below 29818.5",
+        "target": "29991.75",
+        "fvgEvidence": "bullish FVG 29907.3–29913.8 (formed 13:26)",
+        "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bullish MSS — body close above swing high 29909.50 at 13:28",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T17:26:00.000Z O:29914.75 H:29919.25 L:29913.75 C:29918.75",
+          "2026-08-12T17:27:00.000Z O:29919.5 H:29920 L:29914 C:29916.25",
+          "2026-08-12T17:28:00.000Z O:29915.75 H:29916 L:29908.75 C:29910.25",
+          "2026-08-12T17:29:00.000Z O:29909.5 H:29911.25 L:29904.75 C:29909.25",
+          "2026-08-12T17:30:00.000Z O:29910 H:29911.25 L:29901.25 C:29906"
+        ],
+        "levelsUsed": [
+          "ORG top 29991.75",
+          "ORG CE 29819",
+          "ORG bottom 29646.25",
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "LONG bias — wait for retrace into 29907.25–29913.75. This resembles bullish structure continuation because PDH liquidity at 30001.75 was swept. PDL liquidity at 29624.50 was swept. PDC liquidity at 29805.75 was swept. No impulsive displacement detected in lookback. A bullish FVG exists between 29907.25–29913.75. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; Liquidity sweep observed at PDH, PDL, PDC. I rejected SHORT because insufficient bearish confluence.",
+        "dataQuality": "good",
+        "marketStructure": "bullish",
+        "longSupported": true,
+        "shortSupported": false,
+        "entryModel": "bullish structure continuation"
+      },
+      "eval": {
+        "asOf": "2026-08-12T17:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 210,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T19:00:00.000Z",
+      "label": "PM session",
+      "rationale": "Afternoon continuation / reversal context",
+      "price": 29901,
+      "barsAvailable": 6760,
+      "karen": {
+        "entryIdea": "29902.25–29908.75",
+        "invalidation": "30006.75",
+        "target": "29991.75",
+        "fvgEvidence": "bearish FVG 29902.3–29908.8 (formed 14:56)",
+        "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bearish MSS — body close below swing low 29909.00 at 14:58",
+        "confidence": 65,
+        "candlesUsed": [
+          "2026-08-12T18:56:00.000Z O:29899.75 H:29902.25 L:29895.25 C:29895.75",
+          "2026-08-12T18:57:00.000Z O:29895.5 H:29896.75 L:29885 C:29887",
+          "2026-08-12T18:58:00.000Z O:29887 H:29895.5 L:29886.75 C:29893",
+          "2026-08-12T18:59:00.000Z O:29893.25 H:29897.75 L:29889.25 C:29889.75",
+          "2026-08-12T19:00:00.000Z O:29890.25 H:29902.75 L:29890 C:29901"
+        ],
+        "levelsUsed": [
+          "ORG top 29991.75",
+          "ORG CE 29819",
+          "ORG bottom 29646.25",
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "SHORT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "SHORT",
+        "verdictReason": "SHORT — provided price retraces into 29902.25–29908.75. Invalidation: 30006.75.",
+        "dataQuality": "good",
+        "marketStructure": "bearish",
+        "longSupported": false,
+        "shortSupported": true,
+        "entryModel": "NY open sweep + displacement + FVG retrace (Adam reversal model)"
+      },
+      "eval": {
+        "asOf": "2026-08-12T19:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "SHORT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "directional with moderate confidence"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "invalidation 30006.75"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "pipeline directional with acceptable data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "SHORT aligned with bearish context"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 120,
+        "invalidationBreached": false,
+        "maxAdverseMove": 4,
+        "note": "Invalidation held over next 60 bars"
+      }
+    },
+    {
+      "asOf": "2026-08-12T20:59:00.000Z",
+      "label": "Session end anchor",
+      "rationale": "Last RTH minute — prior research fingerprint cutoff",
+      "price": 29805.75,
+      "barsAvailable": 6879,
+      "karen": {
+        "entryIdea": "29815.75–29819.00",
+        "invalidation": "Below 29818.5",
+        "target": "29624.5",
+        "fvgEvidence": "bearish FVG 29815.8–29819.0 (formed 16:54)",
+        "pdEvidence": "vs today range: equilibrium; vs prev day range: equilibrium; vs NDOG: inside (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bearish MSS — body close below swing low 29812.75 at 16:59",
+        "confidence": 45,
+        "candlesUsed": [
+          "2026-08-12T20:55:00.000Z O:29814.25 H:29815 L:29810.25 C:29810.25",
+          "2026-08-12T20:56:00.000Z O:29811.25 H:29814 L:29811 C:29811.75",
+          "2026-08-12T20:57:00.000Z O:29812 H:29812 L:29808.25 C:29810",
+          "2026-08-12T20:58:00.000Z O:29809.75 H:29811.5 L:29808.25 C:29809.25",
+          "2026-08-12T20:59:00.000Z O:29809.5 H:29811.5 L:29804.5 C:29805.75"
+        ],
+        "levelsUsed": [
+          "ORG top 29991.75",
+          "ORG CE 29819",
+          "ORG bottom 29646.25",
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "WAIT",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "WAIT",
+        "verdictReason": "Conflicting cases — wait for clarity. ",
+        "dataQuality": "good",
+        "marketStructure": "bearish",
+        "longSupported": true,
+        "shortSupported": true,
+        "entryModel": "Displacement + FVG retrace entry"
+      },
+      "eval": {
+        "asOf": "2026-08-12T20:59:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "both cases supported — WAIT/NO_TRADE appropriate"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 1,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    },
+    {
+      "asOf": "2026-08-12T21:45:00.000Z",
+      "label": "Late globex",
+      "rationale": "Near CME roll boundary — tests session-end honesty",
+      "price": 29805.75,
+      "barsAvailable": 6879,
+      "karen": {
+        "entryIdea": "Wait — no clean entry at cutoff",
+        "invalidation": "Below 29818.5",
+        "target": "Toward 30001.8",
+        "fvgEvidence": "bearish FVG 29815.8–29819.0 (formed 16:54)",
+        "pdEvidence": "vs today range: equilibrium; vs prev day range: equilibrium; vs NDOG: inside (PDH 30001.8 / PDL 29624.5)",
+        "structureEvidence": "Bearish MSS — body close below swing low 29812.75 at 16:59",
+        "confidence": 30,
+        "candlesUsed": [
+          "2026-08-12T20:55:00.000Z O:29814.25 H:29815 L:29810.25 C:29810.25",
+          "2026-08-12T20:56:00.000Z O:29811.25 H:29814 L:29811 C:29811.75",
+          "2026-08-12T20:57:00.000Z O:29812 H:29812 L:29808.25 C:29810",
+          "2026-08-12T20:58:00.000Z O:29809.75 H:29811.5 L:29808.25 C:29809.25",
+          "2026-08-12T20:59:00.000Z O:29809.5 H:29811.5 L:29804.5 C:29805.75"
+        ],
+        "levelsUsed": [
+          "ORG top 29991.75",
+          "ORG CE 29819",
+          "ORG bottom 29646.25",
+          "Previous day high (PDH) 30001.8",
+          "Previous day low (PDL) 29624.5",
+          "Previous day close (PDC) 29805.8",
+          "Previous day open (PDO) 29657.8"
+        ],
+        "pipelineVerdict": "NO_TRADE",
+        "source": "pipeline"
+      },
+      "pipeline": {
+        "verdict": "NO_TRADE",
+        "verdictReason": "Chart data missing or stale — no call until observation engine has usable MarketState.",
+        "dataQuality": "stale",
+        "marketStructure": "unknown",
+        "longSupported": false,
+        "shortSupported": false,
+        "entryModel": null
+      },
+      "eval": {
+        "asOf": "2026-08-12T21:45:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "NO_TRADE",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure unknown under bad data quality"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 1,
+            "maxScore": 2,
+            "note": "neither case strongly supported"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 30 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "NO_TRADE under bad data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "NO_TRADE + unknown structure under bad data"
+          }
+        ],
+        "totalScore": 19,
+        "maxScore": 20,
+        "pctScore": 95,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      "postHocAudit": {
+        "barsAfterCutoff": 1,
+        "invalidationBreached": null,
+        "maxAdverseMove": null,
+        "note": "Non-directional — outcome audit N/A"
+      }
+    }
+  ]
+}

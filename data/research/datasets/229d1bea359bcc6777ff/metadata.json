@@ -1,0 +1,25 @@
+{
+  "dataset_id": "229d1bea359bcc6777ff",
+  "source_symbol": "NQ",
+  "target_instrument": "MNQ-equivalent",
+  "symbol": "NQ",
+  "source": "tickstream",
+  "source_version": "tickstream-historical-v1",
+  "timeframe": "1m",
+  "start_timestamp": 1785967200,
+  "end_timestamp": 1786572000,
+  "timezone": "America/New_York",
+  "session_definition": "CME_GLOBEX_18:00_ET",
+  "created_at": "2026-08-13T23:30:19.577Z",
+  "code_version": "1.0.0",
+  "data_version": "295f66b7aa9381c1",
+  "versions": {
+    "dataset_version": "1.0.0",
+    "source": "tickstream",
+    "source_version": "tickstream-historical-v1",
+    "loader_version": "1.0.0",
+    "aggregation_version": "1.0.0",
+    "session_definition_version": "1.0.0",
+    "git_revision": "018310a672e9274c8e3c537d04d085b39658fa14"
+  }
+}

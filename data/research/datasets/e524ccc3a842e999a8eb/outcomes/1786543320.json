@@ -1,0 +1,9 @@
+{
+  "kind": "OUTCOME",
+  "dataset_id": "e524ccc3a842e999a8eb",
+  "observation_timestamp": 1786543320,
+  "labels": {
+    "result": "WIN",
+    "mfe": 8
+  }
+}

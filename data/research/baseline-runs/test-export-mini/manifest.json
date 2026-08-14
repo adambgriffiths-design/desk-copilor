@@ -1,0 +1,65 @@
+{
+  "runId": "test-export-mini",
+  "runType": "baseline-backtest",
+  "createdAt": "2026-08-13T20:06:50.259Z",
+  "gitRevision": null,
+  "strategy_definition_version": "phase1-decision-pipeline@spec-1.0.0+pipeline-1.0.0",
+  "strategy_rules": {
+    "layers": []
+  },
+  "documented_ambiguities": [],
+  "dataset": {
+    "id": "synthetic-ny-am",
+    "label": "test",
+    "symbol": "MNQ=F",
+    "dateRange": {
+      "start": "2026-08-12T13:30:00.000Z",
+      "end": "2026-08-12T14:09:00.000Z"
+    },
+    "barCount": 40
+  },
+  "data_quality": {
+    "totalCandles": 40,
+    "missingMinutes": 0,
+    "duplicateCount": 0,
+    "invalidOhlcCount": 0,
+    "sessionGapCount": 0,
+    "partialFirst": false,
+    "partialLast": false,
+    "integrityStatus": "VALID",
+    "issues": [],
+    "ambiguousOutcomesNote": "test"
+  },
+  "split": {
+    "train": {
+      "startIndex": 0,
+      "endIndex": 27,
+      "startTime": "2026-08-12T13:30:00.000Z",
+      "endTime": "2026-08-12T13:57:00.000Z"
+    },
+    "test": {
+      "startIndex": 28,
+      "endIndex": 39,
+      "startTime": "2026-08-12T13:58:00.000Z",
+      "endTime": "2026-08-12T14:09:00.000Z"
+    }
+  },
+  "look_ahead_test": {
+    "pass": true,
+    "detail": "test"
+  },
+  "reproducibility": {
+    "pass": true,
+    "fingerprint": "test",
+    "detail": "test"
+  },
+  "interpretation": "INSUFFICIENT DATA",
+  "session_definition": "ICT sessions via buildMarketContextAt / resolveSessionContext",
+  "timeframe": "1m",
+  "entry_exit_assumptions": {
+    "entry": "limit fill at execution scaffold anchor when ACTIVE",
+    "stop": "decision-layer invalidation",
+    "target": "execution scaffold target1",
+    "ambiguous_intrabar": "AMBIGUOUS — no tick order, no open-proximity heuristic"
+  }
+}

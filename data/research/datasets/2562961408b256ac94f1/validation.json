@@ -1,0 +1,15 @@
+{
+  "status": "WARNING",
+  "issues": [
+    {
+      "severity": "WARNING",
+      "code": "SESSION_BOUNDARY_GAP",
+      "message": "Gap of 60 minute(s) across CME session boundary (2026-08-12 → 2026-08-13)",
+      "timestamp": 1786572000
+    }
+  ],
+  "candleCount": 1381,
+  "duplicateCount": 0,
+  "missingMinuteCount": 60,
+  "invalidOhlcCount": 0
+}

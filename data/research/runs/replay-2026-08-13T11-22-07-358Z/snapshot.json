@@ -1,0 +1,42 @@
+{
+  "runId": "replay-2026-08-13T11-22-07-358Z",
+  "datasetId": "2562961408b256ac94f1",
+  "asOf": "2026-08-12T20:59:00.000Z",
+  "barIndex": 1379,
+  "symbol": "MNQ-equivalent:NQ",
+  "currentPrice": 29805.75,
+  "structureSummary": "Bias: bearish | MSS bearish @ 29812.8 | FVGs: 5 | PD: equilibrium",
+  "features": {
+    "bias": "bearish",
+    "currentDayHigh": 30001.75,
+    "currentDayLow": 29668.25,
+    "sessionHighAtCutoff": 30001.75,
+    "sessionLowAtCutoff": 29624.5,
+    "m1FvgCount": 5,
+    "mssDirection": "bearish",
+    "pdVsRange": "equilibrium",
+    "pdh": 30001.75,
+    "pdl": 29624.5
+  },
+  "karen": {
+    "entryIdea": "Pullback long near 29800.8",
+    "invalidation": "29790.8",
+    "target": "29825.8",
+    "fvgEvidence": "bearish gap 29815.75–29819",
+    "pdEvidence": "PDH/PDL 30001.75/29624.5",
+    "structureEvidence": "Bearish MSS — body close below swing low 29812.75 at 16:59",
+    "confidence": 62,
+    "candlesUsed": [
+      "2026-08-12T20:57:00.000Z C:29810.0",
+      "2026-08-12T20:58:00.000Z C:29809.3",
+      "2026-08-12T20:59:00.000Z C:29805.8"
+    ],
+    "levelsUsed": [
+      "Last 29805.8",
+      "PDH 30001.8"
+    ],
+    "pipelineVerdict": "LONG",
+    "source": "deterministic"
+  },
+  "barCountAtCutoff": 1380
+}

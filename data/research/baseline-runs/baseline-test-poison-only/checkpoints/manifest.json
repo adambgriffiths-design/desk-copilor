@@ -1,0 +1,36 @@
+{
+  "runId": "baseline-test-poison-only",
+  "datasetId": "synthetic-ny-am",
+  "chunkSize": 25,
+  "totalBars": 120,
+  "gitRevision": "018310a672e9274c8e3c537d04d085b39658fa14",
+  "strategyVersion": "phase1-decision-pipeline@spec-1.0.0+pipeline-1.0.0",
+  "createdAt": "2026-08-13T23:27:09.671Z",
+  "chunks": [
+    {
+      "startIndex": 0,
+      "endIndex": 24,
+      "chunkIndex": 0
+    },
+    {
+      "startIndex": 25,
+      "endIndex": 49,
+      "chunkIndex": 1
+    },
+    {
+      "startIndex": 50,
+      "endIndex": 74,
+      "chunkIndex": 2
+    },
+    {
+      "startIndex": 75,
+      "endIndex": 99,
+      "chunkIndex": 3
+    },
+    {
+      "startIndex": 100,
+      "endIndex": 119,
+      "chunkIndex": 4
+    }
+  ]
+}
