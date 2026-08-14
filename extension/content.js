@@ -18,40 +18,82 @@
         ${WOLF_LOGO}
         <div class="dc-brand">
           <span class="dc-brand-title">The Trading Desk</span>
+          <span class="dc-tagline">Karen · your desk co-pilot</span>
           <div class="dc-header-meta">
             <span class="dc-session-badge" id="dc-session-badge" title="Current ICT session">—</span>
             <span class="dc-live-dot hidden" id="dc-live-dot" title="Karen is listening"></span>
           </div>
-          <span class="dc-tagline">Karen · your desk co-pilot</span>
         </div>
       </div>
       <button type="button" class="dc-icon-btn" id="dc-collapse" title="Minimize panel">−</button>
     </div>
+    <div class="dc-status-row" id="dc-status-row" aria-label="Desk connection status">
+      <div class="dc-status-item"><span class="dc-status-key">MARKET</span><span class="dc-status-val" id="dc-status-market"></span></div>
+      <div class="dc-status-item"><span class="dc-status-key">DATA</span><span class="dc-status-val" id="dc-status-data"></span></div>
+      <div class="dc-status-item"><span class="dc-status-key">KAREN</span><span class="dc-status-val" id="dc-status-karen"></span></div>
+    </div>
     <div class="dc-panel-scroll" id="dc-panel-scroll">
     <div class="dc-market-bar" id="dc-market-bar">
-      <span class="dc-bar-symbol" id="dc-bar-symbol">NQ</span>
-      <span class="dc-bar-sep">·</span>
-      <span class="dc-bar-tf" id="dc-bar-tf">1m</span>
-      <span class="dc-bar-sep">·</span>
-      <span class="dc-bar-session" id="dc-bar-session">—</span>
-      <span class="dc-bar-spacer"></span>
-      <span class="dc-bar-price" id="dc-bar-price">—</span>
-      <span class="dc-bar-sep">·</span>
-      <span class="dc-bar-data" id="dc-bar-data">—</span>
-      <span class="dc-bar-updated" id="dc-bar-updated"></span>
+      <div class="dc-market-bar-top">
+        <div class="dc-market-bar-left">
+          <span class="dc-bar-symbol" id="dc-bar-symbol">MNQ</span>
+          <span class="dc-bar-sep">·</span>
+          <span class="dc-bar-tf" id="dc-bar-tf">1m</span>
+          <span class="dc-bar-sep">·</span>
+          <span class="dc-bar-session" id="dc-bar-session">—</span>
+        </div>
+        <span class="dc-data-quality" id="dc-data-quality" title="Data quality indicator"></span>
+      </div>
+      <div class="dc-market-bar-price-row">
+        <span class="dc-bar-price dc-price-unavailable" id="dc-bar-price">PRICE UNAVAILABLE</span>
+        <span class="dc-bar-change hidden" id="dc-bar-change"></span>
+      </div>
+      <div class="dc-market-bar-meta">
+        <span class="dc-bar-data" id="dc-bar-data">—</span>
+        <span class="dc-bar-source" id="dc-bar-source"></span>
+        <span class="dc-bar-freshness" id="dc-bar-freshness"></span>
+        <span class="dc-bar-updated" id="dc-bar-updated"></span>
+      </div>
     </div>
     <div class="dc-desk-primary" id="dc-primary">
+      <div class="dc-analyse-market-label">ANALYSE MARKET</div>
       <div class="dc-verdict-card" id="dc-verdict-card">
         <div class="dc-verdict-empty" id="dc-verdict-empty">Press Analyse Market for the current desk verdict.</div>
+        <div class="dc-verdict-analyzing hidden" id="dc-verdict-analyzing">
+          <div class="dc-verdict-brand-row">
+            <span class="dc-verdict-brand">KAREN</span>
+            <span class="dc-mock-badge" id="dc-mock-badge-analyzing">DEMO / MOCK</span>
+          </div>
+          <div class="dc-analyzing-status">THINKING…</div>
+          <ul class="dc-analyzing-steps" id="dc-analyzing-steps">
+            <li class="dc-analyzing-step dc-analyzing-step-pending">Reading market</li>
+            <li class="dc-analyzing-step dc-analyzing-step-pending">Checking structure</li>
+            <li class="dc-analyzing-step dc-analyzing-step-pending">Checking liquidity</li>
+            <li class="dc-analyzing-step dc-analyzing-step-pending">Checking data quality</li>
+          </ul>
+        </div>
         <div class="dc-verdict-body hidden" id="dc-verdict-body">
+          <div class="dc-verdict-brand-row">
+            <span class="dc-verdict-brand">KAREN</span>
+            <span class="dc-mock-badge hidden" id="dc-mock-badge">MOCK ANALYSIS</span>
+            <span class="dc-verdict-dq" id="dc-verdict-dq"></span>
+          </div>
+          <div class="dc-verdict-section-label">VERDICT</div>
           <div class="dc-verdict-headline" id="dc-verdict-headline">—</div>
-          <div class="dc-verdict-symbol" id="dc-verdict-symbol">NASDAQ / NQ</div>
+          <div class="dc-verdict-symbol" id="dc-verdict-symbol">NASDAQ / MNQ</div>
           <div class="dc-verdict-meta">
-            <div class="dc-v-row hidden" id="dc-v-setup"></div>
-            <div class="dc-v-row hidden" id="dc-v-entry"></div>
-            <div class="dc-v-row hidden" id="dc-v-invalidation"></div>
-            <div class="dc-v-row hidden" id="dc-v-target"></div>
-            <div class="dc-v-row hidden" id="dc-v-rr"></div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">BIAS</span><div class="dc-v-row" id="dc-v-bias"></div></div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">STRUCTURE</span><div class="dc-v-row" id="dc-v-structure"></div></div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">LIQUIDITY</span><div class="dc-v-row" id="dc-v-liquidity"></div></div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">FVG</span><div class="dc-v-row" id="dc-v-fvg"></div></div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">PD ARRAY</span><div class="dc-v-row" id="dc-v-pd"></div></div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">ENTRY</span><div class="dc-v-row" id="dc-v-entry"></div></div>
+            <div class="dc-v-field dc-verdict-invalidation-wrap hidden" id="dc-verdict-invalidation-wrap">
+              <span class="dc-v-label">INVALIDATION</span>
+              <div class="dc-v-row" id="dc-v-invalidation"></div>
+            </div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">TARGET</span><div class="dc-v-row" id="dc-v-target"></div></div>
+            <div class="dc-v-field hidden"><span class="dc-v-label">FRESHNESS</span><div class="dc-v-row" id="dc-v-freshness"></div></div>
           </div>
           <div class="dc-verdict-status" id="dc-verdict-status"></div>
         </div>
@@ -62,8 +104,26 @@
         <div class="dc-prev-change" id="dc-prev-change"></div>
       </div>
       <div class="dc-evidence-wrap" id="dc-evidence-wrap">
-        <div class="dc-evidence-label">Why</div>
+        <div class="dc-evidence-label">WHY · SUMMARY</div>
         <ul class="dc-evidence-list" id="dc-evidence-list"></ul>
+      </div>
+      <div class="dc-evidence-sections hidden" id="dc-evidence-sections">
+        <details class="dc-evidence-block" open>
+          <summary>WHY</summary>
+          <div class="dc-evidence-block-body" id="dc-evidence-why"></div>
+        </details>
+        <details class="dc-evidence-block">
+          <summary>EVIDENCE</summary>
+          <div class="dc-evidence-block-body" id="dc-evidence-facts"></div>
+        </details>
+        <details class="dc-evidence-block">
+          <summary>RISK</summary>
+          <div class="dc-evidence-block-body" id="dc-evidence-risk"></div>
+        </details>
+        <details class="dc-evidence-block">
+          <summary>DATA QUALITY</summary>
+          <div class="dc-evidence-block-body" id="dc-evidence-dq"></div>
+        </details>
       </div>
       <details class="dc-full-analysis-wrap">
         <summary>Full analysis</summary>
@@ -71,6 +131,7 @@
       </details>
       <div class="dc-desk-actions">
         <button type="button" class="dc-btn dc-verdict-btn dc-btn-primary" id="dc-get-verdict" title="Run desk pipeline on live chart data (Alt+Shift+R)">ANALYSE MARKET</button>
+        <button type="button" class="dc-btn dc-verdict-btn dc-btn-secondary hidden" id="dc-new-analysis" title="Reset mock analysis lifecycle">NEW ANALYSIS</button>
         <button type="button" class="dc-btn dc-levels-draw dc-btn-levels" id="dc-levels-draw" title="Fetch + draw enabled level categories (Alt+Shift+L)">MARK LEVELS</button>
       </div>
       <div class="dc-levels-status" id="dc-levels-status"></div>
@@ -86,6 +147,10 @@
       </details>
     </div>
     <div class="dc-voice-hero-wrap">
+      <div class="dc-karen-status" id="dc-karen-status">
+        <span class="dc-karen-status-key">KAREN</span>
+        <span class="dc-karen-status-val" id="dc-karen-status-value"></span>
+      </div>
       <button type="button" class="dc-voice-hero" id="dc-voice-hero" title="Hands-free voice (Alt+Shift+V)">● TALK TO KAREN</button>
       <p class="dc-voice-interrupt-hint hidden" id="dc-voice-interrupt-hint">Speak anytime to interrupt</p>
       <div class="dc-voice-row dc-voice-secondary">
@@ -102,6 +167,14 @@
     <div class="dc-body" id="dc-body">
     <div class="dc-section dc-section-card dc-section-mentor">
       <div class="dc-section-label">Mentor</div>
+      <div class="dc-market-data-card hidden" id="dc-market-data-card">
+        <div class="dc-mdc-head">MARKET DATA</div>
+        <div class="dc-mdc-grid">
+          <div class="dc-mdc-row"><span class="dc-mdc-key">Status</span><span class="dc-mdc-val" id="dc-mdc-status">Unavailable</span></div>
+          <div class="dc-mdc-row"><span class="dc-mdc-key">Reason</span><span class="dc-mdc-val" id="dc-mdc-reason">—</span></div>
+          <div class="dc-mdc-row"><span class="dc-mdc-key">Action</span><span class="dc-mdc-val" id="dc-mdc-action">—</span></div>
+        </div>
+      </div>
       <p class="dc-mentor-hint">Ask: Why? · What would invalidate this? · What are you waiting for? · Why not short?</p>
       <div class="dc-chat" id="dc-chat"></div>
       <div class="dc-chat-input-row">
@@ -109,7 +182,7 @@
         <button type="button" id="dc-chat-send" class="dc-chat-send" title="Send message to Karen">SEND</button>
       </div>
     </div>
-    <details class="dc-section-card dc-overview-wrap dc-section-overview" id="dc-overview">
+    <details class="dc-section-card dc-overview-wrap dc-section-overview" id="dc-overview" open>
       <summary title="How Karen reads the chart and marks levels">Overview</summary>
       <div class="dc-overview-body">
         <p class="dc-overview-lead">Karen is your desk co-pilot — not a signal service or financial advice. You decide whether to trade.</p>
@@ -162,6 +235,17 @@
       <details class="dc-voice-latency-wrap" id="dc-voice-latency-wrap">
         <summary>Voice latency (last turn)</summary>
         <pre class="dc-voice-latency" id="dc-voice-latency">No voice turn recorded yet.</pre>
+      </details>
+      <details class="dc-mock-dev-wrap" id="dc-mock-dev-wrap">
+        <summary>Mock analysis (dev)</summary>
+        <label class="dc-mock-dev-toggle"><input type="checkbox" id="dc-mock-enabled" /> Enable mock lifecycle (no backend)</label>
+        <label class="dc-mock-dev-scenario">Scenario
+          <select id="dc-mock-scenario">
+            <option value="WAIT">WAIT</option>
+            <option value="LONG">LONG</option>
+            <option value="SHORT">SHORT</option>
+          </select>
+        </label>
       </details>
       <details class="dc-connection-diagnostics-wrap" id="dc-connection-diagnostics-wrap">
         <summary>Connection</summary>
@@ -529,6 +613,8 @@
     .finally(() => {
       initPanelResize();
       clampPanelToViewport();
+      window.DeskCopilotUI?.updateKarenStatus?.("idle");
+      updateMarketBarUI();
     });
   const scrollEl = document.getElementById("dc-panel-scroll") || document.getElementById("dc-body");
   if (scrollEl) scrollEl.scrollTop = 0;
@@ -543,6 +629,7 @@
   let verdictBusy = false;
   let chatBusy = false;
   let levelsBusy = false;
+  let drawLevelsSeq = 0;
   let verdictTimer = null;
   let verdictWaiter = null;
   let verdictRequestTs = 0;
@@ -554,6 +641,9 @@
   const CHART_CAPTURE_CACHE_MS = 12000;
   let lastMarketSnapshotCache = { key: "", data: null, ts: 0 };
   const MI_CONTEXT_KEY = "dc-mi-context";
+  const CHAT_STREAM_TIMEOUT_MS = 90000;
+  const CHAT_EXTRAS_TIMEOUT_MS = 8000;
+  let chatBusyWatchdog = null;
 
   function getConversationContext() {
     try {
@@ -586,6 +676,8 @@
   const CONTEXT_CHART_READ_BIAS_MS = 300000;
   let contextStripPrice = null;
   let contextStripPriceTs = 0;
+  let contextStripPriceSource = null;
+  let backendPriceFallbackInflight = null;
   let contextStripBiasHint = "";
   let contextStripPriceTimer = null;
   let contextStripBiasTimer = null;
@@ -682,6 +774,37 @@
     } else if (el) {
       el.remove();
     }
+  }
+
+  function resetChatUiLoading() {
+    chatBusy = false;
+    showTyping(false);
+    if (chatBusyWatchdog) {
+      clearTimeout(chatBusyWatchdog);
+      chatBusyWatchdog = null;
+    }
+  }
+
+  function armChatUiLoading(voice) {
+    chatBusy = true;
+    if (!voice) showTyping(true);
+    if (chatBusyWatchdog) clearTimeout(chatBusyWatchdog);
+    chatBusyWatchdog = setTimeout(() => {
+      if (!chatBusy) return;
+      voiceLog("chat loading watchdog — force reset");
+      cancelActiveChatStream("watchdog");
+      resetChatUiLoading();
+      setMsg("Chat timed out — click RECONNECT and try again.", false);
+    }, CHAT_STREAM_TIMEOUT_MS + 5000);
+  }
+
+  function releaseChatUiLoading(voice) {
+    if (chatBusyWatchdog) {
+      clearTimeout(chatBusyWatchdog);
+      chatBusyWatchdog = null;
+    }
+    if (!voice) showTyping(false);
+    chatBusy = false;
   }
 
   async function ensureBackend(force = false) {
@@ -786,16 +909,27 @@
   }
 
   async function getTurnExtras() {
-    if (turnExtrasInflight) {
-      const inflight = await turnExtrasInflight;
-      if (inflight && Object.keys(inflight).length) return inflight;
+    const extrasTimeout = new Promise((resolve) => {
+      setTimeout(() => resolve({ __timedOut: true }), CHAT_EXTRAS_TIMEOUT_MS);
+    });
+    const loadExtras = async () => {
+      if (turnExtrasInflight) {
+        const inflight = await turnExtrasInflight;
+        if (inflight && Object.keys(inflight).length) return inflight;
+      }
+      if (turnExtrasCache && Date.now() - turnExtrasCacheAt < TURN_EXTRAS_TTL_MS) {
+        const cached = turnExtrasCache;
+        turnExtrasCache = null;
+        return cached;
+      }
+      return chatRequestExtras();
+    };
+    const extras = await Promise.race([loadExtras(), extrasTimeout]);
+    if (extras?.__timedOut) {
+      voiceLog("turn extras timed out — continuing without chart price");
+      return {};
     }
-    if (turnExtrasCache && Date.now() - turnExtrasCacheAt < TURN_EXTRAS_TTL_MS) {
-      const cached = turnExtrasCache;
-      turnExtrasCache = null;
-      return cached;
-    }
-    return chatRequestExtras();
+    return extras || {};
   }
 
   function prefetchVoiceTurnResources(interimText) {
@@ -1180,10 +1314,13 @@
   }
 
   async function publishFastFactFailure(err, voice, turnGen) {
+    const raw = err instanceof Error ? err.message : String(err);
     const msg =
-      err instanceof Error && /offline|fetch failed|network/i.test(err.message)
+      /offline|fetch failed|network/i.test(raw)
         ? offlineChatMessage()
-        : `Couldn't fetch that from market state — ${err instanceof Error ? err.message : String(err)}. Hit RECONNECT.`;
+        : /mask is not a function|internal server|500/i.test(raw)
+          ? "Live market data is temporarily unavailable — hit RECONNECT or try again shortly."
+          : `Couldn't fetch that from market state — ${raw}. Hit RECONNECT.`;
     setMsg("", null);
     await publishAssistantReply(msg, voice, { pauseMic: true, instant: true }, () =>
       setKarenPhase("listening")
@@ -1869,7 +2006,16 @@
           await new Promise((r) => setTimeout(r, 200));
         }
         const item = msgQueue.shift();
-        await handleUserMessage(item);
+        try {
+          await handleUserMessage(item);
+        } catch (e) {
+          voiceLog("handleUserMessage uncaught:", e?.message || e);
+          cancelActiveChatStream("uncaught");
+          resetChatUiLoading();
+          const friendly = explainError(e, "chat");
+          setMsg(friendly, false);
+          if (!item?.voice) recordAssistantReply(friendly);
+        }
       }
     } finally {
       processingQueue = false;
@@ -2177,11 +2323,13 @@
     return new Promise((resolve, reject) => {
       let port;
       let finished = false;
+      let timeoutId = null;
       const result = { reply: "", needsChartRead: false, question: "" };
 
       const finish = (err) => {
         if (finished) return;
         finished = true;
+        if (timeoutId) clearTimeout(timeoutId);
         if (activeChatStreamPort === port) activeChatStreamPort = null;
         try {
           port?.disconnect();
@@ -2191,6 +2339,14 @@
         if (err) reject(err);
         else resolve(result);
       };
+
+      timeoutId = setTimeout(() => {
+        finish(
+          new Error(
+            "Chat timed out after 90 seconds — click RECONNECT and try again."
+          )
+        );
+      }, CHAT_STREAM_TIMEOUT_MS);
 
       try {
         port = chrome.runtime.connect({ name: "desk-copilot-chat-stream" });
@@ -2865,13 +3021,11 @@
     }
 
     if (!tradingQ && shouldRouteCasual(text, routeText)) {
-      chatBusy = true;
-      if (!voice) showTyping(true);
+      armChatUiLoading(voice);
       try {
         await replyCasual(text, voice, turnGen, routeText);
       } finally {
-        if (!voice) showTyping(false);
-        chatBusy = false;
+        releaseChatUiLoading(voice);
       }
       return;
     }
@@ -2904,7 +3058,9 @@
 
     if (isPriceQuestion(intentText)) {
       window.DeskCopilotChartPrice?.invalidate?.();
-      const quote = window.DeskCopilotChartPrice?.readQuote?.();
+      const quote =
+        window.DeskCopilotChartPrice?.readQuoteSync?.() ||
+        (await window.DeskCopilotChartPrice?.readQuote?.());
       const maxAge = window.DeskCopilotChartPrice?.LIVE_PRICE_MAX_AGE_MS ?? 60000;
       const pricePayload =
         quote && quote.ageMs <= maxAge
@@ -3005,8 +3161,7 @@
       return;
     }
 
-    chatBusy = true;
-    if (!voice) showTyping(true);
+    armChatUiLoading(voice);
     setKarenPhase(voice ? "chatting" : "thinking");
     setMsg(voice ? "" : "Karen · thinking…", null);
     try {
@@ -3078,8 +3233,7 @@
         grounded: false,
       }, () => setKarenPhase("listening"));
     } finally {
-      if (!voice) showTyping(false);
-      chatBusy = false;
+      releaseChatUiLoading(voice);
       if (window.DeskCopilotVoice?.isListening?.()) setKarenPhase("listening");
     }
   }
@@ -3141,23 +3295,58 @@
     return null;
   }
 
-  function noteLivePrice(px) {
+  function formatPriceSourceLabel(source) {
+    const s = String(source || "").toLowerCase();
+    if (s === "tradingview_live" || s === "tradingview_quote") return "TV Last";
+    if (s === "tv_bar_close" || s === "tv_api") return "TV bar close";
+    if (s === "tickstream_live" || s === "tickstream_quote") return "TickStream";
+    if (s === "desk_backend" || s === "desk-tracker") return "Desk backend";
+    if (s === "chart-price") return "TV Last";
+    return source ? String(source).replace(/_/g, " ") : "";
+  }
+
+  function noteLivePrice(px, source) {
     if (!Number.isFinite(px)) return;
     const prev = contextStripPrice;
     contextStripPrice = px;
     contextStripPriceTs = Date.now();
+    if (source) contextStripPriceSource = source;
     if (Number.isFinite(prev) && Math.abs(px - prev) >= 0.5) {
       lastMarketSnapshotCache = { key: "", data: null, ts: 0 };
     }
-    reportMarketPulse("chart-price", { timestamp: contextStripPriceTs });
+    reportMarketPulse(source || "chart-price", { timestamp: contextStripPriceTs });
     updateContextStrip();
+  }
+
+  async function fetchBackendPriceFallback() {
+    if (backendPriceFallbackInflight) return backendPriceFallbackInflight;
+    backendPriceFallbackInflight = (async () => {
+      try {
+        const payload = await bgSend({ type: "LEVELS" }, 20000);
+        const px = Number(payload?.lastPrice1m ?? payload?.priceHint?.last);
+        if (Number.isFinite(px) && px >= 20000 && px <= 45000) {
+          noteLivePrice(px, "desk_backend");
+          return px;
+        }
+      } catch {
+        /* ignore */
+      }
+      return null;
+    })();
+    try {
+      return await backendPriceFallbackInflight;
+    } finally {
+      backendPriceFallbackInflight = null;
+    }
   }
 
   async function primeChartPriceForTurn(opts = {}) {
     if (opts.forceRefresh) window.DeskCopilotChartPrice?.invalidate?.();
-    const quote = window.DeskCopilotChartPrice?.readQuote?.();
+    const quote =
+      window.DeskCopilotChartPrice?.readQuoteSync?.() ||
+      (await window.DeskCopilotChartPrice?.readQuote?.());
     if (quote) {
-      noteLivePrice(quote.value);
+      noteLivePrice(quote.value, quote.source);
       return {
         chartLastPrice: quote.value,
         chartLastPriceSource: quote.source,
@@ -3169,7 +3358,7 @@
       try {
         const payload = (await window.DeskCopilotChartPrice?.payload?.()) || {};
         const px = Number(payload.chartLastPrice);
-        if (Number.isFinite(px)) noteLivePrice(px);
+        if (Number.isFinite(px)) noteLivePrice(px, payload.chartLastPriceSource || "tradingview_live");
         return payload;
       } finally {
         priceTurnInflight = null;
@@ -3183,7 +3372,8 @@
 
     let px = window.DeskCopilotChartPrice?.readSync?.();
     if (Number.isFinite(px)) {
-      noteLivePrice(px);
+      const q = window.DeskCopilotChartPrice?.readQuoteSync?.();
+      noteLivePrice(px, q?.source || "tradingview_live");
       return;
     }
 
@@ -3197,9 +3387,10 @@
       if (forceBridge) window.DeskCopilotChartPrice?.invalidate?.();
       const payload = await window.DeskCopilotChartPrice?.payload?.();
       px = Number(payload?.chartLastPrice);
-      if (Number.isFinite(px)) noteLivePrice(px);
+      if (Number.isFinite(px)) noteLivePrice(px, payload?.chartLastPriceSource || "tradingview_live");
+      else if (!Number.isFinite(contextStripPrice)) await fetchBackendPriceFallback();
     } catch {
-      /* ignore */
+      if (!Number.isFinite(contextStripPrice)) await fetchBackendPriceFallback();
     } finally {
       contextStripPriceInflight = false;
     }
@@ -3290,55 +3481,113 @@
 
   function syncVoiceHeroUI(phase) {
     const listening = window.DeskCopilotVoice?.isListening?.();
-    const speaking = window.DeskCopilotVoice?.isSpeaking?.();
+    const speaking = mockKarenSpeaking || window.DeskCopilotVoice?.isSpeaking?.();
     window.DeskCopilotVerdictUI?.updateVoiceHero?.({
       listening,
       phase: phase || karenUiPhase,
       speaking,
     });
+    window.DeskCopilotUI?.updateKarenStatus?.(phase || karenUiPhase, {
+      listening,
+      speaking,
+      degraded: window.DeskCopilotVoice?.getEngineMode?.() === "cascade" && listening,
+    });
   }
 
   let karenUiPhase = "idle";
+  let mockKarenSpeaking = false;
+  let mockAnalysisBusy = false;
+
+  function syncHeaderStatus(extra = {}) {
+    const conn = connectionSnapshot;
+    const px = contextStripPriceDisplay();
+    const hasPrice = Number.isFinite(px);
+    const ui = window.DeskCopilotUI;
+    if (!ui?.updateHeaderStatus) return;
+    ui.updateHeaderStatus({
+      market:
+        extra.tvLive && hasPrice
+          ? "LIVE"
+          : ui.mapConnectionToMarketStatus?.(conn, hasPrice) || "WAITING",
+      data: ui.mapConnectionToDataStatus?.(conn) || "WAITING",
+      karen:
+        extra.karen ||
+        ui.mapKarenStatus?.(karenUiPhase, {
+          listening: window.DeskCopilotVoice?.isListening?.(),
+          speaking: window.DeskCopilotVoice?.isSpeaking?.(),
+          degraded: window.DeskCopilotVoice?.getEngineMode?.() === "cascade",
+        }),
+      marketTip: conn ? window.DeskCopilotConnection?.formatConnectionStatus?.(conn) : "",
+      dataTip: conn ? `Backend ${conn.backendUp ? "up" : "down"} · ${conn.state || "unknown"}` : "",
+      karenTip: extra.karenTip || "",
+    });
+  }
 
   function updateMarketBarUI() {
     const ctx = window.DeskCopilotSession?.resolve?.() || { label: "—" };
     const px = contextStripPriceDisplay();
     const conn = connectionSnapshot;
+    const quote = window.DeskCopilotChartPrice?.readQuoteSync?.() || null;
+    const priceSourceRaw = quote?.source || contextStripPriceSource || conn?.marketMeta?.source || null;
+    const liveQuote =
+      quote &&
+      (quote.source === "tradingview_live" ||
+        quote.source === "tradingview_quote" ||
+        quote.source === "tickstream_live" ||
+        quote.source === "tickstream_quote") &&
+      quote.ageMs <= (window.DeskCopilotChartPrice?.LIVE_PRICE_MAX_AGE_MS ?? 60000);
+    const barCloseQuote =
+      quote?.source === "tv_bar_close" ||
+      quote?.source === "tv_api" ||
+      priceSourceRaw === "desk_backend";
+    const hasChartPrice = Number.isFinite(px);
     let dataStatus = "—";
-    if (!conn?.backendUp) {
-      dataStatus = "OFFLINE";
+    if (liveQuote) {
+      dataStatus = "LIVE";
+    } else if (barCloseQuote && hasChartPrice) {
+      dataStatus = "STALE";
+    } else if (!conn?.backendUp) {
+      dataStatus = hasChartPrice ? "STALE" : "OFFLINE";
     } else if (conn.state === "CONNECTED") {
       dataStatus = "LIVE";
     } else if (conn.state === "DEGRADED") {
-      dataStatus = "STALE";
+      dataStatus = hasChartPrice ? "STALE" : "STALE";
     } else if (conn.state === "RECONNECTING" || conn.state === "CONNECTING") {
-      dataStatus = "STALE";
-    } else if (Number.isFinite(px) && isLiveDataAvailable()) {
-      const age = Date.now() - contextStripPriceTs;
-      dataStatus = age < 8000 ? "LIVE" : "STALE";
+      dataStatus = hasChartPrice ? "STALE" : "WAITING";
     } else {
-      dataStatus = conn?.backendUp ? "UNAVAILABLE" : "ERROR";
+      dataStatus = hasChartPrice ? "STALE" : conn?.backendUp ? "UNAVAILABLE" : "ERROR";
     }
-    const ageMs = conn?.dataAge ?? (contextStripPriceTs > 0 ? Date.now() - contextStripPriceTs : null);
+    const priceAgeMs = contextStripPriceTs > 0 ? Date.now() - contextStripPriceTs : null;
+    const ageMs = liveQuote && priceAgeMs != null ? priceAgeMs : conn?.dataAge ?? priceAgeMs;
     const updated =
       ageMs != null
-        ? conn?.state === "CONNECTED"
-          ? `Last update: ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
-          : conn?.state === "DEGRADED"
-            ? `LAST KNOWN STATE · ${Math.round((ageMs || 0) / 1000)}s ago`
-            : contextStripPriceTs > 0
-              ? `Updated ${new Date(contextStripPriceTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-              : ""
+        ? liveQuote
+          ? `TV Last · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
+          : conn?.state === "CONNECTED"
+            ? `Fresh · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
+            : conn?.state === "DEGRADED"
+              ? `Backend stale · ${Math.round((ageMs || 0) / 1000)}s ago`
+              : contextStripPriceTs > 0
+                ? `Updated ${new Date(contextStripPriceTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                : ""
         : "";
+    const dataSource =
+      formatPriceSourceLabel(priceSourceRaw) ||
+      (conn?.state === "CONNECTED" ? "TradingView + desk" : conn?.backendUp ? "Desk backend" : "");
     window.DeskCopilotVerdictUI?.updateMarketBar?.({
-      symbol: shortSymbol(symbol()),
-      price: isLiveDataAvailable() && (conn?.state === "CONNECTED" || Number.isFinite(px)) ? px : null,
+      symbol: "MNQ",
+      price: hasChartPrice ? px : null,
       session: ctx.label || "—",
       tf: "1m",
-      dataStatus: dataStatus === "OFFLINE" ? "LIVE DATA: OFFLINE" : dataStatus,
+      dataStatus: dataStatus === "OFFLINE" ? "OFFLINE" : dataStatus,
       updatedAt: updated,
       connectionState: conn?.state,
+      dataSource,
+      tooltip: conn
+        ? `${window.DeskCopilotConnection?.formatConnectionStatus?.(conn) || conn.state}${hasChartPrice ? "" : " · Click RECONNECT if price stays unavailable"}`
+        : "",
     });
+    syncHeaderStatus({ tvLive: Boolean(liveQuote) });
   }
 
   function updateContextStrip() {
@@ -3358,7 +3607,8 @@
 
     window.DeskCopilotChartPrice?.startWatcher?.((px) => {
       if (document.hidden || !isPanelExpanded()) return;
-      noteLivePrice(px);
+      const q = window.DeskCopilotChartPrice?.readQuoteSync?.();
+      noteLivePrice(px, q?.source || "tradingview_live");
     });
 
     contextStripPriceTimer = setInterval(() => {
@@ -3406,9 +3656,11 @@
   }
 
   async function chartPricePayload() {
-    const quote = window.DeskCopilotChartPrice?.readQuote?.();
+    const quote =
+      window.DeskCopilotChartPrice?.readQuoteSync?.() ||
+      (await window.DeskCopilotChartPrice?.readQuote?.());
     if (quote) {
-      noteLivePrice(quote.value);
+      noteLivePrice(quote.value, quote.source);
       return {
         chartLastPrice: quote.value,
         chartLastPriceSource: quote.source,
@@ -3442,7 +3694,7 @@
         pricePayload?.chartLastPrice ?? snapshotPayload?.chartLastPrice ?? undefined,
       chartLastPriceSource:
         pricePayload?.chartLastPriceSource ??
-        (snapshotPayload?.chartLastPrice != null ? "tradingview_live" : undefined),
+        (snapshotPayload?.chartLastPrice != null ? "tv_bar_close" : undefined),
       chartLastPriceTs: pricePayload?.chartLastPriceTs ?? Date.now(),
     };
   }
@@ -3579,6 +3831,7 @@
     if (phase === "listening" || (window.DeskCopilotVoice?.isListening?.() && !phase)) {
       updateVoiceModeBanner();
       syncVoiceHeroUI("listening");
+      syncHeaderStatus({ karen: "LISTENING" });
       return;
     }
     const line = window.DeskCopilotPersona?.karenStatusLine?.(phase) || "";
@@ -3587,11 +3840,12 @@
       if (window.DeskCopilotVoice?.isListening?.() && phase === "marking_levels") {
         text = `${line} · talk anytime`;
       }
-      el.textContent = text;
+      el.textContent = text.replace(/^KAREN\s*[·•]\s*/i, "");
       el.classList.add("active");
       el.classList.remove("hidden");
     }
     syncVoiceHeroUI(phase);
+    syncHeaderStatus();
   }
 
   function speakKarenAck(tool, variant) {
@@ -3603,6 +3857,10 @@
 
   function setMsg(t, ok) {
     const m = document.getElementById("dc-msg");
+    if (window.DeskCopilotUI?.absorbMarketDataMessage?.(t)) {
+      if (m) m.textContent = "";
+      return;
+    }
     m.textContent = t;
     m.className = "dc-msg" + (ok ? " ok" : ok === false ? " err" : "");
   }
@@ -3853,6 +4111,7 @@
   function recordAssistantReply(text) {
     const out = assistantBubbleText(text);
     if (!out) return false;
+    if (window.DeskCopilotUI?.absorbMarketDataMessage?.(out)) return false;
     if (lastSnapshotIntent === "casual") {
       const last = chatHistory.at(-1);
       if (last?.role === "assistant") {
@@ -4074,7 +4333,7 @@
     if (await pingBackend(true)) {
       setTimeout(() => refreshStats(), 2500);
       if (document.getElementById("dc-auto-levels")?.checked) {
-        setTimeout(() => drawLevels().catch(() => {}), 6000);
+        setTimeout(() => drawLevels({ silent: true }).catch(() => {}), 6000);
       }
       return;
     }
@@ -4261,17 +4520,27 @@
       setMsg("Levels already loading — wait for Yahoo fetch to finish (30–60 sec)", null);
       return null;
     }
+    const drawSeq = ++drawLevelsSeq;
     levelsBusy = true;
-    setKarenPhase("marking_levels");
-    setMsg(opts.skipFetch ? "Updating level view…" : "Karen · pulling levels (30–60 sec)…", null);
+    if (!opts.silent) setKarenPhase("marking_levels");
+    setMsg(
+      opts.silent
+        ? ""
+        : opts.skipFetch
+          ? "Updating level view…"
+          : "Karen · pulling levels (30–60 sec)…",
+      null
+    );
     try {
       let payload = opts.cached || null;
       let usedCache = false;
       if (!payload && !opts.skipFetch) {
         try {
           payload = await fetchLevelsPayload();
+          if (drawSeq !== drawLevelsSeq) return null;
           if (payload?.error) throw new Error(payload.error);
           const live = await window.DeskCopilotChartPrice?.read?.();
+          if (drawSeq !== drawLevelsSeq) return null;
           if (live != null) {
             payload.lastPrice1m = live;
             if (payload.priceHint) payload.priceHint.last = live;
@@ -4288,6 +4557,7 @@
         payload = window.DeskCopilotDraw.loadCache?.();
         usedCache = Boolean(payload);
       }
+      if (drawSeq !== drawLevelsSeq) return null;
       const drawPayload = filterLevelsForDraw(payload);
       if (!drawPayload?.levels?.length && !drawPayload?.zones?.length) {
         window.DeskCopilotDraw?.clear();
@@ -4295,14 +4565,17 @@
         return null;
       }
       const result = await window.DeskCopilotDraw.draw(drawPayload, opts.overlayOnly === true);
+      if (drawSeq !== drawLevelsSeq) return null;
       const n = result.count || (drawPayload.levels?.length || 0) + (drawPayload.zones?.length || 0);
       if (result.ok) {
         const mode = result.mode === "native" ? "TradingView lines" : "overlay";
         const cacheNote = usedCache ? " · cached" : "";
-        window.DeskCopilotVerdictUI?.setLevelsStatus?.(`✓ ${result.count ?? n} levels added to TradingView`, true);
+        window.DeskCopilotVerdictUI?.setLevelsStatus?.(`${result.count ?? n} levels`, true);
         setMsg(`${result.count ?? n} levels marked · ${mode}${cacheNote}${result.hint ? " — " + result.hint : ""}`, true);
         setKarenPhase("listening");
         refreshContextStrip({ forceBridge: true, bias: true });
+      } else if (result.reason === "superseded") {
+        return null;
       } else {
         const hint =
           result.reason === "no_chart_pane"
@@ -4312,15 +4585,31 @@
       }
       return payload;
     } catch (e) {
+      if (drawSeq !== drawLevelsSeq) return null;
       const reason = explainError(e, "levels");
       setMsg(reason, false);
       return null;
     } finally {
-      levelsBusy = false;
+      if (drawSeq === drawLevelsSeq) {
+        levelsBusy = false;
+        if (
+          !opts.silent &&
+          !verdictBusy &&
+          !chatBusy &&
+          !window.DeskCopilotVoice?.isListening?.()
+        ) {
+          setKarenPhase("idle");
+          window.DeskCopilotVerdictUI?.showReadyState?.();
+        }
+      }
     }
   }
 
   document.getElementById("dc-get-verdict").onclick = () => {
+    if (window.DeskCopilotMockAnalysis?.isEnabled?.()) {
+      runMockVerdictLifecycle();
+      return;
+    }
     const blocked = chartReadBlockedReason();
     if (blocked) {
       setMsg(`Busy — ${blocked}.`, false);
@@ -4332,6 +4621,89 @@
     }
     enqueueUserMessage("get the read", { voice: false });
   };
+
+  document.getElementById("dc-new-analysis")?.addEventListener("click", () => {
+    mockAnalysisBusy = false;
+    mockKarenSpeaking = false;
+    window.DeskCopilotVerdictUI?.resetMockAnalysis?.();
+    setKarenPhase("idle");
+    syncVoiceHeroUI("idle");
+    setMsg("Ready for mock analysis — press ANALYSE MARKET", null);
+  });
+
+  function initMockAnalysisControls() {
+    const Mock = window.DeskCopilotMockAnalysis;
+    if (!Mock) return;
+    const enabledEl = document.getElementById("dc-mock-enabled");
+    const scenarioEl = document.getElementById("dc-mock-scenario");
+    if (enabledEl) {
+      enabledEl.checked = Mock.isEnabled();
+      enabledEl.onchange = () => {
+        Mock.setEnabled(enabledEl.checked);
+        setMsg(
+          enabledEl.checked
+            ? "Mock analysis ON — ANALYSE MARKET uses demo data only"
+            : "Mock analysis OFF — live pipeline restored",
+          null
+        );
+        if (!enabledEl.checked) {
+          mockAnalysisBusy = false;
+          mockKarenSpeaking = false;
+          window.DeskCopilotVerdictUI?.resetMockAnalysis?.();
+        }
+      };
+    }
+    if (scenarioEl) {
+      scenarioEl.value = Mock.getScenarioKey();
+      scenarioEl.onchange = () => {
+        Mock.setScenarioKey(scenarioEl.value);
+        setMsg(`Mock scenario · ${scenarioEl.value}`, null);
+      };
+    }
+  }
+
+  function runMockVerdictLifecycle() {
+    if (mockAnalysisBusy) {
+      setMsg("Mock analysis already running…", null);
+      return;
+    }
+    mockAnalysisBusy = true;
+    mockKarenSpeaking = false;
+    setKarenPhase("analyzing");
+    setMsg("Karen · MOCK analysis — no backend calls", null);
+    syncVoiceHeroUI("analyzing");
+
+    window.DeskCopilotVerdictUI?.runMockAnalysis?.({
+      onAnalyzing: () => {
+        setKarenPhase("analyzing");
+        syncVoiceHeroUI("analyzing");
+      },
+      onVerdict: (data) => {
+        setKarenPhase("thinking");
+        syncVoiceHeroUI("thinking");
+        const line = data?.spokenBrief || "Mock verdict ready.";
+        recordAssistantReply(`[MOCK ANALYSIS] ${line}`);
+        setMsg("MOCK ANALYSIS — demo data only", null);
+      },
+      onSpeaking: () => {
+        mockKarenSpeaking = true;
+        setKarenPhase("chatting");
+        syncVoiceHeroUI("speaking");
+        window.DeskCopilotVerdictUI?.showSpeakingState?.(true);
+      },
+      onSpeakingDone: () => {
+        mockKarenSpeaking = false;
+        mockAnalysisBusy = false;
+        setKarenPhase("idle");
+        syncVoiceHeroUI("idle");
+        window.DeskCopilotVerdictUI?.showSpeakingState?.(false);
+        setMsg("Mock verdict ready — NEW ANALYSIS to reset", null);
+      },
+    });
+  }
+
+  initMockAnalysisControls();
+  window.DeskCopilotVerdictUI?.showReadyState?.();
 
   document.getElementById("dc-levels-draw").onclick = () => {
     speakUiFeedback(karenUiAck("mark_levels"));
@@ -4371,6 +4743,7 @@
   };
 
   void initLevelToggles();
+  void window.DeskCopilotDraw?.syncBridge?.();
 
   function isAutoVoiceEnabled() {
     try {
@@ -4824,7 +5197,7 @@
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         verdictWaiter = null;
-        reject(new Error("Timed out — try again"));
+        reject(new Error("Chart read timed out — backend may be cold or slow. Click RECONNECT, then try Analyse Market again."));
       }, timeoutMs);
       verdictWaiter = {
         resolve: (data) => {
@@ -4887,10 +5260,16 @@
       opts.voice === true
         ? window.DeskCopilotVoiceInterpret?.applyVoiceRules?.(userQuestion) || userQuestion
         : userQuestion;
-    const syncPrice = window.DeskCopilotChartPrice?.readSync?.();
+    const quote = window.DeskCopilotChartPrice?.readQuoteSync?.();
     const pricePayload =
       opts.pricePayload ||
-      (syncPrice != null ? { chartLastPrice: syncPrice } : await chartPricePayload());
+      (quote
+        ? {
+            chartLastPrice: quote.value,
+            chartLastPriceSource: quote.source,
+            chartLastPriceTs: quote.timestamp,
+          }
+        : await chartPricePayload());
     const livePx = Number(pricePayload?.chartLastPrice);
     const cacheKey = `${question.trim().toLowerCase()}|${opts.voice === true ? "v" : "t"}|${Number.isFinite(livePx) ? livePx.toFixed(2) : "na"}`;
     const now = Date.now();
@@ -5128,9 +5507,17 @@
 
       setKarenPhase("analyzing");
       setMsg(
-        hasStructured ? "Karen · running desk rules… 3–8 sec" : "Karen · chart data unavailable",
+        hasStructured ? "Karen · running desk rules… 3–8 sec" : "",
         null
       );
+      if (!hasStructured) {
+        window.DeskCopilotUI?.updateMarketDataCard?.({
+          status: "Unavailable",
+          reason: "OHLC export unavailable from TradingView chart",
+          action: "Maximize chart pane · wait for candles · try ANALYSE MARKET again",
+          visible: true,
+        });
+      }
       if (opts.voice) voiceSpeakAck(karenAck("analyzing"));
 
       if (!hasStructured) {
@@ -5173,7 +5560,8 @@
         return { verdict: noCall, spokenBrief: noCall, noCall: true };
       }
 
-      await warmPromise;
+      // Warm runs in parallel with snapshot — don't block verdict on slow Yahoo fetch.
+      void warmPromise;
 
       const resultPromise = waitForVerdict(90000);
       await bgSend(
@@ -5227,6 +5615,9 @@
   try {
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.type === "VERDICT_RESULT") onVerdictPayload(msg.payload);
+      if (msg.type === "DC_OVERLAY_SYNC") {
+        void window.DeskCopilotDraw?.syncBridge?.();
+      }
       if (msg.type === "CONNECTION_STATE") {
         applyConnectionSnapshot(msg.snapshot);
         if (msg.snapshot?.backendUp && msg.snapshot?.state !== "DISCONNECTED") {
@@ -5476,6 +5867,21 @@
   startHeartbeat();
   startWarmKeepalive();
   startAgentLoop();
+
+  const karenStartupAt = Date.now();
+  setInterval(() => {
+    const phase = String(karenUiPhase || "idle").toLowerCase();
+    const busyPhase =
+      phase === "analyzing" ||
+      phase === "capturing" ||
+      phase === "snapshot" ||
+      phase === "marking_levels";
+    if (!busyPhase) return;
+    if (verdictBusy || chatBusy || levelsBusy || mockAnalysisBusy) return;
+    if (Date.now() - karenStartupAt < 120000) return;
+    setKarenPhase("idle");
+    window.DeskCopilotVerdictUI?.showReadyState?.();
+  }, 15000);
 
   window.addEventListener("focus", () => {
     warmBackend();

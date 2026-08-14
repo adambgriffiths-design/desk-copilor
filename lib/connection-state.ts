@@ -192,9 +192,9 @@ export function formatConnectionStatus(snapshot: ConnectionSnapshot, now = Date.
   if (snapshot.state === "CONNECTED") {
     return `LIVE — Backend ✓ Market data ✓ Market state ✓ Last update: ${ageLabel}`;
   }
-  if (snapshot.state === "DEGRADED") {
-    return `DEGRADED — Backend ✓ Market state ✕ Last update: ${ageLabel}`;
-  }
+    if (snapshot.state === "DEGRADED") {
+      return `DEGRADED — Backend ✓ Market state ✕ Last update: ${ageLabel} · Click RECONNECT to refresh desk data`;
+    }
   if (snapshot.state === "RECONNECTING") {
     return `RECONNECTING — attempt ${snapshot.retryCount} · ${snapshot.lastError || "checking backend…"}`;
   }

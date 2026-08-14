@@ -2,8 +2,14 @@
  * Runs in page context (MAIN world) — loaded via chrome-extension:// URL to satisfy TradingView CSP.
  */
 (function () {
-  if (window.__dcTvBridge) return;
+  if (window.__dcTvBridge) {
+    window.postMessage({ type: "DC_BRIDGE_READY", reattached: true }, "*");
+    return;
+  }
   window.__dcTvBridge = true;
+
+  const DC_SHAPE_TAG = "\u200BDC\u200B";
+  const REGISTRY_KEY = "dc-tv-shape-registry-v1";
 
   const WIDGET_KEYS = [
     "tvWidget",
@@ -17,8 +23,61 @@
     "TradingViewWidget",
   ];
 
+  let drawChain = Promise.resolve();
+  let activeDrawGeneration = 0;
+  let nativeDrawInFlight = false;
+
   function sleep(ms) {
     return new Promise((r) => setTimeout(r, ms));
+  }
+
+  function loadRegistry() {
+    try {
+      const raw = sessionStorage.getItem(REGISTRY_KEY);
+      if (!raw) return { ids: [], generation: 0 };
+      const parsed = JSON.parse(raw);
+      return {
+        ids: Array.isArray(parsed?.ids) ? parsed.ids.map(String) : [],
+        generation: Number(parsed?.generation) || 0,
+      };
+    } catch (_) {
+      return { ids: [], generation: 0 };
+    }
+  }
+
+  function saveRegistry(ids, generation) {
+    const uniq = [...new Set((ids || []).map(String))];
+    window.__dcShapeIds = uniq;
+    try {
+      sessionStorage.setItem(
+        REGISTRY_KEY,
+        JSON.stringify({ ids: uniq, generation: generation ?? activeDrawGeneration, ts: Date.now() })
+      );
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
+  function syncRegistryFromStorage() {
+    const reg = loadRegistry();
+    window.__dcShapeIds = reg.ids.slice();
+    return reg;
+  }
+
+  syncRegistryFromStorage();
+
+  function dcTaggedText(label) {
+    const visible = label != null ? String(label) : "";
+    return visible ? `${DC_SHAPE_TAG}${visible}` : DC_SHAPE_TAG;
+  }
+
+  function shapeLooksDcOwned(shape, id, registrySet) {
+    if (registrySet && registrySet.has(id)) return true;
+    if (!shape) return false;
+    const text = String(shape.text || shape.properties?.text || shape.overrides?.text || "");
+    if (text.includes(DC_SHAPE_TAG)) return true;
+    if (shape.properties?.dcDeskCopilot === true || shape.overrides?.dcDeskCopilot === true) return true;
+    return false;
   }
 
   function looksLikeChartWidget(w) {
@@ -295,14 +354,24 @@
     return "other";
   }
 
+  function isDcOwnedShapeId(id, chart, registrySet) {
+    if (registrySet.has(id)) return true;
+    try {
+      const shape = chart.getShapeById?.(id);
+      return shapeLooksDcOwned(shape, id, registrySet);
+    } catch (_) {
+      return false;
+    }
+  }
+
   function exportDrawings(chart) {
     const drawings = [];
     if (!chart) return drawings;
-    const skip = new Set(window.__dcShapeIds || []);
+    const registrySet = new Set(loadRegistry().ids);
     try {
       const ids = chart.getAllShapes?.() || [];
       for (const id of ids) {
-        if (skip.has(id)) continue;
+        if (isDcOwnedShapeId(id, chart, registrySet)) continue;
         let shape = null;
         try {
           shape = chart.getShapeById?.(id);
@@ -488,29 +557,94 @@
     return null;
   }
 
-  function clearShapes(chart) {
-    if (!chart || !window.__dcShapeIds) return;
-    for (const id of window.__dcShapeIds) {
-      try {
-        chart.removeEntity(id);
-      } catch (_) {
-        /* ignore */
-      }
+  function removeShapeId(chart, id) {
+    if (!chart || id == null) return;
+    try {
+      chart.removeEntity(id);
+    } catch (_) {
+      /* ignore */
     }
-    window.__dcShapeIds = [];
   }
 
-  async function drawLevelsAndZones(levels, zones) {
-    const chart = getActiveChart();
-    if (!chart) return { ok: false, method: "none", reason: "widget_not_found" };
+  function clearAllDcShapes(chart) {
+    if (!chart) {
+      saveRegistry([], activeDrawGeneration);
+      return { removed: 0 };
+    }
 
-    clearShapes(chart);
-    window.__dcShapeIds = window.__dcShapeIds || [];
+    const registry = loadRegistry();
+    const registrySet = new Set(registry.ids);
+    let removed = 0;
+
+    for (const id of [...registrySet]) {
+      removeShapeId(chart, id);
+      removed += 1;
+    }
+
+    try {
+      const allIds = chart.getAllShapes?.() || [];
+      for (const id of allIds) {
+        if (registrySet.has(id)) continue;
+        try {
+          const shape = chart.getShapeById?.(id);
+          if (shapeLooksDcOwned(shape, id, registrySet)) {
+            removeShapeId(chart, id);
+            removed += 1;
+          }
+        } catch (_) {
+          /* ignore */
+        }
+      }
+    } catch (_) {
+      /* ignore */
+    }
+
+    saveRegistry([], activeDrawGeneration);
+    return { removed };
+  }
+
+  function isGenerationStale(generation) {
+    return Number(generation) !== activeDrawGeneration;
+  }
+
+  function withDcTag(opts, label) {
+    const showLabel = Boolean(label && opts?.overrides?.showLabel !== false);
+    return {
+      ...opts,
+      text: showLabel ? dcTaggedText(label) : DC_SHAPE_TAG,
+      overrides: {
+        ...(opts.overrides || {}),
+        dcDeskCopilot: true,
+        text: showLabel ? dcTaggedText(label) : DC_SHAPE_TAG,
+      },
+    };
+  }
+
+  async function drawLevelsAndZones(levels, zones, generation) {
+    const gen = Number(generation) || 0;
+    activeDrawGeneration = gen;
+
+    const chart = getActiveChart();
+    if (!chart) {
+      return { ok: false, method: "tv_api", reason: "widget_not_found", generation: gen, definitive: true };
+    }
+
+    clearAllDcShapes(chart);
+    if (isGenerationStale(gen)) {
+      return { ok: false, method: "tv_api", reason: "superseded", generation: gen, definitive: true };
+    }
+
+    const createdIds = [];
     const range = getVisibleRange(chart);
     const endTime = range?.to ?? Math.floor(Date.now() / 1000) + 600;
     const fallbackStart = range?.from ?? endTime - 1800;
 
     for (const zone of zones || []) {
+      if (isGenerationStale(gen)) {
+        clearAllDcShapes(chart);
+        return { ok: false, method: "tv_api", reason: "superseded", generation: gen, definitive: true };
+      }
+
       const top = Number(zone.top);
       const bottom = Number(zone.bottom);
       if (!Number.isFinite(top) || !Number.isFinite(bottom)) continue;
@@ -519,22 +653,26 @@
       const zTop = Math.max(top, bottom);
       const zBot = Math.min(top, bottom);
       const color = zone.borderColor || zone.color || "#78716c";
-      const opts = {
-        shape: "rectangle",
-        text: zone.displayLabel || zone.label || "",
-        overrides: {
-          backgroundColor: zone.fill || "rgba(251, 191, 133, 0.38)",
-          color,
-          linewidth: 1,
-          fillBackground: true,
-          transparency: 75,
-          showLabel: Boolean(zone.label && zone.showLabel !== false),
-          textcolor: color,
+      const label = zone.displayLabel || zone.label || "";
+      const opts = withDcTag(
+        {
+          shape: "rectangle",
+          overrides: {
+            backgroundColor: zone.fill || "rgba(251, 191, 133, 0.38)",
+            color,
+            linewidth: 1,
+            fillBackground: true,
+            transparency: 75,
+            showLabel: Boolean(zone.label && zone.showLabel !== false),
+            textcolor: color,
+          },
+          disableSelection: true,
+          disableSave: true,
+          lock: true,
         },
-        disableSelection: true,
-        disableSave: true,
-        lock: true,
-      };
+        label
+      );
+
       try {
         let id;
         if (typeof chart.createMultipointShape === "function") {
@@ -546,53 +684,70 @@
             opts
           );
         }
-        if (id) window.__dcShapeIds.push(id);
+        if (id) createdIds.push(id);
+
         if (zone.kind === "fvg" && Number.isFinite(Number(zone.ce))) {
+          if (isGenerationStale(gen)) {
+            clearAllDcShapes(chart);
+            return { ok: false, method: "tv_api", reason: "superseded", generation: gen, definitive: true };
+          }
           const cePrice = Number(zone.ce);
-          const ceOpts = {
-            shape: "horizontal_ray",
-            overrides: {
-              linecolor: "#e879f9",
-              linewidth: 1,
-              linestyle: 0,
-              showLabel: false,
+          const ceOpts = withDcTag(
+            {
+              shape: "horizontal_ray",
+              overrides: {
+                linecolor: "#e879f9",
+                linewidth: 1,
+                linestyle: 0,
+                showLabel: false,
+              },
+              disableSelection: true,
+              disableSave: true,
+              lock: true,
             },
-            disableSelection: true,
-            disableSave: true,
-            lock: true,
-          };
+            ""
+          );
           let ceId;
           if (typeof chart.createMultipointShape === "function") {
             ceId = await chart.createMultipointShape([{ time: startTime, price: cePrice }], ceOpts);
           } else if (typeof chart.createShape === "function") {
             ceId = await chart.createShape({ time: startTime, price: cePrice }, ceOpts);
           }
-          if (ceId) window.__dcShapeIds.push(ceId);
+          if (ceId) createdIds.push(ceId);
         }
       } catch (_) {
-        /* ignore */
+        /* ignore single shape failure */
       }
     }
 
     for (const level of levels || []) {
+      if (isGenerationStale(gen)) {
+        clearAllDcShapes(chart);
+        return { ok: false, method: "tv_api", reason: "superseded", generation: gen, definitive: true };
+      }
+
       const price = Number(level.price);
       if (!Number.isFinite(price)) continue;
       const startTime = normalizeUnixSec(level.startTime) ?? fallbackStart;
       const color = level.color || "#22d3ee";
-      const opts = {
-        shape: "horizontal_ray",
-        text: level.displayLabel || level.label || "",
-        overrides: {
-          linecolor: color,
-          linewidth: level.id && String(level.id).includes("ce") ? 2 : 1,
-          linestyle: 2,
-          showLabel: Boolean(level.label && level.showLabel !== false),
-          textcolor: color,
+      const label = level.displayLabel || level.label || "";
+      const opts = withDcTag(
+        {
+          shape: "horizontal_ray",
+          overrides: {
+            linecolor: color,
+            linewidth: level.id && String(level.id).includes("ce") ? 2 : 1,
+            linestyle: 2,
+            showLabel: Boolean(level.label && level.showLabel !== false),
+            textcolor: color,
+          },
+          disableSelection: true,
+          disableSave: true,
+          lock: true,
         },
-        disableSelection: true,
-        disableSave: true,
-        lock: true,
-      };
+        label
+      );
+
       try {
         let id;
         const point = { time: startTime, price };
@@ -601,16 +756,41 @@
         } else if (typeof chart.createShape === "function") {
           id = await chart.createShape(point, opts);
         }
-        if (id) window.__dcShapeIds.push(id);
+        if (id) createdIds.push(id);
       } catch (_) {
         /* ignore */
       }
     }
-    return { ok: window.__dcShapeIds.length > 0, method: "tv_api", count: window.__dcShapeIds.length };
+
+    if (isGenerationStale(gen)) {
+      clearAllDcShapes(chart);
+      return { ok: false, method: "tv_api", reason: "superseded", generation: gen, definitive: true };
+    }
+
+    saveRegistry(createdIds, gen);
+    return {
+      ok: createdIds.length > 0,
+      method: "tv_api",
+      count: createdIds.length,
+      generation: gen,
+      definitive: true,
+    };
+  }
+
+  function enqueueDraw(task) {
+    const run = drawChain.then(task);
+    drawChain = run.catch(() => {});
+    return run;
   }
 
   window.addEventListener("message", async (event) => {
     if (event.source !== window || !event.data) return;
+
+    if (event.data.type === "DC_SYNC_REGISTRY") {
+      syncRegistryFromStorage();
+      window.postMessage({ type: "DC_SYNC_REGISTRY_RESULT", ok: true, count: window.__dcShapeIds.length }, "*");
+      return;
+    }
 
     if (event.data.type === "DC_GET_VISIBLE_RANGE") {
       const chart = getActiveChart();
@@ -671,6 +851,8 @@
           ok: true,
           widgetFound,
           exportReady: isChartExportReady(chart),
+          nativeDrawInFlight,
+          registryCount: loadRegistry().ids.length,
         },
         "*"
       );
@@ -678,19 +860,66 @@
     }
 
     if (event.data.type !== "DC_DRAW_TV") return;
-    try {
-      if (event.data.action === "clear") {
-        clearShapes(getActiveChart());
-        window.postMessage({ type: "DC_DRAW_TV_RESULT", ok: true, method: "tv_api", cleared: true }, "*");
-        return;
+
+    await enqueueDraw(async () => {
+      const generation = Number(event.data.generation) || 0;
+      try {
+        if (event.data.action === "clear") {
+          const cleared = clearAllDcShapes(getActiveChart());
+          window.postMessage(
+            {
+              type: "DC_DRAW_TV_RESULT",
+              ok: true,
+              method: "tv_api",
+              cleared: true,
+              generation,
+              removed: cleared.removed,
+              definitive: true,
+            },
+            "*"
+          );
+          return;
+        }
+
+        if (event.data.action === "preclear") {
+          const cleared = clearAllDcShapes(getActiveChart());
+          window.postMessage(
+            {
+              type: "DC_DRAW_TV_RESULT",
+              ok: true,
+              method: "tv_api",
+              precleared: true,
+              generation,
+              removed: cleared.removed,
+              definitive: true,
+            },
+            "*"
+          );
+          return;
+        }
+
+        nativeDrawInFlight = true;
+        activeDrawGeneration = generation;
+        const result = await drawLevelsAndZones(event.data.levels || [], event.data.zones || [], generation);
+        nativeDrawInFlight = false;
+        window.postMessage({ type: "DC_DRAW_TV_RESULT", ...result, inFlight: false }, "*");
+      } catch (e) {
+        nativeDrawInFlight = false;
+        window.postMessage(
+          {
+            type: "DC_DRAW_TV_RESULT",
+            ok: false,
+            method: "tv_api",
+            reason: String(e),
+            generation,
+            definitive: true,
+            inFlight: false,
+          },
+          "*"
+        );
       }
-      const result = await drawLevelsAndZones(event.data.levels || [], event.data.zones || []);
-      window.postMessage({ type: "DC_DRAW_TV_RESULT", ...result }, "*");
-    } catch (e) {
-      window.postMessage(
-        { type: "DC_DRAW_TV_RESULT", ok: false, method: "tv_api", reason: String(e) },
-        "*"
-      );
-    }
+    });
   });
+
+  window.postMessage({ type: "DC_BRIDGE_READY", reattached: false }, "*");
 })();

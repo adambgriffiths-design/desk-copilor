@@ -1,15 +1,15 @@
 {
-  "at": "2026-08-12T23:18:16.789Z",
-  "pass": true,
-  "score": 100,
+  "at": "2026-08-14T00:10:29.602Z",
+  "pass": false,
+  "score": 85,
   "subsystems": [
     {
       "name": "routing-golden",
-      "status": "pass",
-      "icon": "✅",
-      "detail": "pass",
+      "status": "fail",
+      "icon": "❌",
+      "detail": "npm warn Unknown env config \"devdir\". This will stop working in the next major version of npm. See `npm help npmrc` for ",
       "priority": "P0",
-      "ms": 8128
+      "ms": 121479
     },
     {
       "name": "conversation-chains",
@@ -17,7 +17,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 6095
+      "ms": 96452
     },
     {
       "name": "observation-engine",
@@ -25,7 +25,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 3817
+      "ms": 63524
     },
     {
       "name": "reh-rel",
@@ -33,7 +33,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P1",
-      "ms": 3893
+      "ms": 67898
     },
     {
       "name": "chart-snapshot",
@@ -41,7 +41,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 5683
+      "ms": 113287
     },
     {
       "name": "decision-pipeline",
@@ -49,7 +49,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 4252
+      "ms": 75619
     },
     {
       "name": "contamination-guard",
@@ -57,7 +57,7 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P0",
-      "ms": 6660
+      "ms": 41681
     },
     {
       "name": "chart-export-quality",
@@ -65,15 +65,15 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P1",
-      "ms": 6107
+      "ms": 64844
     },
     {
       "name": "request-trace",
-      "status": "pass",
-      "icon": "✅",
-      "detail": "pass",
+      "status": "warn",
+      "icon": "⚠️",
+      "detail": "npm warn Unknown env config \"devdir\". This will stop working in the next major version of npm. See `npm help npmrc` for ",
       "priority": "P2",
-      "ms": 4097
+      "ms": 57614
     },
     {
       "name": "connection-state",
@@ -81,17 +81,17 @@
       "icon": "✅",
       "detail": "pass",
       "priority": "P2",
-      "ms": 6065
+      "ms": 16458
     }
   ],
   "checklist": {
-    "pass": true,
+    "pass": false,
     "items": [
       {
         "id": "criticals",
         "label": "No open critical failures",
-        "pass": true,
-        "detail": "0 open P0/P1",
+        "pass": false,
+        "detail": "1 open P0/P1",
         "severity": "P0"
       },
       {
@@ -111,13 +111,15 @@
       {
         "id": "golden",
         "label": "Golden tests pass",
-        "pass": true,
-        "detail": "all pass",
+        "pass": false,
+        "detail": "failures detected",
         "severity": "P0"
       }
     ],
-    "openCriticals": 0
+    "openCriticals": 2
   },
-  "summary": "System health OK — ready for release review.",
-  "failures": []
+  "summary": "System health FAILED — resolve P0/P1 before release.",
+  "failures": [
+    "routing-golden: p working in the next major version of npm. See `npm help npmrc` for supported config options.\nnpm warn Unknown env config \"devdir\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options."
+  ]
 }

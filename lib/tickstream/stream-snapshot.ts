@@ -57,7 +57,7 @@ export function needsTickstreamFallback(input: TickstreamFallbackInput): boolean
   });
   if (isAuthoritativeLiveAvailable(auth)) return false;
 
-  const noCandles = !snap?.candles?.length;
+  const noCandles = snap != null && !snap.candles?.length;
   const exportFailed = chartExportFailed(input);
   const noTvLive = input.chartLastPrice == null || !isLiveTvPriceSource(input.chartLastPriceSource || "none");
   const qualityMissing =
@@ -66,7 +66,7 @@ export function needsTickstreamFallback(input: TickstreamFallbackInput): boolean
       snap.qualityMeta?.quality === "stale" ||
       noCandles);
 
-  if (input.chartExportFailed === true || exportFailed || noCandles || qualityMissing) {
+  if (input.chartExportFailed === true || exportFailed || qualityMissing || noCandles) {
     return true;
   }
 
@@ -77,39 +77,44 @@ async function fetchTickstreamStreamTick(
   apiKey: string,
   waitMs: number
 ): Promise<AuthoritativePrice | null> {
-  const stream = new Stream(apiKey);
-  let latest: AuthoritativePrice | null = null;
+  try {
+    const stream = new Stream(apiKey);
+    let latest: AuthoritativePrice | null = null;
 
-  stream.on("error", () => {
-    /* swallow — REST quote fallback handles failure */
-  });
+    stream.on("error", () => {
+      /* swallow — REST quote fallback handles failure */
+    });
 
-  const iter = stream.subscribe(MNQ);
-  const tickLoop = (async () => {
-    for await (const tick of iter) {
-      if (tick.symbol !== MNQ) continue;
-      const price = tick.price;
-      const tsSec = tick.ts;
-      if (typeof price !== "number" || !Number.isFinite(price) || !isMnqChartPrice(price)) continue;
-      if (typeof tsSec !== "number" || !Number.isFinite(tsSec) || tsSec <= 0) continue;
-      const tsMs = tsSec * 1000;
-      const ageMs = Math.max(0, Date.now() - tsMs);
-      if (ageMs > LIVE_PRICE_MAX_AGE_MS) continue;
-      latest = {
-        value: roundMnq(price),
-        source: "tickstream_live",
-        timestamp: tsMs,
-        ageMs,
-      };
-    }
-  })();
+    const iter = stream.subscribe(MNQ);
+    const tickLoop = (async () => {
+      for await (const tick of iter) {
+        if (tick.symbol !== MNQ) continue;
+        const price = tick.price;
+        const tsSec = tick.ts;
+        if (typeof price !== "number" || !Number.isFinite(price) || !isMnqChartPrice(price)) continue;
+        if (typeof tsSec !== "number" || !Number.isFinite(tsSec) || tsSec <= 0) continue;
+        const tsMs = tsSec * 1000;
+        const ageMs = Math.max(0, Date.now() - tsMs);
+        if (ageMs > LIVE_PRICE_MAX_AGE_MS) continue;
+        latest = {
+          value: roundMnq(price),
+          source: "tickstream_live",
+          timestamp: tsMs,
+          ageMs,
+        };
+      }
+    })();
 
-  await new Promise<void>((resolve) => setTimeout(resolve, waitMs));
-  stream.unsubscribe("ticks", MNQ);
-  stream.close();
-  await tickLoop.catch(() => {});
+    await new Promise<void>((resolve) => setTimeout(resolve, waitMs));
+    stream.unsubscribe("ticks", MNQ);
+    stream.close();
+    await tickLoop.catch(() => {});
 
-  return latest;
+    return latest;
+  } catch {
+    /* ws can fail when bundled on serverless — REST quote is the primary path */
+    return null;
+  }
 }
 
 /** Prefer REST /quote (fast); short live stream when quote unavailable. */
@@ -136,6 +141,11 @@ export async function resolveTickstreamAuthoritativePrice(opts?: {
     }
   } catch {
     /* try stream */
+  }
+
+  if (process.env.VERCEL === "1" || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    /* WebSocket (ws/bufferutil) breaks when bundled on serverless — REST quote above is enough. */
+    return null;
   }
 
   const waitMs = opts?.streamWaitMs ?? DEFAULT_STREAM_WAIT_MS;

@@ -67,7 +67,7 @@ export type ChartSnapshotPayload = {
   lastPrice?: number | null;
   candles: ChartCandle[];
   drawings: ChartDrawing[];
-  source: "tv_export" | "yahoo_fallback" | "none";
+  source: "tv_export" | "research_bars" | "yahoo_fallback" | "none";
   reason?: string;
   exportedAt?: string;
   quality?: ChartQuality;
@@ -502,7 +502,10 @@ export function parseChartSnapshotInput(value: unknown): ChartSnapshotPayload | 
   const drawings = normalizeDrawings(raw.drawings);
   const lastPrice = parseOptionalPrice(raw.lastPrice);
   const source =
-    raw.source === "tv_export" || raw.source === "yahoo_fallback" || raw.source === "none"
+    raw.source === "tv_export" ||
+    raw.source === "research_bars" ||
+    raw.source === "yahoo_fallback" ||
+    raw.source === "none"
       ? raw.source
       : candles.length
         ? "tv_export"

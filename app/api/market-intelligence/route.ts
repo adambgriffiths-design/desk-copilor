@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseChartPriceInput } from "@/lib/chart-live-price";
+import { parseChartPriceInput, parseChartPriceMeta } from "@/lib/chart-live-price";
+import { parseChartSnapshotInput } from "@/lib/chart-snapshot";
 import { applyVoiceRules, interpretVoiceInput, needsVoiceInterpret } from "@/lib/voice-interpret";
 import { buildDeskMarketIntelligence } from "@/lib/market-intelligence";
 import { attachApiDataQuality, resolveApiDataQuality } from "@/lib/api-data-quality";
@@ -40,8 +41,11 @@ export async function POST(request: NextRequest) {
     }
 
     const chartLastPrice = parseChartPriceInput(body.chartLastPrice);
+    const priceMeta = parseChartPriceMeta(body);
+    const chartSnapshot = parseChartSnapshotInput(body.chartSnapshot);
+    const chartExportFailed = body.chartExportFailed === true;
     const conversationContext: ConversationContext | undefined = body.conversationContext;
-    const cacheKey = `${question}|${chartLastPrice ?? "none"}|${conversationContext?.lastTopic ?? ""}`;
+    const cacheKey = `${question}|${chartLastPrice ?? "none"}|${priceMeta.source ?? ""}|${conversationContext?.lastTopic ?? ""}`;
     const now = Date.now();
     if (cache && cache.key === cacheKey && now < cache.expires) {
       return NextResponse.json(cache.body, { headers: cors });
@@ -49,10 +53,14 @@ export async function POST(request: NextRequest) {
 
     const intel = await buildDeskMarketIntelligence({
       chartLastPrice,
+      chartLastPriceSource: priceMeta.source,
+      chartLastPriceTs: priceMeta.timestamp,
+      chartSnapshot,
+      chartExportFailed,
       forceFresh: chartLastPrice != null,
     });
 
-    const dq = resolveApiDataQuality(intel, chartLastPrice);
+    const dq = resolveApiDataQuality(intel, chartLastPrice, priceMeta);
     const answer = answerFromIntelligence(intel, question, conversationContext);
     if (!answer) {
       return NextResponse.json(

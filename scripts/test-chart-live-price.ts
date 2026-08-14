@@ -1,7 +1,11 @@
 /**
  * Tick-aware market context — run: npx tsx scripts/test-chart-live-price.ts
  */
-import { resolveLiveLastPrice, isMnqChartPrice } from "../lib/chart-live-price";
+import {
+  resolveLiveLastPrice,
+  isMnqChartPrice,
+  parseChartPriceInput,
+} from "../lib/chart-live-price";
 import { buildMarketContextAt } from "../lib/levels";
 import type { Bar } from "../lib/types";
 
@@ -14,10 +18,21 @@ function assert(cond: boolean, msg: string) {
 }
 
 // resolveLiveLastPrice unit checks
-assert(resolveLiveLastPrice(25000, 25012.5) === 25012.5, "prefers chart tick");
+assert(
+  resolveLiveLastPrice(25000, 25012.5, { source: "tradingview_live" }) === 25012.5,
+  "prefers chart tick"
+);
 assert(resolveLiveLastPrice(25000, null) === 25000, "falls back to bar close");
 assert(resolveLiveLastPrice(undefined, 15000) === 0, "rejects non-MNQ tick");
 assert(isMnqChartPrice(25000), "MNQ range valid");
+
+assert(parseChartPriceInput("30,185.00") === 30185, "comma thousands MNQ");
+assert(parseChartPriceInput("MNQU2026 30,185.00") === 30185, "symbol+year before price");
+assert(parseChartPriceInput("MNQU202630185.00") === 30185, "symbol glued to price");
+assert(parseChartPriceInput("2026") === null, "contract year alone rejected");
+assert(parseChartPriceInput("20263") === null, "year fragment rejected");
+assert(parseChartPriceInput("20185") === 20185, "legacy 20k range still parses");
+assert(parseChartPriceInput("30185.00") === 30185, "plain 30k tick");
 
 // Bias stack should follow live tick, not stale 1m close
 const asOf = new Date("2026-08-12T15:30:00-04:00");

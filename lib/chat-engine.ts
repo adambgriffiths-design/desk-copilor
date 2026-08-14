@@ -123,10 +123,15 @@ export async function buildChatSystemPrompt(
     richTrading
   ) {
     try {
-      const intel = await buildDeskMarketIntelligence({
-        chartLastPrice: input.chartLastPrice,
-        forceFresh: true,
-      });
+      const intel = await Promise.race([
+        buildDeskMarketIntelligence({
+          chartLastPrice: input.chartLastPrice,
+          forceFresh: true,
+        }),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error("Market data timed out")), 25000);
+        }),
+      ]);
       marketBlock = formatIntelligenceForPrompt(intel);
       if (richTrading || requiresDeepAnalysisPipeline(analysisDepth)) {
         const gate = evaluateAnalysisQualityGate(intel, analysisDepth);

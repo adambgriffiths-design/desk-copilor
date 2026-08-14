@@ -19,22 +19,52 @@
   let overlayOn = false;
   let resizeObserver = null;
   let resizeDebounce = null;
+  let drawGeneration = 0;
+  let overlayGeneration = 0;
+  let nativeDrawInFlight = false;
+  let drawMutex = Promise.resolve();
+
+  function syncBridgeRegistry() {
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        window.removeEventListener("message", onMsg);
+        resolve(false);
+      }, 1200);
+      function onMsg(event) {
+        if (event.source !== window) return;
+        if (event.data?.type === "DC_SYNC_REGISTRY_RESULT" || event.data?.type === "DC_BRIDGE_READY") {
+          clearTimeout(timer);
+          window.removeEventListener("message", onMsg);
+          resolve(true);
+        }
+      }
+      window.addEventListener("message", onMsg);
+      window.postMessage({ type: "DC_SYNC_REGISTRY" }, "*");
+    });
+  }
 
   function injectPageBridge() {
-    if (document.getElementById(PAGE_SCRIPT_ID)) {
-      return Promise.resolve();
+    const existing = document.getElementById(PAGE_SCRIPT_ID);
+    if (existing) {
+      return syncBridgeRegistry();
     }
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.id = PAGE_SCRIPT_ID;
       script.src = chrome.runtime.getURL("tv-bridge.js");
-      script.onload = () => setTimeout(resolve, 100);
+      script.onload = () => setTimeout(() => syncBridgeRegistry().then(resolve), 100);
       script.onerror = () => {
         script.remove();
         resolve();
       };
       (document.head || document.documentElement).appendChild(script);
     });
+  }
+
+  function withDrawMutex(fn) {
+    const run = drawMutex.then(fn);
+    drawMutex = run.catch(() => {});
+    return run;
   }
 
   function parsePrice(text) {
@@ -395,10 +425,12 @@
     detachResizeWatch();
     const pane = findChartPane();
     if (!pane) return;
+    const watchGen = overlayGeneration;
     resizeObserver = new ResizeObserver(() => {
-      if (!overlayOn) return;
+      if (!overlayOn || watchGen !== overlayGeneration) return;
       clearTimeout(resizeDebounce);
       resizeDebounce = setTimeout(() => {
+        if (!overlayOn || watchGen !== overlayGeneration) return;
         renderOverlay(activeLevels, activeZones, activePriceHint, activeVisibleRange);
       }, 350);
     });
@@ -424,20 +456,87 @@
     detachResizeWatch();
   }
 
-  function waitForTvResult(timeoutMs) {
+  function waitForTvResult(generation, opts) {
+    const maxWaitMs = Math.max(5000, Number(opts?.maxWaitMs) || 60000);
+    const pollMs = Math.max(250, Number(opts?.pollMs) || 500);
     return new Promise((resolve) => {
-      const timer = setTimeout(() => {
+      let settled = false;
+      const started = Date.now();
+      let bridgeNativeInFlight = false;
+
+      function finish(result) {
+        if (settled) return;
+        settled = true;
         window.removeEventListener("message", onMsg);
-        resolve({ ok: false, method: "tv_api", reason: "timeout" });
-      }, timeoutMs);
-      function onMsg(event) {
-        if (event.source !== window || event.data?.type !== "DC_DRAW_TV_RESULT") return;
-        clearTimeout(timer);
-        window.removeEventListener("message", onMsg);
-        resolve(event.data);
+        clearInterval(pollTimer);
+        clearInterval(waitTimer);
+        resolve(result);
       }
+
+      function onMsg(event) {
+        if (event.source !== window) return;
+        if (event.data?.type === "DC_PING_BRIDGE_RESULT") {
+          if (event.data.nativeDrawInFlight) {
+            bridgeNativeInFlight = true;
+            nativeDrawInFlight = true;
+          } else if (bridgeNativeInFlight) {
+            bridgeNativeInFlight = false;
+            nativeDrawInFlight = false;
+          }
+          return;
+        }
+        if (event.data?.type !== "DC_DRAW_TV_RESULT") return;
+        const msgGen = Number(event.data.generation);
+        if (Number.isFinite(msgGen) && msgGen !== generation) return;
+        if (event.data.inFlight === true) return;
+        nativeDrawInFlight = false;
+        finish(event.data);
+      }
+
+      const pollTimer = setInterval(() => {
+        if (generation !== drawGeneration) {
+          finish({
+            ok: false,
+            method: "tv_api",
+            reason: "superseded",
+            generation,
+            definitive: true,
+          });
+          return;
+        }
+        window.postMessage({ type: "DC_PING_BRIDGE" }, "*");
+      }, pollMs);
+
+      const waitTimer = setInterval(() => {
+        if (generation !== drawGeneration) {
+          finish({
+            ok: false,
+            method: "tv_api",
+            reason: "superseded",
+            generation,
+            definitive: true,
+          });
+          return;
+        }
+        if (Date.now() - started >= maxWaitMs && !bridgeNativeInFlight && !nativeDrawInFlight) {
+          finish({
+            ok: false,
+            method: "tv_api",
+            reason: "timeout",
+            generation,
+            definitive: false,
+            waitedMs: Date.now() - started,
+          });
+        }
+      }, pollMs);
+
       window.addEventListener("message", onMsg);
     });
+  }
+
+  async function preClearNativeShapes(generation) {
+    window.postMessage({ type: "DC_DRAW_TV", action: "preclear", generation }, "*");
+    await waitForTvResult(generation, { maxWaitMs: 8000 });
   }
 
   function refreshVisibleRange() {
@@ -540,12 +639,14 @@
     return a.bottom + LABEL_MIN_GAP_PX > b.top && b.bottom + LABEL_MIN_GAP_PX > a.top;
   }
 
-  function findLabelLane(lineY, placed) {
-    for (let lane = 0; lane < LABEL_MAX_LANES; lane++) {
+  function findLabelLane(lineY, placed, maxLanes = LABEL_MAX_LANES, startLane = 0) {
+    for (let offset = 0; offset < maxLanes; offset++) {
+      const lane = startLane + offset;
+      if (lane >= maxLanes) break;
       const bbox = labelBBox(lineY, labelLaneToAlign(lane), lane);
       if (!placed.some((p) => labelBboxesOverlap(p, bbox))) return lane;
     }
-    return LABEL_MAX_LANES - 1;
+    return maxLanes - 1;
   }
 
   function appendLabel(root, text, x, lineY, color, align, lane) {
@@ -609,83 +710,132 @@
       const cluster = items.slice(clusterStart, i);
       cluster.sort((a, b) => labelPriorityForDraw(b) - labelPriorityForDraw(a));
       const placed = [];
-      const seenLabelAtPrice = new Set();
 
-      for (const item of cluster) {
+      for (let ci = 0; ci < cluster.length; ci++) {
+        const item = cluster[ci];
         const lineY = priceToLineY(item.price, pMin, pMax, plotH, yOff);
-        const lane = findLabelLane(lineY, placed);
+        const lane = findLabelLane(lineY, placed, LABEL_MAX_LANES, ci % 2);
         item.ref.labelLane = lane;
         item.ref.labelAlign = labelLaneToAlign(lane);
         placed.push(labelBBox(lineY, labelLaneToAlign(lane), lane));
-
-        const priceKey = `${item.ref.label}:${item.price.toFixed(2)}`;
-        if (seenLabelAtPrice.has(priceKey)) {
-          item.ref.displayLabel = item.price.toFixed(1);
-        } else {
-          seenLabelAtPrice.add(priceKey);
-        }
       }
       clusterStart = i;
     }
   }
 
   async function drawOnChart(input, preferOverlay) {
-    const { levels, zones, priceHint } = normalizeInput(input);
-    activeLevels = levels || [];
-    activeZones = zones || [];
-    activePriceHint = priceHint;
-    if (!activeLevels.length && !activeZones.length) {
-      return { ok: false, method: "overlay", reason: "no_levels" };
-    }
+    return withDrawMutex(async () => {
+      const myGeneration = ++drawGeneration;
+      overlayGeneration = myGeneration;
+      nativeDrawInFlight = false;
+      overlayOn = false;
+      stopSyncLoop();
+      clearOverlay();
 
-    await injectPageBridge();
-    activeVisibleRange = await refreshVisibleRange();
-
-    const priceMin = priceHint?.visibleMin;
-    const priceMax = priceHint?.visibleMax;
-    if (Number.isFinite(priceMin) && Number.isFinite(priceMax)) {
-      assignStaggeredLabelAlign(activeLevels, activeZones, { priceMin, priceMax });
-    } else {
-      assignStaggeredLabelAlign(activeLevels, activeZones);
-    }
-
-    if (!preferOverlay && (activeLevels.length || activeZones.length)) {
-      window.postMessage(
-        { type: "DC_DRAW_TV", levels: activeLevels, zones: activeZones },
-        "*"
-      );
-      const tvResult = await waitForTvResult(3500);
-      if (tvResult.ok) {
-        overlayOn = false;
-        stopSyncLoop();
-        clearOverlay();
-        return { ...tvResult, mode: "native", hint: "TradingView lines with labels." };
+      const { levels, zones, priceHint } = normalizeInput(input);
+      activeLevels = levels || [];
+      activeZones = zones || [];
+      activePriceHint = priceHint;
+      if (!activeLevels.length && !activeZones.length) {
+        return { ok: false, method: "overlay", reason: "no_levels", generation: myGeneration };
       }
-    }
 
-    overlayOn = true;
-    const overlayResult = renderOverlay(
-      activeLevels,
-      activeZones,
-      activePriceHint,
-      activeVisibleRange
-    );
-    startSyncLoop();
+      await injectPageBridge();
+      await preClearNativeShapes(myGeneration);
+      if (myGeneration !== drawGeneration) {
+        return { ok: false, method: "overlay", reason: "superseded", generation: myGeneration };
+      }
 
-    const sourceNote =
-      overlayResult.source === "api"
-        ? "aligned to live MNQ prices"
-        : overlayResult.source === "axis"
-        ? "aligned to price scale"
-        : "aligned to level range — zoom chart if lines look off";
+      activeVisibleRange = await refreshVisibleRange();
+      if (myGeneration !== drawGeneration) {
+        return { ok: false, method: "overlay", reason: "superseded", generation: myGeneration };
+      }
 
-    return {
-      ...overlayResult,
-      mode: "overlay",
-      hint: overlayResult.ok
-        ? `Overlay (${sourceNote}) — lines + staggered labels.`
-        : "Could not find chart — zoom in on candles, or use Pine indicator",
-    };
+      const priceMin = priceHint?.visibleMin;
+      const priceMax = priceHint?.visibleMax;
+      if (Number.isFinite(priceMin) && Number.isFinite(priceMax)) {
+        assignStaggeredLabelAlign(activeLevels, activeZones, { priceMin, priceMax });
+      } else {
+        assignStaggeredLabelAlign(activeLevels, activeZones);
+      }
+
+      if (!preferOverlay && (activeLevels.length || activeZones.length)) {
+        nativeDrawInFlight = true;
+        window.postMessage(
+          {
+            type: "DC_DRAW_TV",
+            generation: myGeneration,
+            levels: activeLevels,
+            zones: activeZones,
+          },
+          "*"
+        );
+        const tvResult = await waitForTvResult(myGeneration);
+        nativeDrawInFlight = false;
+
+        if (myGeneration !== drawGeneration) {
+          return { ok: false, method: "tv_api", reason: "superseded", generation: myGeneration };
+        }
+
+        if (tvResult.ok) {
+          overlayOn = false;
+          stopSyncLoop();
+          clearOverlay();
+          return {
+            ...tvResult,
+            mode: "native",
+            generation: myGeneration,
+            hint: "TradingView lines with labels.",
+          };
+        }
+
+        const canFallback =
+          tvResult.definitive === true &&
+          tvResult.reason !== "superseded" &&
+          !nativeDrawInFlight;
+        if (!canFallback) {
+          return {
+            ...tvResult,
+            mode: "native",
+            generation: myGeneration,
+            hint:
+              tvResult.reason === "superseded"
+                ? "Draw superseded by newer request."
+                : "Native draw still running — overlay skipped to avoid duplication.",
+          };
+        }
+      }
+
+      if (myGeneration !== drawGeneration) {
+        return { ok: false, method: "overlay", reason: "superseded", generation: myGeneration };
+      }
+
+      overlayOn = true;
+      overlayGeneration = myGeneration;
+      const overlayResult = renderOverlay(
+        activeLevels,
+        activeZones,
+        activePriceHint,
+        activeVisibleRange
+      );
+      startSyncLoop();
+
+      const sourceNote =
+        overlayResult.source === "api"
+          ? "aligned to live MNQ prices"
+          : overlayResult.source === "axis"
+          ? "aligned to price scale"
+          : "aligned to level range — zoom chart if lines look off";
+
+      return {
+        ...overlayResult,
+        mode: "overlay",
+        generation: myGeneration,
+        hint: overlayResult.ok
+          ? `Overlay (${sourceNote}) — lines + staggered labels.`
+          : "Could not find chart — zoom in on candles, or use Pine indicator",
+      };
+    });
   }
 
   function clearOverlay() {
@@ -694,6 +844,9 @@
   }
 
   function clearAll() {
+    const clearGen = ++drawGeneration;
+    overlayGeneration = clearGen;
+    nativeDrawInFlight = false;
     activeLevels = [];
     activeZones = [];
     activePriceHint = null;
@@ -701,8 +854,10 @@
     overlayOn = false;
     stopSyncLoop();
     clearOverlay();
-    void injectPageBridge().then(() => {
-      window.postMessage({ type: "DC_DRAW_TV", action: "clear" }, "*");
+    void withDrawMutex(async () => {
+      await injectPageBridge();
+      window.postMessage({ type: "DC_DRAW_TV", action: "clear", generation: clearGen }, "*");
+      await waitForTvResult(clearGen, { maxWaitMs: 8000 });
     });
   }
 
@@ -761,5 +916,7 @@
     renderOverlay,
     getActiveLevels: () => activeLevels.slice(),
     isOverlayActive: () => overlayOn,
+    getDrawGeneration: () => drawGeneration,
+    syncBridge: syncBridgeRegistry,
   };
 })();

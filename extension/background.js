@@ -33,6 +33,23 @@ async function apiFetchTracked(path, options = {}) {
   }
 }
 
+async function notifyTradingViewTabsOverlaySync() {
+  const patterns = ["*://www.tradingview.com/*", "*://*.tradingview.com/*"];
+  const seen = new Set();
+  for (const url of patterns) {
+    const tabs = await chrome.tabs.query({ url });
+    for (const tab of tabs) {
+      if (!tab.id || seen.has(tab.id)) continue;
+      seen.add(tab.id);
+      try {
+        await chrome.tabs.sendMessage(tab.id, { type: "DC_OVERLAY_SYNC" });
+      } catch {
+        /* content script not ready */
+      }
+    }
+  }
+}
+
 async function reloadTradingViewTabs() {
   const patterns = ["*://www.tradingview.com/*", "*://*.tradingview.com/*"];
   const seen = new Set();
@@ -53,6 +70,7 @@ async function reloadTradingViewTabs() {
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === "install" || details.reason === "update") {
     ensureVercelApiBase().catch(() => {});
+    notifyTradingViewTabsOverlaySync().catch(() => {});
     reloadTradingViewTabs().catch(() => {});
   }
 });
@@ -86,10 +104,11 @@ chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener(async (msg) => {
     if (msg.type !== "START") return;
     try {
-      const base = await resolveApiBase();
+      const base = cachedBase && isVercelBase(cachedBase) ? cachedBase : await resolveApiBase();
       const res = await fetch(`${base}/api/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(90000),
         body: JSON.stringify({
           messages: msg.messages,
           symbol: msg.symbol,
@@ -108,6 +127,7 @@ chrome.runtime.onConnect.addListener((port) => {
         const err = await res.json().catch(() => ({}));
         connectionManager.recordRequestFailure(new Error(err.error || `HTTP ${res.status}`));
         safePortPost({ type: "error", error: err.error || `HTTP ${res.status}` });
+        safePortPost({ type: "done" });
         return;
       }
       connectionManager.recordRequestSuccess(base);
@@ -200,7 +220,7 @@ async function captureChartPng(tab) {
 async function runVerdictForTab(tab, symbol) {
   const dataUrl = await captureChartPng(tab);
   const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
-  return apiFetchTrackedTracked("/api/live-verdict", {
+  return apiFetchTracked("/api/live-verdict", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -255,11 +275,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (msg.type === "TTS") {
-    resolveApiBase()
+    Promise.resolve(cachedBase && isVercelBase(cachedBase) ? cachedBase : resolveApiBase())
       .then(async (base) => {
         const res = await fetch(`${base}/api/voice/tts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(45000),
           body: JSON.stringify({
             text: msg.text || "",
             voice: msg.voice || undefined,
@@ -319,6 +340,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         question: msg.question || "",
         voiceInput: msg.voiceInput === true,
         chartLastPrice: msg.chartLastPrice,
+        chartLastPriceSource: msg.chartLastPriceSource,
+        chartLastPriceTs: msg.chartLastPriceTs,
         conversationContext: msg.conversationContext,
       }),
       timeoutMs: 20000,

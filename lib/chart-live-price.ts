@@ -42,14 +42,51 @@ export function isMnqChartPrice(n: number): boolean {
   return Number.isFinite(n) && n >= 20000 && n <= 45000;
 }
 
+function stripFuturesSymbolPrefix(text: string): string {
+  return text.replace(/^[A-Z]{2,3}[FGHJKMNQUVXZ]\d{2,4}/i, "");
+}
+
 export function parseChartPriceInput(value: unknown): number | null {
   if (typeof value === "number" && isMnqChartPrice(value)) return roundMnq(value);
   if (typeof value !== "string") return null;
-  const cleaned = value.replace(/,/g, "").trim();
-  const m = cleaned.match(/(\d{4,5}(?:\.\d{1,2})?)/);
-  if (!m) return null;
-  const n = parseFloat(m[1]);
-  return isMnqChartPrice(n) ? roundMnq(n) : null;
+  const raw = value;
+  const candidates: { n: number; score: number }[] = [];
+
+  for (const m of raw.matchAll(/\b(\d{1,2},\d{3}(?:\.\d{1,2})?)\b/g)) {
+    const n = parseFloat(m[1].replace(/,/g, ""));
+    if (Number.isFinite(n)) candidates.push({ n, score: 12 });
+  }
+
+  const cleaned = raw.replace(/[\u00a0\s\u202f]/g, "").replace(/[,，']/g, "");
+  const digitSource = stripFuturesSymbolPrefix(cleaned);
+  for (const m of digitSource.matchAll(/(\d{5,6}(?:\.\d{1,2})?)/g)) {
+    const n = parseFloat(m[1]);
+    if (Number.isFinite(n)) candidates.push({ n, score: 8 });
+  }
+  for (const m of digitSource.matchAll(/(\d{4,5}(?:\.\d{1,2})?)/g)) {
+    const n = parseFloat(m[1]);
+    if (Number.isFinite(n)) candidates.push({ n, score: 4 });
+  }
+
+  let best: number | null = null;
+  let bestScore = -Infinity;
+  for (const { n, score } of candidates) {
+    if (isContractYearNoise(n)) continue;
+    if (!isMnqChartPrice(n)) continue;
+    const s = score + (n >= 25000 ? 2 : 0);
+    if (s > bestScore) {
+      bestScore = s;
+      best = n;
+    }
+  }
+  return best != null ? roundMnq(best) : null;
+}
+
+function isContractYearNoise(n: number): boolean {
+  if (!Number.isFinite(n)) return true;
+  if (n >= 2020 && n <= 2035 && Math.abs(n - Math.round(n)) < 0.001) return true;
+  if (n >= 20200 && n < 20400) return true;
+  return false;
 }
 
 export function isLiveTvPriceSource(source: string | null | undefined): boolean {
@@ -95,6 +132,16 @@ export function resolveAuthoritativePrice(input: LivePriceQuoteInput): Authorita
 
     if (source === "yahoo_bar_close") {
       return { value: roundMnq(chartPx), source, timestamp: ts, ageMs };
+    }
+
+    // Untagged chart tick (replay/tests/callers without source metadata)
+    if (source === "none" && !input.requireTvLive) {
+      return {
+        value: roundMnq(chartPx),
+        source: "tradingview_live",
+        timestamp: ts,
+        ageMs: Math.max(0, now - ts),
+      };
     }
   }
 

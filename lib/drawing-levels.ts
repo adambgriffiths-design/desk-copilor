@@ -640,9 +640,12 @@ function labelBboxesOverlap(
 export function findLabelLane(
   lineY: number,
   placed: Array<{ top: number; bottom: number }>,
-  maxLanes = LABEL_MAX_LANES
+  maxLanes = LABEL_MAX_LANES,
+  startLane = 0
 ): number {
-  for (let lane = 0; lane < maxLanes; lane++) {
+  for (let offset = 0; offset < maxLanes; offset++) {
+    const lane = startLane + offset;
+    if (lane >= maxLanes) break;
     const bbox = labelBBox(lineY, labelLaneToAlign(lane), lane);
     if (!placed.some((p) => labelBboxesOverlap(p, bbox))) return lane;
   }
@@ -698,11 +701,13 @@ export function assignStaggeredLabelAlign(
     if (chained) continue;
 
     const cluster = items.slice(clusterStart, i);
+    cluster.sort((a, b) => labelPriorityForDraw(b) - labelPriorityForDraw(a));
     const placed: Array<{ top: number; bottom: number }> = [];
 
-    for (const item of cluster) {
+    for (let ci = 0; ci < cluster.length; ci++) {
+      const item = cluster[ci];
       const lineY = priceToLineY(item.price, pMin, pMax, plotH, yOff);
-      const lane = findLabelLane(lineY, placed);
+      const lane = findLabelLane(lineY, placed, LABEL_MAX_LANES, ci % 2);
       applyLabelLane(item.ref, lane);
       placed.push(labelBBox(lineY, labelLaneToAlign(lane), lane));
     }

@@ -2,6 +2,9 @@
 const PRODUCTION_BASE = "https://desk-copilor.vercel.app";
 
 let cachedBase = PRODUCTION_BASE;
+/** Skip redundant /api/health probes between successful checks. */
+let lastHealthOkAt = 0;
+const HEALTH_TTL_MS = 120_000;
 
 function normalizeBase(url) {
   return String(url || "")
@@ -22,6 +25,7 @@ function rememberBase(base) {
   const normalized = normalizeBase(base);
   if (!normalized || !isVercelBase(normalized)) return;
   cachedBase = normalized;
+  lastHealthOkAt = Date.now();
   chrome.storage.local.set({ apiBaseLastGood: normalized }).catch(() => {});
 }
 
@@ -90,31 +94,60 @@ async function pingHealth(opts = {}) {
 }
 
 function clearApiCache() {
-  cachedBase = null;
+  cachedBase = PRODUCTION_BASE;
+  lastHealthOkAt = 0;
   chrome.storage.local.remove("apiBaseLastGood").catch(() => {});
 }
 
-async function resolveApiBase() {
-  const ping = await pingHealth();
+async function resolveApiBase(opts = {}) {
+  const force = opts.force === true;
+  const now = Date.now();
+  if (
+    !force &&
+    cachedBase &&
+    isVercelBase(cachedBase) &&
+    lastHealthOkAt > 0 &&
+    now - lastHealthOkAt < HEALTH_TTL_MS
+  ) {
+    return cachedBase;
+  }
+  const ping = await pingHealth({ quick: true, warm: opts.warm !== false });
   if (!ping.ok) throw new Error(ping.error);
   return ping.base;
 }
 
 async function apiFetch(path, options = {}) {
-  const timeoutMs = options.timeoutMs ?? 8000;
-  const base = await resolveApiBase();
-  const res = await fetch(`${base}${path}`, {
-    method: options.method || "GET",
-    headers: options.headers,
-    body: options.body,
-    signal: AbortSignal.timeout(timeoutMs),
-  });
+  const timeoutMs = options.timeoutMs ?? 15000;
+  let base;
+  try {
+    base = await resolveApiBase({ force: options.forceBaseRefresh === true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(msg.includes("offline") ? msg : `Backend unreachable — ${msg}`);
+  }
+  let res;
+  try {
+    res = await fetch(`${base}${path}`, {
+      method: options.method || "GET",
+      headers: options.headers,
+      body: options.body,
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (err?.name === "TimeoutError" || msg.toLowerCase().includes("timeout")) {
+      throw new Error(`Request timed out (${Math.round(timeoutMs / 1000)}s) — try again`);
+    }
+    lastHealthOkAt = 0;
+    throw new Error(`Network error — ${msg}`);
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg =
       data.error ||
       data.message ||
       (res.status === 500 ? `Backend error at ${base}` : `HTTP ${res.status}`);
+    if (res.status >= 500) lastHealthOkAt = 0;
     throw new Error(msg);
   }
   rememberBase(base);

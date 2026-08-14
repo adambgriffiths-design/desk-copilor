@@ -174,7 +174,8 @@ function noCallResult(
     marketDataWarning: null,
     learnedRulesVersion: 0,
     intent,
-    chartDataSource: snap?.source || "none",
+    chartDataSource:
+      snap?.source === "research_bars" ? "none" : snap?.source || "none",
   };
 }
 
