@@ -9,6 +9,7 @@
 (function () {
   const OVERLAY_ID = "dc-level-overlay";
   const PAGE_SCRIPT_ID = "dc-tv-page-bridge";
+  const BRIDGE_REV = "1.4.73";
   const STORAGE_KEY = "dc-levels-cache";
   const PRICE_HINT_MAX_AGE_MS = 60000;
 
@@ -45,13 +46,15 @@
 
   function injectPageBridge() {
     const existing = document.getElementById(PAGE_SCRIPT_ID);
-    if (existing) {
+    if (existing && existing.dataset.dcRev === BRIDGE_REV) {
       return syncBridgeRegistry();
     }
+    if (existing) existing.remove();
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.id = PAGE_SCRIPT_ID;
-      script.src = chrome.runtime.getURL("tv-bridge.js");
+      script.dataset.dcRev = BRIDGE_REV;
+      script.src = `${chrome.runtime.getURL("tv-bridge.js")}?v=${BRIDGE_REV}`;
       script.onload = () => setTimeout(() => syncBridgeRegistry().then(resolve), 100);
       script.onerror = () => {
         script.remove();
@@ -368,7 +371,7 @@
         const zoneLane = Number.isFinite(Number(zone.labelLane)) ? Number(zone.labelLane) : 0;
         appendLabel(
           root,
-          zone.label,
+          formatOverlayLabel(zone.displayLabel || zone.label, zone.id),
           leftX,
           Math.min(yTop, yBot),
           zone.borderColor || zone.color || "#78716c",
@@ -402,7 +405,7 @@
         const levelLane = Number.isFinite(Number(level.labelLane)) ? Number(level.labelLane) : 0;
         appendLabel(
           root,
-          level.label,
+          formatOverlayLabel(level.displayLabel || level.label, level.id),
           Math.min(startX, endX),
           y,
           level.color || "#22d3ee",
@@ -649,6 +652,15 @@
     return maxLanes - 1;
   }
 
+  function formatOverlayLabel(text, id) {
+    const fmt = window.DeskCopilotPlainLanguage?.formatChartLevelLabel;
+    if (typeof fmt === "function") return fmt(text || "", id);
+    return String(text || "")
+      .replace(/[\u200B-\u200D\u2060\uFEFF]/g, "")
+      .replace(/^DC\s+/i, "")
+      .replace(/^DC(?=[A-Z(])/, "");
+  }
+
   function appendLabel(root, text, x, lineY, color, align, lane) {
     const el = document.createElement("div");
     el.className = "dc-lvl-label";
@@ -873,7 +885,7 @@
 
   function formatClipboard(levels) {
     return (levels || [])
-      .map((l) => `${l.label}: ${Number(l.price).toFixed(2)}`)
+      .map((l) => `${formatOverlayLabel(l.label, l.id)}: ${Number(l.price).toFixed(2)}`)
       .join("\n");
   }
 

@@ -22,6 +22,32 @@ const connectionManager = DeskCopilotConnection.createConnectionManager({
 
 connectionManager.start();
 
+function dbgBg(hypothesisId, location, message, data) {
+  const payload = {
+    sessionId: "600bac",
+    runId: "analyse-4",
+    hypothesisId,
+    location,
+    message,
+    data: data || {},
+    timestamp: Date.now(),
+  };
+  const body = JSON.stringify(payload);
+  const headers = { "Content-Type": "application/json", "X-Debug-Session-Id": "600bac" };
+  fetch("http://127.0.0.1:7740/", {
+    method: "POST",
+    headers,
+    body,
+    signal: AbortSignal.timeout(1500),
+  }).catch(() => {});
+  fetch("http://127.0.0.1:7739/ingest/47d0d229-274e-48ee-bfd4-654ac892ba81", {
+    method: "POST",
+    headers,
+    body,
+    signal: AbortSignal.timeout(1500),
+  }).catch(() => {});
+}
+
 async function apiFetchTracked(path, options = {}) {
   try {
     const data = await apiFetch(path, options);
@@ -210,6 +236,14 @@ async function captureChartPng(tab) {
   const needsClick = errors.some(
     (m) => m.includes("activeTab") || m.includes("all_urls")
   );
+  // #region agent log
+  dbgBg("M", "background.js:captureChartPng", "capture-failed", {
+    errors,
+    needsClick,
+    tabId: fullTab?.id || null,
+    windowId: fullTab?.windowId ?? null,
+  });
+  // #endregion
   throw new Error(
     needsClick
       ? "Click The Trading Desk icon in Chrome toolbar (grants screenshot), then Get verdict"
@@ -245,6 +279,12 @@ async function deliverVerdict(tabId, payload) {
 
 /** Toolbar click = activeTab granted → screenshot works. */
 chrome.action.onClicked.addListener(async (tab) => {
+  // #region agent log
+  dbgBg("M", "background.js:onClicked", "toolbar-click", {
+    tabId: tab?.id || null,
+    url: String(tab?.url || "").slice(0, 80),
+  });
+  // #endregion
   if (!tab?.id || !tab.url?.includes("tradingview.com")) return;
   await deliverVerdict(tab.id, { status: "capturing" });
   try {
@@ -455,6 +495,34 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       .then(sendResponse)
       .catch((e) => sendResponse({ error: e.message }));
     return true;
+  }
+  if (msg.type === "QUOTE") {
+    const raw = String(msg.symbol || "MNQ");
+    const clearlyNq = /(?:^|[^A-Z])NQ(?:1!|[FGHJKMNQUVXZ]|$|[^A-Z])/i.test(raw) && !/MNQ/i.test(raw);
+    const resolved = clearlyNq ? "NQ" : "MNQ";
+    dbgBg("I", "background.js:QUOTE", "quote", { requested: raw, resolved });
+    apiFetchTracked(`/api/quote?symbol=${encodeURIComponent(resolved)}`, { timeoutMs: 8000 })
+      .then(sendResponse)
+      .catch((e) => sendResponse({ error: e.message }));
+    return true;
+  }
+  if (msg.type === "DEBUG_LOG") {
+    const body = JSON.stringify(msg.payload || {});
+    const headers = { "Content-Type": "application/json", "X-Debug-Session-Id": "600bac" };
+    fetch("http://127.0.0.1:7740/", {
+      method: "POST",
+      headers,
+      body,
+      signal: AbortSignal.timeout(1500),
+    }).catch(() => {});
+    fetch("http://127.0.0.1:7739/ingest/47d0d229-274e-48ee-bfd4-654ac892ba81", {
+      method: "POST",
+      headers,
+      body,
+      signal: AbortSignal.timeout(1500),
+    }).catch(() => {});
+    sendResponse({ ok: true });
+    return false;
   }
   if (msg.type === "WARM") {
     apiFetchTracked("/api/warm", { timeoutMs: 12000 })

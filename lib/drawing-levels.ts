@@ -33,6 +33,7 @@ import {
 } from "./market-data";
 import type { RelativeEqualPool } from "./structure";
 import { rehRelTolerance } from "./structure";
+import { formatChartLevelLabel } from "./plain-language";
 
 const FHDR_END_MIN = 10 * 60 + 30;
 
@@ -291,7 +292,7 @@ export function buildDrawingLevels(
 
     push(levels, seen, {
       id: "org_top",
-      label: "Opening range gap top",
+      label: "Opening Range Gap Top",
       price: ctx.org.top,
       color: LEVEL_COLORS.org,
       dash: "4 3",
@@ -300,7 +301,7 @@ export function buildDrawingLevels(
     });
     push(levels, seen, {
       id: "org_bottom",
-      label: "Opening range gap bottom",
+      label: "Opening Range Gap Bottom",
       price: ctx.org.bottom,
       color: LEVEL_COLORS.org,
       dash: "4 3",
@@ -309,7 +310,7 @@ export function buildDrawingLevels(
     });
     push(levels, seen, {
       id: "org_ce",
-      label: "ORG midpoint (50%)",
+      label: "Opening Range Gap Midpoint (50%)",
       price: ctx.org.ce,
       color: LEVEL_COLORS.orgCe,
       dash: "6 4",
@@ -322,7 +323,7 @@ export function buildDrawingLevels(
     const nwogStart = ctx.nwog.startTime;
     push(levels, seen, {
       id: "nwog_top",
-      label: "New week opening gap top",
+      label: "New Week Opening Gap Top",
       price: ctx.nwog.top,
       color: LEVEL_COLORS.gap,
       dash: "4 3",
@@ -331,7 +332,7 @@ export function buildDrawingLevels(
     });
     push(levels, seen, {
       id: "nwog_bottom",
-      label: "New week opening gap bottom",
+      label: "New Week Opening Gap Bottom",
       price: ctx.nwog.bottom,
       color: LEVEL_COLORS.gap,
       dash: "4 3",
@@ -345,16 +346,16 @@ export function buildDrawingLevels(
   const sessionLines: Array<
     [string, number, string, Bar[], number | undefined, "high" | "low"]
   > = [
-    ["asia_high", ctx.sessions.asiaHigh, "Asia session high", sessionWindows.asia, ctx.sessions.asiaHighTime, "high"],
-    ["asia_low", ctx.sessions.asiaLow, "Asia session low", sessionWindows.asia, ctx.sessions.asiaLowTime, "low"],
-    ["london_high", ctx.sessions.londonHigh, "London session high", sessionWindows.london, ctx.sessions.londonHighTime, "high"],
-    ["london_low", ctx.sessions.londonLow, "London session low", sessionWindows.london, ctx.sessions.londonLowTime, "low"],
-    ["ny_pre_high", ctx.sessions.nyPreHigh, "New York pre-market high", sessionWindows.nyPre, ctx.sessions.nyPreHighTime, "high"],
-    ["ny_pre_low", ctx.sessions.nyPreLow, "New York pre-market low", sessionWindows.nyPre, ctx.sessions.nyPreLowTime, "low"],
-    ["ny_rth_high", ctx.sessions.nyRthHigh, "New York RTH high", sessionWindows.nyRth, ctx.sessions.nyRthHighTime, "high"],
-    ["ny_rth_low", ctx.sessions.nyRthLow, "New York RTH low", sessionWindows.nyRth, ctx.sessions.nyRthLowTime, "low"],
-    ["ny_pm_high", ctx.sessions.nyPmHigh, "New York PM high", sessionWindows.nyPm, ctx.sessions.nyPmHighTime, "high"],
-    ["ny_pm_low", ctx.sessions.nyPmLow, "New York PM low", sessionWindows.nyPm, ctx.sessions.nyPmLowTime, "low"],
+    ["asia_high", ctx.sessions.asiaHigh, "Asia Session High", sessionWindows.asia, ctx.sessions.asiaHighTime, "high"],
+    ["asia_low", ctx.sessions.asiaLow, "Asia Session Low", sessionWindows.asia, ctx.sessions.asiaLowTime, "low"],
+    ["london_high", ctx.sessions.londonHigh, "London Session High", sessionWindows.london, ctx.sessions.londonHighTime, "high"],
+    ["london_low", ctx.sessions.londonLow, "London Session Low", sessionWindows.london, ctx.sessions.londonLowTime, "low"],
+    ["ny_pre_high", ctx.sessions.nyPreHigh, "New York Pre-Market High", sessionWindows.nyPre, ctx.sessions.nyPreHighTime, "high"],
+    ["ny_pre_low", ctx.sessions.nyPreLow, "New York Pre-Market Low", sessionWindows.nyPre, ctx.sessions.nyPreLowTime, "low"],
+    ["ny_rth_high", ctx.sessions.nyRthHigh, "New York Regular Trading Hours High", sessionWindows.nyRth, ctx.sessions.nyRthHighTime, "high"],
+    ["ny_rth_low", ctx.sessions.nyRthLow, "New York Regular Trading Hours Low", sessionWindows.nyRth, ctx.sessions.nyRthLowTime, "low"],
+    ["ny_pm_high", ctx.sessions.nyPmHigh, "New York Afternoon Session High", sessionWindows.nyPm, ctx.sessions.nyPmHighTime, "high"],
+    ["ny_pm_low", ctx.sessions.nyPmLow, "New York Afternoon Session Low", sessionWindows.nyPm, ctx.sessions.nyPmLowTime, "low"],
   ];
   for (const [id, price, label, windowBars, timeHint, kind] of sessionLines) {
     const startTime = anchorFromSessionWindow(windowBars, price, kind, timeHint);
@@ -401,7 +402,7 @@ export function buildDrawingLevels(
     const idx = rehRelCounts[pool.type]++;
     push(levels, seen, {
       id: `${pool.type}_${idx}`,
-      label: pool.type === "reh" ? "REH" : "REL",
+      label: pool.type === "reh" ? "Relative Equal Highs" : "Relative Equal Lows",
       price: pool.price,
       color: LEVEL_COLORS.liquidity,
       dash: "6 4",
@@ -431,7 +432,7 @@ export function computeFhdr(m1: Bar[], fetchedAt: string): FhdrRange | null {
 export function buildFhdrZone(fhdr: FhdrRange): DrawingZone {
   return {
     id: "fhdr_band",
-    label: "FHDR (9:30–10:30)",
+    label: "First Hour Dealing Range (9:30–10:30)",
     top: fhdr.high,
     bottom: fhdr.low,
     type: "bullish",
@@ -472,7 +473,7 @@ export function buildFirstPresentedFvgZone(
 
   return {
     id: "fpfvg_ny_opening",
-    label: "First presented 1m FVG",
+    label: "First Presented One-Minute Fair Value Gap",
     top: fvg.top,
     bottom: fvg.bottom,
     type: fvg.type,
@@ -503,7 +504,7 @@ export function buildDrawingZones(
 
     return {
       id: `d_fvg_${fvg.type}_${i}`,
-      label: `Daily ${fvg.type} FVG · ${fvg.formedAt}`,
+      label: `Daily ${fvg.type} Fair Value Gap · ${fvg.formedAt}`,
       top: fvg.top,
       bottom: fvg.bottom,
       type: fvg.type,
@@ -719,10 +720,12 @@ export function formatLevelsForClipboard(
   levels: DrawingLevel[],
   zones: DrawingZone[] = []
 ): string {
-  const lines = levels.map((l) => `${l.label}: ${l.price.toFixed(2)}`);
+  const lines = levels.map(
+    (l) => `${formatChartLevelLabel(l.label, l.id)}: ${l.price.toFixed(2)}`
+  );
   for (const z of zones) {
     lines.push(
-      `${z.label}: ${Math.min(z.top, z.bottom).toFixed(2)} – ${Math.max(z.top, z.bottom).toFixed(2)}`
+      `${formatChartLevelLabel(z.label, z.id)}: ${Math.min(z.top, z.bottom).toFixed(2)} – ${Math.max(z.top, z.bottom).toFixed(2)}`
     );
   }
   return lines.join("\n");
@@ -730,7 +733,10 @@ export function formatLevelsForClipboard(
 
 export function formatLevelsForPineInputs(levels: DrawingLevel[]): string {
   return JSON.stringify(
-    levels.map((l) => ({ label: l.label, price: Number(l.price.toFixed(2)) })),
+    levels.map((l) => ({
+      label: formatChartLevelLabel(l.label, l.id),
+      price: Number(l.price.toFixed(2)),
+    })),
     null,
     2
   );

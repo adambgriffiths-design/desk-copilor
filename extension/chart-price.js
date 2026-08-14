@@ -6,7 +6,155 @@
   const PRICE_HINT_MAX_AGE_MS = 60_000;
   const BRIDGE_CACHE_MS = 300;
   const SYNC_BRIDGE_MAX_MS = 2000;
-  const PRICE_WATCH_POLL_MS = 500;
+  const PRICE_WATCH_POLL_MS = 50;
+  // #region agent log
+  let dbgPriceLast = 0;
+  try {
+    chrome.runtime.sendMessage({
+      type: "DEBUG_LOG",
+      payload: {
+        sessionId: "600bac",
+        runId: "ticker-3",
+        hypothesisId: "J",
+        location: "chart-price.js:boot",
+        message: "chart-price loaded",
+        data: { href: String(location.href || "").slice(0, 80) },
+        timestamp: Date.now(),
+      },
+    });
+  } catch {
+    /* ignore */
+  }
+  function dbgPrice(hypothesisId, location, message, data) {
+    const now = Date.now();
+    if (now - dbgPriceLast < 250) return;
+    dbgPriceLast = now;
+    try {
+      chrome.runtime.sendMessage({
+        type: "DEBUG_LOG",
+        payload: {
+          sessionId: "600bac",
+          runId: "ticker-3",
+          hypothesisId,
+          location,
+          message,
+          data: data || {},
+          timestamp: now,
+        },
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+  // #endregion
+
+  const UPDATE_MODE_KEY = "dc-price-update-mode";
+  function readStoredUpdateMode() {
+    try {
+      const v = localStorage.getItem(UPDATE_MODE_KEY);
+      if (v === "minute" || v === "tick") return v;
+    } catch {
+      /* ignore */
+    }
+    return "tick";
+  }
+  let updateMode = readStoredUpdateMode();
+  let lastMinuteBucket = -1;
+
+  function classifyNasdaqRoot(text) {
+    const s = String(text || "").toUpperCase();
+    if (!s) return null;
+    if (/(?:^|[^A-Z])MNQ(?:1!|[FGHJKMNQUVXZ]\d{1,4}|[^A-Z]|$)/.test(s)) return "MNQ";
+    if (/(?:^|[^A-Z])NQ(?:1!|[FGHJKMNQUVXZ]\d{1,4}|[^A-Z]|$)/.test(s)) return "NQ";
+    return null;
+  }
+
+  function packChartSymbol(root, raw) {
+    const r = root === "NQ" ? "NQ" : "MNQ";
+    return {
+      root: r,
+      tvSymbol: r === "NQ" ? "NQ1!" : "MNQ1!",
+      quoteSymbol: r,
+      raw: String(raw || r),
+    };
+  }
+
+  /** URL / header / legend — MNQ when ambiguous; NQ only when the chart is clearly NQ. */
+  function detectChartSymbol() {
+    const ranked = [];
+    try {
+      const q = new URL(location.href).searchParams.get("symbol");
+      if (q) ranked.push({ text: decodeURIComponent(q), weight: 100 });
+    } catch {
+      /* ignore */
+    }
+    const header =
+      document.querySelector("[data-symbol-short]") || document.querySelector(".js-symbol-edit");
+    if (header) {
+      ranked.push({
+        text: header.getAttribute("data-symbol-short") || header.textContent,
+        weight: 80,
+      });
+    }
+    const legend = document.querySelector('[data-name="legend-source-title"]');
+    if (legend) ranked.push({ text: legend.textContent, weight: 70 });
+    ranked.push({ text: document.title, weight: 20 });
+    ranked.sort((a, b) => b.weight - a.weight);
+    for (const { text } of ranked) {
+      const root = classifyNasdaqRoot(text);
+      if (root) return packChartSymbol(root, text);
+    }
+    return packChartSymbol("MNQ", "default");
+  }
+
+  function nearbySymbolBlob(el) {
+    let node = el;
+    let blob = "";
+    for (let i = 0; i < 6 && node; i++) {
+      blob += " " + (node.getAttribute?.("data-symbol-short") || "");
+      blob += " " + (node.getAttribute?.("data-symbol-full") || "");
+      node = node.parentElement;
+    }
+    return blob.toUpperCase();
+  }
+
+  function symbolMatchScore(el, preferredRoot) {
+    const blob = nearbySymbolBlob(el);
+    const root = classifyNasdaqRoot(blob);
+    if (root === preferredRoot) return 24;
+    if (root && root !== preferredRoot) return -40;
+    return 0;
+  }
+
+  function minuteBucket(ts) {
+    return Math.floor((Number(ts) || Date.now()) / 60000);
+  }
+
+  function setUpdateMode(mode) {
+    const next = mode === "minute" ? "minute" : "tick";
+    updateMode = next;
+    try {
+      localStorage.setItem(UPDATE_MODE_KEY, next);
+    } catch {
+      /* ignore */
+    }
+    lastMinuteBucket = -1;
+    lastWatchedPrice = null;
+    lastQuote = null;
+    // #region agent log
+    dbgPrice("N", "chart-price.js:setUpdateMode", "mode", {
+      mode: next,
+      symbol: detectChartSymbol().root,
+    });
+    // #endregion
+    emitPriceIfChanged();
+    restartPricePoll();
+    return next;
+  }
+
+  function getUpdateMode() {
+    return updateMode === "minute" ? "minute" : "tick";
+  }
 
   function roundMnq(n) {
     return Math.round(n * 4) / 4;
@@ -71,9 +219,11 @@
     return n >= 20000 && n <= 45000;
   }
 
-  /** Strip CME root + month + year (e.g. MNQU2026) before digit scan. */
+  /** Strip continuous (NQ1!) and CME month (MNQU2026) prefixes before digit scan. */
   function stripFuturesSymbolPrefix(text) {
-    return String(text).replace(/^[A-Z]{2,3}[FGHJKMNQUVXZ]\d{2,4}/i, "");
+    return String(text)
+      .replace(/^(MNQ|NQ|MES|ES|M2K|RTY|MYM|YM)[1!]+\s*/i, "")
+      .replace(/^[A-Z]{2,3}[FGHJKMNQUVXZ]\d{2,4}/i, "");
   }
 
   /** Parse MNQ tick from TV text — prefer comma thousands (30,185.00); reject symbol/year noise. */
@@ -228,10 +378,15 @@
       '[data-field="last_price"]',
       '[data-field="lp"]',
       ".js-symbol-last",
+      '[class*="js-symbol-last"]',
+      '[class*="tv-symbol-price-quote"]',
       '[class*="lastContainer"] [class*="value"]',
       '[class*="symbolLast"]',
       '[class*="last-J"]',
       '[class*="lastBlock"] [class*="value"]',
+      '[data-name="legend-source-item"] [class*="valueItem"]',
+      '[class*="legend-source-item"] [class*="valueItem"]',
+      '[data-name="legend-source-title"]',
     ];
     for (const sel of selectors) {
       for (const el of document.querySelectorAll(sel)) {
@@ -259,12 +414,12 @@
         ) || [];
       for (const el of items) {
         const text = (el.textContent || "").replace(/\s+/g, " ");
-        const m = text.match(/\bC\s*(\d{1,2},\d{3}(?:\.\d{1,2})?|\d{4,6}(?:\.\d{1,2})?)/i);
+        const m = text.match(/\bC[:\s]*(\d{1,2},\d{3}(?:\.\d{1,2})?|\d{4,6}(?:\.\d{1,2})?)/i);
         if (m) {
           const n = parseMnqPrice(m[1], anchor);
           if (n) return n;
         }
-        const m2 = text.match(/\bClose\s*(\d{1,2},\d{3}(?:\.\d{1,2})?|\d{4,6}(?:\.\d{1,2})?)/i);
+        const m2 = text.match(/\bClose[:\s]*(\d{1,2},\d{3}(?:\.\d{1,2})?|\d{4,6}(?:\.\d{1,2})?)/i);
         if (m2) {
           const n = parseMnqPrice(m2[1], anchor);
           if (n) return n;
@@ -342,7 +497,7 @@
     if (bridgeInflight) return bridgeInflight;
 
     bridgeInflight = (async () => {
-      const res = await requestBridgePrice(200);
+      const res = await requestBridgePrice(2800);
       bridgeInflight = null;
       const price = Number(res?.price);
       const trustedAnchor = isTrustedAnchor(anchor) ? anchor : null;
@@ -351,7 +506,7 @@
         (isMnqPrice(price, trustedAnchor) || (trustedAnchor != null && isMnqPrice(price, null)));
       if (ok) {
         const rounded = roundMnq(price);
-        const src = res?.source === "tv_api" ? "tv_api" : "tv_bar_close";
+        const src = "tradingview_live";
         bridgeCache = { price: rounded, ts: Date.now(), source: src };
         return rounded;
       }
@@ -365,6 +520,55 @@
     return source === "tradingview_live" || source === "tradingview_quote";
   }
 
+  /** Chart page often has no js-symbol-last — scan header / right axis only. */
+  function scanVisibleLast(anchor) {
+    const t0 = performance.now();
+    const trustedAnchor = isTrustedAnchor(anchor) ? anchor : null;
+    const headerBottom = Math.max(140, window.innerHeight * 0.16);
+    const axisLeft = window.innerWidth - 140;
+    const hits = [];
+    const roots = collectDomRoots();
+    for (const root of roots) {
+      const nodes = root.querySelectorAll?.("span, div, td, label") || [];
+      for (const el of nodes) {
+        const text = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+        if (!text || text.length > 16) continue;
+        if (!/\d{1,2},\d{3}(?:\.\d{1,2})?/.test(text) && !/\d{5}\.\d{1,2}/.test(text)) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width < 1 || r.height < 1 || r.height > 48) continue;
+        const inHeader = r.top >= 0 && r.bottom <= headerBottom;
+        const onAxis = r.left >= axisLeft;
+        if (!inHeader && !onAxis) continue;
+        let n = parseMnqPrice(text, trustedAnchor);
+        if (n == null && trustedAnchor != null) n = parseMnqPrice(text, null);
+        if (n == null) continue;
+        const known = lastWatchedPrice ?? lastQuote?.value ?? trustedAnchor;
+        if (known != null && Math.abs(n - known) > 80) continue;
+        let score = inHeader ? 10 : 8;
+        if (text.includes(",")) score += 4;
+        if (n >= 25000) score += 2;
+        score += symbolMatchScore(el, detectChartSymbol().root);
+        if (score < 0) continue;
+        hits.push({ n, score, el });
+      }
+    }
+    const ms = Math.round((performance.now() - t0) * 10) / 10;
+    const det = detectChartSymbol();
+    // #region agent log
+    dbgPrice("G", "chart-price.js:scanVisibleLast", "scan", {
+      ms,
+      hits: hits.length,
+      best: hits[0]?.n ?? null,
+      symbol: det.root,
+      path: "scan",
+    });
+    // #endregion
+    if (!hits.length) return null;
+    hits.sort((a, b) => b.score - a.score);
+    if (hits[0].el) observedPriceEl = hits[0].el;
+    return hits[0].n;
+  }
+
   function readDomPriceSync(anchor) {
     const header = readFromHeaderLast(anchor);
     if (header != null) return { value: header, source: "tradingview_live" };
@@ -375,24 +579,158 @@
     const axis = readFromPriceScale(anchor);
     if (axis != null) return { value: axis, source: "tradingview_live" };
 
+    const legend = readFromLegendClose(anchor);
+    if (legend != null) return { value: legend, source: "tv_bar_close" };
+
+    const scanned = scanVisibleLast(anchor);
+    if (scanned != null) return { value: scanned, source: "tradingview_live" };
+
     return null;
   }
 
-  /** Sync quote read — header/quote/axis last; cached bar close when DOM empty. */
+  let observedPriceEl = null;
+
+  const LIVE_PRICE_SELECTORS = [
+    '[data-field="last"]',
+    '[data-field="last_price"]',
+    '[data-field="lp"]',
+    ".js-symbol-last",
+    '[class*="js-symbol-last"]',
+    '[class*="price-axis-last"]',
+    '[class*="lastValueBar"]',
+  ];
+
+  function findLivePriceEl() {
+    const preferred = detectChartSymbol().root;
+    if (observedPriceEl && observedPriceEl.isConnected) {
+      const text = (observedPriceEl.innerText || observedPriceEl.textContent || "").replace(/\s+/g, " ").trim();
+      const n = parseMnqPrice(text, priceAnchor()) ?? parseMnqPrice(text, null);
+      if (n != null && symbolMatchScore(observedPriceEl, preferred) >= 0) return observedPriceEl;
+    }
+    let best = null;
+    let bestScore = -1;
+    for (const sel of LIVE_PRICE_SELECTORS) {
+      for (const el of document.querySelectorAll(sel)) {
+        const text = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+        const n = parseMnqPrice(text, priceAnchor()) ?? parseMnqPrice(text, null);
+        if (n == null) continue;
+        const r = el.getBoundingClientRect();
+        let score = 4 + symbolMatchScore(el, preferred);
+        if (r.top >= 0 && r.bottom <= 140) score += 6;
+        if (score > bestScore) {
+          bestScore = score;
+          best = el;
+        }
+      }
+    }
+    if (best && bestScore >= 0) return best;
+    return observedPriceEl && observedPriceEl.isConnected ? observedPriceEl : null;
+  }
+
+  function readPinnedPrice() {
+    const el = findLivePriceEl();
+    if (!el) return null;
+    observedPriceEl = el;
+    const text = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+    return parseMnqPrice(text, priceAnchor()) ?? parseMnqPrice(text, null);
+  }
+
+  let lastExpensiveReadAt = 0;
+
+  /** Sync quote read — pinned Last first; never freeze on an 8s cache. */
   function readQuoteSync() {
-    const anchor = priceAnchor();
     const now = Date.now();
-
-    let hit = readDomPriceSync(anchor);
-    if (!hit && anchor != null) hit = readDomPriceSync(null);
-    if (hit) return makeQuote(hit.value, hit.source, now);
-
-    const cachedBridge = readBridgeCacheSync(anchor) ?? readBridgeCacheSync(null);
-    if (cachedBridge != null) {
-      return makeQuote(cachedBridge, bridgeCache.source || "tv_bar_close", bridgeCache.ts);
+    if (getUpdateMode() === "minute" && lastQuote && lastQuote.source === "tv_1m_close") {
+      return { ...lastQuote, ageMs: now - lastQuote.timestamp };
     }
 
-    return null;
+    const anchor = priceAnchor();
+
+    if (lastQuote && now - lastQuote.timestamp < 80) {
+      return { ...lastQuote, ageMs: now - lastQuote.timestamp };
+    }
+
+    const pinned = readPinnedPrice();
+    if (pinned != null) {
+      const q = makeQuote(pinned, "tradingview_live", now);
+      lastQuote = q;
+      // #region agent log
+      dbgPrice("H", "chart-price.js:readQuoteSync", "quote", {
+        path: "pin",
+        value: q.value,
+        source: q.source,
+        ageMs: 0,
+        symbol: detectChartSymbol().root,
+        mode: getUpdateMode(),
+      });
+      // #endregion
+      return q;
+    }
+
+    let hit = readFromHeaderLast(anchor) ?? readFromQuoteStrip(anchor);
+    if (!hit && anchor != null) {
+      hit = readFromHeaderLast(null) ?? readFromQuoteStrip(null);
+    }
+    if (hit != null) {
+      const q = makeQuote(hit, "tradingview_live", now);
+      lastQuote = q;
+      // #region agent log
+      dbgPrice("H", "chart-price.js:readQuoteSync", "quote", {
+        path: "dom",
+        value: q.value,
+        source: q.source,
+        ageMs: 0,
+        symbol: detectChartSymbol().root,
+        mode: getUpdateMode(),
+      });
+      // #endregion
+      return q;
+    }
+
+    if (lastQuote && now - lastQuote.timestamp < 250) {
+      const stale = { ...lastQuote, ageMs: now - lastQuote.timestamp };
+      // #region agent log
+      dbgPrice("H", "chart-price.js:readQuoteSync", "quote", { path: "stale250", value: stale.value, source: stale.source, ageMs: stale.ageMs });
+      // #endregion
+      return stale;
+    }
+
+    if (now - lastExpensiveReadAt >= 2000) {
+      lastExpensiveReadAt = now;
+      let slow = readDomPriceSync(anchor);
+      if (!slow && anchor != null) slow = readDomPriceSync(null);
+      if (slow) {
+        const q = makeQuote(slow.value, slow.source, now);
+        lastQuote = q;
+        // #region agent log
+        dbgPrice("H", "chart-price.js:readQuoteSync", "quote", {
+        path: "scan",
+        value: q.value,
+        source: q.source,
+        ageMs: 0,
+        symbol: detectChartSymbol().root,
+        mode: getUpdateMode(),
+      });
+        // #endregion
+        return q;
+      }
+    }
+
+    const cachedBridge = readBridgeCacheSync(anchor) ?? readBridgeCacheSync(null);
+    if (cachedBridge != null && lastQuote && now - lastQuote.timestamp < 250) {
+      return lastQuote;
+    }
+
+    // #region agent log
+    dbgPrice("H", "chart-price.js:readQuoteSync", "quote", {
+      path: "null",
+      symbol: detectChartSymbol().root,
+      mode: getUpdateMode(),
+    });
+    // #endregion
+    return lastQuote && now - lastQuote.timestamp < 2000
+      ? { ...lastQuote, ageMs: now - lastQuote.timestamp }
+      : null;
   }
 
   /** Full quote read — falls back to TV bridge bar close, not stale draw-cache anchor. */
@@ -407,7 +745,10 @@
     let bridge = await readFromBridge(anchor);
     if (bridge == null && anchor != null) bridge = await readFromBridge(null);
     if (bridge != null) {
-      const q = makeQuote(bridge, "tv_bar_close", bridgeCache.ts || Date.now());
+      const q = makeQuote(bridge, "tradingview_live", bridgeCache.ts || Date.now());
+      if (lastQuote && isLiveQuoteSource(lastQuote.source) && Date.now() - lastQuote.timestamp < 2000) {
+        return lastQuote;
+      }
       lastQuote = q;
       return q;
     }
@@ -445,44 +786,130 @@
   let priceChangeCb = null;
   let lastWatchedPrice = null;
   let priceObserver = null;
-  let observedPriceEl = null;
   let pricePollTimer = null;
+  let tickCount = 0;
 
-  function emitPriceIfChanged() {
-    const q = readQuoteSync();
-    if (!q) return;
+  function applyTick(value, source, timestamp) {
+    if (!Number.isFinite(value)) return;
+    const det = detectChartSymbol();
+    let src = source || "tradingview_live";
+    if (getUpdateMode() === "minute") {
+      const bucket = minuteBucket(timestamp);
+      if (lastMinuteBucket === bucket && lastWatchedPrice != null) return;
+      lastMinuteBucket = bucket;
+      src = "tv_1m_close";
+    }
+    const q = makeQuote(value, src, timestamp || Date.now());
     if (lastWatchedPrice != null && Math.abs(q.value - lastWatchedPrice) < 0.25) return;
     lastWatchedPrice = q.value;
     lastQuote = q;
+    tickCount += 1;
     if (!isLiveQuoteSource(q.source)) {
       bridgeCache = { price: q.value, ts: q.timestamp, source: q.source };
     }
-    priceChangeCb?.(q.value);
+    // #region agent log
+    dbgPrice("F", "chart-price.js:applyTick", "tick-emit", {
+      value: q.value,
+      source: q.source,
+      ageMs: q.ageMs,
+      observed: Boolean(observedPriceEl),
+      tickCount,
+      symbol: det.root,
+      path: getUpdateMode() === "minute" ? "minute" : "tick",
+      mode: getUpdateMode(),
+    });
+    // #endregion
+    priceChangeCb?.(q.value, q);
+  }
+
+  function emitPriceIfChanged() {
+    if (getUpdateMode() === "minute") {
+      const bucket = minuteBucket(Date.now());
+      if (bucket === lastMinuteBucket && lastWatchedPrice != null) return;
+      const legend = readFromLegendClose(priceAnchor());
+      const pinned = readPinnedPrice();
+      const value = legend ?? pinned;
+      if (value != null) {
+        applyTick(value, "tv_1m_close", Date.now());
+        return;
+      }
+      const q = readQuoteSync();
+      if (!q) {
+        dbgPrice("F", "chart-price.js:emitPriceIfChanged", "no-quote", {
+          observed: Boolean(observedPriceEl),
+          symbol: detectChartSymbol().root,
+          mode: "minute",
+        });
+        return;
+      }
+      applyTick(q.value, "tv_1m_close", Date.now());
+      return;
+    }
+    const pinned = readPinnedPrice();
+    if (pinned != null) {
+      applyTick(pinned, "tradingview_live", Date.now());
+      return;
+    }
+    const q = readQuoteSync();
+    if (!q) {
+      // #region agent log
+      dbgPrice("F", "chart-price.js:emitPriceIfChanged", "no-quote", {
+        observed: Boolean(observedPriceEl),
+        symbol: detectChartSymbol().root,
+        mode: "tick",
+      });
+      // #endregion
+      return;
+    }
+    applyTick(q.value, q.source, q.timestamp);
   }
 
   function attachPriceObserver() {
-    const el =
-      document.querySelector('[data-field="last"]') ||
-      document.querySelector('[data-field="last_price"]') ||
-      document.querySelector('[data-field="lp"]') ||
-      document.querySelector(".js-symbol-last");
+    const el = findLivePriceEl();
     if (el === observedPriceEl) return;
     priceObserver?.disconnect();
     observedPriceEl = el;
+    // #region agent log
+    dbgPrice("J", "chart-price.js:attachPriceObserver", "observer-el", {
+      found: Boolean(el),
+      cls: el ? String(el.className || "").slice(0, 80) : null,
+    });
+    // #endregion
     if (!el) return;
     priceObserver = new MutationObserver(() => emitPriceIfChanged());
     priceObserver.observe(el, { childList: true, subtree: true, characterData: true });
   }
 
+  window.addEventListener("message", (event) => {
+    if (event.source !== window || event.data?.type !== "DC_PRICE_TICK") return;
+    if (getUpdateMode() === "minute") return;
+    const src = event.data.source || "tradingview_live";
+    if (src === "tv_bar_close" || src === "tv_1m_close") {
+      if (lastQuote && isLiveQuoteSource(lastQuote.source) && Date.now() - lastQuote.timestamp < 2000) {
+        return;
+      }
+    }
+    const n = Number(event.data.price);
+    if (!Number.isFinite(n)) return;
+    applyTick(n, src, event.data.ts);
+  });
+
+  function restartPricePoll() {
+    if (pricePollTimer) {
+      clearInterval(pricePollTimer);
+      pricePollTimer = null;
+    }
+    const ms = getUpdateMode() === "minute" ? 1000 : PRICE_WATCH_POLL_MS;
+    pricePollTimer = setInterval(() => {
+      attachPriceObserver();
+      emitPriceIfChanged();
+    }, ms);
+  }
+
   function startPriceWatcher(cb) {
     priceChangeCb = cb;
     attachPriceObserver();
-    if (!pricePollTimer) {
-      pricePollTimer = setInterval(() => {
-        attachPriceObserver();
-        emitPriceIfChanged();
-      }, PRICE_WATCH_POLL_MS);
-    }
+    restartPricePoll();
     emitPriceIfChanged();
   }
 
@@ -508,10 +935,14 @@
     payload: chartPricePayload,
     startWatcher: startPriceWatcher,
     stopWatcher: stopPriceWatcher,
+    setUpdateMode,
+    getUpdateMode,
+    detectChartSymbol,
     invalidate: () => {
       bridgeCache = { price: null, ts: 0, source: null };
       lastQuote = null;
       lastWatchedPrice = null;
+      lastMinuteBucket = -1;
     },
   };
 })();

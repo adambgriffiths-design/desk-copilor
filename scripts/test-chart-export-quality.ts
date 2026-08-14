@@ -176,7 +176,10 @@ assert(scored.quality === "partial", "scoreChartQuality partial");
 
 // --- unavailable message includes reason snippet ---
 const msg = buildChartExportUnavailableMessage(["stale_last_bar", "export_failed"]);
-assert(msg.includes("stale_last_bar"), "message includes stale reason");
+assert(msg.includes("stale"), "message includes stale reason");
 assert(msg.includes("No call"), "message keeps NO_CALL base");
+const timeoutMsg = buildChartExportUnavailableMessage(["export_failed", "export_partial_failure"], undefined, "timeout");
+assert(timeoutMsg.includes("timed out"), "bridge reason preferred over partial flag");
+assert(!timeoutMsg.includes("export_partial"), "partial not shown on hard timeout failure");
 
 console.log("test-chart-export-quality: ok");

@@ -13,6 +13,7 @@ export type LivePriceSource =
   | "tickstream_quote"
   | "yahoo_bar_close"
   | "tv_bar_close"
+  | "tv_1m_close"
   | "price_hint"
   | "none";
 
@@ -43,7 +44,9 @@ export function isMnqChartPrice(n: number): boolean {
 }
 
 function stripFuturesSymbolPrefix(text: string): string {
-  return text.replace(/^[A-Z]{2,3}[FGHJKMNQUVXZ]\d{2,4}/i, "");
+  return text
+    .replace(/^(MNQ|NQ|MES|ES|M2K|RTY|MYM|YM)[1!]+\s*/i, "")
+    .replace(/^[A-Z]{2,3}[FGHJKMNQUVXZ]\d{2,4}/i, "");
 }
 
 export function parseChartPriceInput(value: unknown): number | null {
@@ -98,7 +101,7 @@ export function isTickstreamLiveSource(source: string | null | undefined): boole
 }
 
 export function isBarClosePriceSource(source: string | null | undefined): boolean {
-  return source === "tv_bar_close" || source === "yahoo_bar_close" || source === "price_hint";
+  return source === "tv_bar_close" || source === "tv_1m_close" || source === "yahoo_bar_close" || source === "price_hint";
 }
 
 export function isAuthoritativeLiveAvailable(quote: AuthoritativePrice | null): boolean {
@@ -121,7 +124,7 @@ export function resolveAuthoritativePrice(input: LivePriceQuoteInput): Authorita
     const ageMs = Math.max(0, now - ts);
 
     if (source === "price_hint" && ageMs > PRICE_HINT_MAX_AGE_MS) return null;
-    if (source === "tv_bar_close") return null;
+    if (source === "tv_bar_close" || source === "tv_1m_close") return null;
 
     if (isLiveTvPriceSource(source) || isTickstreamLiveSource(source)) {
       if (ageMs > LIVE_PRICE_MAX_AGE_MS) return null;

@@ -59,7 +59,7 @@
   function formatPriceChange(current, previous) {
     if (!Number.isFinite(current) || !Number.isFinite(previous)) return null;
     const delta = current - previous;
-    if (Math.abs(delta) < 0.01) return { text: "±0.00", cls: "dc-price-flat" };
+    if (Math.abs(delta) < 0.25) return null;
     const sign = delta > 0 ? "+" : "";
     return {
       text: `${sign}${delta.toFixed(2)}`,
@@ -97,13 +97,14 @@
     if (sessEl) sessEl.textContent = session || "—";
 
     const hasPrice = Number.isFinite(price);
-    const offline = connectionState && connectionState !== "CONNECTED";
+    const normStatus = normalizeKey(dataStatus);
+    const staleMark = normStatus === "STALE" || normStatus === "OFFLINE";
 
     if (priceEl) {
       if (hasPrice) {
-        priceEl.textContent = offline ? `${price.toFixed(2)}*` : price.toFixed(2);
+        priceEl.textContent = staleMark ? `${price.toFixed(2)}*` : price.toFixed(2);
         priceEl.classList.remove("dc-price-unavailable");
-        priceEl.title = offline ? "Last known — not confirmed live" : "";
+        priceEl.title = staleMark ? "Last known — not confirmed live" : "";
       } else {
         priceEl.textContent = "PRICE UNAVAILABLE";
         priceEl.classList.add("dc-price-unavailable");
@@ -124,7 +125,6 @@
     }
     if (hasPrice) lastPrice = price;
 
-    const normStatus = normalizeKey(dataStatus);
     if (dataEl) {
       const spec = STATUS[normStatus] || STATUS.WAITING;
       dataEl.innerHTML = `<span class="dc-status-badge-icon" aria-hidden="true">${spec.icon}</span> ${spec.label}`;
@@ -166,12 +166,12 @@
   }
 
   function mapConnectionToMarketStatus(conn, hasPrice) {
+    if (hasPrice) return conn?.backendUp === false ? "STALE" : "LIVE";
     if (!conn?.backendUp) return "OFFLINE";
-    if (conn.state === "CONNECTED" && hasPrice) return "LIVE";
-    if (conn.state === "DEGRADED") return "DEGRADED";
-    if (!hasPrice) return "UNAVAILABLE";
     if (conn.state === "RECONNECTING" || conn.state === "CONNECTING") return "WAITING";
-    return "STALE";
+    if (conn.state === "DEGRADED") return "DEGRADED";
+    if (conn.state === "FAILED" || conn.state === "DISCONNECTED") return "OFFLINE";
+    return "UNAVAILABLE";
   }
 
   function mapKarenStatus(phase, opts = {}) {

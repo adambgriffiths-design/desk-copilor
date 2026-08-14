@@ -64,22 +64,22 @@ function buildLevels(ctx: MarketContext): LevelLine[] {
   }
   if (ctx.org) {
     levels.push(
-      { price: ctx.org.top, color: "#22d3ee", label: "ORG top", dash: "4 3" },
-      { price: ctx.org.bottom, color: "#22d3ee", label: "ORG bot", dash: "4 3" },
-      { price: ctx.org.ce, color: "#e879f9", label: "ORG 50%", dash: "6 4" },
-      { price: ctx.org.level25, color: "#64748b", label: "ORG 25%", dash: "2 4" }
+      { price: ctx.org.top, color: "#22d3ee", label: "Opening Range Gap Top", dash: "4 3" },
+      { price: ctx.org.bottom, color: "#22d3ee", label: "Opening Range Gap Bottom", dash: "4 3" },
+      { price: ctx.org.ce, color: "#e879f9", label: "Opening Range Gap Midpoint", dash: "6 4" },
+      { price: ctx.org.level25, color: "#64748b", label: "Opening Range Gap 25%", dash: "2 4" }
     );
   }
   if (ctx.nwog) {
     levels.push(
-      { price: ctx.nwog.top, color: "#ef4444", label: "NWOG top", dash: "4 3" },
-      { price: ctx.nwog.bottom, color: "#ef4444", label: "NWOG bot", dash: "4 3" }
+      { price: ctx.nwog.top, color: "#ef4444", label: "New Week Opening Gap Top", dash: "4 3" },
+      { price: ctx.nwog.bottom, color: "#ef4444", label: "New Week Opening Gap Bottom", dash: "4 3" }
     );
   }
   levels.push(
-    { price: ctx.daily.equilibrium, color: "#a78bfa", label: "D EQ", dash: "2 3" },
-    { price: ctx.sessions.nyPreHigh, color: "#94a3b8", label: "NY pre H", dash: "2 3" },
-    { price: ctx.sessions.nyPreLow, color: "#94a3b8", label: "NY pre L", dash: "2 3" }
+    { price: ctx.daily.equilibrium, color: "#a78bfa", label: "Daily Equilibrium", dash: "2 3" },
+    { price: ctx.sessions.nyPreHigh, color: "#94a3b8", label: "New York Pre-Market High", dash: "2 3" },
+    { price: ctx.sessions.nyPreLow, color: "#94a3b8", label: "New York Pre-Market Low", dash: "2 3" }
   );
   return levels;
 }

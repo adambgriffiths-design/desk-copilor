@@ -19,12 +19,17 @@ function assert(cond: boolean, msg: string) {
 
 const now = 1_700_000_000_000;
 const freshPulse = { source: "desk-tracker", timestamp: now - 420, receivedAt: now - 420 };
-const stalePulse = { source: "desk-tracker", timestamp: now - 18_000, receivedAt: now - 18_000 };
+const agingPulse = { source: "desk-tracker", timestamp: now - 18_000, receivedAt: now - 18_000 };
+const stalePulse = { source: "desk-tracker", timestamp: now - 70_000, receivedAt: now - 70_000 };
 
 assert(evaluateConnectionState({ backendUp: false, retryCount: 0 }) === "DISCONNECTED", "backend down → DISCONNECTED");
 assert(
   evaluateConnectionState({ backendUp: true, marketPulse: freshPulse, now }) === "CONNECTED",
   "backend + fresh market → CONNECTED"
+);
+assert(
+  evaluateConnectionState({ backendUp: true, marketPulse: agingPulse, now }) === "CONNECTED",
+  "backend + 18s pulse still CONNECTED (60s fresh window)"
 );
 assert(
   evaluateConnectionState({ backendUp: true, marketPulse: stalePulse, now }) === "DEGRADED",
@@ -40,7 +45,8 @@ assert(
 );
 
 assert(isMarketFresh(freshPulse, now), "420ms pulse is fresh");
-assert(!isMarketFresh(stalePulse, now), "18s pulse is stale");
+assert(isMarketFresh(agingPulse, now), "18s pulse is still fresh");
+assert(!isMarketFresh(stalePulse, now), "70s pulse is stale");
 assert(computeDataAge(freshPulse, now) === 420, "data age computed");
 
 const connected = buildConnectionSnapshot({
@@ -61,7 +67,7 @@ const degraded = buildConnectionSnapshot({
 });
 assert(!isLiveDataAvailable(degraded), "DEGRADED is not live");
 assert(formatConnectionStatus(degraded, now).includes("DEGRADED"), "status shows DEGRADED");
-assert(formatConnectionStatus(degraded, now).includes("18s"), "degraded shows stale age");
+assert(formatConnectionStatus(degraded, now).includes("1m") || formatConnectionStatus(degraded, now).includes("70s"), "degraded shows stale age");
 
 const t = transitionState("DISCONNECTED", "CONNECTING", "probe");
 assert(t?.from === "DISCONNECTED" && t.to === "CONNECTING", "transition recorded");
@@ -94,7 +100,7 @@ assert(
   "no fake live on missing market"
 );
 
-assert(MARKET_FRESH_MS === 15_000, "fresh threshold exported");
+assert(MARKET_FRESH_MS === 60_000, "fresh threshold exported");
 
 /** Manager — single reconnect loop, no duplicate timers */
 // eslint-disable-next-line @typescript-eslint/no-require-imports

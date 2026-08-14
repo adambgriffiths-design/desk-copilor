@@ -1536,6 +1536,29 @@
   letter-spacing: 0.06em;
 }
 
+.dc-bar-mode {
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid #333;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  line-height: 1.3;
+  font-family: inherit;
+}
+.dc-bar-mode:hover {
+  color: #f0f0f0;
+  border-color: #555;
+}
+.dc-bar-mode[aria-pressed="true"] {
+  color: #f0f0f0;
+  border-color: #666;
+}
+
 .dc-bar-sep {
   color: #555;
   user-select: none;
@@ -1615,6 +1638,7 @@
   text-transform: uppercase;
   color: #888;
   margin-bottom: 4px;
+  cursor: pointer;
 }
 
 /* ── Mock badge ── */
@@ -1920,6 +1944,7 @@
   line-height: 1.45;
   letter-spacing: 0.02em;
   padding: 4px 0;
+  cursor: pointer;
 }
 
 .dc-verdict-headline {

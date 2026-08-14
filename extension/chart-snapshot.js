@@ -4,6 +4,7 @@
  */
 (function () {
   const PAGE_SCRIPT_ID = "dc-tv-page-bridge";
+  const BRIDGE_REV = "1.4.73";
   const MIN_CANDLES = 20;
   const STALE_BAR_SEC = 120;
   const EXPORT_FAST_TIMEOUT_MS = 3500;
@@ -92,13 +93,16 @@
   }
 
   function injectPageBridge() {
-    if (document.getElementById(PAGE_SCRIPT_ID)) {
+    const existing = document.getElementById(PAGE_SCRIPT_ID);
+    if (existing && existing.dataset.dcRev === BRIDGE_REV) {
       return Promise.resolve();
     }
+    if (existing) existing.remove();
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.id = PAGE_SCRIPT_ID;
-      script.src = chrome.runtime.getURL("tv-bridge.js");
+      script.dataset.dcRev = BRIDGE_REV;
+      script.src = `${chrome.runtime.getURL("tv-bridge.js")}?v=${BRIDGE_REV}`;
       script.onload = () => setTimeout(resolve, 100);
       script.onerror = () => {
         script.remove();
@@ -159,7 +163,9 @@
         if (!Number.isFinite(price)) continue;
         drawings.push({
           type: "horizontal_line",
-          label: level.label || level.displayLabel || "desk level",
+          label: window.DeskCopilotPlainLanguage?.formatChartLevelLabel
+            ? window.DeskCopilotPlainLanguage.formatChartLevelLabel(level.label || level.displayLabel || "", level.id)
+            : (level.label || level.displayLabel || "desk level"),
           price,
           source: "desk_copilot",
         });
@@ -170,7 +176,9 @@
         if (!Number.isFinite(top) || !Number.isFinite(bottom)) continue;
         drawings.push({
           type: "rectangle",
-          label: zone.label || zone.kind || "desk zone",
+          label: window.DeskCopilotPlainLanguage?.formatChartLevelLabel
+            ? window.DeskCopilotPlainLanguage.formatChartLevelLabel(zone.label || zone.kind || "", zone.id)
+            : (zone.label || zone.kind || "desk zone"),
           top: Math.max(top, bottom),
           bottom: Math.min(top, bottom),
           source: "desk_copilot",

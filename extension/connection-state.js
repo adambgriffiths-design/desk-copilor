@@ -2,7 +2,7 @@
  * Extension connection lifecycle — shared between background + content.
  */
 (function (root) {
-  const MARKET_FRESH_MS = 15000;
+  const MARKET_FRESH_MS = 60000;
   const MAX_RECONNECT_RETRIES = 10;
   const BACKOFF_BASE_MS = 1000;
   const BACKOFF_MAX_MS = 60000;

@@ -29,6 +29,8 @@ assert(isMnqChartPrice(25000), "MNQ range valid");
 assert(parseChartPriceInput("30,185.00") === 30185, "comma thousands MNQ");
 assert(parseChartPriceInput("MNQU2026 30,185.00") === 30185, "symbol+year before price");
 assert(parseChartPriceInput("MNQU202630185.00") === 30185, "symbol glued to price");
+assert(parseChartPriceInput("NQ1! 30,185.00") === 30185, "NQ1! continuous prefix");
+assert(parseChartPriceInput("NQ1!30185.00") === 30185, "NQ1! glued to price");
 assert(parseChartPriceInput("2026") === null, "contract year alone rejected");
 assert(parseChartPriceInput("20263") === null, "year fragment rejected");
 assert(parseChartPriceInput("20185") === 20185, "legacy 20k range still parses");

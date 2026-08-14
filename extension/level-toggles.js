@@ -9,19 +9,19 @@
   const LEVEL_CATEGORIES = [
     {
       key: "showOrg",
-      label: "ORG (top · CE · bottom)",
+      label: "Opening Range Gap",
       teach: "Opening range gap from 4:15 close to 9:30 open — CE is the equilibrium magnet.",
       defaultOn: true,
     },
     {
       key: "showPd",
-      label: "PDH · PDL · PDC · EQ",
+      label: "Previous Day High · Low · Close · Equilibrium",
       teach: "Prior day high, low, close, and equilibrium — HTF draw liquidity for rebalances.",
       defaultOn: true,
     },
     {
       key: "showGap",
-      label: "NWOG · NDOG",
+      label: "New Week / New Day Opening Gap",
       teach: "New week/day opening gaps — unfinished auction between sessions, often revisited.",
       defaultOn: true,
     },
@@ -33,19 +33,19 @@
     },
     {
       key: "showDailyFvg",
-      label: "Daily FVG zones",
+      label: "Daily Fair Value Gap Zones",
       teach: "Higher-timeframe fair value gaps — imbalance blocks where price often reprices.",
       defaultOn: true,
     },
     {
       key: "showFpfvg",
-      label: "First presented 1m FVG",
+      label: "First Presented One-Minute Fair Value Gap",
       teach: "First 1m FVG after NY open — early imbalance that sets the opening delivery bias.",
       defaultOn: true,
     },
     {
       key: "showRehRel",
-      label: "REH · REL",
+      label: "Relative Equal Highs · Lows",
       teach: "Relative equal highs and lows — clustered swing liquidity pools (pre-market + session).",
       defaultOn: true,
     },

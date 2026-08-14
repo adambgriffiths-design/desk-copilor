@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "The Trading Desk",
-  "version": "1.4.62",
+  "version": "1.4.73",
   "description": "No signals. Just the read. ICT desk on TradingView.",
   "permissions": ["activeTab", "tabs", "storage", "scripting"],
   "host_permissions": [
@@ -9,7 +9,9 @@
     "https://*.vercel.app/*",
     "https://api.openai.com/*",
     "https://www.tradingview.com/*",
-    "https://*.tradingview.com/*"
+    "https://*.tradingview.com/*",
+    "http://127.0.0.1:7739/*",
+    "http://127.0.0.1:7740/*"
   ],
   "options_page": "options.html",
   "action": {

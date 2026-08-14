@@ -6,6 +6,10 @@ const YAHOO_CHART = "https://query1.finance.yahoo.com/v8/finance/chart";
 type YahooChartResponse = {
   chart?: {
     result?: Array<{
+      meta?: {
+        regularMarketPrice?: number;
+        regularMarketTime?: number;
+      };
       timestamp?: number[];
       indicators?: {
         quote?: Array<{
@@ -69,6 +73,49 @@ export async function fetchBars(
   }
 
   return bars;
+}
+
+/** Fast last print for the desk bar — Yahoo meta, then last 1m close. */
+export async function fetchYahooLastPrice(yahooSymbol: string = SYMBOL): Promise<{
+  price: number;
+  timestamp: number;
+  source: "yahoo_bar_close";
+} | null> {
+  try {
+    const ticker = yahooSymbol === "NQ=F" ? "NQ=F" : "MNQ=F";
+    const url = `${YAHOO_CHART}/${ticker}?interval=1m&range=1d`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as YahooChartResponse;
+    const result = data.chart?.result?.[0];
+    const metaPx = Number(result?.meta?.regularMarketPrice);
+    if (Number.isFinite(metaPx) && metaPx >= 20000 && metaPx <= 45000) {
+      const tsSec = Number(result?.meta?.regularMarketTime);
+      return {
+        price: metaPx,
+        timestamp: Number.isFinite(tsSec) && tsSec > 0 ? tsSec * 1000 : Date.now(),
+        source: "yahoo_bar_close",
+      };
+    }
+    const closes = result?.indicators?.quote?.[0]?.close ?? [];
+    const times = result?.timestamp ?? [];
+    for (let i = closes.length - 1; i >= 0; i--) {
+      const close = closes[i];
+      if (close == null || !Number.isFinite(close) || close < 20000 || close > 45000) continue;
+      const tsSec = times[i];
+      return {
+        price: close,
+        timestamp: Number.isFinite(tsSec) ? tsSec * 1000 : Date.now(),
+        source: "yahoo_bar_close",
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
 }
 
 export async function fetchAllTimeframes() {

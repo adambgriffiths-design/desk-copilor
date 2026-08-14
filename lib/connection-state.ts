@@ -56,7 +56,8 @@ export type EvaluateInput = {
   reconnecting?: boolean;
 };
 
-export const MARKET_FRESH_MS = 15_000;
+/** Pulse younger than this counts as CONNECTED. 15s caused LIVE/DEGRADED flicker. */
+export const MARKET_FRESH_MS = 60_000;
 export const MARKET_STALE_MS = 60_000;
 export const MAX_RECONNECT_RETRIES = 10;
 export const BACKOFF_BASE_MS = 1_000;

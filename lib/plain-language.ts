@@ -77,6 +77,117 @@ export function expandTradingAbbreviations(text: string): string {
   return s.replace(/\s{2,}/g, " ").replace(/\s+([,.])/g, "$1").trim();
 }
 
+const CHART_INVISIBLE = /[\u200B-\u200D\u2060\uFEFF]/g;
+
+const CHART_ID_LABELS: Record<string, string> = {
+  pdh: "Previous Day High",
+  pdl: "Previous Day Low",
+  pdc: "Previous Day Close",
+  pdo: "Previous Day Open",
+  cdo: "Current Day Open",
+  cdeq: "Current Day Equilibrium",
+  pdeq: "Previous Day Equilibrium",
+  ndog_top: "New Day Opening Gap Top",
+  ndog_bot: "New Day Opening Gap Bottom",
+  nwog_top: "New Week Opening Gap Top",
+  nwog_bottom: "New Week Opening Gap Bottom",
+  nwog_bot: "New Week Opening Gap Bottom",
+  org_top: "Opening Range Gap Top",
+  org_bottom: "Opening Range Gap Bottom",
+  org_ce: "Opening Range Gap Midpoint",
+  fhdr_band: "First Hour Dealing Range (9:30–10:30)",
+  fpfvg_ny_opening: "First Presented One-Minute Fair Value Gap",
+  asia_high: "Asia Session High",
+  asia_low: "Asia Session Low",
+  london_high: "London Session High",
+  london_low: "London Session Low",
+  ny_pre_high: "New York Pre-Market High",
+  ny_pre_low: "New York Pre-Market Low",
+  ny_rth_high: "New York Regular Trading Hours High",
+  ny_rth_low: "New York Regular Trading Hours Low",
+  ny_pm_high: "New York Afternoon Session High",
+  ny_pm_low: "New York Afternoon Session Low",
+};
+
+const CHART_ABBREV: Array<[RegExp, string]> = [
+  [/\bFirst presented 1m FVG\b/gi, "First Presented One-Minute Fair Value Gap"],
+  [/\bORG bot\b/gi, "Opening Range Gap Bottom"],
+  [/\bORG top\b/gi, "Opening Range Gap Top"],
+  [/\bORG 50%\b/gi, "Opening Range Gap Midpoint"],
+  [/\bORG 25%\b/gi, "Opening Range Gap 25%"],
+  [/\bNY pre H\b/gi, "New York Pre-Market High"],
+  [/\bNY pre L\b/gi, "New York Pre-Market Low"],
+  [/\bNY RTH H\b/gi, "New York Regular Trading Hours High"],
+  [/\bNY RTH L\b/gi, "New York Regular Trading Hours Low"],
+  [/\bD EQ\b/gi, "Daily Equilibrium"],
+  [/\bFHDR\b/gi, "First Hour Dealing Range"],
+  [/\bFPFVG\b/gi, "First Presented Fair Value Gap"],
+  [/\bIVFVG\b/gi, "Inverse Fair Value Gap"],
+  [/\bNDOG\b/gi, "New Day Opening Gap"],
+  [/\bNWOG\b/gi, "New Week Opening Gap"],
+  [/\bBPR\b/gi, "Balanced Price Range"],
+  [/\bFVGs\b/gi, "Fair Value Gaps"],
+  [/\bFVG\b/gi, "Fair Value Gap"],
+  [/\bPDH\b/gi, "Previous Day High"],
+  [/\bPDL\b/gi, "Previous Day Low"],
+  [/\bPDC\b/gi, "Previous Day Close"],
+  [/\bPDO\b/gi, "Previous Day Open"],
+  [/\bCDO\b/gi, "Current Day Open"],
+  [/\bEQH\b/gi, "Relative Equal Highs"],
+  [/\bEQL\b/gi, "Relative Equal Lows"],
+  [/\bREH\b/gi, "Relative Equal Highs"],
+  [/\bREL\b/gi, "Relative Equal Lows"],
+  [/\bORG\b/gi, "Opening Range Gap"],
+  [/\bOTE\b/gi, "Optimal Trade Entry"],
+  [/\bMSS\b/gi, "Market Structure Shift"],
+  [/\bRTH\b/gi, "Regular Trading Hours"],
+  [/\bOB\b/gi, "Order Block"],
+  [/\b1m\b/gi, "One-Minute"],
+  [/\bCE\b/gi, "Consequent Encroachment"],
+  [/\bEQ\b/gi, "Equilibrium"],
+];
+
+function chartIdKey(id?: string): string {
+  const raw = String(id || "");
+  if (/^reh(_|$)/i.test(raw)) return "reh";
+  if (/^rel(_|$)/i.test(raw)) return "rel";
+  return raw;
+}
+
+function stripChartOwnershipPrefix(label: string): string {
+  let s = String(label || "").replace(CHART_INVISIBLE, "").trim();
+  s = s.replace(/^DC\s+/i, "");
+  s = s.replace(/^DC(?=[A-Z(])/, "");
+  s = s.replace(
+    /\(\s*(PDH|PDL|PDC|PDO|CDO|NDOG|NWOG|FVG|ORG|CE|OB|EQ|REH|REL|FHDR|BPR|EQH|EQL)\s*\)/gi,
+    ""
+  );
+  return s.replace(/\s{2,}/g, " ").trim();
+}
+
+function titleCaseChartLabel(s: string): string {
+  return s.replace(/[A-Za-z][A-Za-z']*/g, (word, offset: number) => {
+    if (offset > 0 && /^(and|of|to|the|or)$/i.test(word)) return word.toLowerCase();
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+}
+
+/** User-visible chart/overlay level text — full ICT names, never a DC prefix. */
+export function formatChartLevelLabel(label: string, id?: string): string {
+  const key = chartIdKey(id);
+  if (key === "reh") return "Relative Equal Highs";
+  if (key === "rel") return "Relative Equal Lows";
+  if (CHART_ID_LABELS[key]) {
+    const extra = String(label || "").match(/[·•].+$/);
+    return extra ? `${CHART_ID_LABELS[key]} ${extra[0].trim()}` : CHART_ID_LABELS[key];
+  }
+
+  let s = stripChartOwnershipPrefix(label);
+  if (!s) return "";
+  for (const [re, rep] of CHART_ABBREV) s = s.replace(re, rep);
+  return titleCaseChartLabel(s).replace(/\s{2,}/g, " ").trim();
+}
+
 /** Injected into user-facing LLM prompts — responses must spell out ICT terms. */
 export const PLAIN_LANGUAGE_RULE = `## Plain language (strict — all user-facing text)
 Never use abbreviations, acronyms, or ticker shorthand in responses. Spell everything out.

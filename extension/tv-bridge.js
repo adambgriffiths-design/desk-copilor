@@ -2,14 +2,230 @@
  * Runs in page context (MAIN world) — loaded via chrome-extension:// URL to satisfy TradingView CSP.
  */
 (function () {
-  if (window.__dcTvBridge) {
+  // Tick stream must start even if the bridge was already injected (extension reload).
+  (function dcPriceTickStream() {
+    if (window.__dcPriceTickTimer) {
+      clearInterval(window.__dcPriceTickTimer);
+      window.__dcPriceTickTimer = 0;
+    }
+    let lastPosted = null;
+    let pinnedEl = null;
+    const SEL =
+      '[data-field="last"],[data-field="last_price"],[data-field="lp"],.js-symbol-last,[class*="js-symbol-last"],[class*="price-axis-last"],[class*="lastValueBar"]';
+    function parseTxt(text) {
+      if (!text) return null;
+      const raw = String(text).replace(/[\u00a0\s\u202f]/g, " ");
+      const comma = raw.match(/\b(\d{1,2},\d{3}(?:\.\d{1,2})?)\b/);
+      if (comma) {
+        const n = parseFloat(comma[1].replace(/,/g, ""));
+        if (n >= 20000 && n <= 45000) return Math.round(n * 4) / 4;
+      }
+      const plain = raw.replace(/[,，']/g, "").match(/(\d{5}(?:\.\d{1,2})?)/);
+      if (plain) {
+        const n = parseFloat(plain[1]);
+        if (n >= 20000 && n <= 45000) return Math.round(n * 4) / 4;
+      }
+      return null;
+    }
+    function classifyRoot(text) {
+      const s = String(text || "").toUpperCase();
+      if (/(?:^|[^A-Z])MNQ(?:1!|[FGHJKMNQUVXZ]\d{1,4}|[^A-Z]|$)/.test(s)) return "MNQ";
+      if (/(?:^|[^A-Z])NQ(?:1!|[FGHJKMNQUVXZ]\d{1,4}|[^A-Z]|$)/.test(s)) return "NQ";
+      return null;
+    }
+    function preferredRoot() {
+      try {
+        const q = new URL(location.href).searchParams.get("symbol");
+        if (q) {
+          const root = classifyRoot(decodeURIComponent(q));
+          if (root) return root;
+        }
+      } catch (_) {
+        /* ignore */
+      }
+      const header = document.querySelector("[data-symbol-short], .js-symbol-edit");
+      const t = header?.getAttribute("data-symbol-short") || header?.textContent || "";
+      return classifyRoot(t) || "MNQ";
+    }
+    function pickPinnedLastEl() {
+      const preferred = preferredRoot();
+      const nodes = document.querySelectorAll(SEL);
+      let best = null;
+      let bestScore = -1;
+      for (const el of nodes) {
+        const price = parseTxt(el.textContent);
+        if (price == null) continue;
+        let score = 1;
+        let node = el;
+        let blob = "";
+        for (let i = 0; i < 5 && node; i++) {
+          blob += " " + (node.getAttribute?.("data-symbol-short") || "");
+          node = node.parentElement;
+        }
+        const nearby = classifyRoot(blob);
+        if (nearby === preferred) score += 12;
+        else if (nearby && nearby !== preferred) score -= 20;
+        const r = el.getBoundingClientRect();
+        if (r.top >= 0 && r.bottom <= 140) score += 5;
+        if (score > bestScore) {
+          bestScore = score;
+          best = el;
+        }
+      }
+      return best;
+    }
+    window.__dcPriceTickTimer = setInterval(() => {
+      let price = null;
+      let source = "tradingview_live";
+      if (pinnedEl && pinnedEl.isConnected) price = parseTxt(pinnedEl.textContent);
+      if (price == null) {
+        const el = pickPinnedLastEl();
+        if (el) {
+          pinnedEl = el;
+          price = parseTxt(el.textContent);
+        }
+      }
+      if (price == null) {
+        try {
+          const fast = window.__dcLastCloseFast;
+          const chartFn = window.__dcGetActiveChart;
+          if (typeof fast === "function" && typeof chartFn === "function") {
+            price = fast(chartFn());
+            if (price != null) source = "tv_bar_close";
+          }
+        } catch (_) {
+          /* ignore */
+        }
+      }
+      if (price == null || !Number.isFinite(Number(price))) return;
+      const rounded = Math.round(Number(price) * 4) / 4;
+      if (lastPosted != null && rounded === lastPosted) return;
+      lastPosted = rounded;
+      window.postMessage(
+        { type: "DC_PRICE_TICK", price: rounded, source, ts: Date.now(), symbol: preferredRoot() },
+        "*"
+      );
+    }, 50);
+  })();
+
+  const BRIDGE_REV = "1.4.73";
+  if (window.__dcTvBridgeRev === BRIDGE_REV) {
     window.postMessage({ type: "DC_BRIDGE_READY", reattached: true }, "*");
     return;
   }
+  if (typeof window.__dcTvBridgeOnMessage === "function") {
+    window.removeEventListener("message", window.__dcTvBridgeOnMessage);
+  }
   window.__dcTvBridge = true;
+  window.__dcTvBridgeRev = BRIDGE_REV;
 
-  const DC_SHAPE_TAG = "\u200BDC\u200B";
+  // Invisible ownership mark only — never put "DC" in user-visible label text.
+  // TradingView strips ZWSP around letters, which previously leaked as "DC PDH".
+  const DC_SHAPE_TAG_LEGACY = "\u200BDC\u200B";
+  const DC_SHAPE_TAG = "\u200B\u2060\u200C\u200B";
   const REGISTRY_KEY = "dc-tv-shape-registry-v1";
+  const CHART_INVISIBLE = /[\u200B-\u200D\u2060\uFEFF]/g;
+  const CHART_ABBREV = [
+    [/\bFirst presented 1m FVG\b/gi, "First Presented One-Minute Fair Value Gap"],
+    [/\bORG bot\b/gi, "Opening Range Gap Bottom"],
+    [/\bORG top\b/gi, "Opening Range Gap Top"],
+    [/\bORG 50%\b/gi, "Opening Range Gap Midpoint"],
+    [/\bNY RTH H\b/gi, "New York Regular Trading Hours High"],
+    [/\bNY pre H\b/gi, "New York Pre-Market High"],
+    [/\bNY pre L\b/gi, "New York Pre-Market Low"],
+    [/\bD EQ\b/gi, "Daily Equilibrium"],
+    [/\bFHDR\b/gi, "First Hour Dealing Range"],
+    [/\bFPFVG\b/gi, "First Presented Fair Value Gap"],
+    [/\bNDOG\b/gi, "New Day Opening Gap"],
+    [/\bNWOG\b/gi, "New Week Opening Gap"],
+    [/\bBPR\b/gi, "Balanced Price Range"],
+    [/\bFVGs\b/gi, "Fair Value Gaps"],
+    [/\bFVG\b/gi, "Fair Value Gap"],
+    [/\bPDH\b/gi, "Previous Day High"],
+    [/\bPDL\b/gi, "Previous Day Low"],
+    [/\bPDC\b/gi, "Previous Day Close"],
+    [/\bPDO\b/gi, "Previous Day Open"],
+    [/\bEQH\b/gi, "Relative Equal Highs"],
+    [/\bEQL\b/gi, "Relative Equal Lows"],
+    [/\bREH\b/gi, "Relative Equal Highs"],
+    [/\bREL\b/gi, "Relative Equal Lows"],
+    [/\bORG\b/gi, "Opening Range Gap"],
+    [/\bRTH\b/gi, "Regular Trading Hours"],
+    [/\bOB\b/gi, "Order Block"],
+    [/\b1m\b/gi, "One-Minute"],
+    [/\bCE\b/gi, "Consequent Encroachment"],
+    [/\bEQ\b/gi, "Equilibrium"],
+  ];
+
+  function formatChartLevelLabel(label, id) {
+    const rawId = String(id || "");
+    if (/^reh(_|$)/i.test(rawId)) return "Relative Equal Highs";
+    if (/^rel(_|$)/i.test(rawId)) return "Relative Equal Lows";
+    const idNames = {
+      pdh: "Previous Day High",
+      pdl: "Previous Day Low",
+      pdc: "Previous Day Close",
+      pdo: "Previous Day Open",
+      cdo: "Current Day Open",
+      cdeq: "Current Day Equilibrium",
+      pdeq: "Previous Day Equilibrium",
+      ndog_top: "New Day Opening Gap Top",
+      ndog_bot: "New Day Opening Gap Bottom",
+      nwog_top: "New Week Opening Gap Top",
+      nwog_bottom: "New Week Opening Gap Bottom",
+      nwog_bot: "New Week Opening Gap Bottom",
+      org_top: "Opening Range Gap Top",
+      org_bottom: "Opening Range Gap Bottom",
+      org_ce: "Opening Range Gap Midpoint",
+      fhdr_band: "First Hour Dealing Range (9:30–10:30)",
+      fpfvg_ny_opening: "First Presented One-Minute Fair Value Gap",
+      asia_high: "Asia Session High",
+      asia_low: "Asia Session Low",
+      london_high: "London Session High",
+      london_low: "London Session Low",
+      ny_pre_high: "New York Pre-Market High",
+      ny_pre_low: "New York Pre-Market Low",
+      ny_rth_high: "New York Regular Trading Hours High",
+      ny_rth_low: "New York Regular Trading Hours Low",
+      ny_pm_high: "New York Afternoon Session High",
+      ny_pm_low: "New York Afternoon Session Low",
+    };
+    if (idNames[rawId]) {
+      const extra = String(label || "").match(/[·•].+$/);
+      return extra ? `${idNames[rawId]} ${extra[0].trim()}` : idNames[rawId];
+    }
+    let s = String(label || "").replace(CHART_INVISIBLE, "").trim();
+    s = s.replace(/^DC\s+/i, "");
+    s = s.replace(/^DC(?=[A-Z(])/, "");
+    s = s.replace(
+      /\(\s*(PDH|PDL|PDC|PDO|CDO|NDOG|NWOG|FVG|ORG|CE|OB|EQ|REH|REL|FHDR|BPR|EQH|EQL)\s*\)/gi,
+      ""
+    );
+    s = s.replace(/\s{2,}/g, " ").trim();
+    if (!s) return "";
+    for (const pair of CHART_ABBREV) s = s.replace(pair[0], pair[1]);
+    s = s.replace(/[A-Za-z][A-Za-z']*/g, (word, offset) => {
+      if (offset > 0 && /^(and|of|to|the|or)$/i.test(word)) return word.toLowerCase();
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+    return s.replace(/\s{2,}/g, " ").trim();
+  }
+
+  function looksLikeOurLevelText(s) {
+    return /^(PDH|PDL|PDC|PDO|ORG|FVG|NDOG|NWOG|REH|REL|FHDR|EQH|EQL|BPR|OB|CE|Previous |Opening |New Day|New Week|Daily |Fair Value|First |Asia |London |Relative Equal|Current Day|New York|Order Block)/i.test(
+      String(s || "").trim()
+    );
+  }
+
+  function textHasDcOwnershipMark(text) {
+    const raw = String(text || "");
+    if (!raw) return false;
+    if (raw.includes(DC_SHAPE_TAG) || raw.includes(DC_SHAPE_TAG_LEGACY)) return true;
+    const visible = raw.replace(CHART_INVISIBLE, "");
+    if (/^DC\s+/i.test(visible) && looksLikeOurLevelText(visible.replace(/^DC\s+/i, ""))) return true;
+    if (/^DC(?=[A-Z(])/.test(visible) && looksLikeOurLevelText(visible.slice(2))) return true;
+    return false;
+  }
 
   const WIDGET_KEYS = [
     "tvWidget",
@@ -66,8 +282,8 @@
 
   syncRegistryFromStorage();
 
-  function dcTaggedText(label) {
-    const visible = label != null ? String(label) : "";
+  function dcTaggedText(label, id) {
+    const visible = formatChartLevelLabel(label != null ? String(label) : "", id);
     return visible ? `${DC_SHAPE_TAG}${visible}` : DC_SHAPE_TAG;
   }
 
@@ -75,7 +291,7 @@
     if (registrySet && registrySet.has(id)) return true;
     if (!shape) return false;
     const text = String(shape.text || shape.properties?.text || shape.overrides?.text || "");
-    if (text.includes(DC_SHAPE_TAG)) return true;
+    if (textHasDcOwnershipMark(text)) return true;
     if (shape.properties?.dcDeskCopilot === true || shape.overrides?.dcDeskCopilot === true) return true;
     return false;
   }
@@ -156,7 +372,13 @@
   }
 
   function isChartExportReady(chart) {
-    return Boolean(chart && typeof chart.exportData === "function");
+    return Boolean(
+      chart &&
+        (typeof chart.exportData === "function" ||
+          typeof chart.getSeries === "function" ||
+          typeof chart.mainSeries === "function" ||
+          typeof chart.getPanes === "function")
+    );
   }
 
   async function waitForChartReady(opts) {
@@ -223,6 +445,201 @@
     return { from: now - 6 * 3600, to: now + 600 };
   }
 
+  function isNasdaqIndexPrice(n) {
+    return Number.isFinite(n) && n >= 20000 && n <= 45000;
+  }
+
+  function closeFromValue(last) {
+    const close = Number(
+      last?.close ?? last?.value ?? last?.c ?? last?.[4] ?? (typeof last === "number" ? last : NaN)
+    );
+    return isNasdaqIndexPrice(close) ? close : null;
+  }
+
+  /** Fast last print — pane/series bars, no exportData (export often exceeds the 200ms caller timeout). */
+  function lastCloseFast(chart) {
+    if (!chart) return null;
+    try {
+      const series = chart.getSeries?.() || chart.mainSeries?.();
+      const data = series?.data?.() || series?.bars?.();
+      const last =
+        (typeof data?.last === "function" ? data.last() : null) ||
+        (typeof data?.lastValue === "function" ? data.lastValue() : null) ||
+        (Array.isArray(data) && data.length ? data[data.length - 1] : null);
+      const hit = closeFromValue(last);
+      if (hit != null) return hit;
+    } catch (_) {
+      /* ignore */
+    }
+    try {
+      const panes = chart.getPanes?.();
+      if (Array.isArray(panes) && panes.length) {
+        const main = panes[0];
+        const src = main.getMainSource?.() || main.mainSource?.();
+        const bars = src?.bars?.() || src?.data?.()?.bars || src?.data?.();
+        if (bars?.length) {
+          const hit = closeFromValue(bars[bars.length - 1]);
+          if (hit != null) return hit;
+        }
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    return null;
+  }
+
+  function ohlcFromValueField(value) {
+    if (Array.isArray(value) && value.length >= 4) {
+      return { o: Number(value[0]), h: Number(value[1]), l: Number(value[2]), c: Number(value[3]) };
+    }
+    if (Array.isArray(value) && value.length >= 1) {
+      const c = Number(value[value.length - 1]);
+      return { o: c, h: c, l: c, c };
+    }
+    if (value && typeof value === "object") {
+      const c = Number(value.close ?? value.c ?? value.value);
+      if (!Number.isFinite(c)) return null;
+      return {
+        o: Number(value.open ?? value.o ?? c),
+        h: Number(value.high ?? value.h ?? c),
+        l: Number(value.low ?? value.l ?? c),
+        c,
+      };
+    }
+    const c = Number(value);
+    if (!Number.isFinite(c)) return null;
+    return { o: c, h: c, l: c, c };
+  }
+
+  function candleFromBar(bar) {
+    if (bar == null || typeof bar === "number") return null;
+    if (Array.isArray(bar)) {
+      const t = normalizeUnixSec(bar[0]);
+      const c = Number(bar[4] ?? bar[bar.length - 1]);
+      if (t == null || !isNasdaqIndexPrice(c)) return null;
+      const o = Number(bar[1]);
+      const h = Number(bar[2]);
+      const l = Number(bar[3]);
+      return {
+        t,
+        o: Number.isFinite(o) ? o : c,
+        h: Number.isFinite(h) ? h : c,
+        l: Number.isFinite(l) ? l : c,
+        c,
+      };
+    }
+    const t = normalizeUnixSec(bar.time ?? bar.t ?? bar.timestamp ?? bar.date ?? bar.index);
+    const packed = ohlcFromValueField(bar.value);
+    const c = Number(bar.close ?? bar.c ?? packed?.c);
+    if (t == null || !isNasdaqIndexPrice(c)) return null;
+    const o = Number(bar.open ?? bar.o ?? packed?.o ?? c);
+    const h = Number(bar.high ?? bar.h ?? packed?.h ?? c);
+    const l = Number(bar.low ?? bar.l ?? packed?.l ?? c);
+    return {
+      t,
+      o: Number.isFinite(o) ? o : c,
+      h: Number.isFinite(h) ? h : c,
+      l: Number.isFinite(l) ? l : c,
+      c,
+    };
+  }
+
+  function plotToArray(plot) {
+    if (!plot) return [];
+    if (Array.isArray(plot)) return plot;
+    const out = [];
+    try {
+      if (typeof plot.size === "function" && typeof plot.valueAt === "function") {
+        const n = Number(plot.size()) || 0;
+        const start = Math.max(0, n - 240);
+        for (let i = start; i < n; i++) out.push(plot.valueAt(i));
+        if (out.length) return out;
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    try {
+      if (typeof plot.each === "function") {
+        plot.each((b) => out.push(b));
+        if (out.length) return out;
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    try {
+      if (typeof plot.bars === "function") {
+        const nested = plotToArray(plot.bars());
+        if (nested.length) return nested;
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    for (const key of ["_items", "items", "_bars", "m_bars", "_data", "_plotList", "_values", "values"]) {
+      try {
+        const v = plot[key];
+        if (Array.isArray(v) && v.length) return v;
+      } catch (_) {
+        /* ignore */
+      }
+    }
+    try {
+      if (typeof plot.last === "function") {
+        let row = plot.last();
+        const prevFn = plot.previous || plot.prev || plot.prior;
+        for (let i = 0; i < 240 && row; i++) {
+          out.push(row);
+          row = typeof prevFn === "function" ? prevFn.call(plot, row) : null;
+        }
+        if (out.length) return out.reverse();
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    return out;
+  }
+
+  function collectSeriesBars(chart) {
+    try {
+      const series = chart.getSeries?.() || chart.mainSeries?.();
+      const fromSeries = plotToArray(series?.data?.() || series?.bars?.() || series?.data);
+      if (fromSeries.length) return fromSeries;
+    } catch (_) {
+      /* ignore */
+    }
+    try {
+      const panes = chart.getPanes?.();
+      const main = Array.isArray(panes) && panes[0];
+      const src = main?.getMainSource?.() || main?.mainSource?.();
+      const fromPane = plotToArray(src?.bars?.() || src?.data?.()?.bars || src?.data?.() || src?.bars);
+      if (fromPane.length) return fromPane;
+    } catch (_) {
+      /* ignore */
+    }
+    return [];
+  }
+
+  function candlesFromSeries(chart, maxBars) {
+    if (!chart) return [];
+    const limit = Math.max(20, Math.min(maxBars || 120, 240));
+    const raw = collectSeriesBars(chart);
+    const range = getVisibleRange(chart);
+    const to = range?.to || Math.floor(Date.now() / 1000);
+    const from = range?.from || to - Math.max(raw.length, limit) * 60;
+    const step = raw.length > 1 ? Math.max(1, Math.floor((to - from) / Math.max(1, raw.length - 1))) : 60;
+    const candles = [];
+    for (let i = 0; i < raw.length; i++) {
+      let c = candleFromBar(raw[i]);
+      if (!c) {
+        const close = closeFromValue(raw[i]);
+        if (close == null) continue;
+        c = { t: from + i * step, o: close, h: close, l: close, c: close };
+      }
+      candles.push(c);
+    }
+    candles.sort((a, b) => a.t - b.t);
+    return candles.slice(-limit);
+  }
+
   function closeFromExportData(data) {
     if (!data?.data?.length || !data?.schema?.length) return null;
     let closeIdx = -1;
@@ -246,8 +663,7 @@
     if (closeIdx < 0) return null;
     const lastRow = data.data[data.data.length - 1];
     const close = Number(lastRow[closeIdx]);
-    if (Number.isFinite(close) && close >= 20000 && close <= 45000) return close;
-    return null;
+    return isNasdaqIndexPrice(close) ? close : null;
   }
 
   function findOhlcColumns(schema) {
@@ -316,33 +732,88 @@
     return candles.slice(-limit);
   }
 
+  function withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(label || "timeout")), Math.max(200, ms))
+      ),
+    ]);
+  }
+
   async function exportOhlcFromChart(chart, maxBars) {
-    if (!isChartExportReady(chart)) return { candles: [], rawRowCount: 0, exportError: "export_not_ready" };
+    if (!chart) return { candles: [], rawRowCount: 0, origin: "none", exportError: "export_not_ready" };
+
+    const seriesCandles = candlesFromSeries(chart, maxBars);
+    if (seriesCandles.length >= 20) {
+      return {
+        candles: seriesCandles,
+        rawRowCount: seriesCandles.length,
+        origin: "tv_series",
+        exportPartial: false,
+        exportError: null,
+      };
+    }
+
+    if (typeof chart.exportData !== "function") {
+      return {
+        candles: seriesCandles,
+        rawRowCount: seriesCandles.length,
+        origin: seriesCandles.length ? "tv_series" : "none",
+        exportError: seriesCandles.length ? "insufficient_candles" : "export_not_ready",
+      };
+    }
+
     let rawRowCount = 0;
     let exportPartial = false;
     let exportError = null;
 
     try {
-      const data = await chart.exportData({ includedStudies: "none" });
+      const data = await withTimeout(chart.exportData({ includedStudies: "none" }), 800, "export_timeout");
       rawRowCount = data?.data?.length || 0;
       const candles = parseExportCandles(data, maxBars);
-      if (candles.length) {
+      if (candles.length >= 20) {
         if (rawRowCount > 0 && candles.length < Math.min(rawRowCount, maxBars) * 0.5) exportPartial = true;
-        return { candles, rawRowCount, exportPartial, exportError: null };
+        return { candles, rawRowCount, origin: "tv_export", exportPartial, exportError: null };
+      }
+      if (candles.length > seriesCandles.length) {
+        return {
+          candles,
+          rawRowCount,
+          origin: "tv_export",
+          exportPartial: true,
+          exportError: candles.length < 20 ? "insufficient_candles" : null,
+        };
       }
     } catch (e) {
       exportError = String(e?.message || e || "export_failed");
     }
 
     try {
-      const data = await chart.exportData({});
+      const data = await withTimeout(chart.exportData({}), 800, "export_timeout");
       rawRowCount = data?.data?.length || 0;
       const candles = parseExportCandles(data, maxBars);
-      if (rawRowCount > 0 && candles.length < Math.min(rawRowCount, maxBars) * 0.5) exportPartial = true;
-      return { candles, rawRowCount, exportPartial, exportError: candles.length ? null : exportError };
+      if (candles.length) {
+        if (rawRowCount > 0 && candles.length < Math.min(rawRowCount, maxBars) * 0.5) exportPartial = true;
+        return {
+          candles,
+          rawRowCount,
+          origin: "tv_export",
+          exportPartial,
+          exportError: candles.length >= 20 ? null : "insufficient_candles",
+        };
+      }
     } catch (e) {
-      return { candles: [], rawRowCount, exportPartial: false, exportError: String(e?.message || e || "export_failed") };
+      exportError = String(e?.message || e || "export_failed");
     }
+
+    return {
+      candles: seriesCandles,
+      rawRowCount: seriesCandles.length,
+      origin: seriesCandles.length ? "tv_series" : "none",
+      exportPartial: false,
+      exportError: exportError || (seriesCandles.length ? "insufficient_candles" : "export_failed"),
+    };
   }
 
   function normalizeDrawingType(name) {
@@ -430,19 +901,6 @@
       };
     }
 
-    if (!isChartExportReady(chart)) {
-      return {
-        ok: false,
-        reason: "export_not_ready",
-        candles: [],
-        drawings: [],
-        source: "none",
-        sync: { drawingExportFailed: true, widgetFound },
-        exportStartTs,
-        exportCompleteTs: Date.now(),
-      };
-    }
-
     const maxBars = Math.max(20, Math.min(Number(opts?.maxBars) || 120, 240));
     let symbol = null;
     let timeframe = null;
@@ -498,7 +956,7 @@
       candles,
       drawings,
       lastPrice,
-      source: candles.length ? "tv_export" : "none",
+      source: candles.length ? exportResult.origin || "tv_export" : "none",
       exportedAt: new Date().toISOString(),
       reason,
       sync: {
@@ -517,6 +975,9 @@
 
   async function getLastBarClose(chart) {
     if (!chart) return null;
+
+    const fast = lastCloseFast(chart);
+    if (fast != null) return fast;
 
     try {
       if (typeof chart.exportData === "function") {
@@ -538,23 +999,62 @@
       /* ignore */
     }
 
-    try {
-      const panes = chart.getPanes?.();
-      if (Array.isArray(panes) && panes.length) {
-        const main = panes[0];
-        const src = main.getMainSource?.() || main.mainSource?.();
-        const bars = src?.bars?.() || src?.data?.()?.bars;
-        if (bars?.length) {
-          const last = bars[bars.length - 1];
-          const close = Number(last?.close ?? last?.value ?? last?.[4]);
-          if (Number.isFinite(close) && close >= 20000 && close <= 45000) return close;
-        }
-      }
-    } catch (_) {
-      /* ignore */
-    }
+    return lastCloseFast(chart);
+  }
 
+  function parseDomPriceText(text) {
+    if (!text) return null;
+    const raw = String(text).replace(/[\u00a0\s\u202f]/g, " ");
+    const comma = raw.match(/\b(\d{2},\d{3}(?:\.\d{1,2})?)\b/);
+    if (comma) {
+      const n = parseFloat(comma[1].replace(/,/g, ""));
+      if (isNasdaqIndexPrice(n)) return n;
+    }
+    const plain = raw.replace(/[,，']/g, "").match(/(\d{5}(?:\.\d{1,2})?)/);
+    if (plain) {
+      const n = parseFloat(plain[1]);
+      if (isNasdaqIndexPrice(n) && !(n >= 20200 && n < 20400 && Math.abs(n - Math.round(n)) < 0.001)) {
+        return n;
+      }
+    }
     return null;
+  }
+
+  function readPageDomLast() {
+    const selectors = [
+      ".js-symbol-last",
+      '[class*="js-symbol-last"]',
+      '[data-field="last"]',
+      '[data-field="last_price"]',
+      '[class*="tv-symbol-price-quote"]',
+    ];
+    for (const sel of selectors) {
+      for (const el of document.querySelectorAll(sel)) {
+        const n = parseDomPriceText(el.innerText || el.textContent);
+        if (n != null) return n;
+      }
+    }
+    const headerBottom = 180;
+    const axisLeft = window.innerWidth - 160;
+    let best = null;
+    let bestScore = -1;
+    for (const el of document.querySelectorAll("span, div")) {
+      const text = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+      if (!text || text.length > 22) continue;
+      const n = parseDomPriceText(text);
+      if (n == null) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1 || r.height > 64) continue;
+      let score = 1;
+      if (r.top < headerBottom) score += 8;
+      if (r.left > axisLeft) score += 6;
+      if (text.includes(",")) score += 3;
+      if (score > bestScore) {
+        bestScore = score;
+        best = n;
+      }
+    }
+    return best;
   }
 
   function removeShapeId(chart, id) {
@@ -607,15 +1107,16 @@
     return Number(generation) !== activeDrawGeneration;
   }
 
-  function withDcTag(opts, label) {
+  function withDcTag(opts, label, id) {
     const showLabel = Boolean(label && opts?.overrides?.showLabel !== false);
+    const tagged = showLabel ? dcTaggedText(label, id) : DC_SHAPE_TAG;
     return {
       ...opts,
-      text: showLabel ? dcTaggedText(label) : DC_SHAPE_TAG,
+      text: tagged,
       overrides: {
         ...(opts.overrides || {}),
         dcDeskCopilot: true,
-        text: showLabel ? dcTaggedText(label) : DC_SHAPE_TAG,
+        text: tagged,
       },
     };
   }
@@ -670,7 +1171,8 @@
           disableSave: true,
           lock: true,
         },
-        label
+        label,
+        zone.id
       );
 
       try {
@@ -705,7 +1207,8 @@
               disableSave: true,
               lock: true,
             },
-            ""
+            "",
+            zone.id
           );
           let ceId;
           if (typeof chart.createMultipointShape === "function") {
@@ -745,7 +1248,8 @@
           disableSave: true,
           lock: true,
         },
-        label
+        label,
+        level.id
       );
 
       try {
@@ -783,7 +1287,7 @@
     return run;
   }
 
-  window.addEventListener("message", async (event) => {
+  window.__dcTvBridgeOnMessage = async function dcTvBridgeOnMessage(event) {
     if (event.source !== window || !event.data) return;
 
     if (event.data.type === "DC_SYNC_REGISTRY") {
@@ -802,13 +1306,18 @@
     if (event.data.type === "DC_GET_LAST_PRICE") {
       try {
         const chart = getActiveChart();
-        const price = await getLastBarClose(chart);
+        let price = await getLastBarClose(chart);
+        let source = "tv_api";
+        if (price == null) {
+          price = readPageDomLast();
+          source = "tradingview_live";
+        }
         window.postMessage(
           {
             type: "DC_LAST_PRICE",
             price: price != null ? price : null,
             ok: price != null,
-            source: price != null ? "tv_api" : "none",
+            source: price != null ? source : "none",
           },
           "*"
         );
@@ -919,7 +1428,10 @@
         );
       }
     });
-  });
+  };
+  window.addEventListener("message", window.__dcTvBridgeOnMessage);
 
   window.postMessage({ type: "DC_BRIDGE_READY", reattached: false }, "*");
+  window.__dcLastCloseFast = lastCloseFast;
+  window.__dcGetActiveChart = getActiveChart;
 })();

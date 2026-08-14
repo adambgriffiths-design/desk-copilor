@@ -151,33 +151,33 @@ export function computeHtfPdArrays(input: {
   const unfilledDailyFvgs = filterUnfilledDailyFvgs(input.dailyBars, recentDailyFvgs);
 
   const levels: PdLevel[] = [
-    { id: "pdh", label: "Previous day high (PDH)", price: prevHigh },
-    { id: "pdl", label: "Previous day low (PDL)", price: prevLow },
-    { id: "pdc", label: "Previous day close (PDC)", price: prevClose },
-    { id: "pdo", label: "Previous day open (PDO)", price: prevOpen },
-    { id: "cdo", label: "Current day open (CDO)", price: dayOpen },
-    { id: "cdeq", label: "Current day EQ", price: eq(input.currLow, input.currHigh) },
-    { id: "pdeq", label: "Previous day EQ", price: eq(prevLow, prevHigh) },
+    { id: "pdh", label: "Previous Day High", price: prevHigh },
+    { id: "pdl", label: "Previous Day Low", price: prevLow },
+    { id: "pdc", label: "Previous Day Close", price: prevClose },
+    { id: "pdo", label: "Previous Day Open", price: prevOpen },
+    { id: "cdo", label: "Current Day Open", price: dayOpen },
+    { id: "cdeq", label: "Current Day Equilibrium", price: eq(input.currLow, input.currHigh) },
+    { id: "pdeq", label: "Previous Day Equilibrium", price: eq(prevLow, prevHigh) },
   ];
 
   if (ndog) {
     levels.push(
-      { id: "ndog_top", label: "NDOG top", price: ndog.top },
-      { id: "ndog_bot", label: "NDOG bottom", price: ndog.bottom }
+      { id: "ndog_top", label: "New Day Opening Gap Top", price: ndog.top },
+      { id: "ndog_bot", label: "New Day Opening Gap Bottom", price: ndog.bottom }
     );
   }
 
   if (input.nwog) {
     levels.push(
-      { id: "nwog_top", label: "NWOG top", price: input.nwog.top },
-      { id: "nwog_bot", label: "NWOG bottom", price: input.nwog.bottom }
+      { id: "nwog_top", label: "New Week Opening Gap Top", price: input.nwog.top },
+      { id: "nwog_bot", label: "New Week Opening Gap Bottom", price: input.nwog.bottom }
     );
   }
 
   for (const fvg of recentDailyFvgs) {
     levels.push({
       id: `d_fvg_${fvg.type}`,
-      label: `Daily ${fvg.type} FVG`,
+      label: `Daily ${fvg.type} Fair Value Gap`,
       price: eq(fvg.top, fvg.bottom),
     });
   }

@@ -1,10 +1,35 @@
 (function () {
-  const DC_VERSION = "1.4.62";
+  const DC_VERSION = "1.4.73";
+  // #region agent log
+  function dbgLog(hypothesisId, location, message, data) {
+    const payload = {
+      sessionId: "600bac",
+      runId: "analyse-4",
+      hypothesisId,
+      location,
+      message,
+      data: data || {},
+      timestamp: Date.now(),
+    };
+    try {
+      chrome.runtime.sendMessage({ type: "DEBUG_LOG", payload });
+    } catch {
+      /* ignore */
+    }
+    try {
+      const el = document.getElementById("dc-dbg");
+      if (el) el.textContent = `${hypothesisId}:${message}`.slice(0, 48);
+    } catch {
+      /* ignore */
+    }
+  }
+  // #endregion
   const DESK_VERDICT_SPEAK_SPEED = 0.85;
   const DESK_BROWSER_TTS_RATE = 0.88;
   const BOOT = `dc-boot-${DC_VERSION}`;
   if (window[BOOT]) return;
   window[BOOT] = true;
+  dbgLog("A", "content.js:boot", "content script loaded", { version: DC_VERSION });
   const WOLF_LOGO = `<svg class="dc-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true"><rect width="64" height="64" fill="#000"/><polygon fill="#fff" points="18,20 12,2 28,16"/><polygon fill="#fff" points="46,20 52,2 36,16"/><polygon fill="#000" points="17,17 14,7 22,15"/><polygon fill="#000" points="47,17 50,7 42,15"/><polygon fill="#fff" points="32,14 44,20 48,32 44,44 32,58 20,44 16,32 20,20"/><polygon fill="#000" points="19,27 27,29 25,33 17,31"/><polygon fill="#000" points="45,27 37,29 39,33 47,31"/><ellipse cx="22" cy="30" rx="3.2" ry="2.6" fill="#38B6FF"/><ellipse cx="42" cy="30" rx="3.2" ry="2.6" fill="#38B6FF"/><circle cx="23" cy="29" r="1" fill="#D4F0FF"/><circle cx="43" cy="29" r="1" fill="#D4F0FF"/><ellipse cx="32" cy="44" rx="3.5" ry="2.5" fill="#000"/><polygon fill="#fff" points="28,47 29,52 30,47"/><polygon fill="#fff" points="34,47 35,52 36,47"/></svg>`;
 
   document.getElementById("dc-panel")?.remove();
@@ -31,6 +56,7 @@
       <div class="dc-status-item"><span class="dc-status-key">MARKET</span><span class="dc-status-val" id="dc-status-market"></span></div>
       <div class="dc-status-item"><span class="dc-status-key">DATA</span><span class="dc-status-val" id="dc-status-data"></span></div>
       <div class="dc-status-item"><span class="dc-status-key">KAREN</span><span class="dc-status-val" id="dc-status-karen"></span></div>
+      <div class="dc-status-item"><span class="dc-status-key">DBG</span><span class="dc-status-val" id="dc-dbg">—</span></div>
     </div>
     <div class="dc-panel-scroll" id="dc-panel-scroll">
     <div class="dc-market-bar" id="dc-market-bar">
@@ -39,6 +65,8 @@
           <span class="dc-bar-symbol" id="dc-bar-symbol">MNQ</span>
           <span class="dc-bar-sep">·</span>
           <span class="dc-bar-tf" id="dc-bar-tf">1m</span>
+          <span class="dc-bar-sep">·</span>
+          <button type="button" class="dc-bar-mode" id="dc-bar-mode" title="Price updates every tick. Click for 1-minute close.">TICK</button>
           <span class="dc-bar-sep">·</span>
           <span class="dc-bar-session" id="dc-bar-session">—</span>
         </div>
@@ -56,7 +84,7 @@
       </div>
     </div>
     <div class="dc-desk-primary" id="dc-primary">
-      <div class="dc-analyse-market-label">ANALYSE MARKET</div>
+      <div class="dc-analyse-market-label" id="dc-analyse-market-label" role="button">ANALYSE MARKET</div>
       <div class="dc-verdict-card" id="dc-verdict-card">
         <div class="dc-verdict-empty" id="dc-verdict-empty">Press Analyse Market for the current desk verdict.</div>
         <div class="dc-verdict-analyzing hidden" id="dc-verdict-analyzing">
@@ -591,6 +619,15 @@
     togglePanelCollapsed();
   });
 
+  document.getElementById("dc-bar-mode")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const cur = window.DeskCopilotChartPrice?.getUpdateMode?.() || "tick";
+    window.DeskCopilotChartPrice?.setUpdateMode?.(cur === "tick" ? "minute" : "tick");
+    syncPriceModeButton();
+    updateMarketBarUI();
+  });
+
   document.getElementById("dc-header").addEventListener("dblclick", (e) => {
     if (e.target.closest("#dc-collapse")) return;
     togglePanelCollapsed();
@@ -669,6 +706,7 @@
   }
   const MARKET_SNAPSHOT_CACHE_MS = 5000;
   const CONTEXT_PRICE_MS = 2500;
+  let lastBarDbgAt = 0;
   const CONTEXT_BIAS_MS = 45000;
   const CONTEXT_SESSION_MS = 30000;
   const CONTEXT_PRICE_STALE_MS = 30000;
@@ -819,8 +857,15 @@
     return window.DeskCopilotConnection?.isLiveDataAvailable?.(connectionSnapshot) === true;
   }
 
+  let lastPulseSentAt = 0;
+  let lastPulsePrice = null;
+  const PULSE_MIN_INTERVAL_MS = 4000;
+  let lastQuoteFallbackAt = 0;
+  const QUOTE_FALLBACK_COOLDOWN_MS = 20000;
+
   function reportMarketPulse(source, extra = {}) {
     const receivedAt = Date.now();
+    lastPulseSentAt = receivedAt;
     void bgSend({
       type: "CONNECTION_MARKET_PULSE",
       source,
@@ -838,6 +883,7 @@
   function applyConnectionSnapshot(snap) {
     if (!snap) return;
     const prevState = connectionSnapshot?.state;
+    const prevUp = connectionSnapshot?.backendUp;
     connectionSnapshot = snap;
     backendOnline = snap.backendUp === true;
     if (backendOnline) {
@@ -845,10 +891,18 @@
       pingFailStreak = 0;
       lastOnlineAt = Date.now();
     }
-    updateAgentStatus();
     updateConnectionDiagnostics();
-    updateMarketBarUI();
-    if (backendOnline && snap.state === "DEGRADED" && prevState !== "CONNECTED") {
+    const stateChanged = prevState !== snap.state || prevUp !== snap.backendUp;
+    if (stateChanged) {
+      updateAgentStatus();
+      updateMarketBarUI();
+    }
+    if (
+      backendOnline &&
+      snap.state === "DEGRADED" &&
+      !hasLocalChartPrice() &&
+      Date.now() - lastQuoteFallbackAt > QUOTE_FALLBACK_COOLDOWN_MS
+    ) {
       void fetchBackendPriceFallback();
     }
   }
@@ -1052,6 +1106,10 @@
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes("Superseded")) return;
       if (opts.turnGen != null && opts.turnGen !== voiceTurnGen) return;
+      // #region agent log
+      dbgLog("E", "content.js:kickOffChartRead", "unhandled", { msg: msg.slice(0, 160) });
+      // #endregion
+      reportIssue(explainError(e, "chart"), { chat: true });
     });
   }
 
@@ -1974,10 +2032,24 @@
 
   function enqueueUserMessage(text, opts = {}) {
     const cleaned = sanitizeUserInput(text);
-    if (!cleaned || shouldDropUserInput(text)) return;
+    if (!cleaned || shouldDropUserInput(text)) {
+      // #region agent log
+      dbgLog("L", "content.js:enqueueUserMessage", "dropped", {
+        text: String(text || "").slice(0, 80),
+        cleaned: cleaned || null,
+        drop: shouldDropUserInput(text),
+      });
+      // #endregion
+      return;
+    }
     const t = cleaned.trim();
     if (!t) return;
-    if (msgQueue.length && msgQueue[msgQueue.length - 1].text === t) return;
+    if (msgQueue.length && msgQueue[msgQueue.length - 1].text === t) {
+      // #region agent log
+      dbgLog("L", "content.js:enqueueUserMessage", "dup-queue", { text: t.slice(0, 80) });
+      // #endregion
+      return;
+    }
 
     if (!opts.skipBubble) {
       appendChatBubble("user", t);
@@ -3042,6 +3114,15 @@
       ? normalizeChartReadCommand(intentText) || intentText
       : intentText;
     if (isChartReadCommand(intentText) || needsFullChartRead(intentText, chartReadContext())) {
+      // #region agent log
+      dbgLog("A", "content.js:handleUserMessage", "routing to runChartRead", {
+        intentText,
+        chartQ,
+        voice: Boolean(voice),
+        isChartRead: isChartReadCommand(intentText),
+        needsFull: needsFullChartRead(intentText, chartReadContext()),
+      });
+      // #endregion
       window.DeskCopilotRealtime?.exitCasualTurn?.();
       lastSnapshotIntent = null;
       kickOffChartRead(chartQ, { voice, turnGen });
@@ -3246,18 +3327,26 @@
     enqueueUserMessage(userText, opts);
   }
 
+  function detectChartSymbol() {
+    const fromPrice = window.DeskCopilotChartPrice?.detectChartSymbol?.();
+    if (fromPrice?.root === "MNQ" || fromPrice?.root === "NQ") return fromPrice;
+    return { root: "MNQ", tvSymbol: "MNQ1!", quoteSymbol: "MNQ", raw: "fallback" };
+  }
+
   function symbol() {
-    const el =
-      document.querySelector("[data-symbol-short]") ||
-      document.querySelector(".js-symbol-edit") ||
-      document.querySelector('[data-name="legend-source-title"]');
-    return el?.textContent?.trim() || "MNQ1!";
+    return detectChartSymbol().tvSymbol;
   }
 
   function shortSymbol(sym) {
-    const s = String(sym || symbol()).trim();
-    return s.replace(/1!$/, "").replace(/\.P$/, "") || "MNQ";
+    if (sym) {
+      const s = String(sym).trim().toUpperCase();
+      if (/(?:^|[^A-Z])MNQ(?:1!|[FGHJKMNQUVXZ]|$|[^A-Z])/.test(s)) return "MNQ";
+      if (/(?:^|[^A-Z])NQ(?:1!|[FGHJKMNQUVXZ]|$|[^A-Z])/.test(s)) return "NQ";
+    }
+    return detectChartSymbol().root;
   }
+
+  window.__dcSymbol = symbol;
 
   function extractDeskOneLiner(verdictText) {
     const t = displayText(verdictText || "");
@@ -3302,8 +3391,10 @@
   function formatPriceSourceLabel(source) {
     const s = String(source || "").toLowerCase();
     if (s === "tradingview_live" || s === "tradingview_quote") return "TV Last";
+    if (s === "tv_1m_close") return "TV 1m close";
     if (s === "tv_bar_close" || s === "tv_api") return "TV bar close";
     if (s === "tickstream_live" || s === "tickstream_quote") return "TickStream";
+    if (s === "yahoo_bar_close") return "Yahoo last";
     if (s === "desk_backend" || s === "desk-tracker") return "Desk backend";
     if (s === "chart-price") return "TV Last";
     return source ? String(source).replace(/_/g, " ") : "";
@@ -3318,18 +3409,51 @@
     if (Number.isFinite(prev) && Math.abs(px - prev) >= 0.5) {
       lastMarketSnapshotCache = { key: "", data: null, ts: 0 };
     }
-    reportMarketPulse(source || "chart-price", { timestamp: contextStripPriceTs });
-    updateContextStrip();
+    const priceChanged = lastPulsePrice == null || Math.abs(px - lastPulsePrice) >= 0.25;
+    if (priceChanged || Date.now() - lastPulseSentAt >= PULSE_MIN_INTERVAL_MS) {
+      lastPulsePrice = px;
+      reportMarketPulse(source || "chart-price", { timestamp: contextStripPriceTs });
+    }
   }
 
   async function fetchBackendPriceFallback() {
     if (backendPriceFallbackInflight) return backendPriceFallbackInflight;
+    if (Date.now() - lastQuoteFallbackAt < QUOTE_FALLBACK_COOLDOWN_MS && Number.isFinite(contextStripPrice)) {
+      return contextStripPrice;
+    }
+    lastQuoteFallbackAt = Date.now();
     backendPriceFallbackInflight = (async () => {
+      try {
+        const local = window.DeskCopilotChartPrice?.readQuoteSync?.();
+        if (local && Number.isFinite(local.value) && local.ageMs < 5000) {
+          return local.value;
+        }
+        const det = detectChartSymbol();
+        const quote = await bgSend({ type: "QUOTE", symbol: det.quoteSymbol }, 8000);
+        const qPx = Number(quote?.lastPrice ?? quote?.price);
+        if (Number.isFinite(qPx) && qPx >= 20000 && qPx <= 45000) {
+          // #region agent log
+          dbgLog("I", "content.js:fetchBackendPriceFallback", "quote-api", {
+            lastPrice: qPx,
+            source: quote?.source || null,
+            symbol: det.root,
+            path: "backend",
+            quoteSymbol: quote?.symbol || det.quoteSymbol,
+          });
+          // #endregion
+          noteLivePrice(qPx, quote?.source || "desk_backend");
+          updateMarketBarUI();
+          return qPx;
+        }
+      } catch {
+        /* try levels */
+      }
       try {
         const payload = await bgSend({ type: "LEVELS" }, 20000);
         const px = Number(payload?.lastPrice1m ?? payload?.priceHint?.last);
         if (Number.isFinite(px) && px >= 20000 && px <= 45000) {
           noteLivePrice(px, "desk_backend");
+          updateMarketBarUI();
           return px;
         }
       } catch {
@@ -3378,6 +3502,7 @@
     if (Number.isFinite(px)) {
       const q = window.DeskCopilotChartPrice?.readQuoteSync?.();
       noteLivePrice(px, q?.source || "tradingview_live");
+      updateMarketBarUI();
       return;
     }
 
@@ -3527,60 +3652,113 @@
     });
   }
 
-  function updateMarketBarUI() {
+  function syncPriceModeButton() {
+    const btn = document.getElementById("dc-bar-mode");
+    if (!btn) return;
+    const mode = window.DeskCopilotChartPrice?.getUpdateMode?.() || "tick";
+    btn.textContent = mode === "minute" ? "1m" : "TICK";
+    btn.title =
+      mode === "minute"
+        ? "Price updates once per minute (TV 1m close). Click for live ticks."
+        : "Price updates every tick. Click for 1-minute close.";
+    btn.setAttribute("aria-pressed", mode === "tick" ? "true" : "false");
+  }
+
+  function updateMarketBarUI(quoteHint) {
     const ctx = window.DeskCopilotSession?.resolve?.() || { label: "—" };
-    const quote = window.DeskCopilotChartPrice?.readQuoteSync?.() || null;
-    if (quote?.value != null) noteLivePrice(quote.value, quote.source);
+    const quote = quoteHint || window.DeskCopilotChartPrice?.readQuoteSync?.() || null;
+    if (quote?.value != null) {
+      const prev = contextStripPrice;
+      contextStripPrice = quote.value;
+      contextStripPriceTs = Date.now();
+      if (quote.source) contextStripPriceSource = quote.source;
+      if (Number.isFinite(prev) && Math.abs(quote.value - prev) >= 0.5) {
+        lastMarketSnapshotCache = { key: "", data: null, ts: 0 };
+      }
+    }
     const px = contextStripPriceDisplay();
     const conn = connectionSnapshot;
+    const priceMode = window.DeskCopilotChartPrice?.getUpdateMode?.() || "tick";
+    const det = detectChartSymbol();
+    // #region agent log
+    if (Date.now() - lastBarDbgAt > 250) {
+      lastBarDbgAt = Date.now();
+      dbgLog("I", "content.js:updateMarketBarUI", "bar", {
+        px: px ?? null,
+        quote: quote?.value ?? null,
+        source: quote?.source || contextStripPriceSource || null,
+        ageMs: quote?.ageMs ?? (contextStripPriceTs ? Date.now() - contextStripPriceTs : null),
+        conn: conn?.state || null,
+        symbol: det.root,
+        path: quote?.source || contextStripPriceSource || "none",
+        mode: priceMode,
+      });
+    }
+    // #endregion
     const priceSourceRaw = quote?.source || contextStripPriceSource || conn?.marketMeta?.source || null;
     const liveQuote =
+      priceMode === "tick" &&
       quote &&
       (quote.source === "tradingview_live" ||
         quote.source === "tradingview_quote" ||
         quote.source === "tickstream_live" ||
         quote.source === "tickstream_quote") &&
-      quote.ageMs <= (window.DeskCopilotChartPrice?.LIVE_PRICE_MAX_AGE_MS ?? 60000);
+      quote.ageMs <= 2000;
+    const minuteQuote =
+      priceMode === "minute" &&
+      Number.isFinite(px) &&
+      (priceSourceRaw === "tv_1m_close" ||
+        priceSourceRaw === "tv_bar_close" ||
+        priceSourceRaw === "tradingview_live" ||
+        priceSourceRaw === "tradingview_quote");
     const barCloseQuote =
-      quote?.source === "tv_bar_close" ||
-      quote?.source === "tv_api" ||
-      priceSourceRaw === "desk_backend";
+      priceSourceRaw === "desk_backend" ||
+      priceSourceRaw === "yahoo_bar_close";
     const hasChartPrice = Number.isFinite(px);
     let dataStatus = "—";
-    if (liveQuote) {
+    if (minuteQuote) {
+      dataStatus = "DELAYED";
+    } else if (liveQuote) {
       dataStatus = "LIVE";
     } else if (barCloseQuote && hasChartPrice) {
+      dataStatus = "STALE";
+    } else if (priceSourceRaw === "tv_bar_close" && hasChartPrice) {
       dataStatus = "STALE";
     } else if (!conn?.backendUp) {
       dataStatus = hasChartPrice ? "STALE" : "OFFLINE";
     } else if (conn.state === "CONNECTED") {
-      dataStatus = "LIVE";
+      dataStatus = hasChartPrice ? "LIVE" : "WAITING";
     } else if (conn.state === "DEGRADED") {
-      dataStatus = hasChartPrice ? "STALE" : "STALE";
+      dataStatus = hasChartPrice ? "LIVE" : "STALE";
     } else if (conn.state === "RECONNECTING" || conn.state === "CONNECTING") {
-      dataStatus = hasChartPrice ? "STALE" : "WAITING";
+      dataStatus = hasChartPrice ? "LIVE" : "WAITING";
     } else {
-      dataStatus = hasChartPrice ? "STALE" : conn?.backendUp ? "UNAVAILABLE" : "ERROR";
+      dataStatus = hasChartPrice ? "LIVE" : conn?.backendUp ? "UNAVAILABLE" : "ERROR";
     }
     const priceAgeMs = contextStripPriceTs > 0 ? Date.now() - contextStripPriceTs : null;
     const ageMs = liveQuote && priceAgeMs != null ? priceAgeMs : conn?.dataAge ?? priceAgeMs;
     const updated =
       ageMs != null
-        ? liveQuote
-          ? `TV Last · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
-          : conn?.state === "CONNECTED"
-            ? `Fresh · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
-            : conn?.state === "DEGRADED"
-              ? `Backend stale · ${Math.round((ageMs || 0) / 1000)}s ago`
-              : contextStripPriceTs > 0
-                ? `Updated ${new Date(contextStripPriceTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                : ""
+        ? minuteQuote
+          ? "TV 1m close"
+          : dataStatus === "LIVE"
+            ? `TV Last · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
+            : dataStatus === "STALE"
+              ? `Last print · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
+              : conn?.state === "DEGRADED"
+                ? `Backend stale · ${Math.round((ageMs || 0) / 1000)}s ago`
+                : contextStripPriceTs > 0
+                  ? `Updated ${new Date(contextStripPriceTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                  : ""
         : "";
-    const dataSource =
-      formatPriceSourceLabel(priceSourceRaw) ||
-      (hasChartPrice ? "TV Last" : conn?.backendUp ? "Awaiting chart price" : "");
+    const dataSource = minuteQuote
+      ? "TV 1m close"
+      : liveQuote || dataStatus === "LIVE"
+        ? "TV Last"
+        : formatPriceSourceLabel(priceSourceRaw) ||
+          (hasChartPrice ? "TV Last" : conn?.backendUp ? "Awaiting chart price" : "");
     window.DeskCopilotVerdictUI?.updateMarketBar?.({
-      symbol: "MNQ",
+      symbol: shortSymbol() || "MNQ",
       price: hasChartPrice ? px : null,
       session: ctx.label || "—",
       tf: "1m",
@@ -3592,6 +3770,7 @@
         ? `${window.DeskCopilotConnection?.formatConnectionStatus?.(conn) || conn.state}${hasChartPrice ? "" : " · Click RECONNECT if price stays unavailable"}`
         : "",
     });
+    syncPriceModeButton();
     syncHeaderStatus({ tvLive: Boolean(liveQuote) });
   }
 
@@ -3610,10 +3789,10 @@
   function startPanelContextRefresh() {
     refreshContextStrip({ forceBridge: true, bias: true });
 
-    window.DeskCopilotChartPrice?.startWatcher?.((px) => {
+    window.DeskCopilotChartPrice?.startWatcher?.((px, quote) => {
       if (document.hidden || !isPanelExpanded()) return;
-      const q = window.DeskCopilotChartPrice?.readQuoteSync?.();
-      noteLivePrice(px, q?.source || "tradingview_live");
+      noteLivePrice(px, quote?.source || "tradingview_live");
+      updateMarketBarUI(quote || { value: px, source: "tradingview_live", ageMs: 0, timestamp: Date.now() });
     });
 
     contextStripPriceTimer = setInterval(() => {
@@ -3633,8 +3812,7 @@
 
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState !== "visible" || !isPanelExpanded()) return;
-      window.DeskCopilotChartPrice?.invalidate?.();
-      refreshContextStrip({ forceBridge: true, bias: true });
+      refreshContextStrip({ forceBridge: false, bias: false });
     });
   }
 
@@ -3679,9 +3857,11 @@
     return payload;
   }
 
-  async function marketSnapshotExtras(pricePayload) {
+  async function marketSnapshotExtras(pricePayload, opts = {}) {
     const snapshotPayload =
-      (await window.DeskCopilotChartSnapshot?.payload?.({ maxBars: 120 })) || null;
+      opts.skipChartExport
+        ? null
+        : (await window.DeskCopilotChartSnapshot?.payload?.({ maxBars: 120 })) || null;
     const rejectionReasons =
       snapshotPayload?.exportTrace?.qualityRejectionReasons ||
       snapshotPayload?.chartSnapshot?.qualityMeta?.reasons ||
@@ -4256,8 +4436,6 @@
         if (reconnect) {
           setMsg(r.statusLine || `Desk online (${r.base || "Vercel"})`, r.liveDataAvailable !== false);
           void window.DeskCopilotTracker?.refresh?.({ freeze: true, forceClose: true });
-        } else {
-          setMsg(r.liveDataAvailable ? "" : r.statusLine || "", r.liveDataAvailable ? null : false);
         }
         if (window.DeskCopilotRealtime?.prefetchSession) {
           void window.DeskCopilotRealtime.prefetchSession(symbol());
@@ -4266,7 +4444,7 @@
           void tryStartAutonomousVoice();
         }
         if (!isUserRequestBusy()) {
-          refreshContextStrip({ forceBridge: true, bias: reconnect || !contextStripBiasHint });
+          refreshContextStrip({ forceBridge: reconnect, bias: reconnect || !contextStripBiasHint });
         }
         return r.liveDataAvailable !== false || r.ok;
       }
@@ -4288,6 +4466,9 @@
       }
       pingFailStreak += 1;
       lastBackendFail = Date.now();
+      if (pingFailStreak < 3 && (backendOnline || connectionSnapshot?.backendUp)) {
+        return true;
+      }
       if (connectionSnapshot) {
         applyConnectionSnapshot({
           ...connectionSnapshot,
@@ -4346,6 +4527,8 @@
     warmBackend();
     prefetchTurnExtras();
     void refreshConnectionState();
+    void refreshContextStripPrice(true);
+    void fetchBackendPriceFallback();
     void window.DeskCopilotRealtime?.prefetchSession?.(symbol());
     if (isAutoVoiceEnabled() && voiceReady && !window.DeskCopilotVoice?.isUserVoiceOff?.()) {
       void tryStartAutonomousVoice();
@@ -4372,14 +4555,22 @@
     heartbeatTimer = setInterval(() => {
       if (document.hidden || pingInFlight) return;
       void pingBackend(false);
-      void refreshConnectionState();
-      updateMarketBarUI();
     }, 60000);
     setInterval(() => {
       if (document.hidden) return;
-      void refreshConnectionState();
+      if (
+        Number.isFinite(contextStripPrice) &&
+        Date.now() - contextStripPriceTs < CONTEXT_PRICE_STALE_MS &&
+        Date.now() - lastPulseSentAt >= PULSE_MIN_INTERVAL_MS
+      ) {
+        reportMarketPulse(contextStripPriceSource || "chart-price", { timestamp: Date.now() });
+      }
       updateMarketBarUI();
     }, 5000);
+    setInterval(() => {
+      if (document.hidden) return;
+      void refreshConnectionState();
+    }, 20000);
   }
 
   document.getElementById("dc-reconnect").onclick = () => {
@@ -4625,22 +4816,42 @@
     }
   }
 
-  document.getElementById("dc-get-verdict").onclick = () => {
+  document.getElementById("dc-get-verdict").onclick = () => startChartReadFromUi("button");
+  document.getElementById("dc-analyse-market-label")?.addEventListener("click", () =>
+    startChartReadFromUi("label")
+  );
+  document.getElementById("dc-verdict-empty")?.addEventListener("click", () =>
+    startChartReadFromUi("empty-card")
+  );
+
+  function startChartReadFromUi(source) {
+    // #region agent log
+    dbgLog("K", "content.js:startChartReadFromUi", "ui-analyse", {
+      source,
+      version: DC_VERSION,
+      mock: Boolean(window.DeskCopilotMockAnalysis?.isEnabled?.()),
+      blocked: chartReadBlockedReason(),
+      voiceTurnBusy,
+      processingQueue,
+      verdictBusy,
+      chatBusy,
+      conn: connectionSnapshot?.state || null,
+      backendUp: connectionSnapshot?.backendUp ?? null,
+      hasPrice: hasLocalChartPrice(),
+    });
+    // #endregion
     if (window.DeskCopilotMockAnalysis?.isEnabled?.()) {
       runMockVerdictLifecycle();
       return;
     }
-    const blocked = chartReadBlockedReason();
-    if (blocked) {
-      setMsg(`Busy — ${blocked}.`, false);
-      return;
-    }
+    if (verdictBusy) cancelActiveChartRead("analyse market");
+    setMsg("Karen · starting chart read…", null);
     speakUiFeedback(karenUiAck("chart_read"));
     if (levelsBusy) {
       setMsg("Levels still loading in background — chart read uses live screenshot.", null);
     }
-    enqueueUserMessage("get the read", { voice: false });
-  };
+    kickOffChartRead("get the read", { voice: false });
+  }
 
   document.getElementById("dc-new-analysis")?.addEventListener("click", () => {
     mockAnalysisBusy = false;
@@ -5134,7 +5345,23 @@
       return;
     }
 
-    if (!isLiveDataAvailable() && !data?._liveDataBlocked) {
+    // #region agent log
+    dbgLog("E", "content.js:applyVerdict", "applying verdict", {
+      error: data?.error || null,
+      scoped: Boolean(data?.scoped),
+      hasSpoken: Boolean(data?.spokenBrief || data?.spoken),
+      verdict: data?.verdict || data?.decisionVerdict || null,
+      dataQuality: data?.dataQuality || data?.data_quality || null,
+      backendUp: connectionSnapshot?.backendUp ?? null,
+      live: isLiveDataAvailable(),
+      hasLocalPrice: hasLocalChartPrice(),
+    });
+    // #endregion
+    if (
+      !data?._liveDataBlocked &&
+      connectionSnapshot?.backendUp === false &&
+      !hasLocalChartPrice()
+    ) {
       const blocked = window.DeskCopilotConnection?.LIVE_DATA_UNAVAILABLE_VERDICT;
       window.DeskCopilotVerdictUI?.applyVerdictData?.(blocked, { lastKnown: false, liveDataOffline: true });
       recordAssistantReply(blocked?.spokenBrief || "WAIT / NO TRADE — LIVE DATA UNAVAILABLE");
@@ -5313,7 +5540,7 @@
 
     if (opts.voice && !opts.skipWorkingAck) voiceSpeakAck(karenWorkingAck("snapshot"));
 
-    const apiPayload = await marketSnapshotExtras(pricePayload);
+    const apiPayload = await marketSnapshotExtras(pricePayload, opts);
     const snap = await bgSend(
       {
         type: "MARKET_SNAPSHOT",
@@ -5384,15 +5611,75 @@
     return Number.isFinite(contextStripPrice);
   }
 
-  /** When TV OHLC export fails, fall back to screenshot vision or desk levels + TV Last. */
+  function localPriceWaitVerdict(pricePayload) {
+    const px = Number(pricePayload?.chartLastPrice);
+    const spoken = Number.isFinite(px)
+      ? `WAIT — last print ${px.toFixed(2)}, but I don't have enough chart candles for a long or short. Stay flat until the next clean read.`
+      : "WAIT — I don't have enough chart candles for a long or short. Stay flat until the next clean read.";
+    const priceBit = Number.isFinite(px) ? ` Last print ${px.toFixed(2)}.` : "";
+    return {
+      spoken,
+      spokenBrief: spoken,
+      panel: spoken,
+      verdict: `VERDICT: WAIT\nSETUP: none — chart candles unavailable\nHTF BIAS: unknown\nENTRY: —\nINVALIDATION: —\nTARGET: —\nR:R: —\nDATA QUALITY: DEGRADED\nFINAL REASONING: WAIT — OHLC export unavailable.${priceBit}`,
+      scoped: true,
+      intent: "chart_read_degraded",
+    };
+  }
+
+  /** When TV OHLC export fails, use desk levels + TV Last first (screenshot needs the toolbar icon). */
   async function tryChartReadExportFallback(userQuestion, opts, pricePayload, requestId) {
     const sym = symbol();
     const mergedPrice = { ...pricePayload };
+
+    const livePx = Number(mergedPrice?.chartLastPrice);
+    if (!Number.isFinite(livePx) && hasLocalChartPrice()) {
+      const primed = await primeChartPriceForTurn({ forceRefresh: true });
+      Object.assign(mergedPrice, primed || {});
+    }
+    if (Number.isFinite(Number(mergedPrice?.chartLastPrice)) || connectionSnapshot?.backendUp) {
+      try {
+        setKarenPhase("snapshot");
+        setMsg("Karen · desk levels read (OHLC unavailable)…", null);
+        // #region agent log
+        dbgLog("D", "content.js:tryChartReadExportFallback", "snapshot-first", {
+          lastPrice: Number(mergedPrice?.chartLastPrice) || null,
+          backendUp: connectionSnapshot?.backendUp ?? null,
+        });
+        // #endregion
+        const snap = await Promise.race([
+          runMarketSnapshot(
+            "what's the bias and where is price relative to key levels",
+            { ...opts, pricePayload: mergedPrice, forceRefresh: true, skipWorkingAck: true, skipChartExport: true }
+          ),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("snapshot_timeout")), 8000)),
+        ]);
+        if (snap?.spoken || snap?.spokenBrief || snap?.panel || snap?.verdict) {
+          voiceLog("chart read fallback: market snapshot");
+          window.DeskCopilotUI?.updateMarketDataCard?.({
+            status: "Degraded",
+            reason: "Chart OHLC export failed — using desk levels + live price",
+            action: "Maximize chart · try ANALYSE MARKET for full pipeline read",
+            visible: true,
+          });
+          return snap;
+        }
+      } catch (e) {
+        voiceLog("levels snapshot fallback failed:", e?.message || e);
+      }
+    }
 
     try {
       setKarenPhase("capturing");
       setMsg("Karen · screenshot fallback…", null);
       const cap = await captureChartScreenshot(true);
+      // #region agent log
+      dbgLog("M", "content.js:tryChartReadExportFallback", "screenshot", {
+        hasBase64: Boolean(cap?.base64),
+        error: cap?.error || null,
+        cached: Boolean(cap?.cached),
+      });
+      // #endregion
       if (cap?.base64 && requestId === currentVerdictRequestId) {
         setKarenPhase("analyzing");
         setMsg("Karen · reading chart image… 8–15 sec", null);
@@ -5418,38 +5705,19 @@
         }
       }
     } catch (e) {
+      // #region agent log
+      dbgLog("M", "content.js:tryChartReadExportFallback", "screenshot-error", {
+        error: e instanceof Error ? e.message : String(e),
+      });
+      // #endregion
       voiceLog("screenshot fallback failed:", e?.message || e);
     }
 
-    const livePx = Number(mergedPrice?.chartLastPrice);
-    if (!Number.isFinite(livePx) && hasLocalChartPrice()) {
-      const primed = await primeChartPriceForTurn({ forceRefresh: true });
-      Object.assign(mergedPrice, primed || {});
-    }
-    if (Number.isFinite(Number(mergedPrice?.chartLastPrice)) || connectionSnapshot?.backendUp) {
-      try {
-        setKarenPhase("snapshot");
-        setMsg("Karen · desk levels read (OHLC unavailable)…", null);
-        const snap = await runMarketSnapshot(
-          "what's the bias and where is price relative to key levels",
-          { ...opts, pricePayload: mergedPrice, forceRefresh: true, skipWorkingAck: true }
-        );
-        if (snap?.spoken || snap?.spokenBrief) {
-          voiceLog("chart read fallback: market snapshot");
-          window.DeskCopilotUI?.updateMarketDataCard?.({
-            status: "Degraded",
-            reason: "Chart OHLC export failed — using desk levels + live price",
-            action: "Maximize chart · try ANALYSE MARKET for full pipeline read",
-            visible: true,
-          });
-          return snap;
-        }
-      } catch (e) {
-        voiceLog("levels snapshot fallback failed:", e?.message || e);
-      }
-    }
-
-    return null;
+    const localWait = localPriceWaitVerdict(mergedPrice);
+    dbgLog("D", "content.js:tryChartReadExportFallback", "local-wait", {
+      lastPrice: Number(mergedPrice?.chartLastPrice) || null,
+    });
+    return localWait;
   }
 
   async function runChartRead(userQuestion, opts = {}) {
@@ -5485,6 +5753,19 @@
       ensureBackend(),
       chartPricePayload(),
     ]);
+    // #region agent log
+    dbgLog("B", "content.js:runChartRead", "backend and price gate", {
+      userQuestion,
+      backendOk,
+      live: isLiveDataAvailable(),
+      backendUp: connectionSnapshot?.backendUp ?? null,
+      conn: connectionSnapshot?.state || null,
+      hasLocalPrice: hasLocalChartPrice(),
+      chartLastPrice: pricePayload?.chartLastPrice ?? null,
+      priceSource: pricePayload?.chartLastPriceSource ?? null,
+      needsFullRead,
+    });
+    // #endregion
     if (!backendOk) {
       if (opts.voice) {
         await publishOfflineReply(true);
@@ -5495,7 +5776,7 @@
       return null;
     }
     if (!isLiveDataAvailable()) {
-      if (!hasLocalChartPrice()) {
+      if (!hasLocalChartPrice() && connectionSnapshot?.backendUp === false) {
         const blocked = window.DeskCopilotConnection?.LIVE_DATA_UNAVAILABLE_VERDICT;
         if (opts.voice) {
           await publishAssistantReply(
@@ -5510,7 +5791,7 @@
         setMsg("LIVE DATA: OFFLINE", false);
         return null;
       }
-      voiceLog("chart read: DEGRADED connection — proceeding with TV Last / levels fallback");
+      voiceLog("chart read: DEGRADED — proceeding with TV Last / backend fallback");
     }
 
     verdictBusy = true;
@@ -5596,6 +5877,18 @@
         chartLastPrice:
           snapshotPayload?.chartLastPrice ?? pricePayload?.chartLastPrice,
       };
+      // #region agent log
+      dbgLog("D", "content.js:runChartRead", "chart snapshot quality", {
+        hasStructured,
+        qualityUsable,
+        candleCount: chartSnapshot?.candles?.length ?? 0,
+        snapOk: chartSnapshot?.ok ?? null,
+        snapReason: chartSnapshot?.reason ?? null,
+        source: chartSnapshot?.source ?? null,
+        rejection: exportTrace?.qualityRejectionReasons || chartSnapshot?.qualityMeta?.reasons || null,
+        mergedPrice: mergedPrice?.chartLastPrice ?? null,
+      });
+      // #endregion
 
       if (turnGen != null && turnGen !== voiceTurnGen) {
         verdictBusy = false;
@@ -5632,6 +5925,16 @@
           mergedPrice,
           requestId
         );
+        // #region agent log
+        dbgLog("D", "content.js:runChartRead", "export fallback result", {
+          gotFallback: Boolean(fallback),
+          scoped: Boolean(fallback?.scoped),
+          spoken: Boolean(fallback?.spoken || fallback?.spokenBrief),
+          error: fallback?.error || null,
+          bridgeReason,
+          rejectionReasons,
+        });
+        // #endregion
         if (fallback && requestId === currentVerdictRequestId) {
           if (turnGen != null && turnGen !== voiceTurnGen) {
             verdictBusy = false;
@@ -6033,7 +6336,7 @@
       document.getElementById("dc-levels-draw")?.click();
     } else if (k === "r") {
       e.preventDefault();
-      if (!verdictBusy && !chatBusy) sendChat("what do you see on the chart", { voice: voiceReady });
+      startChartReadFromUi("hotkey");
     }
   });
 
