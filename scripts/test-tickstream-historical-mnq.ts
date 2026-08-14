@@ -277,8 +277,12 @@ async function main() {
   try {
     const symbolsResp = (await client.symbols()) as {
       symbols?: Array<{ symbol: string; exchange?: string; name?: string }>;
+      futures?: Array<{ symbol: string; exchange?: string; name?: string }>;
     };
-    const syms = symbolsResp.symbols ?? (Array.isArray(symbolsResp) ? symbolsResp : []);
+    const syms =
+      symbolsResp.symbols ??
+      symbolsResp.futures ??
+      (Array.isArray(symbolsResp) ? symbolsResp : []);
     const mnqEntry = syms.find((s) => s.symbol === MNQ);
     if (!mnqEntry) {
       report.step1_probe.result = "STOP";
