@@ -208,7 +208,13 @@ export function runContinuousDecisionRecorderTick(
   ): ContinuousRecorderTickResult => {
     const recorderEvalLatencyMs = Number(process.hrtime.bigint()) / 1e6 - t0;
     metrics.lastEvalLatencyMs = recorderEvalLatencyMs;
-    return { ...base, action, recorderEvalLatencyMs, ...extra };
+    return {
+      ...base,
+      action,
+      recorderEvalLatencyMs,
+      ...extra,
+      runtime: CONTINUOUS_RECORDER_RUNTIME,
+    };
   };
 
   if (!input.envelope) {
