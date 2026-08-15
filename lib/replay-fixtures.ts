@@ -306,7 +306,7 @@ export function rebuildCtxFromCandles(
   };
 }
 
-const emptyStructurePlaceholder = {
+const emptyStructurePlaceholder: MarketContext["structureFacts"] = {
   mss: null,
   liquiditySweeps: [],
   relativeEqualPools: [],
@@ -315,7 +315,7 @@ const emptyStructurePlaceholder = {
   fhdr: null,
   firstPresentedFvg: { nyOpening: null, postFhdr: null, activeSession: null },
   summary: "placeholder — rebuilt from OHLC in proof harness",
-} as const;
+};
 
 export const REPLAY_FIXTURES: Record<string, { ctx: MarketContext; state: MarketState }> = {
   "ny-open-long-a-plus": { ctx: baseCtx(), state: baseState({ stateHash: "ny-open-long-001" }) },
