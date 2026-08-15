@@ -43,7 +43,13 @@ import {
   needsMarketIntelligenceAnswer,
   tryIntelligenceReply,
 } from "@/lib/conversational-query";
-import { buildDeskMarketIntelligence, formatIntelligenceForPrompt } from "@/lib/market-intelligence";
+import {
+  buildDeskMarketIntelligence,
+  formatIntelligenceForPrompt,
+  peekLiveDeskIntelligenceCache,
+  tryReuseLiveDeskIntelligence,
+  type DeskMarketIntelligence,
+} from "@/lib/market-intelligence";
 import {
   answerComparativeLevelFollowUp,
   isLevelComparativeFollowUp,
@@ -60,17 +66,38 @@ import { validateDecisionEnvelope } from "@/lib/decision-envelope";
 import {
   formatMentorTradeSpoken,
   formatQualityGateSpokenReply,
+  formatStructuredInvalidationFollowUp,
   formatStructuredWaitFollowUp,
   formatWhyNotDirectionFollowUp,
   resolveUserPresentationMode,
 } from "@/lib/decision-contract-output";
-import { getLastPipelineResult } from "@/lib/desk-pipeline";
+import { getLastPipelineResult, replaceLastPipelineResult } from "@/lib/desk-pipeline";
 import {
   classifyMentorIntent,
+  hasPriorMarketRead,
+  isBareMentorFollowUp,
+  isMentorFollowUpOnPriorRead,
+  isPriorReadFollowUpPhrase,
   mentorContextFromMessages,
   parseWhyNotDirection,
+  requestsFreshMarketState,
+  shouldRefreshMarketState,
+  type MentorIntent,
   type MentorIntentContext,
 } from "@/lib/mentor-intent";
+import {
+  classifyMarketDataFailure,
+  formatMarketDataWaitReply,
+  MarketDataError,
+} from "@/lib/market-data-errors";
+import { bumpLiveLatency, noteLiveLatency } from "@/lib/live-latency-profile";
+import { markLiveLatencyStage, patchLiveLatencyTraceMeta } from "@/lib/live-latency-trace";
+import {
+  buildHistoricalFixtureIntelligence,
+  getHistoricalFixtureSession,
+  labelHistoricalFixtureText,
+  type HistoricalFixtureRequest,
+} from "@/lib/research/replay/historical-ui";
 import { isDecisionHistoryTimeQuery } from "@/lib/decision-history-query";
 import { answerLiveDecisionHistoryQuery } from "@/lib/decision-time-travel";
 import { CASUAL_CHAT_SYSTEM_PROMPT } from "@/lib/casual-chat-prompt";
@@ -400,6 +427,209 @@ export function tryStructuredWhyNotFollowUpFromLastPipeline(
     responseSource: "why_not_structured",
     openaiCalls: 0,
   };
+}
+
+/** Follow-ups that explain a prior envelope must not QUALITY_GATE on missing OHLC. */
+export function shouldSkipQualityGate(
+  question: string,
+  ctx?: MentorIntentContext
+): boolean {
+  if (requestsFreshMarketState(question, ctx)) return false;
+  if (isMentorFollowUpOnPriorRead(question, ctx)) return true;
+  if (isPriorReadFollowUpPhrase(question)) return true;
+  const intent = classifyMentorIntent(question, ctx);
+  return !shouldRefreshMarketState(intent, ctx);
+}
+
+const STRUCTURED_FOLLOWUP_INTENTS: ReadonlySet<MentorIntent> = new Set([
+  "WAIT_EXPLANATION",
+  "INVALIDATION",
+]);
+
+export function needsStructuredWaitFollowUp(
+  question: string,
+  ctx?: ReturnType<typeof mentorContextFromMessages>
+): boolean {
+  if (parseWhyNotDirection(question) != null) return true;
+  if (isPriorReadFollowUpPhrase(question)) return true;
+  const intent = classifyMentorIntent(question, ctx);
+  if (STRUCTURED_FOLLOWUP_INTENTS.has(intent)) return true;
+  if (ctx && hasPriorMarketRead(ctx)) {
+    if (
+      intent === "EXPLAIN_PREVIOUS_MARKET_READ" ||
+      intent === "WAIT_EXPLANATION" ||
+      intent === "BIAS_EXPLANATION"
+    ) {
+      return true;
+    }
+    if (isBareMentorFollowUp(question)) return true;
+  }
+  return false;
+}
+
+function noteFollowUpReuse(): void {
+  bumpLiveLatency("mentor_followup_reuse");
+  noteLiveLatency("followup_rebuilds_intel=no");
+  noteLiveLatency("market_refresh=skip_prior_read");
+  noteLiveLatency("live_context=hit");
+  patchLiveLatencyTraceMeta({ cache: "HIT", missReason: null, new1mBarInvalidation: false });
+  markLiveLatencyStage("market_context_complete");
+}
+
+function answerStructuredFollowUpFromLastPipeline(
+  question: string,
+  mentorCtx?: MentorIntentContext,
+  historical?: boolean
+): string | null {
+  const hist = historical ? getHistoricalFixtureSession() : null;
+  const pipe = hist?.pipeline ?? getLastPipelineResult();
+  const env = pipe?.analysis_contract?.decision;
+  if (!pipe || !env) return null;
+  const ctx = {
+    long_case: pipe.interpretation.long_case,
+    short_case: pipe.interpretation.short_case,
+    entry_model: pipe.interpretation.entry_model,
+    rejected_alternative: pipe.analysis_contract?.rejected_alternative,
+  };
+  const mode = resolveUserPresentationMode();
+  const label = (spoken: string) => {
+    const base = labelPreviousDecision(spoken);
+    return historical ? labelHistoricalFixtureText(base) : base;
+  };
+  const whyNot = parseWhyNotDirection(question);
+  if (whyNot) return label(formatWhyNotDirectionFollowUp(env, whyNot, ctx, { mode }));
+  const intent = classifyMentorIntent(question, mentorCtx);
+  if (intent === "WAIT_EXPLANATION") return label(formatStructuredWaitFollowUp(env, ctx, { mode }));
+  if (intent === "INVALIDATION") return label(formatStructuredInvalidationFollowUp(env, { mode }));
+  if (
+    intent === "EXPLAIN_PREVIOUS_MARKET_READ" ||
+    intent === "BIAS_EXPLANATION" ||
+    isPriorReadFollowUpPhrase(question)
+  ) {
+    return label(formatMentorTradeSpoken(env, { mode }));
+  }
+  return null;
+}
+
+async function buildIntelForMentorFollowUp(
+  question: string,
+  mentorCtx: ReturnType<typeof mentorContextFromMessages> | undefined,
+  chartLastPrice?: number | null
+): Promise<DeskMarketIntelligence> {
+  const intent = classifyMentorIntent(question, mentorCtx);
+  const refresh = shouldRefreshMarketState(intent, mentorCtx);
+  if (!refresh) {
+    const reused = tryReuseLiveDeskIntelligence() || peekLiveDeskIntelligenceCache()?.intel || null;
+    if (reused) return reused;
+    throw new Error("followup_no_cached_envelope");
+  }
+  const forceFresh = chartLastPrice != null;
+  try {
+    return await buildDeskMarketIntelligence({ chartLastPrice, forceFresh });
+  } catch (err) {
+    const kind = classifyMarketDataFailure(err);
+    // Do not double-wait on timeout / unavailable — retry would poison UX.
+    if (
+      kind === "MARKET_DATA_TIMEOUT" ||
+      kind === "MARKET_DATA_UNAVAILABLE" ||
+      kind === "REQUEST_ABORTED" ||
+      kind === "USER_CANCELLED"
+    ) {
+      throw err instanceof MarketDataError
+        ? err
+        : new MarketDataError(kind, formatMarketDataWaitReply(kind), { cause: err });
+    }
+    return buildDeskMarketIntelligence({ forceFresh: false });
+  }
+}
+
+function loadHistoricalIntelForChat(
+  req: HistoricalFixtureRequest,
+  analysisDepth: AnalysisDepth
+): { intel: DeskMarketIntelligence; qualityGate?: QualityGateResult } {
+  const session = buildHistoricalFixtureIntelligence(req);
+  const prev = getLastPipelineResult();
+  try {
+    const gate = evaluateAnalysisQualityGate(session.intel, analysisDepth);
+    bumpLiveLatency("decision_envelope_builds");
+    markLiveLatencyStage("decision_envelope_complete");
+    return { intel: session.intel, qualityGate: gate };
+  } finally {
+    replaceLastPipelineResult(prev);
+  }
+}
+
+/** Deterministic envelope-backed mentor follow-up — bypasses LLM paraphrase. */
+export async function tryDeterministicMentorFollowUp(
+  question: string,
+  messages?: ChatMessage[],
+  chartLastPrice?: number | null,
+  lastVerdict?: string | null,
+  historicalFixture?: HistoricalFixtureRequest | null
+): Promise<string | null> {
+  const conversationContext = messages?.length ? extractConversationContext(messages) : undefined;
+  const mentorCtx = messages?.length ? mentorContextFromMessages(messages) : undefined;
+  if (mentorCtx) attachPriorReadContext(mentorCtx, lastVerdict);
+  if (mentorCtx && conversationContext && !conversationContext.lastAssistant && mentorCtx.lastAssistant) {
+    conversationContext.lastAssistant = mentorCtx.lastAssistant;
+  }
+  if (!needsStructuredWaitFollowUp(question, mentorCtx)) return null;
+  const historical = Boolean(historicalFixture);
+  try {
+    const intent = classifyMentorIntent(question, mentorCtx);
+    const refresh =
+      !isMentorFollowUpOnPriorRead(question, mentorCtx) &&
+      shouldRefreshMarketState(intent, mentorCtx);
+    if (historical) {
+      const session =
+        getHistoricalFixtureSession() ??
+        buildHistoricalFixtureIntelligence(historicalFixture || {});
+      noteFollowUpReuse();
+      if (!refresh) {
+        const answer = tryIntelligenceReply(session.intel, question, conversationContext);
+        if (answer?.spoken) {
+          return labelHistoricalFixtureText(labelPreviousDecision(answer.spoken));
+        }
+        return answerStructuredFollowUpFromLastPipeline(question, mentorCtx, true);
+      }
+      const loaded = loadHistoricalIntelForChat(historicalFixture || {}, "DEEP_ANALYSIS");
+      const answer = tryIntelligenceReply(loaded.intel, question, conversationContext);
+      if (answer?.spoken) return labelHistoricalFixtureText(answer.spoken);
+      return answerStructuredFollowUpFromLastPipeline(question, mentorCtx, true);
+    }
+    if (!refresh) {
+      const reused = tryReuseLiveDeskIntelligence() || peekLiveDeskIntelligenceCache()?.intel || null;
+      if (reused) {
+        noteFollowUpReuse();
+        const answer = tryIntelligenceReply(reused, question, conversationContext);
+        if (answer?.spoken) return labelPreviousDecision(answer.spoken);
+      }
+      const fromPipe = answerStructuredFollowUpFromLastPipeline(question, mentorCtx, false);
+      if (fromPipe) {
+        noteFollowUpReuse();
+        return fromPipe;
+      }
+      return null;
+    }
+    const intel = await buildIntelForMentorFollowUp(question, mentorCtx, chartLastPrice);
+    bumpLiveLatency("mentor_followup_intel");
+    noteLiveLatency("followup_rebuilds_intel=yes");
+    const answer = tryIntelligenceReply(intel, question, conversationContext);
+    return answer?.spoken ?? null;
+  } catch (err) {
+    const kind = classifyMarketDataFailure(err);
+    if (
+      kind === "MARKET_DATA_TIMEOUT" ||
+      kind === "MARKET_DATA_UNAVAILABLE" ||
+      kind === "REQUEST_ABORTED"
+    ) {
+      return formatMarketDataWaitReply(kind);
+    }
+    if (!shouldRefreshMarketState(classifyMentorIntent(question, mentorCtx), mentorCtx)) {
+      return answerStructuredFollowUpFromLastPipeline(question, mentorCtx, historical);
+    }
+    return null;
+  }
 }
 
 export async function buildChatSystemPrompt(
