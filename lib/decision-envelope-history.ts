@@ -442,6 +442,50 @@ export function latestDecisionEnvelope(
   return null;
 }
 
+/** True when recorded status is an actionable directional call (LONG/SHORT only). */
+export function isDirectionalRecordedStatus(
+  verdict?: string | null,
+  stance?: string | null
+): boolean {
+  const status = normalizeRecordedStatus(verdict, stance);
+  return status === "LONG" || status === "SHORT";
+}
+
+/**
+ * Walk newest→oldest for the most recent LONG/SHORT.
+ * Skips WAIT / NO_TRADE / monitor / flat.
+ * When `sessionKey` is set, only entries matching that CME session date key qualify.
+ * When `side` is set, only that directional status qualifies.
+ */
+export function findLatestDirectionalDecision(
+  lane: DecisionHistoryLane,
+  opts?: {
+    fixtureId?: string;
+    /** CME Globex session date key (18:00 ET roll). Omit = full history. */
+    sessionKey?: string;
+    sessionKeyFromAsOf?: (asOf: Date) => string;
+    /** Restrict to LONG or SHORT only. */
+    side?: "LONG" | "SHORT";
+  }
+): DecisionEnvelopeHistoryEntry | null {
+  const list = getDecisionEnvelopeHistory(lane);
+  const keyFn = opts?.sessionKeyFromAsOf;
+  for (let i = list.length - 1; i >= 0; i--) {
+    const e = list[i]!;
+    if (opts?.fixtureId && e.fixtureId && e.fixtureId !== opts.fixtureId) continue;
+    if (opts?.sessionKey && keyFn) {
+      if (keyFn(new Date(e.asOf)) !== opts.sessionKey) continue;
+    }
+    if (!isDirectionalRecordedStatus(e.verdict, e.stance)) continue;
+    if (opts?.side) {
+      const status = normalizeRecordedStatus(e.verdict, e.stance);
+      if (status !== opts.side) continue;
+    }
+    return e;
+  }
+  return null;
+}
+
 /** Latest recorded entry with asOf strictly before target (not at-or-before). */
 export function findDecisionStrictlyBefore(
   lane: DecisionHistoryLane,

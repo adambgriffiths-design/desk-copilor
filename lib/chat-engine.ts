@@ -149,6 +149,8 @@ export type ChatPromptInput = {
   chartSnapshot?: import("./chart-snapshot").ChartSnapshotPayload | null;
   chartExportFailed?: boolean;
   memory?: DeskMemory | null;
+  /** Weekend / PIT fixture mode — never mixes with live TV or live intel cache. */
+  historicalFixture?: HistoricalFixtureRequest | null;
   /**
    * Same-request reuse only: when the stream route already ran buildChatSystemPrompt
    * for the CURRENT_MARKET_READ fast path and fell through to LLM.
