@@ -16,7 +16,25 @@ export type DecisionHistoryQueryKind =
   | "why_changed"
   | "minutes_ago"
   | "what_changed"
+  /** Literal newest DecisionEnvelope (WAIT/NO_TRADE allowed). */
   | "last_recorded"
+  /**
+   * Ambiguous "last decision" — composite UX:
+   * latest recorded stance + last actionable LONG/SHORT when they differ.
+   */
+  | "last_decision"
+  /** Explicit actionable trade — most recent LONG/SHORT only. */
+  | "last_directional"
+  /** Side-specific: when were you last long/short. */
+  | "last_side"
+  /** Session: have you taken a trade today. */
+  | "trade_today"
+  /** Prior actionable setup / thesis. */
+  | "previous_setup"
+  /** What happened to the prior actionable idea (if history supports). */
+  | "setup_outcome"
+  /** Latest current recorded stance (LONG/SHORT/WAIT/NO_TRADE). */
+  | "current_stance"
   | "immediately_before"
   | "none";
 
@@ -37,6 +55,8 @@ export type ParsedDecisionHistoryQuery = {
   to?: ParsedClockTime;
   /** Relative lookback in minutes ("10 minutes ago") */
   lookbackMinutes?: number;
+  /** For last_side — LONG or SHORT only. */
+  side?: "LONG" | "SHORT";
 };
 
 const CLOCK_RE =
