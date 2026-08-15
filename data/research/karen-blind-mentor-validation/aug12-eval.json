@@ -1,0 +1,2880 @@
+{
+  "dataset": "nq-aug12-2026-cme",
+  "generatedAt": "2026-08-14T10:07:41.563Z",
+  "cases": [
+    {
+      "spec": {
+        "asOf": "2026-08-11T22:00:00.000Z",
+        "label": "Globex open",
+        "rationale": "First bar of CME session"
+      },
+      "verdict": "NO_TRADE",
+      "eval": {
+        "asOf": "2026-08-11T22:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "NO_TRADE",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 1 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure unknown under bad data quality"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 1,
+            "maxScore": 2,
+            "note": "neither case strongly supported"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 30 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 1 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "NO_TRADE under bad data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "NO_TRADE + unknown structure under bad data"
+          }
+        ],
+        "totalScore": 19,
+        "maxScore": 20,
+        "pctScore": 95,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-11T22:00:00.000Z",
+        "label": "Globex open",
+        "evidenceClass": "weak",
+        "expected": "WAIT|NO_TRADE",
+        "actual": "NO_TRADE",
+        "match": true,
+        "note": "entry=ACTIVE long=false short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 1380,
+        "next30Net": 11.75,
+        "note": "Non-directional — outcome N/A"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T02:00:00.000Z",
+        "label": "Overnight mid",
+        "rationale": "Low-liquidity overnight"
+      },
+      "verdict": "NO_TRADE",
+      "eval": {
+        "asOf": "2026-08-12T02:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "NO_TRADE",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 1,
+            "maxScore": 2,
+            "note": "neither case strongly supported"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 30 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "NO_TRADE — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 19,
+        "maxScore": 20,
+        "pctScore": 95,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T02:00:00.000Z",
+        "label": "Overnight mid",
+        "evidenceClass": "weak",
+        "expected": "WAIT|NO_TRADE",
+        "actual": "NO_TRADE",
+        "match": true,
+        "note": "entry=WAIT long=false short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 1140,
+        "next30Net": 19.75,
+        "note": "Non-directional — outcome N/A"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T06:00:00.000Z",
+        "label": "Early morning",
+        "rationale": "Pre-London / early globex"
+      },
+      "verdict": "WAIT",
+      "eval": {
+        "asOf": "2026-08-12T06:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 1,
+            "maxScore": 2,
+            "note": "neither case strongly supported"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 19,
+        "maxScore": 20,
+        "pctScore": 95,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T06:00:00.000Z",
+        "label": "Early morning",
+        "evidenceClass": "weak",
+        "expected": "WAIT|NO_TRADE",
+        "actual": "WAIT",
+        "match": true,
+        "note": "entry=WAIT long=false short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 900,
+        "next30Net": -8.75,
+        "note": "Non-directional — outcome N/A"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T11:00:00.000Z",
+        "label": "Pre-market",
+        "rationale": "Pre-RTH positioning"
+      },
+      "verdict": "WAIT",
+      "eval": {
+        "asOf": "2026-08-12T11:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T11:00:00.000Z",
+        "label": "Pre-market",
+        "evidenceClass": "one_sided_retrace_wait",
+        "expected": "WAIT",
+        "actual": "WAIT",
+        "match": true,
+        "note": "entry=WAIT long=true short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 600,
+        "next30Net": -19.5,
+        "note": "Non-directional — outcome N/A"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T13:00:00.000Z",
+        "label": "Pre-NY open",
+        "rationale": "Final pre-open context"
+      },
+      "verdict": "LONG",
+      "eval": {
+        "asOf": "2026-08-12T13:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "LONG",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "directional with moderate confidence"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "invalidation 29619.5"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "pipeline directional with acceptable data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "LONG aligned with bullish context"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T13:00:00.000Z",
+        "label": "Pre-NY open",
+        "evidenceClass": "strong",
+        "expected": "LONG",
+        "actual": "LONG",
+        "match": true,
+        "note": "entry=ACTIVE long=true short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 480,
+        "next30Net": 55.5,
+        "note": "DIAGNOSTIC ONLY — next-30m net 55.5 (not scored)"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T14:30:00.000Z",
+        "label": "NY open",
+        "rationale": "Canonical NY RTH anchor"
+      },
+      "verdict": "WAIT",
+      "eval": {
+        "asOf": "2026-08-12T14:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T14:30:00.000Z",
+        "label": "NY open",
+        "evidenceClass": "one_sided_retrace_wait",
+        "expected": "WAIT",
+        "actual": "WAIT",
+        "match": true,
+        "note": "entry=WAIT long=true short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 390,
+        "next30Net": -36.75,
+        "note": "Non-directional — outcome N/A"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T15:30:00.000Z",
+        "label": "Post-open hour",
+        "rationale": "First hour post-open"
+      },
+      "verdict": "SHORT",
+      "eval": {
+        "asOf": "2026-08-12T15:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "SHORT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "directional with moderate confidence"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "invalidation 30006.75"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "pipeline directional with acceptable data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "SHORT aligned with bearish context"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T15:30:00.000Z",
+        "label": "Post-open hour",
+        "evidenceClass": "strong",
+        "expected": "SHORT",
+        "actual": "SHORT",
+        "match": true,
+        "note": "entry=null long=false short=true"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 330,
+        "next30Net": -16.25,
+        "note": "DIAGNOSTIC ONLY — next-30m net -16.3 (not scored)"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T16:30:00.000Z",
+        "label": "Mid-morning RTH",
+        "rationale": "Trend vs range"
+      },
+      "verdict": "WAIT",
+      "eval": {
+        "asOf": "2026-08-12T16:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T16:30:00.000Z",
+        "label": "Mid-morning RTH",
+        "evidenceClass": "one_sided_retrace_wait",
+        "expected": "WAIT",
+        "actual": "WAIT",
+        "match": true,
+        "note": "entry=WAIT long=true short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 270,
+        "next30Net": 34.25,
+        "note": "Non-directional — outcome N/A"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T17:30:00.000Z",
+        "label": "Lunch",
+        "rationale": "Typical liquidity dip"
+      },
+      "verdict": "WAIT",
+      "eval": {
+        "asOf": "2026-08-12T17:30:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "WAIT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bullish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 45 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "WAIT — not forcing trade"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T17:30:00.000Z",
+        "label": "Lunch",
+        "evidenceClass": "one_sided_retrace_wait",
+        "expected": "WAIT",
+        "actual": "WAIT",
+        "match": true,
+        "note": "entry=WAIT long=true short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 210,
+        "next30Net": -1.75,
+        "note": "Non-directional — outcome N/A"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T19:00:00.000Z",
+        "label": "PM session",
+        "rationale": "Afternoon continuation / reversal"
+      },
+      "verdict": "SHORT",
+      "eval": {
+        "asOf": "2026-08-12T19:00:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "SHORT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "directional with moderate confidence"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "invalidation 30006.75"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "pipeline directional with acceptable data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "SHORT aligned with bearish context"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T19:00:00.000Z",
+        "label": "PM session",
+        "evidenceClass": "strong",
+        "expected": "SHORT",
+        "actual": "SHORT",
+        "match": true,
+        "note": "entry=ACTIVE long=false short=true"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 120,
+        "next30Net": -44,
+        "note": "DIAGNOSTIC ONLY — next-30m net -44.0 (not scored)"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T20:59:00.000Z",
+        "label": "Session end",
+        "rationale": "Last RTH minute"
+      },
+      "verdict": "SHORT",
+      "eval": {
+        "asOf": "2026-08-12T20:59:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "SHORT",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure bearish reflected in evidence"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 2,
+            "maxScore": 2,
+            "note": "single dominant case — no conflict"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "directional with moderate confidence"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "invalidation 30006.75"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "pipeline directional with acceptable data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "SHORT aligned with bearish context"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "data_quality=good — pipeline evaluated"
+          }
+        ],
+        "totalScore": 20,
+        "maxScore": 20,
+        "pctScore": 100,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T20:59:00.000Z",
+        "label": "Session end",
+        "evidenceClass": "strong",
+        "expected": "SHORT",
+        "actual": "SHORT",
+        "match": true,
+        "note": "entry=ACTIVE long=false short=true"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 1,
+        "next30Net": 23.5,
+        "note": "DIAGNOSTIC ONLY — next-30m net 23.5 (not scored)"
+      }
+    },
+    {
+      "spec": {
+        "asOf": "2026-08-12T21:45:00.000Z",
+        "label": "Late globex",
+        "rationale": "Near CME roll boundary"
+      },
+      "verdict": "NO_TRADE",
+      "eval": {
+        "asOf": "2026-08-12T21:45:00.000Z",
+        "source": "pipeline",
+        "pipelineVerdict": "NO_TRADE",
+        "criteria": [
+          {
+            "id": "sufficient_info",
+            "label": "Sufficient observable info cited at cutoff",
+            "score": 2,
+            "maxScore": 2,
+            "note": "4/4 evidence fields + 5 candles"
+          },
+          {
+            "id": "structure_accuracy",
+            "label": "Structure evidence aligns with observation",
+            "score": 2,
+            "maxScore": 2,
+            "note": "structure unknown under bad data quality"
+          },
+          {
+            "id": "dominant_conflicting_evidence",
+            "label": "Dominant vs conflicting evidence acknowledged",
+            "score": 1,
+            "maxScore": 2,
+            "note": "neither case strongly supported"
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty expressed when evidence mixed or incomplete",
+            "score": 2,
+            "maxScore": 2,
+            "note": "confidence 30 appropriate for mixed/weak/wait"
+          },
+          {
+            "id": "invalidation",
+            "label": "Actionable invalidation when directional",
+            "score": 2,
+            "maxScore": 2,
+            "note": "non-directional — invalidation not required"
+          },
+          {
+            "id": "no_hindsight",
+            "label": "No future bar or outcome references",
+            "score": 2,
+            "maxScore": 2,
+            "note": "all 5 cited candles ≤ cutoff"
+          },
+          {
+            "id": "no_forced_direction",
+            "label": "No forced LONG/SHORT when evidence insufficient",
+            "score": 2,
+            "maxScore": 2,
+            "note": "NO_TRADE under bad data"
+          },
+          {
+            "id": "consistency",
+            "label": "Verdict consistent with cited evidence",
+            "score": 2,
+            "maxScore": 2,
+            "note": "mentor matches pipeline wait/no-trade"
+          },
+          {
+            "id": "trader_usefulness",
+            "label": "Entry idea + levels useful to a trader",
+            "score": 2,
+            "maxScore": 2,
+            "note": "entry + levels + invalidation present"
+          },
+          {
+            "id": "data_quality_honesty",
+            "label": "Honest handling of missing/stale data",
+            "score": 2,
+            "maxScore": 2,
+            "note": "NO_TRADE + unknown structure under bad data"
+          }
+        ],
+        "totalScore": 19,
+        "maxScore": 20,
+        "pctScore": 95,
+        "falsifications": [
+          {
+            "flag": "hindsight_leakage",
+            "detected": false,
+            "detail": "References information after cutoff T"
+          },
+          {
+            "flag": "overconfidence",
+            "detected": false,
+            "detail": "High confidence despite mixed/insufficient evidence"
+          },
+          {
+            "flag": "forced_signal",
+            "detected": false,
+            "detail": "Direction forced without pipeline support"
+          },
+          {
+            "flag": "cherry_pick",
+            "detected": false,
+            "detail": "Cherry-picks one side while ignoring conflict"
+          },
+          {
+            "flag": "unavailable_info_cited",
+            "detected": false,
+            "detail": "Cites levels/data not available at cutoff"
+          }
+        ],
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      "phase4": {
+        "asOf": "2026-08-12T21:45:00.000Z",
+        "label": "Late globex",
+        "evidenceClass": "weak",
+        "expected": "WAIT|NO_TRADE",
+        "actual": "NO_TRADE",
+        "match": true,
+        "note": "entry=ACTIVE long=false short=false"
+      },
+      "futureLeak": {
+        "futureFvgs": 0,
+        "assertOk": true
+      },
+      "postHoc": {
+        "barsAfter": 1,
+        "next30Net": 23.5,
+        "note": "Non-directional — outcome N/A"
+      }
+    }
+  ],
+  "baselines": {
+    "always_wait_naive": [
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 55,
+        "mentorEvalReady": false,
+        "summary": "Weak: sufficient_info, no_forced_direction, trader_usefulness, data_quality_honesty (55%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 65,
+        "mentorEvalReady": false,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (65%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 65,
+        "mentorEvalReady": false,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (65%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 70,
+        "mentorEvalReady": true,
+        "summary": "Weak: sufficient_info, structure_accuracy, trader_usefulness (70%)"
+      },
+      {
+        "id": "always_wait_naive",
+        "verdict": "WAIT",
+        "pctScore": 55,
+        "mentorEvalReady": false,
+        "summary": "Weak: sufficient_info, no_forced_direction, trader_usefulness, data_quality_honesty (55%)"
+      }
+    ],
+    "always_wait_copied": [
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 75,
+        "mentorEvalReady": true,
+        "summary": "Weak: no_forced_direction, data_quality_honesty (75%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 95,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 95,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "always_wait_copied",
+        "verdict": "WAIT",
+        "pctScore": 75,
+        "mentorEvalReady": true,
+        "summary": "Weak: no_forced_direction, data_quality_honesty (75%)"
+      }
+    ],
+    "follow_st_direction": [
+      {
+        "id": "follow_st_direction",
+        "verdict": "LONG",
+        "pctScore": 65,
+        "mentorEvalReady": false,
+        "summary": "Falsification: forced_signal"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "LONG",
+        "pctScore": 90,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (90%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "LONG",
+        "pctScore": 80,
+        "mentorEvalReady": true,
+        "summary": "Weak: structure_accuracy (80%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "LONG",
+        "pctScore": 90,
+        "mentorEvalReady": true,
+        "summary": "Weak: structure_accuracy (90%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "LONG",
+        "pctScore": 90,
+        "mentorEvalReady": true,
+        "summary": "Weak: structure_accuracy (90%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "SHORT",
+        "pctScore": 85,
+        "mentorEvalReady": true,
+        "summary": "Weak: structure_accuracy (85%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "LONG",
+        "pctScore": 95,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "SHORT",
+        "pctScore": 85,
+        "mentorEvalReady": true,
+        "summary": "Weak: structure_accuracy (85%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "SHORT",
+        "pctScore": 85,
+        "mentorEvalReady": true,
+        "summary": "Weak: structure_accuracy (85%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "LONG",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "SHORT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "follow_st_direction",
+        "verdict": "SHORT",
+        "pctScore": 65,
+        "mentorEvalReady": false,
+        "summary": "Falsification: forced_signal"
+      }
+    ],
+    "structure_only": [
+      {
+        "id": "structure_only",
+        "verdict": "WAIT",
+        "pctScore": 75,
+        "mentorEvalReady": true,
+        "summary": "Weak: no_forced_direction, data_quality_honesty (75%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "SHORT",
+        "pctScore": 90,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (90%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "LONG",
+        "pctScore": 90,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (90%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "LONG",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "LONG",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "LONG",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "SHORT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "LONG",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "LONG",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "SHORT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "SHORT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "structure_only",
+        "verdict": "WAIT",
+        "pctScore": 75,
+        "mentorEvalReady": true,
+        "summary": "Weak: no_forced_direction, data_quality_honesty (75%)"
+      }
+    ],
+    "liquidity_only": [
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 75,
+        "mentorEvalReady": true,
+        "summary": "Weak: no_forced_direction, data_quality_honesty (75%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 95,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 95,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (95%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 100,
+        "mentorEvalReady": true,
+        "summary": "Mentor-quality pass (100%)"
+      },
+      {
+        "id": "liquidity_only",
+        "verdict": "WAIT",
+        "pctScore": 75,
+        "mentorEvalReady": true,
+        "summary": "Weak: no_forced_direction, data_quality_honesty (75%)"
+      }
+    ]
+  },
+  "minute": {
+    "evaluationCount": 1321,
+    "range": {
+      "start": "2026-08-11T23:00:00.000Z",
+      "end": "2026-08-12T22:00:00.000Z",
+      "barCount": 1321
+    },
+    "waitRate": 0.9091597274791824,
+    "directionalRate": 0.09084027252081757,
+    "noTradeRate": 0,
+    "long": 49,
+    "short": 71,
+    "wait": 1201,
+    "noTrade": 0,
+    "verdictTransitions": 94,
+    "structureChanges": 63,
+    "biasChanges": 115,
+    "sessionChanges": 7,
+    "entryStatusTransitions": 481,
+    "entryActiveWindows": 100,
+    "setupEligibleWindows": 37,
+    "poisonPass": true,
+    "poisonDetail": "point-in-time preserved — 14 snapshots unchanged before poison at 2026-08-11T23:14:00.000Z",
+    "responsive": true,
+    "responsivenessEvidence": "94 verdict transition(s) at native 1m resolution (e.g. WAIT→LONG @ 23:21Z, LONG→WAIT @ 23:25Z, WAIT→LONG @ 00:19Z); 100 entryStatus ACTIVE window(s), 226 total minutes; 37 setup-eligible window(s), 90 total minutes; 63 structure change(s)",
+    "episodeCount": 272,
+    "directionalEpisodes": 47,
+    "flickerEpisodes": 43,
+    "durableEpisodes": 0,
+    "medianDirectionalMinutes": 2,
+    "verdictNearStructurePct": 0.46808510638297873,
+    "agreeAlwaysWait": 0.9091597274791824,
+    "agreeStructureOnly": 0.0991672975018925,
+    "agreeShortTermDir": 0.04844814534443603,
+    "nReconstructed": 1321,
+    "karenDirectionalWhenStructWait": 8,
+    "structDirectionalWhenKarenWait": 1182,
+    "flickerExamples": [
+      {
+        "from": "WAIT",
+        "to": "LONG",
+        "start": "2026-08-11T23:21:00.000Z",
+        "end": "2026-08-11T23:25:00.000Z",
+        "minutes": 4
+      },
+      {
+        "from": "WAIT",
+        "to": "LONG",
+        "start": "2026-08-12T00:19:00.000Z",
+        "end": "2026-08-12T00:23:00.000Z",
+        "minutes": 4
+      },
+      {
+        "from": "WAIT",
+        "to": "LONG",
+        "start": "2026-08-12T00:25:00.000Z",
+        "end": "2026-08-12T00:26:00.000Z",
+        "minutes": 1
+      },
+      {
+        "from": "WAIT",
+        "to": "SHORT",
+        "start": "2026-08-12T01:17:00.000Z",
+        "end": "2026-08-12T01:18:00.000Z",
+        "minutes": 1
+      },
+      {
+        "from": "WAIT",
+        "to": "SHORT",
+        "start": "2026-08-12T01:20:00.000Z",
+        "end": "2026-08-12T01:21:00.000Z",
+        "minutes": 1
+      },
+      {
+        "from": "WAIT",
+        "to": "SHORT",
+        "start": "2026-08-12T01:29:00.000Z",
+        "end": "2026-08-12T01:30:00.000Z",
+        "minutes": 1
+      },
+      {
+        "from": "WAIT",
+        "to": "SHORT",
+        "start": "2026-08-12T01:34:00.000Z",
+        "end": "2026-08-12T01:39:00.000Z",
+        "minutes": 5
+      },
+      {
+        "from": "WAIT",
+        "to": "LONG",
+        "start": "2026-08-12T02:16:00.000Z",
+        "end": "2026-08-12T02:17:00.000Z",
+        "minutes": 1
+      }
+    ],
+    "durableExamples": [],
+    "setupWindows": [
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T00:19:00.000Z",
+        "endAsOf": "2026-08-12T00:22:00.000Z",
+        "startBarIndex": 139,
+        "endBarIndex": 142,
+        "durationMinutes": 4,
+        "verdictAtStart": "LONG",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 4
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T00:25:00.000Z",
+        "endAsOf": "2026-08-12T00:25:00.000Z",
+        "startBarIndex": 145,
+        "endBarIndex": 145,
+        "durationMinutes": 1,
+        "verdictAtStart": "LONG",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 1
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T01:17:00.000Z",
+        "endAsOf": "2026-08-12T01:17:00.000Z",
+        "startBarIndex": 197,
+        "endBarIndex": 197,
+        "durationMinutes": 1,
+        "verdictAtStart": "SHORT",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 1
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T01:20:00.000Z",
+        "endAsOf": "2026-08-12T01:20:00.000Z",
+        "startBarIndex": 200,
+        "endBarIndex": 200,
+        "durationMinutes": 1,
+        "verdictAtStart": "SHORT",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 1
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T01:29:00.000Z",
+        "endAsOf": "2026-08-12T01:29:00.000Z",
+        "startBarIndex": 209,
+        "endBarIndex": 209,
+        "durationMinutes": 1,
+        "verdictAtStart": "SHORT",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 1
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T02:38:00.000Z",
+        "endAsOf": "2026-08-12T02:42:00.000Z",
+        "startBarIndex": 278,
+        "endBarIndex": 282,
+        "durationMinutes": 5,
+        "verdictAtStart": "LONG",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 5
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T02:52:00.000Z",
+        "endAsOf": "2026-08-12T02:58:00.000Z",
+        "startBarIndex": 292,
+        "endBarIndex": 298,
+        "durationMinutes": 7,
+        "verdictAtStart": "LONG",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 7
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T03:11:00.000Z",
+        "endAsOf": "2026-08-12T03:12:00.000Z",
+        "startBarIndex": 311,
+        "endBarIndex": 312,
+        "durationMinutes": 2,
+        "verdictAtStart": "LONG",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 2
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T03:27:00.000Z",
+        "endAsOf": "2026-08-12T03:30:00.000Z",
+        "startBarIndex": 327,
+        "endBarIndex": 330,
+        "durationMinutes": 4,
+        "verdictAtStart": "SHORT",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 4
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T03:51:00.000Z",
+        "endAsOf": "2026-08-12T03:59:00.000Z",
+        "startBarIndex": 351,
+        "endBarIndex": 359,
+        "durationMinutes": 9,
+        "verdictAtStart": "SHORT",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 9
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T04:35:00.000Z",
+        "endAsOf": "2026-08-12T04:36:00.000Z",
+        "startBarIndex": 395,
+        "endBarIndex": 396,
+        "durationMinutes": 2,
+        "verdictAtStart": "SHORT",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 2
+      },
+      {
+        "kind": "setupEligible",
+        "startAsOf": "2026-08-12T04:39:00.000Z",
+        "endAsOf": "2026-08-12T04:41:00.000Z",
+        "startBarIndex": 399,
+        "endBarIndex": 401,
+        "durationMinutes": 3,
+        "verdictAtStart": "SHORT",
+        "entryStatus": "ACTIVE",
+        "activationToInvalidationMinutes": 3
+      }
+    ]
+  },
+  "liquidity": [
+    {
+      "asOf": "2026-08-12T02:00:00.000Z",
+      "bars": 241,
+      "price": 29663.75,
+      "accepted": [
+        {
+          "type": "EQH",
+          "areaType": "BUY_SIDE",
+          "level": 29681,
+          "range": {
+            "low": 29680,
+            "high": 29681
+          },
+          "status": "closed_through",
+          "importance": "MEDIUM",
+          "why": "MEDIUM: Buy-side liquidity area 29680.00–29681.00. A trader would mark this horizontal (2 confirmed meaningful swing highs). Already swept — preserved as history, not current resting liquidity. Near a bullish market structure shift at 29680.50; held and released a 41.5 pt move — protected a significant swing; inside the Asia range. Same visible area: 1.00 pt shelf vs 28.00 pt pullback (ATR 8.21; band 1.23). Relative equality supports the area — it is not the reason it exists.",
+          "whyNotNearby": "This area is meaningful because it is a class-A shelf. Nearby 29681.00/29683.50 is not: Rejected as EQH: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "visualClass": "A",
+          "swings": [
+            {
+              "price": 29680,
+              "time": 1786494900,
+              "prom": 13.75
+            },
+            {
+              "price": 29681,
+              "time": 1786496700,
+              "prom": 18.5
+            }
+          ],
+          "confirmationTime": 1786496820,
+          "structuralContext": "near a bullish market structure shift at 29680.50; held and released a 41.5 pt move — protected a significant swing; inside the Asia range. Current-session liquidity (Asia session).",
+          "confidence": 0.6
+        },
+        {
+          "type": "EQL",
+          "areaType": "SELL_SIDE",
+          "level": 29646.75,
+          "range": {
+            "low": 29646.75,
+            "high": 29646.75
+          },
+          "status": "active",
+          "importance": "HIGH",
+          "why": "HIGH: Sell-side liquidity area 29646.75–29646.75. A trader would mark this horizontal (2 confirmed meaningful swing lows). Still unswept. Near a bullish market structure shift at 29646.50; inside the Asia range. Same visible area: 0.00 pt shelf vs 36.75 pt pullback (ATR 8.21; band 1.23). Relative equality supports the area — it is not the reason it exists.",
+          "whyNotNearby": "This area is meaningful because it is a class-A shelf. Nearby 29639.50/29640.75 is not: Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "visualClass": "A",
+          "swings": [
+            {
+              "price": 29646.75,
+              "time": 1786498500,
+              "prom": 13.5
+            },
+            {
+              "price": 29646.75,
+              "time": 1786499880,
+              "prom": 20.25
+            }
+          ],
+          "confirmationTime": 1786500000,
+          "structuralContext": "near a bullish market structure shift at 29646.50; inside the Asia range. Current-session liquidity (Asia session).",
+          "confidence": 0.85
+        }
+      ],
+      "rejected": [
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29667.25,
+            29666.5
+          ],
+          "why": "Rejected as EQH: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29639.5,
+            29639.5
+          ],
+          "why": "Rejected as EQL: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29669.75,
+            29670.75
+          ],
+          "why": "Rejected as EQH: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29657,
+            29657
+          ],
+          "why": "Rejected as EQL: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29672,
+            29670.75
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29639.5,
+            29640.75
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29652.25,
+            29654.25
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29640.75,
+            29639.5
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29669.75,
+            29672
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29635.75,
+            29634.25
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29669.75,
+            29667.25
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29658.75,
+            29657
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        }
+      ],
+      "pendingSwings": 1
+    },
+    {
+      "asOf": "2026-08-12T14:30:00.000Z",
+      "bars": 991,
+      "price": 29907.5,
+      "accepted": [],
+      "rejected": [
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29935,
+            29936
+          ],
+          "why": "Rejected as EQH: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29860.75,
+            29864
+          ],
+          "why": "Rejected as EQL: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29922.5,
+            29921.5
+          ],
+          "why": "Rejected as EQH: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29853.25,
+            29847.75
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29941.5,
+            29945.75
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29853.25,
+            29860.75
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29941.5,
+            29936
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29935,
+            29941.5
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        }
+      ],
+      "pendingSwings": 1
+    },
+    {
+      "asOf": "2026-08-12T19:00:00.000Z",
+      "bars": 1261,
+      "price": 29901,
+      "accepted": [
+        {
+          "type": "EQH",
+          "areaType": "BUY_SIDE",
+          "level": 29924.5,
+          "range": {
+            "low": 29924,
+            "high": 29924.5
+          },
+          "status": "closed_through",
+          "importance": "MEDIUM",
+          "why": "MEDIUM: Buy-side liquidity area 29924.00–29924.50. A trader would mark this horizontal (2 confirmed meaningful swing highs). Already swept — preserved as history, not current resting liquidity. Held and released a 39.5 pt move — protected a significant swing; inside the New York PM range. Same visible area: 0.50 pt shelf vs 34.75 pt pullback (ATR 7.89; band 1.18). Relative equality supports the area — it is not the reason it exists. Left high slightly above right (ICT priming).",
+          "whyNotNearby": "This area is meaningful because it is a class-A shelf. Nearby 29924.50/29923.25 is not: Rejected as EQH: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "visualClass": "A",
+          "swings": [
+            {
+              "price": 29924.5,
+              "time": 1786554420,
+              "prom": 16.5
+            },
+            {
+              "price": 29924,
+              "time": 1786557060,
+              "prom": 15
+            }
+          ],
+          "confirmationTime": 1786557180,
+          "structuralContext": "held and released a 39.5 pt move — protected a significant swing; inside the New York PM range. Higher-timeframe / multi-session liquidity — listed separately from current-session noise.",
+          "confidence": 0.6
+        },
+        {
+          "type": "EQL",
+          "areaType": "SELL_SIDE",
+          "level": 29889.25,
+          "range": {
+            "low": 29889.25,
+            "high": 29890.5
+          },
+          "status": "closed_through",
+          "importance": "MEDIUM",
+          "why": "MEDIUM: Sell-side liquidity area 29889.25–29890.50. A trader would mark this horizontal (3 confirmed meaningful swing lows). Already swept — preserved as history, not current resting liquidity. Held and released a 42.8 pt move — protected a significant swing; inside the New York PM range. Same visible area: 0.25 pt shelf vs 28.00 pt pullback (ATR 7.89; band 1.18). Relative equality supports the area — it is not the reason it exists. Left low slightly below right (ICT failure swing).",
+          "whyNotNearby": "This area is meaningful because it is a class-A shelf. Nearby 29889.25/29890.50 is not: Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "visualClass": "A",
+          "swings": [
+            {
+              "price": 29889.25,
+              "time": 1786554960,
+              "prom": 22.5
+            },
+            {
+              "price": 29890.25,
+              "time": 1786557960,
+              "prom": 14
+            },
+            {
+              "price": 29890.5,
+              "time": 1786558800,
+              "prom": 15.5
+            }
+          ],
+          "confirmationTime": 1786558920,
+          "structuralContext": "held and released a 42.8 pt move — protected a significant swing; inside the New York PM range. Higher-timeframe / multi-session liquidity — listed separately from current-session noise.",
+          "confidence": 0.6
+        },
+        {
+          "type": "EQL",
+          "areaType": "SELL_SIDE",
+          "level": 29901.25,
+          "range": {
+            "low": 29901.25,
+            "high": 29901.5
+          },
+          "status": "closed_through",
+          "importance": "MEDIUM",
+          "why": "MEDIUM: Sell-side liquidity area 29901.25–29901.50. A trader would mark this horizontal (2 confirmed meaningful swing lows). Already swept — preserved as history, not current resting liquidity. Near a bearish market structure shift at 29901.50; held and released a 30.8 pt move — protected a significant swing; inside the New York PM range. Same visible area: 0.25 pt shelf vs 22.50 pt pullback (ATR 7.89; band 1.18). Relative equality supports the area — it is not the reason it exists. Left low slightly below right (ICT failure swing).",
+          "whyNotNearby": "This area is meaningful because it is a class-A shelf. Nearby 29902.50/29901.25 is not: Rejected as EQL: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "visualClass": "A",
+          "swings": [
+            {
+              "price": 29901.25,
+              "time": 1786555800,
+              "prom": 14.75
+            },
+            {
+              "price": 29901.5,
+              "time": 1786557300,
+              "prom": 20.25
+            }
+          ],
+          "confirmationTime": 1786557420,
+          "structuralContext": "near a bearish market structure shift at 29901.50; held and released a 30.8 pt move — protected a significant swing; inside the New York PM range. Current-session liquidity (New York PM).",
+          "confidence": 0.6
+        }
+      ],
+      "rejected": [
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29924,
+            29923.25
+          ],
+          "why": "Rejected as EQH: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29902.5,
+            29901.5
+          ],
+          "why": "Rejected as EQL: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29922.25,
+            29923.25
+          ],
+          "why": "Rejected as EQH: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29908,
+            29909
+          ],
+          "why": "Rejected as EQL: clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29924.5,
+            29923.25
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29902.5,
+            29901.25
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29915,
+            29913.75
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29889.25,
+            29890.5
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29920,
+            29918.5
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Overlapping structure between the swings — not one clean horizontal pool.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29890.5,
+            29892.25
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eqh",
+          "visualClass": "D",
+          "prices": [
+            29922.25,
+            29924
+          ],
+          "why": "Rejected as EQH: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        },
+        {
+          "kind": "eql",
+          "visualClass": "D",
+          "prices": [
+            29890.25,
+            29892.25
+          ],
+          "why": "Rejected as EQL: relativeEquality, clearPoolVsNoise. Prices are similar but not one recognizable horizontal area.",
+          "failedTests": [
+            "relativeEquality",
+            "clearPoolVsNoise"
+          ]
+        }
+      ],
+      "pendingSwings": 1
+    }
+  ],
+  "hindsight": [],
+  "pdCollapses": [
+    "Globex open",
+    "Overnight mid"
+  ]
+}

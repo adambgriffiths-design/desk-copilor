@@ -9,16 +9,23 @@ import {
 } from "./ict-knowledge";
 import { buildStructureFacts } from "./structure";
 import {
+  aggregateSessionBar,
+  barsInCmeSession,
   barsInEstWindow,
   buildFvgDailyBars,
+  cmeSessionDateKeyFromDate,
   computeNwog as computeNwogLevels,
   findBarClosestTo,
+  findExtremeBarInWindow,
   formatEst,
   getEstDateKey,
+  priorCmeSessionKey,
   priorEstDateKey,
   RTH_CLOSE_MIN,
   RTH_OPEN_MIN,
+  sessionCloseBar,
   sessionHighLow,
+  type PdhSource,
 } from "./market-data";
 import { resolveLiveLastPrice } from "./chart-live-price";
 
@@ -26,7 +33,7 @@ function eq(a: number, b: number): number {
   return (a + b) / 2;
 }
 
-function biasFromPrice(price: number, low: number, high: number): "bullish" | "bearish" | "neutral" {
+export function biasFromPrice(price: number, low: number, high: number): "bullish" | "bearish" | "neutral" {
   const mid = eq(low, high);
   const range = high - low;
   if (range <= 0) return "neutral";
@@ -37,6 +44,23 @@ function biasFromPrice(price: number, low: number, high: number): "bullish" | "b
 
 function detectUnfilledFvgs(bars: Bar[], timeframe: FvgZone["timeframe"], lookback = 40): FvgZone[] {
   return detectUnfilledIntradayFvgs(bars, timeframe, lookback, 5);
+}
+
+/** 5m/15m HL + unfilled FVG window — shared by full context build and HTF append-only patch. */
+export function buildIntradayTimeframeState(
+  bars: Bar[],
+  timeframe: "5m" | "15m",
+  lastPrice: number
+): MarketContext["timeframe5m"] {
+  const recent = timeframe === "15m" ? bars.slice(-32) : bars.slice(-48);
+  const hl = sessionHighLow(recent) ?? { high: lastPrice, low: lastPrice };
+  return {
+    high: hl.high,
+    low: hl.low,
+    equilibrium: eq(hl.low, hl.high),
+    biasHint: biasFromPrice(lastPrice, hl.low, hl.high),
+    unfilledFvgs: detectUnfilledFvgs(bars, timeframe),
+  };
 }
 
 function priorTradingDayKey(m1: Bar[], todayKey: string): string | null {
@@ -102,7 +126,7 @@ function recentSessionBars(m1: Bar[], today: string, yesterday: string) {
   return { asia, london, nyPre, nyRth, nyPm };
 }
 
-function liquidityLevelsFromContext(input: {
+export function liquidityLevelsFromContext(input: {
   pdLevels: Array<{ id: string; label: string; price: number }>;
   sessions: MarketContext["sessions"];
   org: MarketContext["org"];
@@ -149,16 +173,51 @@ function sliceDailyForAsOf(
   daily: Bar[],
   m1: Bar[],
   asOf: Date
-): { daily: Bar[]; prev: Bar | undefined; currPartial: { high: number; low: number; close: number } | null } {
+): {
+  daily: Bar[];
+  prev: Bar | undefined;
+  currPartial: { high: number; low: number; close: number } | null;
+  pdhSource: PdhSource;
+  currentSessionKey: string;
+  previousSessionKey: string | null;
+  /** Source candle for PDC when from Globex 1m; undefined on Yahoo fallback. */
+  pdcSourceBar: Bar | undefined;
+  /** Extreme bars for PDH/PDL provenance (Globex 1m only). */
+  pdhSourceBar: Bar | undefined;
+  pdlSourceBar: Bar | undefined;
+  yahooDailyClose: number | undefined;
+} {
   const asOfKey = getEstDateKey(asOf);
   const completed = daily.filter((b) => getEstDateKey(b.time) < asOfKey);
-  const dayM1 = m1.filter((b) => getEstDateKey(b.time) === asOfKey);
-  const hl = sessionHighLow(dayM1);
-  const prev = completed.at(-1);
+  const currentSessionKey = cmeSessionDateKeyFromDate(asOf);
+  const prevSessionKey = priorCmeSessionKey(m1, currentSessionKey);
+  const prevSessionBars = prevSessionKey ? barsInCmeSession(m1, prevSessionKey) : [];
+  const prevFromM1 = aggregateSessionBar(prevSessionBars);
+  const pdcSourceBar = sessionCloseBar(prevSessionBars);
+  const pdhSourceBar = findExtremeBarInWindow(prevSessionBars, "high") ?? undefined;
+  const pdlSourceBar = findExtremeBarInWindow(prevSessionBars, "low") ?? undefined;
+  const prevFromDaily = completed.at(-1);
+  // Prefer Globex 1m session OHLC (close = last 1m of prior session). Never mix
+  // Yahoo settlement close with Globex H/L — Yahoo close often ≠ last trade.
+  const prev = prevFromM1 ?? prevFromDaily;
+  const pdhSource: PdhSource = prevFromM1 ? "cme_session_1m" : "yahoo_daily_fallback";
+  const currBars = barsInCmeSession(m1, currentSessionKey);
+  const hl = sessionHighLow(currBars);
   const currPartial = hl
-    ? { high: hl.high, low: hl.low, close: dayM1.at(-1)?.close ?? hl.high }
+    ? { high: hl.high, low: hl.low, close: currBars.at(-1)?.close ?? hl.high }
     : null;
-  return { daily: completed, prev, currPartial };
+  return {
+    daily: completed,
+    prev,
+    currPartial,
+    pdhSource,
+    currentSessionKey,
+    previousSessionKey: prevSessionKey,
+    pdcSourceBar: prevFromM1 ? pdcSourceBar : undefined,
+    pdhSourceBar: prevFromM1 ? pdhSourceBar : undefined,
+    pdlSourceBar: prevFromM1 ? pdlSourceBar : undefined,
+    yahooDailyClose: prevFromDaily?.close,
+  };
 }
 
 export function buildMarketContextAt(
@@ -176,17 +235,24 @@ export function buildMarketContextAt(
   yesterdayDate.setDate(yesterdayDate.getDate() - 1);
   const yesterday = getEstDateKey(yesterdayDate);
 
-  const { prev, currPartial } = sliceDailyForAsOf(data.daily, m1, asOf);
+  const {
+    prev,
+    currPartial,
+    pdhSource,
+    currentSessionKey,
+    previousSessionKey,
+    pdcSourceBar,
+    pdhSourceBar,
+    yahooDailyClose,
+  } = sliceDailyForAsOf(data.daily, m1, asOf);
   const barClose = m1.at(-1)?.close ?? currPartial?.close ?? prev?.close;
   const lastPrice = resolveLiveLastPrice(barClose, chartLastPrice);
 
-  const m15Recent = m15.slice(-32);
-  const m5Recent = m5.slice(-48);
-  const m15Hl = sessionHighLow(m15Recent) ?? { high: lastPrice, low: lastPrice };
-  const m5Hl = sessionHighLow(m5Recent) ?? { high: lastPrice, low: lastPrice };
+  const timeframe15m = buildIntradayTimeframeState(m15, "15m", lastPrice);
+  const timeframe5m = buildIntradayTimeframeState(m5, "5m", lastPrice);
 
   const m1TodayHl =
-    sessionHighLow(m1.filter((b) => getEstDateKey(b.time) === today)) ??
+    sessionHighLow(barsInCmeSession(m1, currentSessionKey)) ??
     ({ high: lastPrice, low: lastPrice } as const);
 
   const sessions = recentSessionBars(m1, today, yesterday);
@@ -216,20 +282,31 @@ export function buildMarketContextAt(
     lowTime: Math.floor(asOf.getTime() / 1000),
   };
 
-  const todayM1 = m1.filter((b) => getEstDateKey(b.time) === today);
-  const currentDayStartTime = todayM1[0]
-    ? Math.floor(todayM1[0].time.getTime() / 1000)
+  const sessionBars = barsInCmeSession(m1, currentSessionKey);
+  const currentDayStartTime = sessionBars[0]
+    ? Math.floor(sessionBars[0].time.getTime() / 1000)
     : Math.floor(asOf.getTime() / 1000);
+  const pdhFormedAt = pdhSourceBar
+    ? Math.floor(pdhSourceBar.time.getTime() / 1000)
+    : prev
+      ? Math.floor(prev.time.getTime() / 1000)
+      : undefined;
+  const pdcFormedAt = pdcSourceBar
+    ? Math.floor(pdcSourceBar.time.getTime() / 1000)
+    : pdhSource === "yahoo_daily_fallback" && prev
+      ? Math.floor(prev.time.getTime() / 1000)
+      : undefined;
+  const previousDayClose = prev?.close;
 
   const prevHigh = prev?.high ?? lastPrice;
   const prevLow = prev?.low ?? lastPrice;
   const currHigh = currPartial?.high ?? prevHigh;
   const currLow = currPartial?.low ?? prevLow;
 
-  const m15Bias = biasFromPrice(lastPrice, m15Hl.low, m15Hl.high);
-  const m5Bias = biasFromPrice(lastPrice, m5Hl.low, m5Hl.high);
+  const m15Bias = timeframe15m.biasHint;
+  const m5Bias = timeframe5m.biasHint;
 
-  const dayOpen = m1.find((b) => getEstDateKey(b.time) === today)?.open ?? lastPrice;
+  const dayOpen = sessionBars[0]?.open ?? lastPrice;
   const fvgDailyBars = buildFvgDailyBars(data.daily, m1, asOf);
   const nwogRaw = computeNwogLevels(m1, data.daily.filter((b) => getEstDateKey(b.time) <= today), asOf);
   const nwog = nwogRaw
@@ -286,16 +363,12 @@ export function buildMarketContextAt(
     nyPmHighTime: nyPmHl.highTime,
     nyPmLowTime: nyPmHl.lowTime,
   };
-  const structureFacts = buildStructureFacts(
-    m1,
-    liquidityLevelsFromContext({
-      pdLevels: htfPdArrays.levels,
-      sessions: sessionLevels,
-      org,
-    }),
-    asOf,
-    sessionCtx.id
-  );
+  const liqLevels = liquidityLevelsFromContext({
+    pdLevels: htfPdArrays.levels,
+    sessions: sessionLevels,
+    org,
+  });
+  const structureFacts = buildStructureFacts(m1, liqLevels, asOf, sessionCtx.id);
 
   return {
     symbol: data.symbol,
@@ -309,7 +382,15 @@ export function buildMarketContextAt(
       equilibrium: eq(currLow, currHigh),
       biasHint: dailyBias,
       lastClose: lastPrice,
+      m1BarClose: barClose,
       currentDayStartTime,
+      previousDaySessionKey: previousSessionKey ?? undefined,
+      currentDaySessionKey: currentSessionKey,
+      pdhSource,
+      pdhFormedAt,
+      pdcFormedAt,
+      previousDayClose,
+      yahooDailyClose,
     },
     nwog,
     org,
@@ -322,20 +403,8 @@ export function buildMarketContextAt(
       summary: sessionPhaseSummary(sessionCtx),
     },
     sessions: sessionLevels,
-    timeframe15m: {
-      high: m15Hl.high,
-      low: m15Hl.low,
-      equilibrium: eq(m15Hl.low, m15Hl.high),
-      biasHint: m15Bias,
-      unfilledFvgs: detectUnfilledFvgs(m15, "15m"),
-    },
-    timeframe5m: {
-      high: m5Hl.high,
-      low: m5Hl.low,
-      equilibrium: eq(m5Hl.low, m5Hl.high),
-      biasHint: m5Bias,
-      unfilledFvgs: detectUnfilledFvgs(m5, "5m"),
-    },
+    timeframe15m,
+    timeframe5m,
     amdPhaseHint: sessionCtx.amdPhase,
     structureFacts,
     htfPdArrays,
@@ -417,6 +486,19 @@ function formatStructureCompact(ctx: MarketContext): string {
     lines.push(
       `${pool.type === "reh" ? "REH" : "REL"} ${pool.price.toFixed(2)} (${pool.barCount} swings)`
     );
+  }
+  for (const sweep of ctx.structureFacts.liquiditySweeps?.slice(0, 4) ?? []) {
+    if (sweep.levelId === "pdh" || sweep.levelId === "pdl" || sweep.levelId === "pdc") {
+      const ix = ctx.structureFacts.levelInteractions?.find((i) => i.levelId === sweep.levelId);
+      if (ix?.status !== "CLOSED_BEYOND") continue;
+    }
+    const raid =
+      sweep.side === "buy_side"
+        ? "buy-side liquidity taken (raid on highs — not bullish by itself)"
+        : sweep.side === "sell_side"
+          ? "sell-side liquidity taken (raid on lows — not bearish by itself)"
+          : "liquidity taken";
+    lines.push(`${sweep.label}: ${raid} at ${sweep.price.toFixed(2)} (${sweep.at})`);
   }
   if (!lines.length) lines.push("No recent MSS in lookback; check chart for displacement/FVG.");
   return lines.join("\n");

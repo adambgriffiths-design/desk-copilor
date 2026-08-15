@@ -10,3 +10,6 @@ export * from "./store";
 export * from "./karen";
 export * from "./fixtures";
 export * from "./session";
+export * from "./mode";
+export * from "./incremental-context";
+export * from "./parity";

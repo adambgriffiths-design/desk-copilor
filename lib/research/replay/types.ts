@@ -2,6 +2,7 @@ import type { Bar } from "../../types";
 import type { MarketContext } from "../../types";
 import type { DeskPipelineResult } from "../../desk-schema";
 import type { ValidationSeverity } from "../dataset/types";
+import type { ResearchReplayMode } from "./mode";
 
 export type ReplayDirection = "LONG" | "SHORT" | "WAIT";
 
@@ -100,6 +101,8 @@ export type ReplayEngineConfig = {
   startTime?: Date;
   endTime?: Date;
   initialIndex?: number;
+  /** CURRENT = full rebuild; OPTIMIZED = incremental applyClosedBar/syncSeries. */
+  mode?: ResearchReplayMode;
 };
 
 /** Post-decision outcome labels — only populated after lock + reveal. */

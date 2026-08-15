@@ -60,10 +60,15 @@ export function resolveApiDataQuality(
   }
 
   const price = tvAuth?.value ?? auth?.value ?? intel.state.lastPrice;
+  const hasLivePrint = isAuthoritativeLiveAvailable(tvAuth) || isAuthoritativeLiveAvailable(auth) ||
+    (chartLastPrice != null && Number.isFinite(chartLastPrice) && chartLastPrice >= 20000 && chartLastPrice <= 45000);
 
   if (!audit.can_observe || obs.data_quality === "missing") {
     if (!audit.can_observe) reasons.push("market state unavailable");
     if (obs.data_quality === "missing") reasons.push("observation data missing");
+    if (hasLivePrint) {
+      return { dataQuality: "DEGRADED", canDecide: true, reasons };
+    }
     return { dataQuality: "UNAVAILABLE", canDecide: false, reasons };
   }
   if (obs.data_quality === "stale" || audit.flag === "stale") {

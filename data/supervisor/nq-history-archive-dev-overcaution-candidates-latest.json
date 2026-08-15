@@ -1,0 +1,200 @@
+{
+  "EDGE_CLAIM": "NONE",
+  "HOLDOUT": "PROTECTED",
+  "BASELINE_FROZEN_ID": "baseline-v2",
+  "at": "2026-08-15T20:40:12.230Z",
+  "smoke": false,
+  "method": {
+    "carve": "archive-carve-v1",
+    "split": "DEVELOPMENT",
+    "fromYmd": "2023-10-02",
+    "toYmd": "2025-05-31",
+    "cadenceMinutes": 10,
+    "limitTotal": 1500,
+    "plannedAsOfs": 1500,
+    "tradingBrainBaseline": "baseline-v2",
+    "oneChangePerCandidate": true
+  },
+  "candidates": [
+    {
+      "id": "none",
+      "description": "Frozen production thresholds (minReasons=2, maxEntryFromPrice=28, entry WAIT|EXTENDED→WAIT)",
+      "counts": {
+        "TOTAL_STATES": 1500,
+        "WAIT": 1188,
+        "NO_TRADE": 239,
+        "ACTIONABLE": 73,
+        "LONG": 41,
+        "SHORT": 32,
+        "PIT": 0
+      },
+      "actionable": {
+        "n": 73,
+        "tBeforeInvRate": 0.21428571428571427,
+        "medianMfe": 12,
+        "medianMae": 9.75,
+        "meanProxyR": -0.32987342208222037
+      },
+      "vsBaseline": null,
+      "promising": false,
+      "promiseNote": "baseline"
+    },
+    {
+      "id": "c1_wait_entry_actionable",
+      "description": "One change: entryStatus WAIT no longer blocks directional LONG/SHORT (EXTENDED still waits)",
+      "counts": {
+        "TOTAL_STATES": 1500,
+        "WAIT": 114,
+        "NO_TRADE": 239,
+        "ACTIONABLE": 1147,
+        "LONG": 560,
+        "SHORT": 587,
+        "PIT": 0
+      },
+      "actionable": {
+        "n": 1147,
+        "tBeforeInvRate": 0.5812743823146944,
+        "medianMfe": 11.75,
+        "medianMae": 10.75,
+        "meanProxyR": 0.3144628251110639
+      },
+      "vsBaseline": {
+        "paired": 1500,
+        "verdictChanged": 1074,
+        "waitToActionable": 1074,
+        "actionableToWait": 0,
+        "noTradeToActionable": 0,
+        "bothSidesSupportBase": 113,
+        "bothSidesSupportCand": 113
+      },
+      "promising": true,
+      "promiseNote": "WAITΔ=-1074 ACTΔ=1074 T-before 21.4%→58.1% proxyR -0.330→0.314"
+    },
+    {
+      "id": "c2_min_reasons_1",
+      "description": "One change: long/short supported when reasons.length >= 1 (was >= 2)",
+      "counts": {
+        "TOTAL_STATES": 1500,
+        "WAIT": 1404,
+        "NO_TRADE": 50,
+        "ACTIONABLE": 46,
+        "LONG": 25,
+        "SHORT": 21,
+        "PIT": 0
+      },
+      "actionable": {
+        "n": 46,
+        "tBeforeInvRate": 0.30434782608695654,
+        "medianMfe": 11.25,
+        "medianMae": 9.375,
+        "meanProxyR": -0.3028533262863007
+      },
+      "vsBaseline": {
+        "paired": 1500,
+        "verdictChanged": 219,
+        "waitToActionable": 0,
+        "actionableToWait": 30,
+        "noTradeToActionable": 3,
+        "bothSidesSupportBase": 113,
+        "bothSidesSupportCand": 487
+      },
+      "promising": false,
+      "promiseNote": "WAITΔ=216 ACTΔ=-27 T-before 21.4%→30.4% proxyR -0.330→-0.303 — not meeting DEV winner bar"
+    },
+    {
+      "id": "c3_widen_entry_band",
+      "description": "One change: MAX_ENTRY_FROM_PRICE 28 → 42 (wider reachable entry zone)",
+      "counts": {
+        "TOTAL_STATES": 1500,
+        "WAIT": 1188,
+        "NO_TRADE": 239,
+        "ACTIONABLE": 73,
+        "LONG": 41,
+        "SHORT": 32,
+        "PIT": 0
+      },
+      "actionable": {
+        "n": 73,
+        "tBeforeInvRate": 0.21428571428571427,
+        "medianMfe": 12,
+        "medianMae": 9.75,
+        "meanProxyR": -0.32987342208222037
+      },
+      "vsBaseline": {
+        "paired": 1500,
+        "verdictChanged": 0,
+        "waitToActionable": 0,
+        "actionableToWait": 0,
+        "noTradeToActionable": 0,
+        "bothSidesSupportBase": 113,
+        "bothSidesSupportCand": 113
+      },
+      "promising": false,
+      "promiseNote": "WAITΔ=0 ACTΔ=0 T-before 21.4%→21.4% proxyR -0.330→-0.330 — not meeting DEV winner bar"
+    }
+  ],
+  "DEV_WINNERS": [
+    "c1_wait_entry_actionable"
+  ],
+  "VAL": {
+    "ran": true,
+    "winnerId": "c1_wait_entry_actionable",
+    "summaries": [
+      {
+        "id": "none",
+        "description": "Frozen production thresholds (minReasons=2, maxEntryFromPrice=28, entry WAIT|EXTENDED→WAIT)",
+        "counts": {
+          "TOTAL_STATES": 500,
+          "WAIT": 359,
+          "NO_TRADE": 67,
+          "ACTIONABLE": 74,
+          "LONG": 43,
+          "SHORT": 31,
+          "PIT": 0
+        },
+        "actionable": {
+          "n": 74,
+          "tBeforeInvRate": 0.325,
+          "medianMfe": 15,
+          "medianMae": 13,
+          "meanProxyR": -0.5611676784710186
+        },
+        "vsBaseline": null,
+        "promising": false,
+        "promiseNote": "baseline"
+      },
+      {
+        "id": "c1_wait_entry_actionable",
+        "description": "One change: entryStatus WAIT no longer blocks directional LONG/SHORT (EXTENDED still waits)",
+        "counts": {
+          "TOTAL_STATES": 500,
+          "WAIT": 41,
+          "NO_TRADE": 67,
+          "ACTIONABLE": 392,
+          "LONG": 209,
+          "SHORT": 183,
+          "PIT": 0
+        },
+        "actionable": {
+          "n": 392,
+          "tBeforeInvRate": 0.5021834061135371,
+          "medianMfe": 13.25,
+          "medianMae": 13,
+          "meanProxyR": -1.053101297640227
+        },
+        "vsBaseline": {
+          "paired": 500,
+          "verdictChanged": 318,
+          "waitToActionable": 318,
+          "actionableToWait": 0,
+          "noTradeToActionable": 0,
+          "bothSidesSupportBase": 39,
+          "bothSidesSupportCand": 39
+        },
+        "promising": false,
+        "promiseNote": "WAITΔ=-318 ACTΔ=318 T-before 32.5%→50.2% proxyR -0.561→-1.053 — not meeting DEV winner bar"
+      }
+    ],
+    "note": "VAL PASS (heuristic): WAITΔ=-318 ACTΔ=318 T-before 32.5%→50.2%"
+  }
+}

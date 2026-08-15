@@ -1,5 +1,5 @@
 /** Probe local Desk Copilot API — run: npm run health */
-const ports = [3000, 3001, 3002];
+const ports = [3020, 3000, 3001, 3002];
 
 async function probe(base) {
   const health = await fetch(`${base}/api/health`, { signal: AbortSignal.timeout(5000) });
@@ -23,6 +23,6 @@ for (const port of ports) {
   }
 }
 
-console.error("Backend not ready — run: npm run dev");
+console.error("Backend not ready — run: npm run dev:karen");
 if (lastErr) console.error(lastErr.message);
 process.exit(1);

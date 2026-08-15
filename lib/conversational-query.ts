@@ -13,11 +13,29 @@ import {
 } from "./chart-question-intent";
 import { buildMarketSnapshotAnswer } from "./market-snapshot";
 import { expandTradingAbbreviations } from "./plain-language";
+import { classifyLevelSide, isAsiaHighLevel } from "./session-liquidity";
+import {
+  buildSpokenEqhEqlBrief,
+  isEqhEqlLiquidityQuestion,
+} from "./voice-eqh-eql";
+import { classifyMentorIntent, isInvalidationStatusQuestion, isMentorMarketTurn } from "./mentor-intent";
+import { isStandaloneGeneralTurn } from "./conversational-intent";
+import { answerMentorCoaching } from "./mentor-coaching";
+import { buildTradingDecision } from "./decision-layer";
+import { buildDecisionEnvelope } from "./decision-envelope";
+import {
+  explainBullishEvidenceWithoutConverting,
+  formatMentorTradeSpoken,
+  htfBiasMentorLine,
+  resolveUserPresentationMode,
+} from "./decision-contract-output";
 
 export type ConversationContext = {
   /** Fact ids from the prior answer — enables "has that been invalidated?" */
   lastFactIds?: string[];
   lastTopic?: string;
+  lastAssistant?: string;
+  lastUser?: string;
 };
 
 export type IntelligenceConfidence = "high" | "medium" | "low" | "unknown";
@@ -36,6 +54,7 @@ export type MarketIntelligenceAnswer = {
   scoped: true;
   intent?: string;
   last_fact_ids: string[];
+  marketSnapshotId?: string;
   /** Set when data quality blocks a directional bias decision. */
   tradeable_bias?: string;
 };
@@ -49,19 +68,16 @@ export type QueryMode =
   | "legacy_snapshot";
 
 function isFollowUpInvalidation(question: string): boolean {
-  const q = question.trim().toLowerCase();
-  return (
-    /\b(has that|has it|was that|is that|did that|still valid|been invalidated|invalidate|invalidated yet|still hold|still good)\b/.test(
-      q
-    ) ||
-    (/^(still|valid)\??$/.test(q) && q.length < 20)
-  );
+  return isInvalidationStatusQuestion(question);
 }
 
 function isFollowUpWhy(question: string): boolean {
   const q = question.trim().toLowerCase();
-  if (/^(why|how come|explain that|what does that mean|why though)\??$/.test(q)) return true;
-  return /\bwhy\b/.test(q) && q.length < 40 && !/\b(why not short|why long|why short|why buy|why sell)\b/.test(q);
+  if (/^(why|how come|explain that|what does that mean|why though|why is that)\??$/.test(q)) return true;
+  if (/^why (?:are you|aren't you|are we|bullish|bearish|long|short|wait|waiting|not (?:short|long))\b/.test(q)) {
+    return true;
+  }
+  return false;
 }
 
 function resolveFollowUpTarget(
@@ -124,6 +140,15 @@ export function classifyQueryMode(
   ctx?: ConversationContext
 ): QueryMode {
   if (detectTeachingConcept(question)) return "teaching";
+  if (isMentorMarketTurn(question, {
+    lastAssistant: ctx?.lastAssistant,
+    lastUser: ctx?.lastUser,
+    lastFactIds: ctx?.lastFactIds,
+    lastTopic: ctx?.lastTopic,
+    lastMentorIntent: ctx?.lastUser ? classifyMentorIntent(ctx.lastUser) : undefined,
+  }) && !isInvalidationStatusQuestion(question)) {
+    return "status";
+  }
   if (isFollowUpInvalidation(question) && (ctx?.lastFactIds?.length || ctx?.lastTopic))
     return "invalidation_followup";
   if (isFollowUpInvalidation(question)) return "invalidation_followup";
@@ -167,7 +192,14 @@ function interpretFact(fact: ObservationFact, intel: DeskMarketIntelligence): st
     return "An active fair value gap can act as a retrace zone if structure aligns — confirm with MSS and bias.";
   }
   if (fact.id.startsWith("liquidity.") && fact.status === "swept") {
-    return "Liquidity was taken — watch for displacement and a structure shift in the sweep direction.";
+    const side = classifyLevelSide(fact.label, undefined);
+    if (side === "buy_side" || isAsiaHighLevel(fact.label, fact.id)) {
+      return "Buy-side liquidity was taken (raid on highs) — that is not a bullish continuation. Look for displacement or continuation lower, or stay flat until one-minute structure confirms. Do not flip long because a high was swept.";
+    }
+    if (side === "sell_side") {
+      return "Sell-side liquidity was taken (raid on lows) — that is not a bearish continuation by itself. Watch for displacement and a structure shift after the raid, not in the sweep direction through the low.";
+    }
+    return "Liquidity was taken — watch for displacement after the raid. Sweeping a high is not bullish; sweeping a low is not bearish by itself.";
   }
   if (fact.id === "gaps.nwog" && fact.price_low != null && fact.price_high != null) {
     if (price > fact.price_high) return "Price is above NWOG — premium context vs the weekly gap.";
@@ -175,7 +207,13 @@ function interpretFact(fact: ObservationFact, intel: DeskMarketIntelligence): st
     return "Price is inside NWOG — equilibrium between weekly gap bounds.";
   }
   if (fact.id === "bias.tradeable" && fact.value !== "unknown") {
-    return `Tradeable bias is ${fact.value} — frame execution in that direction when 1m structure confirms.`;
+    const decision = buildTradingDecision(intel.observation, intel.interpretation, intel.ctx);
+    const env = buildDecisionEnvelope(
+      { observation: intel.observation, interpretation: intel.interpretation, decision },
+      intel.ctx,
+      intel.state
+    );
+    return `MENTOR VIEW: higher-timeframe bias is ${htfBiasMentorLine(env)}. TRADE DECISION remains ${env.stance} — that bias is not a long or short by itself.`;
   }
   return null;
 }
@@ -258,9 +296,16 @@ function answerWhyFollowUp(
   const narrative = formatObservationNarrative(intel.observation);
   if (narrative) factLines.push(narrative);
 
+  const decision = buildTradingDecision(intel.observation, intel.interpretation, intel.ctx);
+  const env = buildDecisionEnvelope(
+    { observation: intel.observation, interpretation: intel.interpretation, decision },
+    intel.ctx,
+    intel.state
+  );
   const interpretation =
-    intel.interpretation.reasoning.slice(0, 280) ||
-    (target ? interpretFact(target, intel) : null);
+    env.stance === "flat" || env.stance === "wait" || env.stance === "monitor"
+      ? explainBullishEvidenceWithoutConverting(env, { mode: resolveUserPresentationMode() })
+      : formatMentorTradeSpoken(env, { mode: resolveUserPresentationMode() });
 
   return wrapAnswer({
     mode: "analysis",
@@ -286,6 +331,24 @@ function answerFactLookup(
   const evidence_refs: string[] = [];
   const missing: string[] = [];
   let last_fact_ids: string[] = [];
+
+  const eqhTopics =
+    topic === "liquidity" || topic === "liquidity.reh" || topic === "liquidity.rel";
+  const sweepOnly =
+    /\b(sweep|swept)\b/.test(q) && !isEqhEqlLiquidityQuestion(question);
+  if (eqhTopics && !sweepOnly && intel.eqhEqlRows?.length) {
+    const spoken = buildSpokenEqhEqlBrief(intel.eqhEqlRows, { question });
+    return wrapAnswer({
+      mode: "facts",
+      factLines: [spoken],
+      interpretation: null,
+      confidence: confidenceFromQuality(intel),
+      missing: [],
+      evidence_refs: ["eqh-eql"],
+      intel,
+      last_fact_ids: [topic],
+    });
+  }
 
   if (topic === "liquidity") {
     const swept = intel.facts.filter((f) => f.status === "swept" && f.category === "liquidity");
@@ -365,12 +428,18 @@ function answerFactLookup(
 
 function answerStatus(intel: DeskMarketIntelligence): MarketIntelligenceAnswer {
   const price = findFact(intel.facts, "market_state.last_price");
-  const bias = findFact(intel.facts, "bias.tradeable");
   const mss = findFact(intel.facts, "structure.mss");
   const session = findFact(intel.facts, "session.active");
   const factLines: string[] = [];
   const evidence_refs: string[] = [];
+  const decision = buildTradingDecision(intel.observation, intel.interpretation, intel.ctx);
+  const env = buildDecisionEnvelope(
+    { observation: intel.observation, interpretation: intel.interpretation, decision },
+    intel.ctx,
+    intel.state
+  );
 
+  factLines.push("MENTOR VIEW:");
   if (price) {
     factLines.push(`Price: ${price.value}.`);
     evidence_refs.push(price.evidence_key);
@@ -379,17 +448,14 @@ function answerStatus(intel: DeskMarketIntelligence): MarketIntelligenceAnswer {
     factLines.push(`Session: ${session.value}.`);
     evidence_refs.push(session.evidence_key);
   }
-  if (bias) {
-    factLines.push(`Tradeable bias: ${bias.value}.`);
-    evidence_refs.push(bias.evidence_key);
-  }
+  factLines.push(`Higher-timeframe bias: ${htfBiasMentorLine(env)}.`);
   if (mss && mss.status !== "absent") {
-    factLines.push(`Structure: ${mss.value}${mss.status === "invalidated" ? " — invalidated" : ""}.`);
+    factLines.push(`Tactical structure: ${mss.value}${mss.status === "invalidated" ? " — invalidated" : ""} on the ${env.primaryHorizon.timeframe}.`);
     evidence_refs.push(mss.evidence_key);
   }
 
   const narrative = formatObservationNarrative(intel.observation);
-  const interpretation = intel.interpretation.reasoning.slice(0, 200) || null;
+  const interpretation = formatMentorTradeSpoken(env, { mode: resolveUserPresentationMode() });
 
   return wrapAnswer({
     mode: "analysis",
@@ -399,7 +465,7 @@ function answerStatus(intel: DeskMarketIntelligence): MarketIntelligenceAnswer {
     missing: [],
     evidence_refs,
     intel,
-    last_fact_ids: mss ? [mss.id] : bias ? [bias.id] : [],
+    last_fact_ids: mss ? [mss.id] : [],
   });
 }
 
@@ -442,6 +508,7 @@ function wrapAnswer(input: {
     missing: input.missing,
     evidence_refs: [...new Set(input.evidence_refs)],
     state_hash: input.intel.state_hash,
+    marketSnapshotId: input.intel.state.snapshotId || input.intel.state_hash,
     updated_at: input.intel.built_at,
     scoped: true,
     intent: input.intent,
@@ -455,6 +522,27 @@ export function answerFromIntelligence(
   question: string,
   ctx?: ConversationContext
 ): MarketIntelligenceAnswer | null {
+  if (isMentorMarketTurn(question, {
+    lastAssistant: ctx?.lastAssistant,
+    lastFactIds: ctx?.lastFactIds,
+    lastTopic: ctx?.lastTopic,
+  }) && !isInvalidationStatusQuestion(question)) {
+    const coached = answerMentorCoaching(intel, question, ctx, ctx?.lastAssistant);
+    if (coached) {
+      return wrapAnswer({
+        mode: coached.mode === "teaching" ? "teaching" : "analysis",
+        factLines: [coached.spoken],
+        interpretation: null,
+        confidence: coached.confidence,
+        missing: [],
+        evidence_refs: [],
+        intel,
+        last_fact_ids: coached.last_fact_ids,
+        intent: coached.intent,
+      });
+    }
+  }
+
   const mode = classifyQueryMode(question, ctx);
 
   if (mode === "teaching") {
@@ -517,26 +605,35 @@ export function answerFromIntelligence(
 
 export function extractConversationContext(messages: Array<{ role: string; content: string }>): ConversationContext {
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-  if (!lastAssistant?.content) return {};
+  const users = messages.filter((m) => m.role === "user");
+  const lastUser = users[users.length - 1];
+  const priorUser = users.length >= 2 ? users[users.length - 2] : undefined;
+  if (!lastAssistant?.content && !lastUser?.content) return {};
 
   const ids: string[] = [];
-  const idMatch = lastAssistant.content.match(/\[([a-z0-9_.]+)\]/gi);
+  const assistantText = lastAssistant?.content || "";
+  const idMatch = assistantText.match(/\[([a-z0-9_.]+)\]/gi);
   if (idMatch) {
     for (const m of idMatch) ids.push(m.replace(/[\[\]]/g, ""));
   }
 
   const topic =
-    /\bmss\b/i.test(lastAssistant.content) || /structure shift/i.test(lastAssistant.content)
+    /\bmss\b/i.test(assistantText) || /structure shift/i.test(assistantText)
       ? "structure.mss"
-      : /\bnwog\b/i.test(lastAssistant.content)
+      : /\bnwog\b/i.test(assistantText)
         ? "gaps.nwog"
-        : /\bndog\b/i.test(lastAssistant.content)
+        : /\bndog\b/i.test(assistantText)
           ? "gaps.ndog"
-          : /\bfvg\b/i.test(lastAssistant.content)
+          : /\bfvg\b/i.test(assistantText)
             ? "structure.fvg"
             : undefined;
 
-  return { lastFactIds: ids.length ? ids : topic ? [topic] : undefined, lastTopic: topic };
+  return {
+    lastFactIds: ids.length ? ids : topic ? [topic] : undefined,
+    lastTopic: topic,
+    lastAssistant: lastAssistant?.content,
+    lastUser: priorUser?.content || lastUser?.content,
+  };
 }
 
 /** Try intelligence layer before legacy snapshot — returns spoken string for chat. */
@@ -550,6 +647,8 @@ export function tryIntelligenceReply(
 
 /** Route plain-English fact / teaching / follow-up questions to observation-backed answers. */
 export function needsMarketIntelligenceAnswer(question: string): boolean {
+  if (isStandaloneGeneralTurn(question)) return false;
+  if (isMentorMarketTurn(question)) return true;
   if (detectTeachingConcept(question)) return true;
   if (classifyFactTopic(question)) return true;
   if (isFollowUpInvalidation(question)) return true;

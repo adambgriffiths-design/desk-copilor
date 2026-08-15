@@ -1,0 +1,74 @@
+{
+  "concept_id": "inverted_fair_value_gap",
+  "name": "Inversion fair value gap (IFVG)",
+  "aliases": [
+    "IFVG",
+    "inversion FVG",
+    "inverted FVG"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "ifvg_paired_with_fpfvg__uC4-1SYXJFg__2432",
+      "definition_text": "Lecture labels a structure as 'first presented fair value gap inversion fair value gap' at the start of a new day; projects it forward as a respected level (bodies respect; later bump-through / leave).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Presented in context of FPFVG / ORG narrative on the example day"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "2025 Lecture Series NQ review (May 18, 2025) \u2014 live/review framing",
+      "variations_note": "USAGE EXAMPLE \u2014 not a standalone geometric definition of inversion. Dedicated IFVG lecture (-tuXoqSjO78) was CAPTION_MISSING this batch.",
+      "confidence": "paraphrased",
+      "cue_start": "00:40:32.910",
+      "cue_end": "00:40:54.950",
+      "timestamp_sec": 2432.91,
+      "source": {
+        "video_id": "uC4-1SYXJFg",
+        "title": "2025 Lecture Series - NQ Review When 9:30am ET Is 1st Presented FVG May 18, 2025",
+        "url": "https://www.youtube.com/watch?v=uC4-1SYXJFg",
+        "transcript_path": "data/ict-transcripts/raw/uC4-1SYXJFg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ifvg_ce_half__tbEzAhdv_Ak__551",
+      "definition_text": "Inversion fair value gap half / consequent encroachment used as entry/weight reference; in the example CE of the IFVG coincides with Friday RTH ORG high.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "IFVG already identified on the chart in live commentary"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "ICT 2026 Futures Review & RTH ORG Commentary (live)",
+      "variations_note": "Live application of CE-to-IFVG \u2014 keep separate from ORG CE geometry.",
+      "confidence": "quoted",
+      "cue_start": "00:09:11.310",
+      "cue_end": "00:09:20.670",
+      "timestamp_sec": 551.31,
+      "source": {
+        "video_id": "tbEzAhdv_Ak",
+        "title": "ICT 2026 Futures Review & RTH ORG Commentary \\ April 29, 2026",
+        "url": "https://www.youtube.com/watch?v=tbEzAhdv_Ak",
+        "transcript_path": "data/ict-transcripts/raw/tbEzAhdv_Ak.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "Possible IFVG / inversion detectors \u2014 none confirmed",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "Unknown",
+    "gap_vs_baseline_v2": "No official definitional IFVG lecture captions this batch",
+    "hypothesis_id": "H_ICT_IFVG",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Thin catalogue \u2014 usage mentions only until definitional lecture captions exist."
+  },
+  "extraction_notes": "Batch5. CAPTION_MISSING on -tuXoqSjO78 (IFVG-titled). Do not invent IFVG geometry."
+}

@@ -171,19 +171,20 @@
       <input type="checkbox" id="routeDebug" />
       Show routing debug in panel (route: casual · stream)
     </label>
-    <label for="apiBaseUrl">API base URL (Vercel only)</label>
+    <label for="apiBaseUrl">API base URL (blank = auto)</label>
     <input
       id="apiBaseUrl"
       type="url"
-      readonly
       autocomplete="off"
-      value="https://desk-copilor.vercel.app"
+      placeholder="auto — localhost:3020 then desk-copilor.vercel.app"
     />
     <div>
       <button id="save">Save</button>
-      <button id="reset" class="secondary" type="button">Reset to Vercel</button>
+      <button id="usePreview" class="secondary" type="button">Use active preview</button>
+      <button id="reset" class="secondary" type="button">Reset to auto</button>
     </div>
     <p id="status"></p>
+    <pre id="backendMeta" style="font-size: 11px; color: #9a9a9a; white-space: pre-wrap; margin-top: 12px; line-height: 1.45;"></pre>
     <script src="options.js"></script>
   </body>
 </html>

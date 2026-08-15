@@ -7,6 +7,8 @@ import {
   enrichPayloadMeta,
   evaluateConnectionState,
   formatConnectionStatus,
+  isDeskOnline,
+  isExtensionMessagingFailure,
   isLiveDataAvailable,
   isMarketFresh,
   LIVE_DATA_UNAVAILABLE_VERDICT,
@@ -96,15 +98,42 @@ assert(
   "missing market state → DEGRADED not CONNECTED"
 );
 assert(
+  evaluateConnectionState({
+    backendUp: true,
+    healthDegraded: true,
+    marketPulse: freshPulse,
+    now,
+  }) === "DEGRADED",
+  "cached/degraded health → DEGRADED even with fresh pulse"
+);
+assert(
   !isLiveDataAvailable(buildConnectionSnapshot({ backendUp: true, marketMeta: null, now })),
   "no fake live on missing market"
 );
 
 assert(MARKET_FRESH_MS === 60_000, "fresh threshold exported");
 
+assert(
+  isExtensionMessagingFailure("Could not establish connection. Receiving end does not exist."),
+  "receiving-end is extension messaging, not backend"
+);
+assert(
+  isExtensionMessagingFailure(new Error("Extension context invalidated.")),
+  "invalidated context is extension messaging"
+);
+assert(
+  !isExtensionMessagingFailure("Vercel backend offline — https://desk-copilor.vercel.app"),
+  "real backend down is not messaging"
+);
+assert(!isExtensionMessagingFailure("HTTP 500"), "HTTP 500 is not messaging");
+
 /** Manager — single reconnect loop, no duplicate timers */
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const connMod = require("../extension/connection-state.js");
+assert(
+  connMod.isExtensionMessagingFailure("Could not establish connection. Receiving end does not exist."),
+  "extension JS matcher agrees"
+);
 let pingCalls = 0;
 const manager = connMod.createConnectionManager({
   pingHealth: async () => {
@@ -123,5 +152,56 @@ assert(
 );
 manager.clearReconnectTimer();
 
-console.log("test-connection-state: ok");
-process.exit(0);
+/** G — scheduleReconnect ×N single timer; forceReconnect clears health cache */
+(async () => {
+  let clearCacheSeen = 0;
+  let degradedPing = false;
+  const mgr2 = connMod.createConnectionManager({
+    pingHealth: async (opts: { clearCache?: boolean }) => {
+      if (opts?.clearCache) clearCacheSeen += 1;
+      if (degradedPing) {
+        return { ok: true, base: "http://127.0.0.1:3000", degraded: true, reason: "cached" };
+      }
+      return { ok: true, base: "http://127.0.0.1:3000", version: "test" };
+    },
+    onStateChange: () => {},
+    onResync: () => {},
+  });
+  mgr2.scheduleReconnect();
+  mgr2.scheduleReconnect();
+  mgr2.scheduleReconnect();
+  assert(typeof mgr2.clearReconnectTimer === "function", "G: single reconnect timer API present");
+  mgr2.clearReconnectTimer();
+  degradedPing = true;
+  await mgr2.forceReconnect();
+  assert(clearCacheSeen === 1, "G: forceReconnect clears health cache (clearCache)");
+  assert(mgr2.snapshot().state === "DEGRADED", "G: degraded health → DEGRADED not ONLINE");
+  assert(mgr2.snapshot().healthDegraded === true, "G: healthDegraded flag set");
+  assert(
+    !connMod.isDeskOnline({
+      backendUp: true,
+      healthDegraded: true,
+      lastSuccessfulRequest: now,
+      tickAgeMs: 200,
+      hasPrice: true,
+      now,
+    }),
+    "G: isDeskOnline false on degraded health"
+  );
+  assert(
+    isDeskOnline({
+      backendUp: true,
+      lastSuccessfulRequest: now,
+      tickAgeMs: 400,
+      hasPrice: true,
+      now,
+    }),
+    "desk ONLINE when API fresh + market present"
+  );
+
+  console.log("test-connection-state: ok");
+})().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+

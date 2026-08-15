@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchAllTimeframes, buildFvgDailyBars } from "@/lib/market-data";
-import { buildMarketContext } from "@/lib/levels";
+import { fetchAllTimeframesCached, buildFvgDailyBars } from "@/lib/market-data";
 import { formatPdArrayBrief } from "@/lib/pd-arrays";
 import {
   assignStaggeredLabelAlign,
@@ -11,6 +10,12 @@ import {
   formatLevelsForClipboard,
   formatLevelsForPineInputs,
 } from "@/lib/drawing-levels";
+import {
+  formatEqhEqlClipboard,
+  toEqhEqlTrackRows,
+  toRelativeEqualPools,
+} from "@/lib/research/eqh-eql-liquidity";
+import { syncLiveEngineFromFeed } from "@/lib/incremental-market-engine";
 
 export const runtime = "nodejs";
 
@@ -26,10 +31,22 @@ export async function OPTIONS() {
 
 export async function GET() {
   try {
-    const data = await fetchAllTimeframes();
-    const ctx = buildMarketContext(data);
+    const data = await fetchAllTimeframesCached(false);
+    const synced = syncLiveEngineFromFeed({
+      data,
+      asOf: new Date(),
+      lastPrice: data.m1.at(-1)?.close ?? null,
+    });
+    const ctx = synced.ctx;
+    const eqhEql = synced.eqhEql;
+    const eqhEqlRows = toEqhEqlTrackRows(eqhEql, {
+      currentPrice: ctx.daily.lastClose,
+      maxRows: 12,
+    });
+    const overlayPools = toRelativeEqualPools(eqhEql.displayed.length ? eqhEql.displayed : eqhEql.pools);
     const levels = buildDrawingLevels(ctx, data.m1, {
       currentPrice: ctx.daily.lastClose,
+      relativeEqualPools: overlayPools,
     });
     const fvgDaily = buildFvgDailyBars(data.daily, data.m1);
     const zones = buildDrawingZones(ctx, data.m1, fvgDaily);
@@ -74,7 +91,33 @@ export async function GET() {
         zones,
         fhdr,
         firstPresentedFvg,
-        clipboardText: formatLevelsForClipboard(levels, zones),
+        eqhEqlLiquidity: {
+          status: eqhEql.status,
+          tickSize: eqhEql.tickSize,
+          tolerance: eqhEql.tolerance,
+          toleranceTicks: eqhEql.toleranceTicks,
+          atr: eqhEql.atr,
+          confirmationDelayBars: eqhEql.confirmationDelayBars,
+          rows: eqhEqlRows,
+          pools: eqhEql.pools,
+          displayed: eqhEql.displayed,
+          internal: eqhEql.internal,
+          liquidityAreas: eqhEql.areas,
+          rejectedCount: eqhEql.rejected.length,
+          hierarchy: {
+            rawSwingCount: eqhEql.rawSwings.highs.length + eqhEql.rawSwings.lows.length,
+            classifiedCount: eqhEql.pools.length + eqhEql.internal.length,
+            displayedCount: overlayPools.length,
+            internalCount: eqhEql.internal.length,
+            rejectedCount: eqhEql.rejected.length,
+          },
+        },
+        clipboardText: [
+          formatLevelsForClipboard(levels, zones),
+          formatEqhEqlClipboard(eqhEqlRows),
+        ]
+          .filter(Boolean)
+          .join("\n"),
         pineJson: formatLevelsForPineInputs(levels),
       },
       { headers: cors }

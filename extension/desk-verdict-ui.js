@@ -16,9 +16,25 @@
 
   function contractFromData(data) {
     const pipe = data?.deskPipeline;
-    if (pipe?.analysis_contract) return normalizeContract(pipe.analysis_contract);
+    const structuredDecision =
+      pipe?.analysis_contract?.decision || data?.decisionEnvelope || data?.decision || null;
+    if (pipe?.analysis_contract) {
+      const c = normalizeContract(pipe.analysis_contract);
+      if (structuredDecision) c.decision = structuredDecision;
+      if (c.decision?.stance) {
+        const s = String(c.decision.stance).toLowerCase();
+        if (s === "long") c.verdict = "LONG";
+        else if (s === "short") c.verdict = "SHORT";
+        else if (s === "wait") c.verdict = "WAIT";
+        else if (s === "flat" || s === "monitor") c.verdict = "NO_TRADE";
+      }
+      return c;
+    }
+    if (structuredDecision?.stance) return legacyFromData({ ...data, decision: structuredDecision });
     const brief = data?.verdict || data?.panel || "";
-    if (/^VERDICT:/im.test(brief)) return parsePanelBrief(brief);
+    if (/^VERDICT:/im.test(brief) && /^VERDICT:\s*(LONG|SHORT|WAIT|NO_TRADE|NO TRADE|UNAVAILABLE)/im.test(brief)) {
+      return parsePanelBrief(brief);
+    }
     return legacyFromData(data);
   }
 
@@ -36,6 +52,9 @@
       rejected_alternative: c.rejected_alternative || "",
       data_quality: c.data_quality || "DEGRADED",
       final_reasoning: c.final_reasoning || "",
+      wait_reason: c.wait_reason || "",
+      mtf: c.mtf || null,
+      decision: c.decision || null,
     };
   }
 
@@ -71,20 +90,42 @@
       rejected_alternative: parseField(text, "REJECTED ALTERNATIVE"),
       data_quality: parseField(text, "DATA QUALITY").toUpperCase() || "DEGRADED",
       final_reasoning: parseField(text, "FINAL REASONING"),
+      wait_reason: parseField(text, "WHY WAIT"),
     });
   }
 
   function legacyFromData(data) {
-    const spoken = data?.spokenBrief || "";
-    const v = data?.decisionVerdict || "";
-    let verdict = "NO_TRADE";
-    if (/long|buy|bullish/i.test(spoken) && !/no trade|wait/i.test(spoken)) verdict = "LONG";
-    else if (/short|sell|bearish/i.test(spoken) && !/no trade|wait/i.test(spoken)) verdict = "SHORT";
-    else if (v === "wait" || /wait/i.test(spoken)) verdict = "WAIT";
+    const decision = data?.decision || data?.decisionEnvelope || data?.deskPipeline?.analysis_contract?.decision || null;
+    if (decision && decision.stance) {
+      const stance = String(decision.stance).toLowerCase();
+      const verdict =
+        stance === "long" ? "LONG" : stance === "short" ? "SHORT" : stance === "wait" ? "WAIT" : "NO_TRADE";
+      return normalizeContract({
+        verdict,
+        setup: "—",
+        htf_bias: decision.htfContext?.lean || "unknown",
+        entry: decision.thesis?.fromWhere || "—",
+        invalidation: decision.invalidation?.condition || "unknown",
+        target: decision.read?.target || "unknown",
+        risk_reward: "unknown",
+        why: {},
+        contradictions: [],
+        rejected_alternative: "",
+        data_quality: data?.quality === "good" ? "GOOD" : "DEGRADED",
+        final_reasoning: decision.layers?.decision || "",
+        wait_reason:
+          stance === "wait"
+            ? decision.logicOrder?.execution || ""
+            : stance === "flat"
+              ? "Stay flat — no trade justified"
+              : "",
+        decision,
+      });
+    }
     return normalizeContract({
-      verdict,
+      verdict: "UNAVAILABLE",
       setup: "—",
-      htf_bias: /bullish/i.test(spoken) ? "bullish" : /bearish/i.test(spoken) ? "bearish" : "unknown",
+      htf_bias: "unknown",
       entry: "—",
       invalidation: "unknown",
       target: "unknown",
@@ -92,21 +133,51 @@
       why: {},
       contradictions: [],
       rejected_alternative: "",
-      data_quality: data?.quality === "good" ? "GOOD" : "DEGRADED",
-      final_reasoning: spoken.slice(0, 280),
+      data_quality: "DEGRADED",
+      final_reasoning: "NO DECISION — structured decision unavailable. Stance is not inferred from text.",
     });
   }
 
-  function verdictHeadline(v) {
-    if (v === "LONG") return "LONG BIAS";
-    if (v === "SHORT") return "SHORT BIAS";
-    if (v === "WAIT") return "WAIT";
-    return "NO TRADE";
+  function isNumericEntry(entry) {
+    const e = String(entry || "");
+    return /\d/.test(e) && !/wait for/i.test(e) && e !== "—" && e !== "none";
   }
 
-  function verdictStatus(v, entry) {
+  function hasStayFlatConflict(c) {
+    return (c?.contradictions || []).some((t) => /opposes|stay flat|disagree/i.test(String(t)));
+  }
+
+  function isWaitForTrigger(c) {
+    if (!c || c.verdict !== "WAIT") return false;
+    if (/^stay flat/i.test(c.wait_reason || c.final_reasoning || "")) return false;
+    if (hasStayFlatConflict(c)) return false;
+    if (isNumericEntry(c.entry)) return true;
+    const setup = String(c.setup || "");
+    return Boolean(
+      setup &&
+        setup !== "none identified" &&
+        /wait|sweep|retrace/i.test(`${setup} ${c.entry || ""}`)
+    );
+  }
+
+  function verdictHeadline(v, stance) {
+    if (stance) return String(stance).toUpperCase();
+    if (v === "LONG") return "LONG";
+    if (v === "SHORT") return "SHORT";
+    if (v === "WAIT") return "WAIT";
+    if (v === "UNAVAILABLE" || v === "NO_DECISION") return "NO DECISION";
+    if (v === "NO_TRADE") return "FLAT";
+    return "NO DECISION";
+  }
+
+  function verdictStatus(c) {
+    const stance = String(c?.decision?.stance || "").toLowerCase();
+    const v = c?.verdict;
+    if (v === "UNAVAILABLE" || v === "NO_DECISION") return "NO DECISION";
+    if (stance === "flat" || (v === "NO_TRADE" && stance !== "wait")) return "STAY FLAT";
+    if (stance === "monitor") return "MONITOR";
     if (v === "NO_TRADE") return "INSUFFICIENT SETUP";
-    if (v === "WAIT" || /wait/i.test(entry)) return "WAITING FOR ENTRY";
+    if (v === "WAIT" || stance === "wait") return isWaitForTrigger(c) ? "WAITING FOR ENTRY" : "STAY FLAT";
     if (v === "LONG" || v === "SHORT") return "SETUP ACTIVE";
     return "";
   }
@@ -134,16 +205,18 @@
     if (/present/i.test(w.fvg) && !/absent|invalid/i.test(w.fvg)) add(true, false, "Fair value gap identified");
     else if (/invalid/i.test(w.fvg)) add(false, true, "Fair value gap invalidated");
 
-    if (c.verdict === "WAIT") add(false, true, "Entry confirmation pending");
+    if (c.verdict === "WAIT" && isWaitForTrigger(c)) add(false, true, "Entry confirmation pending");
+    if (c.verdict === "WAIT" && !isWaitForTrigger(c)) add(false, true, c.wait_reason || c.final_reasoning || "Stay flat");
     if (c.contradictions?.length) add(false, true, `${c.contradictions.length} contradiction(s) noted`);
 
     return items.slice(0, 5);
   }
 
-  function verdictClass(v) {
-    if (v === "LONG") return "dc-verdict-long";
-    if (v === "SHORT") return "dc-verdict-short";
-    if (v === "WAIT") return "dc-verdict-wait";
+  function verdictClass(v, stance) {
+    const s = String(stance || "").toLowerCase();
+    if (s === "long" || v === "LONG") return "dc-verdict-long";
+    if (s === "short" || v === "SHORT") return "dc-verdict-short";
+    if (s === "wait" || v === "WAIT") return "dc-verdict-wait";
     return "dc-verdict-none";
   }
 
@@ -230,9 +303,33 @@
     };
 
     setSection("dc-evidence-why", [
+      { key: "Overall", value: contract.decision?.read?.overallStance },
+      { key: "HTF context", value: contract.decision?.read ? `${contract.decision.read.htfContext.horizon} ${contract.decision.read.htfContext.lean}` : "" },
+      { key: "Structure", value: contract.decision?.read ? `${contract.decision.read.currentStructure.horizon} ${contract.decision.read.currentStructure.lean}` : "" },
+      { key: "Opportunity", value: contract.decision?.read?.tradeableOpportunity },
+      { key: "Direction", value: contract.decision?.read?.tradeDirection },
+      { key: "Target", value: contract.decision?.read?.target },
+      { key: "Invalidation", value: contract.decision?.read?.invalidation },
+      { key: "Strategic", value: contract.decision?.logicOrder?.strategicBias },
+      { key: "Tactical", value: contract.decision?.logicOrder?.tacticalBias },
+      { key: "Execution", value: contract.decision?.logicOrder?.execution },
+      { key: "Stance", value: contract.decision?.stance },
+      { key: "Thesis", value: contract.decision?.thesis ? `complete=${contract.decision.thesis.complete ? "yes" : "no"} what=${contract.decision.thesis.what || "unanswered"} toward=${contract.decision.thesis.toward || "unanswered"}` : "" },
+      { key: "Conflict log", value: contract.decision?.conflictLog ? `${contract.decision.conflictLog.htfHorizon} ${contract.decision.conflictLog.htfLean} vs ${contract.decision.conflictLog.tacticalHorizon} ${contract.decision.conflictLog.tacticalLean}; disagree=${contract.decision.conflictLog.disagree}; ltfAgainstHtfAllowed=${String(contract.decision.conflictLog.ltfAgainstHtfAllowed)}` : "" },
+      { key: "Primary", value: contract.decision ? `${contract.decision.primaryHorizon.timeframe} ${contract.decision.primaryHorizon.lean}` : "" },
+      { key: "HTF", value: contract.decision ? `${contract.decision.htfContext.timeframe} ${contract.decision.htfContext.lean}` : "" },
+      { key: "Conflict", value: contract.decision?.conflictResolution?.sentence },
       { key: "Setup", value: contract.setup },
       { key: "Bias", value: contract.htf_bias },
       { key: "Reasoning", value: contract.final_reasoning },
+    ]);
+
+    const mtf = contract.mtf;
+    setSection("dc-evidence-mtf", [
+      { key: "Chart", value: mtf?.chart_timeframe },
+      { key: "Short", value: mtf?.short },
+      { key: "Medium", value: mtf?.medium },
+      { key: "Long", value: mtf?.long },
     ]);
 
     setSection("dc-evidence-facts", [
@@ -243,6 +340,10 @@
       { key: "Displacement", value: w.displacement },
       { key: "Order block", value: w.order_block },
       { key: "Session", value: w.session_time },
+      ...(contract.decision?.reasoningChain || []).map((item) => ({
+        key: item.concept,
+        value: `${item.checked ? "checked" : "skipped"} · detected=${item.detected ? "yes" : "no"} · used=${item.role || "NONE"} · ${item.outcome} · ${item.impact}`,
+      })),
     ]);
 
     const riskRows = [];
@@ -290,7 +391,7 @@
     empty?.classList.add("hidden");
     analyzing?.classList.add("hidden");
     body.classList.remove("hidden");
-    card.className = `dc-verdict-card ${verdictClass(contract.verdict)}`;
+    card.className = `dc-verdict-card ${verdictClass(contract.verdict, contract.decision?.stance)}`;
     if (opts.liveDataOffline) card.classList.add("dc-verdict-offline");
     else card.classList.remove("dc-verdict-offline");
     card.classList.toggle("dc-verdict-mock", Boolean(opts.mock));
@@ -300,8 +401,8 @@
     const status = document.getElementById("dc-verdict-status");
     if (headline) {
       headline.textContent = opts.lastKnown
-        ? `LAST KNOWN · ${verdictHeadline(contract.verdict)}`
-        : verdictHeadline(contract.verdict);
+        ? `LAST KNOWN · ${verdictHeadline(contract.verdict, contract.decision?.stance)}`
+        : verdictHeadline(contract.verdict, contract.decision?.stance);
     }
     if (sym) sym.textContent = "NASDAQ / MNQ";
     if (status) {
@@ -311,17 +412,33 @@
           ? "LAST KNOWN STATE — NOT CURRENT LIVE STATE"
           : opts.mock
             ? "MOCK ANALYSIS — NOT LIVE DATA"
-            : verdictStatus(contract.verdict, contract.entry);
+            : verdictStatus(contract);
     }
 
-    setField("dc-v-bias", contract.htf_bias && contract.htf_bias !== "unknown" ? contract.htf_bias : "");
+    setField(
+      "dc-v-why",
+      contract.decision?.conflictResolution?.sentence ||
+        (contract.verdict === "WAIT" || contract.verdict === "NO_TRADE"
+          ? contract.wait_reason || contract.final_reasoning || ""
+          : "")
+    );
+    setField(
+      "dc-v-bias",
+      contract.decision?.htfContext
+        ? `${contract.decision.htfContext.timeframe} ${contract.decision.htfContext.lean} (HTF context — not the trade)`
+        : ""
+    );
+    setField("dc-v-short", contract.mtf?.short || "");
+    setField("dc-v-medium", contract.mtf?.medium || "");
+    setField("dc-v-long", contract.mtf?.long || "");
     setField("dc-v-structure", contract.why?.market_structure || "");
     setField("dc-v-liquidity", contract.why?.liquidity || "");
     setField("dc-v-fvg", contract.why?.fvg || "");
     setField("dc-v-pd", contract.why?.premium_discount || "");
-    setField("dc-v-entry", contract.entry !== "—" ? contract.entry : "");
-    setInvalidation(contract.invalidation);
-    setField("dc-v-target", contract.target !== "unknown" ? contract.target : "");
+    const showLevels = contract.verdict !== "WAIT" || isWaitForTrigger(contract);
+    setField("dc-v-entry", showLevels && contract.entry !== "—" ? contract.entry : "");
+    setInvalidation(showLevels ? contract.invalidation : "");
+    setField("dc-v-target", showLevels && contract.target !== "unknown" ? contract.target : "");
     setField("dc-v-freshness", contract.freshness || (opts.mock ? "MOCK · demo only" : ""));
 
     UI()?.renderKarenVerdictMeta?.(contract, opts);
@@ -395,7 +512,7 @@
       wrap.classList.add("hidden");
       return;
     }
-    if (prev.verdict === current?.verdict && !deltaText) {
+    if (prev.verdict === current?.verdict) {
       wrap.classList.add("hidden");
       return;
     }
@@ -489,19 +606,8 @@
       if (upEl) upEl.textContent = ageLabel;
     }
 
-    if (ui?.updateHeaderStatus) {
-      const hasPrice = Number.isFinite(price);
-      const conn =
-        typeof connectionState === "object"
-          ? connectionState
-          : { state: connectionState, backendUp: normStatus !== "OFFLINE" };
-      ui.updateHeaderStatus({
-        market: ui.mapConnectionToMarketStatus?.(conn, hasPrice) || normStatus,
-        data: ui.mapConnectionToDataStatus?.(conn, normStatus) || normStatus,
-        marketTip: tooltip,
-        dataTip: tooltip,
-      });
-    }
+    // Header MARKET/DATA are owned by content.js syncHeaderStatus:
+    // MARKET = TV Last presence, DATA = backend. Do not remap MARKET from connection.
   }
 
   function updateVoiceHero(opts) {
@@ -525,14 +631,8 @@
     }
 
     const ui = UI();
-    const degraded = window.DeskCopilotVoice?.getEngineMode?.() === "cascade" && listening;
-    ui?.updateKarenStatus?.(phase, { listening, speaking, degraded });
-    if (ui?.updateHeaderStatus) {
-      ui.updateHeaderStatus({
-        karen: ui.mapKarenStatus?.(phase, { listening, speaking, degraded }),
-        karenTip: speaking ? "Karen is speaking" : listening ? "Karen is listening" : "Karen ready",
-      });
-    }
+    // Header KAREN is owned by content.js. Whisper cascade is a working mic, not DEGRADED.
+    ui?.updateKarenStatus?.(phase, { listening, speaking, degraded: false });
   }
 
   function setLevelsStatus(text, ok) {

@@ -1,0 +1,27 @@
+{
+  "id": "neutral-no-trade",
+  "ctx": {},
+  "state": {},
+  "label": {
+    "id": "neutral-no-trade",
+    "timestamp": "2026-08-12T14:30:00Z",
+    "market_state_snapshot": "replay-fixtures/neutral-no-trade",
+    "expected_observation": {
+      "liquidity_swept": false,
+      "fvg_status": "absent",
+      "displacement": "present",
+      "market_structure": "unclear",
+      "htf_bias_aligned": false,
+      "tradeable_bias": "conflicted",
+      "data_quality": "good",
+      "session": "ny"
+    },
+    "adam_verdict": "NO_TRADE",
+    "would_take": false,
+    "grade": "no_trade",
+    "why_taken": "Would not take — no HTF edge, no MSS, no FVG scaffold despite displacement",
+    "why_rejected_alternatives": "No long case — biases neutral/conflicted. No short case — no bearish structure.",
+    "fvg_validity": "absent",
+    "notes": "Obvious loser — true chop, stand aside"
+  }
+}

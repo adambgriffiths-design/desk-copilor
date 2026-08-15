@@ -1,0 +1,133 @@
+{
+  "configVersion": "walk-forward-anchored-v1",
+  "EDGE_CLAIM": "NONE",
+  "HOLDOUT_STATUS": "SEALED",
+  "methodology": "anchored_expanding_walk_forward",
+  "rankingSourceOfTruth": {
+    "primary": "anchored_walk_forward_plus_purge_embargo_plus_final_untouched_holdout",
+    "laterRobustnessCheck": "combinatorial_purged_cv_stub_only",
+    "fragileAlone": "single_train_test",
+    "forbidden": "random_k_fold"
+  },
+  "dataset": {
+    "carve": "archive-carve-v1",
+    "source": "nq-history-archive-1m",
+    "availableSpanNote": "Carve-v1 trading days ~2023-10-02→2026-08-14 (manifest archive bars from 2023-01). Broader raw availability ~2021-10→2026-08 is noted but not used until wired into carve.",
+    "anchorStartYmd": "2023-10-02",
+    "preHoldoutEndYmd": "2025-12-31",
+    "holdout": {
+      "id": "UNTOUCHED_HOLDOUT",
+      "fromYmd": "2026-01-01",
+      "toYmd": "2026-08-14",
+      "sealed": true
+    },
+    "carveValidationOneShot": {
+      "id": "VALIDATION",
+      "fromYmd": "2025-06-01",
+      "toYmd": "2025-12-31",
+      "role": "one_shot_confirmatory_after_PROMOTE_TO_VALIDATION — not a walk-forward retune fold"
+    }
+  },
+  "purgeEmbargo": {
+    "outcomeHorizonMinutes": 30,
+    "sessionBufferMinutes": 390,
+    "totalGapMinutes": 420,
+    "calendarGapTradingDays": 1,
+    "rule": "Between last usable DEV asOf calendar day and first OOS asOf calendar day, exclude ≥ calendarGapTradingDays trading day(s). Additionally forbid any DEV asOf whose (asOf + outcomeHorizonMinutes) overlaps the purge window. Session buffer = one full NY RTH session (09:30–16:00 ET = 390m) to reduce session-structure leakage across the split boundary."
+  },
+  "forbidden": [
+    "random_k_fold",
+    "shuffle_cv",
+    "peek_holdout",
+    "retune_on_oos_folds",
+    "use_carve_VAL_as_wf_retune_fold",
+    "unlock_holdout_for_selection"
+  ],
+  "combinatorialPurgedCv": {
+    "status": "future_robustness_stub",
+    "implemented": false,
+    "note": "Many-config combinatorial/purged CV may be added later as a robustness check only — never as primary selection, never on holdout."
+  },
+  "folds": [
+    {
+      "id": "wf-anchored-01",
+      "label": "DEV Oct 2023–Jun 2024 → OOS Jul–Sep 2024",
+      "role": "inner_oos",
+      "dev": {
+        "fromYmd": "2023-10-02",
+        "toYmd": "2024-06-27",
+        "nominalLabel": "2023-10 → 2024-06"
+      },
+      "purge": {
+        "fromYmd": "2024-06-28",
+        "toYmd": "2024-06-28"
+      },
+      "oos": {
+        "fromYmd": "2024-07-01",
+        "toYmd": "2024-09-30"
+      }
+    },
+    {
+      "id": "wf-anchored-02",
+      "label": "DEV Oct 2023–Sep 2024 → OOS Oct–Dec 2024",
+      "role": "inner_oos",
+      "dev": {
+        "fromYmd": "2023-10-02",
+        "toYmd": "2024-09-27",
+        "nominalLabel": "2023-10 → 2024-09"
+      },
+      "purge": {
+        "fromYmd": "2024-09-30",
+        "toYmd": "2024-09-30"
+      },
+      "oos": {
+        "fromYmd": "2024-10-01",
+        "toYmd": "2024-12-31"
+      }
+    },
+    {
+      "id": "wf-anchored-03",
+      "label": "DEV Oct 2023–Dec 2024 → OOS Jan–Mar 2025",
+      "role": "inner_oos",
+      "dev": {
+        "fromYmd": "2023-10-02",
+        "toYmd": "2024-12-30",
+        "nominalLabel": "2023-10 → 2024-12"
+      },
+      "purge": {
+        "fromYmd": "2024-12-31",
+        "toYmd": "2024-12-31"
+      },
+      "oos": {
+        "fromYmd": "2025-01-01",
+        "toYmd": "2025-03-31"
+      }
+    },
+    {
+      "id": "wf-anchored-04",
+      "label": "DEV Oct 2023–Mar 2025 → OOS Apr–May 2025 (stops before carve VAL)",
+      "role": "inner_oos",
+      "dev": {
+        "fromYmd": "2023-10-02",
+        "toYmd": "2025-03-28",
+        "nominalLabel": "2023-10 → 2025-03"
+      },
+      "purge": {
+        "fromYmd": "2025-03-31",
+        "toYmd": "2025-03-31"
+      },
+      "oos": {
+        "fromYmd": "2025-04-01",
+        "toYmd": "2025-05-30",
+        "note": "Truncated vs full quarter so OOS stays entirely before carve-v1 VALIDATION (2025-06-01)."
+      }
+    }
+  ],
+  "interactionWithPromotionProtocol": {
+    "devExploration": "Candidate exploration + gate scoring stay on expanding DEV windows / full carve DEVELOPMENT as declared per experiment.",
+    "innerOos": "wf-anchored-01..04 are chronological robustness OOS blocks — report-only diagnostics for stability; do not retune thresholds on OOS.",
+    "carveValidation": "After PROMOTE_TO_VALIDATION, run one-shot carve VALIDATION (2025-06-01→2025-12-31) per karen-dev-to-validation-protocol.md.",
+    "holdout": "2026-01-01→2026-08-14 remains sealed until architecture/thresholds/execution/eval rules are frozen and Adam unlocks.",
+    "registry": "Register each fold run with dataset_version including walk-forward-anchored-v1 fold id in timestamp_manifest / notes; split=DEV for inner training windows; do not register HOLDOUT."
+  }
+}

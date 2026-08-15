@@ -1,0 +1,203 @@
+{
+  "concept_id": "midnight_opening_range",
+  "name": "Midnight opening range (NY local 00:00\u201300:30)",
+  "aliases": [
+    "midnight OR",
+    "00:00 opening range",
+    "midnight to 12:30 opening range"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "midnight_or_30m_algo_same_as_ny__Z0VYZoaTIKE__618",
+      "definition_text": "Morning-session algorithmic opening range is specifically the 9:30\u201310:00 30-minute interval \u2014 if less than 30 minutes it is not algorithmic. The algorithm uses that first 30 minutes and does the same type of thing at midnight New York local time.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "30-minute algorithmic OR length",
+        "Midnight NY local analogue of NY AM OR logic"
+      ],
+      "invalidation": [
+        "Sub-30-minute 'opening range' framed as non-algorithmic"
+      ],
+      "timeframe_session_context": "NY AM 9:30\u201310:00 contrasted with midnight NY local 30m OR",
+      "variations_note": "Reinforces modern 30m NY OR while introducing midnight OR as same-type construct \u2014 KEEP SEPARATE from Month 10 1h index/bond ORs.",
+      "confidence": "quoted",
+      "cue_start": "00:09:46.870",
+      "cue_end": "00:10:27.870",
+      "timestamp_sec": 586.87,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "midnight_or_window_0000_0030__Z0VYZoaTIKE__1527",
+      "definition_text": "Midnight opening range is the 30-minute interval between midnight and 12:30 Eastern. Framing on 1-minute chart: mark midnight candle and 12:30 to obtain the midnight opening range.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Eastern / NY local timezone",
+        "Window 00:00\u201300:30",
+        "1m chart framing with verticals at midnight and 12:30"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "ETH overnight; midnight\u219212:30 ET",
+      "variations_note": "Primary clock definition for midnight OR. Reinforced again ~00:46 and ~00:48 in same lecture.",
+      "confidence": "quoted",
+      "cue_start": "00:25:19.830",
+      "cue_end": "00:25:35.000",
+      "timestamp_sec": 1519.83,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "midnight_or_three_refs_open_hi_lo__Z0VYZoaTIKE__1041",
+      "definition_text": "Three crucial reference points on the midnight candle / range: (1) opening price at midnight \u2014 midnight opening price for Power of Three (daily-range candlestick formation); (2) high of the midnight opening range; (3) low of the midnight opening range.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Midnight candle identified on chart",
+        "Track open, high, and low of the midnight OR"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Midnight OR geometry anchors + Power of Three open",
+      "variations_note": "Geometry triad; Power-of-Three midnight open is related but not identical to OR high/low \u2014 kept in one occurrence as lecture presents them together.",
+      "confidence": "quoted",
+      "cue_start": "00:17:21.559",
+      "cue_end": "00:19:05.000",
+      "timestamp_sec": 1041.559,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "midnight_or_fib_sd_projection__Z0VYZoaTIKE__1519",
+      "definition_text": "Fib measuring the midnight opening range (high\u2192low): if the market trades above the range, it can go one-half of one standard deviation or one standard deviation (lecture walks -1 SD / projection settings from the midnight OR).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Midnight OR high/low graded with Fib / SD projections",
+        "Trade above midnight OR high \u2192 look for 0.5 / 1.0 SD extensions"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Post-midnight OR expansion geometry",
+      "variations_note": "Related geometry (not ORG settlement Fib). KEEP SEPARATE from RTH ORG Fib 4:14\u21929:30 grading.",
+      "confidence": "quoted",
+      "cue_start": "00:25:19.830",
+      "cue_end": "00:25:50.710",
+      "timestamp_sec": 1519.83,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "midnight_or_fpfvg_inside__Z0VYZoaTIKE__1714",
+      "definition_text": "Inside the midnight opening range, algorithm can rebook/redeliver premium and discount via first-presented displacement (first presented FVG-style displacement that 'jumps off the chart' inside the midnight OR).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Displacement forms inside midnight OR window",
+        "First-presented displacement prioritized"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "00:00\u201300:30 NY; FPFVG analogue inside midnight OR",
+      "variations_note": "KEEP SEPARATE from NY 9:31 FPFVG and silver-bullet-after-10 variants; midnight-window first displacement only.",
+      "confidence": "quoted",
+      "cue_start": "00:28:26.269",
+      "cue_end": "00:29:15.000",
+      "timestamp_sec": 1706.269,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "midnight_or_ce_midpoint__Z0VYZoaTIKE__2762",
+      "definition_text": "Consequent encroachment of the midnight opening range \u2014 the 30-minute interval between midnight and 12:30 Eastern \u2014 is used as a delivery magnet (example path trades into CE of midnight OR).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "CE = midpoint of midnight OR high/low",
+        "Window midnight\u201312:30 ET"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Midnight OR CE (not RTH ORG CE)",
+      "variations_note": "KEEP SEPARATE from consequent_encroachment_half_gap RTH-ORG ~70% claims \u2014 same CE vocabulary, different range object.",
+      "confidence": "quoted",
+      "cue_start": "00:46:02.790",
+      "cue_end": "00:46:19.990",
+      "timestamp_sec": 2762.79,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "midnight_or_1m_frame_0000_0030__Z0VYZoaTIKE__2921",
+      "definition_text": "Operational framing: on a one-minute chart place markers at the midnight candle and at 12:30 to obtain the midnight opening range; for a down-close midnight candle, the open of that body is the midnight opening price for Power of Three.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "1-minute chart",
+        "Verticals / range from 00:00 to 00:30",
+        "Down-close midnight candle \u2192 body open = midnight open"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "1m ETH chart framing procedure",
+      "variations_note": "How-to reinforcement of window + midnight open; complements three-refs occurrence.",
+      "confidence": "quoted",
+      "cue_start": "00:48:32.510",
+      "cue_end": "00:49:14.309",
+      "timestamp_sec": 2912.51,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "No dedicated midnight-OR observation in baseline-v2",
+    "related_karen_evidence_or_gate": "n/a",
+    "overlap_vs_baseline_v2": "None",
+    "gap_vs_baseline_v2": "Midnight OR high/low/open/CE not Layer-1 fields",
+    "hypothesis_id": "H_ICT_MIDNIGHT_OR",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Later DEV only if Adam wants overnight OR object; do not conflate with RTH OR/ORG/FHDR."
+  },
+  "extraction_notes": "Batch4 zero-download mine of Z0VYZoaTIKE. Official 2025 lecture: midnight OR = 00:00\u201300:30 ET; same 30m algorithmic logic as NY 9:30\u201310:00; geometry open/hi/lo + Fib/SD + CE + first displacement inside."
+}

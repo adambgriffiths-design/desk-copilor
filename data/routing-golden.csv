@@ -14,15 +14,15 @@ weather in Telford Shropshire,live_web,search
 weather in Birmingham,live_web,search
 What's the market doing right now?,snapshot,status
 What is the chart doing right now?,snapshot,status
-What's the bias?,trading,bias
+What's the bias?,trading,bias_explanation
 What's the current price?,snapshot,price
 What price are we at?,snapshot,price
 Where are we trading?,snapshot,price
 What level are we at?,snapshot,price
 What level are we trading at?,snapshot,price
-get the read,chart_read,structured
+get the read,trading,current_market_read
 full read,chart_read,structured
-what do you see on the chart,chart_read,structured
+what do you see on the chart,trading,current_market_read
 read the chart,chart_read,structured
 mark levels,levels,
 draw levels,levels,
@@ -34,7 +34,11 @@ What's target one?,snapshot,target
 tell me about market structure,trading,structure
 explain why we should wait,trading,
 should I take this long,chart_read,structured
-what do you see,chart_read,structured
+what do you see,trading,current_market_read
+What are you seeing,trading,current_market_read
+Calculate what you will do,trading,current_market_read
+What's your call,trading,current_market_read
+What will you do,trading,current_market_read
 Who are you,casual,persona
 What is your name,casual,persona
 Hi,casual,stream
@@ -59,7 +63,7 @@ Should I fade this move?,trading,
 Help me understand premium vs discount,trading,
 Tell me about the current setup,trading,
 What do you think about going long here,trading,
-Break down the market structure for me,trading,structure
+Break down the market structure for me,trading,structure_explanation
 Explain order blocks,trading,
 Why wait for a reclaim,trading,
 What's happening in the London session,trading,
@@ -68,3 +72,42 @@ Where is the nearest REH?,snapshot,
 Where is the nearest relative equal high?,snapshot,
 Where is the last EQH?,snapshot,
 Is there a relative equal high near current price?,snapshot,
+Where is the IFVG?,snapshot,structure
+Where is the FHDR?,snapshot,structure
+Where is CISD?,snapshot,structure
+Where is the PD array?,snapshot,structure
+Where is the last NDOG?,snapshot,structure
+Where is the OTE?,snapshot,structure
+Where is the BPR?,snapshot,structure
+Where is the SMT divergence?,snapshot,structure
+Where is the AMD phase?,snapshot,structure
+Where is the equilibrium?,snapshot,level
+Where is the weekly open?,snapshot,level
+Where is the kill zone?,snapshot,structure
+Where is the asian range?,snapshot,level
+Where is the midnight open?,snapshot,structure
+Where is the imbalance?,snapshot,structure
+Where is premium?,snapshot,structure
+Where is the opening range?,snapshot,structure
+Where is the gap fill?,snapshot,structure
+Where is the unfilled gap?,snapshot,structure
+Where is the range high?,snapshot,level
+Where is the previous week high?,snapshot,level
+Where is turtle soup?,snapshot,structure
+Where is the daily high?,snapshot,level
+Where is the current day high?,snapshot,level
+Where is the NY open?,snapshot,level
+Where is the macro window?,snapshot,structure
+Where is the inversion?,snapshot,structure
+Where is PDC?,snapshot,level
+Where is the efficiency?,snapshot,structure
+Where is the fair value?,snapshot,structure
+Where is the swing high?,snapshot,level
+Where is DOL?,snapshot,structure
+Where is the inducement?,snapshot,structure
+Where is the stop run?,snapshot,structure
+Where is the old high?,snapshot,level
+Where is the mean threshold?,snapshot,structure
+Where is the Fibonacci?,snapshot,structure
+Where is POC?,snapshot,level
+Where is value area high?,snapshot,level

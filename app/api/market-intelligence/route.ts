@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       chartLastPriceTs: priceMeta.timestamp,
       chartSnapshot,
       chartExportFailed,
-      forceFresh: chartLastPrice != null,
+      forceFresh: false,
     });
 
     const dq = resolveApiDataQuality(intel, chartLastPrice, priceMeta);
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     const safeAnswer =
-      dq.dataQuality === "UNAVAILABLE" || dq.dataQuality === "STALE"
+      (dq.dataQuality === "UNAVAILABLE" || dq.dataQuality === "STALE") && chartLastPrice == null
         ? {
             ...answer,
             spoken: "Live market data is unavailable — I can't quote price or bias yet.",

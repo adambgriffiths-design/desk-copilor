@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "The Trading Desk",
-  "version": "1.4.73",
+  "version": "1.4.137",
   "description": "No signals. Just the read. ICT desk on TradingView.",
   "permissions": ["activeTab", "tabs", "storage", "scripting"],
   "host_permissions": [

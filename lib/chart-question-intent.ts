@@ -90,7 +90,7 @@ export function isSnapshotIntent(intent: ChartQuestionIntent): boolean {
 }
 
 const ANALYTICAL_STRUCTURE =
-  /\b(market structure|dealing range|premium|discount|order block|liquidity|displacement|fair value gap|kill zone|opening range|session bias|macro)\b/;
+  /\b(market structure|dealing range|premium|discount|order blocks?|obs?|breaker(?: blocks?)?|bsl|ssl|bos|choch|liquidity|displacement|fair value gap|kill zone|opening range|session bias|macro)\b/;
 
 /** Analytical trading questions need full LLM + market context — not one-line snapshot. */
 export function prefersRichTradingAnswer(question: string): boolean {
@@ -106,8 +106,19 @@ export function prefersRichTradingAnswer(question: string): boolean {
   ) {
     return true;
   }
+  // "why"/"explain" alone must not steal general knowledge ("Explain why the sky is blue").
   if (/\b(why|explain|walk me through|talk me through|break down|help me understand)\b/.test(q)) {
-    return true;
+    if (
+      ANALYTICAL_STRUCTURE.test(q) ||
+      /\b(this|that|it|here|the (?:read|lean|bias|call|setup|trade|chart|market|price|level|move|tape|structure))\b/.test(
+        q
+      ) ||
+      /\b(long|short|bullish|bearish|wait|flat|entry|invalidation|target|pdh|pdl|fvg|liquidity|mss|mnq|nasdaq|futures|order block|fair value)\b/.test(
+        q
+      )
+    ) {
+      return true;
+    }
   }
   if (/\b(should i|would you|do you think|what do you think|is it worth|make sense to)\b/.test(q)) {
     return true;
@@ -174,6 +185,16 @@ export function classifyChartQuestion(question: string): ChartQuestionIntent {
 
   if (isChartStatusQuestion(q)) return "status";
 
+  // Named ICT structure / liquidity near price is a fact lookup — not a live-price quote.
+  if (
+    /\b(mss|nwog|ndog|org|fvg|ifvg|fpfvg|fhdr|eqh|eql|reh|rel|bos|choch|cisd|ote|bpr|smt|ce|ash|relative equal|fair value gap|inverse (?:fair value )?gap|volume imbalance|optimal trade entry|market structure|dealing range|first hour dealing range|judas(?: swing)?|open(?:ing)? gap|london open(?:ing)?(?: gap)?|order blocks?|obs?|breaker(?: blocks?)?|bsl|ssl|buy[- ]?side|sell[- ]?side|liquidity(?: pools?| void)?|displacement|consequent encroachment|change in state of delivery|pd arrays?|amd(?: phase)?|kill zone|midnight open|true day open|imbalance|gap fill|opening range|silver bullet|power of three|premium|discount|unfilled gap|turtle soup|macro(?: window)?|inversion|inefficiency|mitigation blocks?|rejection blocks?|prop blocks?|vacuum blocks?|(?:delivery )?efficiency|fair value(?! gap)|dol|next draw|inducement|internal range|external range|consolidation|accumulation|stop runs?|mean threshold|fibonacci|fib(?:onacci)?|62(?:\s*percent|%)|79(?:\s*percent|%)|50(?:\s*percent|%) level|ipda|institutional order flow|smart money reversal|market maker model)\b/.test(
+      q
+    ) &&
+    /\b(where|nearest|latest|last|near|is there|are there|show me|nearby|locate|find)\b/.test(q)
+  ) {
+    return "structure";
+  }
+
   if (
     /\b(what level|where are we|what price|current price|trading at|price at|what are we at|where is price|where's price|what level are we|how much is|last price|currently trading)\b/.test(
       q
@@ -196,7 +217,7 @@ export function classifyChartQuestion(question: string): ChartQuestionIntent {
     return "first_presented_fvg";
   }
   if (
-    /\b(fvg|fair value gap|mss|market structure|displacement|sweep|liquidity|order block|structure shift)\b/.test(
+    /\b(fvg|ifvg|fpfvg|fhdr|fair value gap|inverse (?:fair value )?gap|volume imbalance|mss|market structure|dealing range|first hour dealing range|judas(?: swing)?|displacement|sweep|liquidity(?: pools?| void)?|order blocks?|obs?|breaker(?: blocks?)?|bsl|ssl|buy[- ]?side|sell[- ]?side|structure shift|nwog|ndog|org|bos|choch|cisd|ote|bpr|smt|ce|ash|eqh|eql|reh|rel|relative equal|open(?:ing)? gap|london open(?:ing)?(?: gap)?|new week opening gap|new day opening gap|consequent encroachment|change in state of delivery|optimal trade entry|pd arrays?|amd(?: phase)?|kill zone|midnight open|true day open|imbalance|gap fill|opening range|silver bullet|power of three|premium|discount|unfilled gap|turtle soup|macro(?: window)?|inversion|inefficiency|mitigation blocks?|rejection blocks?|prop blocks?|vacuum blocks?|(?:delivery )?efficiency|fair value(?! gap)|dol|next draw|inducement|internal range|external range|consolidation|accumulation|stop runs?|mean threshold|fibonacci|fib(?:onacci)?|62(?:\s*percent|%)|79(?:\s*percent|%)|50(?:\s*percent|%) level|ipda|institutional order flow|smart money reversal|market maker model)\b/.test(
       q
     )
   ) {
@@ -211,11 +232,14 @@ export function classifyChartQuestion(question: string): ChartQuestionIntent {
   if (/\b(bias|direction|long or short|buy or sell|tradeable bias)\b/.test(q)) {
     return "bias";
   }
-  if (/\b(bullish|bearish)\b/.test(q) && !/\b(fvg|gap|photo|fair value)\b/.test(q)) {
+  if (
+    /\b(bullish|bearish)\b/.test(q) &&
+    !/\b(fvg|gap|photo|fair value|order blocks?|obs?|breaker)\b/.test(q)
+  ) {
     return "bias";
   }
   if (
-    /\b(pdh|pdl|previous day high|previous day low|nearest (support|resistance)|session high|session low)\b/.test(
+    /\b(pdh|pdl|pdc|previous day high|previous day low|previous day close|nearest (support|resistance)|session high|session low|asia (?:high|low)|london (?:high|low)|(?:new york|ny) (?:high|low)|ash|equilibrium|weekly open|asian? range|asia range|previous week (?:high|low)|weekly (?:high|low)|monthly open|range (?:high|low)|mid(?:[- ]?point| range)|daily (?:high|low)|current day (?:high|low)|(?:new york|ny) open|asian? open|session open|swing (?:high|low)|old (?:high|low)|value area (?:high|low)|vah|val|poc|point of control)\b/.test(
       q
     )
   ) {
@@ -228,7 +252,7 @@ export function classifyChartQuestion(question: string): ChartQuestionIntent {
   if (/\b(previews|preview|precious)\b/.test(q) && /\b(low|lo|stay low)\b/.test(q)) {
     return "level";
   }
-  if (/\bwhere\b/.test(q) && /\b(pdh|pdl)\b/.test(q)) return "level";
+  if (/\bwhere\b/.test(q) && /\b(pdh|pdl|pdc)\b/.test(q)) return "level";
   if (/\bwhere\b/.test(q) && /\bprevious day\b/.test(q)) return "level";
   if (/\b(support|resistance|key level)\b/.test(q)) return "level";
 

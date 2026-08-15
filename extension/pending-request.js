@@ -89,16 +89,9 @@
     return null;
   }
 
-  function isFollowUpWhyQuestion(question) {
-    const q = String(question || "")
-      .trim()
-      .toLowerCase();
-    if (/^(why|how come|explain that|what does that mean|why though)\??$/.test(q)) return true;
-    return (
-      /\bwhy\b/.test(q) &&
-      q.length < 40 &&
-      !/\b(why not short|why long|why short|why buy|why sell)\b/.test(q)
-    );
+  function isFollowUpWhyQuestion(question, messages) {
+    const mentorCtx = window.DeskCopilotMentor?.mentorContextFromMessages?.(messages);
+    return window.DeskCopilotCasual?.isLinguisticMarketFollowUp?.(question, mentorCtx) === true;
   }
 
   function isFollowUpInvalidationQuestion(question) {
@@ -186,8 +179,9 @@
   }
 
   function classifyTurn(text, messages, ctx) {
-    const q = String(text || "").trim();
+    const q = (window.DeskCopilotCasual?.repairConversationalStt?.(text) || String(text || "")).trim();
     if (!q) return "NEW_REQUEST";
+    if (window.DeskCopilotCasual?.isStandaloneGeneralTurn?.(q) === true) return "NEW_REQUEST";
     const pending = inferPendingRequest(messages, ctx);
     if (
       pending?.intent === "CURRENT_EXTERNAL" &&
@@ -204,8 +198,12 @@
       return "FOLLOW_UP";
     }
     if (pending?.intent === "MARKET_INTEL" || pending?.intent === "VERDICT_EXPLAIN") {
-      if (isFollowUpInvalidationQuestion(q) || isFollowUpWhyQuestion(q)) return "FOLLOW_UP";
+      if (isFollowUpInvalidationQuestion(q) || isFollowUpWhyQuestion(q, messages)) return "FOLLOW_UP";
+      if (window.DeskCopilotMentor?.isInvalidationConditionQuestion?.(q) || window.DeskCopilotMentor?.isBareMentorFollowUp?.(q)) {
+        return "FOLLOW_UP";
+      }
       if (/\bwhat about\b/i.test(q) && pending.entities?.lastTopic) return "FOLLOW_UP";
+      if (window.DeskCopilotMentor?.isMentorMarketTurn?.(q)) return "FOLLOW_UP";
     }
     if (pending?.intent === "TEACHING" && CHART_SHOW_FOLLOWUP.test(q)) return "FOLLOW_UP";
     return "NEW_REQUEST";
@@ -248,8 +246,22 @@
   }
 
   function shouldDeferCasualRoute(text, messages, ctx) {
+    if (window.DeskCopilotCasual?.isStandaloneGeneralTurn?.(text) === true) return false;
+    const mentorCtx = window.DeskCopilotMentor?.mentorContextFromMessages?.(messages);
+    if (
+      window.DeskCopilotCasual?.isBareAnaphoraFollowUp?.(text) === true &&
+      (mentorCtx?.lastTurnCategory === "GENERAL_KNOWLEDGE" || mentorCtx?.lastTurnCategory === "GENERAL_CHAT")
+    ) {
+      return false;
+    }
     const pending = inferPendingRequest(messages, ctx);
-    if (!pending) return false;
+    if (!pending) {
+      return !!(
+        window.DeskCopilotMentor?.isMentorMarketTurn?.(text) &&
+        (window.DeskCopilotMentor?.isBareMentorFollowUp?.(text) ||
+          window.DeskCopilotMentor?.isInvalidationConditionQuestion?.(text))
+      );
+    }
     const kind = classifyTurn(text, messages, ctx);
     if (kind === "CLARIFICATION" && pending.intent === "CURRENT_EXTERNAL") return true;
     if (kind === "FOLLOW_UP") {
@@ -257,7 +269,14 @@
       if (pending.intent === "MARKET_INTEL" || pending.intent === "VERDICT_EXPLAIN") return true;
       if (pending.intent === "TEACHING" && CHART_SHOW_FOLLOWUP.test(text)) return true;
     }
-    if (isFollowUpWhyQuestion(text) && pending.intent === "VERDICT_EXPLAIN") return true;
+    if (isFollowUpWhyQuestion(text, messages) && pending.intent === "VERDICT_EXPLAIN") return true;
+    if (
+      window.DeskCopilotMentor?.isMentorMarketTurn?.(text) &&
+      (window.DeskCopilotMentor?.isBareMentorFollowUp?.(text) ||
+        window.DeskCopilotMentor?.isInvalidationConditionQuestion?.(text))
+    ) {
+      return true;
+    }
     return false;
   }
 

@@ -4,6 +4,7 @@
 import type { MarketContext } from "./types";
 import type { MarketState } from "./market-state";
 import type { ReadonlyMarketObservation } from "./desk-schema";
+import { classifyLevelSide, describeSweepFact, sweptStatusNote } from "./session-liquidity";
 
 export type FactStatus = "active" | "invalidated" | "swept" | "absent" | "unknown";
 
@@ -186,7 +187,7 @@ export function buildObservationFacts(
     });
   }
 
-  const fpfvg = ctx.structureFacts.firstPresentedFvg.activeSession;
+  const fpfvg = ctx.structureFacts?.firstPresentedFvg?.activeSession;
   if (fpfvg?.fvg) {
     pushFact(facts, {
       id: "structure.first_presented_fvg",
@@ -273,19 +274,34 @@ export function buildObservationFacts(
       id,
       category: "liquidity",
       label: level.label,
-      value: `${roundMnq(level.price).toFixed(2)}${level.taken === true ? " — swept" : level.taken === false ? " — not swept" : ""}`,
+      value: `${roundMnq(level.price).toFixed(2)}${
+        level.taken === true
+          ? ` — ${sweptStatusNote(classifyLevelSide(level.label, level.side))}`
+          : level.taken === "unknown"
+            ? " — sweep not confirmed"
+            : level.status && level.status !== "UNTOUCHED"
+              ? ` — ${level.status}`
+              : " — not swept"
+      }`,
       price: roundMnq(level.price),
       status: level.taken === true ? "swept" : level.taken === "unknown" ? "unknown" : "active",
       evidence_key: id,
     });
   }
 
-  for (const sweep of ctx.structureFacts.liquiditySweeps) {
+  for (const sweep of ctx.structureFacts.liquiditySweeps ?? []) {
+    if (sweep.levelId === "pdh" || sweep.levelId === "pdl" || sweep.levelId === "pdc") {
+      const obsLevel = obs.liquidity.levels.find(
+        (l) => l.id === sweep.levelId || l.label.toLowerCase() === sweep.levelId
+      );
+      if (!obsLevel || obsLevel.taken !== true) continue;
+    }
+    const side = classifyLevelSide(sweep.label, sweep.side);
     pushFact(facts, {
       id: `liquidity.sweep.${sweep.levelId}`,
       category: "liquidity",
       label: `${sweep.label} sweep`,
-      value: `${sweep.side.replace("_", "-")} at ${roundMnq(sweep.price).toFixed(2)} (${sweep.at})`,
+      value: describeSweepFact(side, roundMnq(sweep.price).toFixed(2), sweep.at),
       price: roundMnq(sweep.price),
       status: "swept",
       observed_at: sweep.at,
@@ -370,6 +386,9 @@ export function buildObservationFacts(
   }
 
   const sess = ctx.sessions;
+  const sweeps = ctx.structureFacts.liquiditySweeps ?? [];
+  const sweptLevelIds = new Set(sweeps.map((s) => s.levelId.toLowerCase()));
+  const sweptLevelLabels = new Set(sweeps.map((s) => s.label.toLowerCase()));
   const sessionLevels: Array<[string, string, number]> = [
     ["session.asia_high", "Asia high", sess.asiaHigh],
     ["session.asia_low", "Asia low", sess.asiaLow],
@@ -384,13 +403,19 @@ export function buildObservationFacts(
   ];
   for (const [id, label, price] of sessionLevels) {
     if (!Number.isFinite(price)) continue;
+    const levelId = id.replace("session.", "");
+    const swept =
+      sweptLevelIds.has(levelId) || sweptLevelLabels.has(label.toLowerCase());
+    const side = classifyLevelSide(label);
     pushFact(facts, {
       id,
       category: "session",
       label,
-      value: roundMnq(price).toFixed(2),
+      value: swept
+        ? `${roundMnq(price).toFixed(2)} — ${sweptStatusNote(side)}`
+        : roundMnq(price).toFixed(2),
       price: roundMnq(price),
-      status: "active",
+      status: swept ? "swept" : "active",
       evidence_key: id,
     });
   }

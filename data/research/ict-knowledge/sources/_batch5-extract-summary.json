@@ -1,0 +1,200 @@
+{
+  "extracted_at": "2026-08-15T21:58:58.300Z",
+  "videos": [
+    {
+      "id": "FgacYSN9QEo",
+      "cues": 494,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-FgacYSN9QEo.json",
+      "hitCounts": {
+        "fair value gap": 12,
+        "fvg": 0,
+        "three candle": 0,
+        "imbalance": 0,
+        "liquidity void": 5,
+        "consequent encroachment": 0,
+        "half": 0,
+        "premium": 0,
+        "discount": 0,
+        "equilibrium": 0,
+        "fill": 7,
+        "entry": 0
+      }
+    },
+    {
+      "id": "uC4-1SYXJFg",
+      "cues": 1206,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-uC4-1SYXJFg.json",
+      "hitCounts": {
+        "first presented": 6,
+        "9:30": 12,
+        "9:31": 2,
+        "fair value gap": 12,
+        "fvg": 0,
+        "opening range": 9,
+        "middle candle": 0,
+        "one minute": 6,
+        "1 minute": 0,
+        "displacement": 0,
+        "buy side": 8,
+        "sell side": 6
+      }
+    },
+    {
+      "id": "POUT0pVs4U0",
+      "cues": 423,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-POUT0pVs4U0.json",
+      "hitCounts": {
+        "first presented": 2,
+        "fair value gap": 8,
+        "fvg": 0,
+        "sell side": 0,
+        "buy side": 0,
+        "liquidity": 5,
+        "9:30": 0,
+        "9:31": 0,
+        "opening range": 0,
+        "dealing range": 0
+      }
+    },
+    {
+      "id": "qC0LogyIk2I",
+      "cues": 1731,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-qC0LogyIk2I.json",
+      "hitCounts": {
+        "equilibrium": 12,
+        "discount": 12,
+        "premium": 5,
+        "dealing range": 0,
+        "50%": 0,
+        "fifty": 1,
+        "fib": 12,
+        "range": 12,
+        "buy side": 0,
+        "sell side": 0,
+        "fair value": 1
+      }
+    },
+    {
+      "id": "YuefjnUKQdM",
+      "cues": 631,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-YuefjnUKQdM.json",
+      "hitCounts": {
+        "equilibrium": 12,
+        "premium": 12,
+        "discount": 12,
+        "dealing range": 0,
+        "50%": 0,
+        "fifty": 3,
+        "fib": 10,
+        "range": 12,
+        "buy side": 0,
+        "sell side": 0,
+        "fair value": 0
+      }
+    },
+    {
+      "id": "22XkhpJR5eA",
+      "cues": 738,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-22XkhpJR5eA.json",
+      "hitCounts": {
+        "liquidity run": 12,
+        "liquidity": 12,
+        "buy side": 2,
+        "sell side": 5,
+        "stop": 12,
+        "pool": 0,
+        "equal high": 0,
+        "equal low": 1,
+        "sweep": 0,
+        "raid": 0,
+        "inducement": 0
+      }
+    },
+    {
+      "id": "Gnw54f9v6SA",
+      "cues": 566,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-Gnw54f9v6SA.json",
+      "hitCounts": {
+        "liquidity pool": 12,
+        "liquidity": 12,
+        "buy side": 2,
+        "sell side": 3,
+        "equal high": 2,
+        "equal low": 1,
+        "relative equal": 1,
+        "stop": 12,
+        "old high": 12,
+        "old low": 7,
+        "pool": 12
+      }
+    },
+    {
+      "id": "vqtA1S9JH34",
+      "cues": 701,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-vqtA1S9JH34.json",
+      "hitCounts": {
+        "open float": 12,
+        "liquidity pool": 7,
+        "liquidity": 12,
+        "buy side": 1,
+        "sell side": 4,
+        "float": 12,
+        "equal high": 0,
+        "equal low": 0,
+        "stop": 12,
+        "pool": 7
+      }
+    },
+    {
+      "id": "HTQgH11W37o",
+      "cues": 354,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-HTQgH11W37o.json",
+      "hitCounts": {
+        "liquidity void": 12,
+        "void": 12,
+        "fair value gap": 0,
+        "imbalance": 1,
+        "fvg": 0,
+        "fill": 5,
+        "buy side": 3,
+        "sell side": 0,
+        "gap": 12
+      }
+    },
+    {
+      "id": "O69iFqP1j7o",
+      "cues": 686,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-O69iFqP1j7o.json",
+      "hitCounts": {
+        "low resistance": 1,
+        "liquidity run": 2,
+        "liquidity": 5,
+        "high resistance": 0,
+        "buy side": 0,
+        "sell side": 0,
+        "stop": 1,
+        "pool": 0,
+        "draw": 1,
+        "target": 0
+      }
+    },
+    {
+      "id": "tbEzAhdv_Ak",
+      "cues": 2085,
+      "dest": "data\\research\\ict-knowledge\\sources\\_extract-tbEzAhdv_Ak.json",
+      "hitCounts": {
+        "first presented": 0,
+        "fair value gap": 4,
+        "fvg": 0,
+        "liquidity": 2,
+        "buy side": 12,
+        "sell side": 12,
+        "dealing range": 0,
+        "opening range gap": 11,
+        "consequent encroachment": 6,
+        "9:31": 0,
+        "sweep": 0
+      }
+    }
+  ]
+}

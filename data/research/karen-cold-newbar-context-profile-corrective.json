@@ -1,0 +1,27 @@
+{
+  "when": "2026-08-14T18:57:15.280Z",
+  "dataset": "2562961408b256ac94f1",
+  "prefixBars": 1380,
+  "advancedBars": 1381,
+  "sharedColdInitializeMs": 8106.749,
+  "coldStats": {
+    "lastFullMs": 8105.262700000001,
+    "lastEqhMs": 424.6995999999999
+  },
+  "syncLiveEngineFromFeedNewBarMs": 9936.4236,
+  "contextReuse": "miss",
+  "contextReuseReason": "cold",
+  "afterStats": {
+    "lastBarMs": 0,
+    "lastStructureMs": 0,
+    "lastEqhMs": 357.48929999999746,
+    "structureRebuilds": 0,
+    "eqhEqlRebuilds": 2,
+    "eqhEqlReused": 0,
+    "fullRebuilds": 2,
+    "barUpdates": 0
+  },
+  "assembleIntelMs": 17.52260000000024,
+  "decisionEnvelopeMs": 3.3214000000007218,
+  "note": "syncLiveEngineFromFeed after shared initialize(prefix) measures genuine bars-miss → syncSeries → applyClosedBar path"
+}

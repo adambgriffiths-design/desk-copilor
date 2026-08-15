@@ -6,3 +6,5 @@ export * from "./manifest";
 export * from "./report";
 export * from "./gate";
 export * from "./mentor";
+export * from "./eqh-eql-liquidity";
+export * from "./architecture";

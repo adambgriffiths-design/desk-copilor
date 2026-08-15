@@ -102,7 +102,11 @@ function formatKarenFromPipeline(
   };
 }
 
-/** Offline deterministic Karen — no API key, fully repeatable. */
+/**
+ * NON-AUTHORITATIVE — offline bias heuristic only (always LONG|SHORT, never WAIT).
+ * Not strategy / not DecisionEnvelope / not live mentor. Do not use for research:replay
+ * primary result; prefer buildKarenReplayResponse → runDeskPipeline.
+ */
 export function buildDeterministicKarenResponse(
   ctx: MarketContext,
   data: ReplayMarketData,

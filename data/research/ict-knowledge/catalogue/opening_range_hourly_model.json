@@ -1,0 +1,43 @@
+{
+  "concept_id": "opening_range_hourly_model",
+  "name": "Opening range (hourly / post-premarket model language)",
+  "aliases": ["opening range (7:30–8:00)", "hourly opening range"],
+  "status": "CONFLICTING_SOURCES",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "opening_range_hourly_model__2K1IcVvq9z8__1563",
+      "definition_text": "In the same lecture that defines NY OR as post-9:30 30 minutes: '7 o'clock to 7:30, that is your pre-market range. 7:30 to 8:00 is your opening range.' And: '9 to 9:30, that's your pre-market range… post 9:30 to 10:00. That's your opening range.'",
+      "definition_mode": "quote",
+      "conditions": [
+        "Paired with a preceding 30-minute pre-market range on the hour",
+        "Framed as something you can do on every hourly candle"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY local morning hours; model generalizes 30m pre-market then 30m 'opening range' after each hour start",
+      "variations_note": "KEEP SEPARATE from opening_range_ny_30m. Same speaker/video uses 'opening range' for (a) NY 9:30–10:00 and (b) 7:30–8:00 after 7:00–7:30 pre-market. Do not merge.",
+      "confidence": "quoted",
+      "cue_start": "00:25:59.350",
+      "cue_end": "00:26:23.750",
+      "timestamp_sec": 1563.11,
+      "source": {
+        "video_id": "2K1IcVvq9z8",
+        "title": "ICT Gems — Pre-Market Range",
+        "url": "https://www.youtube.com/watch?v=2K1IcVvq9z8",
+        "transcript_path": "data/ict-transcripts/pilot/premarket-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "None dedicated for 7:30–8:00 'opening range' object",
+    "related_karen_evidence_or_gate": "n/a",
+    "overlap_vs_baseline_v2": "None",
+    "gap_vs_baseline_v2": "Hourly OR model language not represented in baseline-v2 observation schema",
+    "hypothesis_id": "H_ICT_OR_HOURLY_MODEL",
+    "status": "CATALOGUED",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Cataloguing conflict only; do not wire until NY-OR vs hourly-OR disambiguation is specified by Adam."
+  },
+  "extraction_notes": "Explicit variation/conflict row required by project rules."
+}

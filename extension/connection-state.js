@@ -6,6 +6,13 @@
   const MAX_RECONNECT_RETRIES = 10;
   const BACKOFF_BASE_MS = 1000;
   const BACKOFF_MAX_MS = 60000;
+  const SW_WAKE_MAX_RETRIES = 4;
+  const SW_WAKE_BACKOFF_BASE_MS = 300;
+  const SW_WAKE_BACKOFF_MAX_MS = 2400;
+  const INVALIDATED_RELOAD_COOLDOWN_MS = 60000;
+  const API_FRESH_MS = 60000;
+  const TICK_LIVE_MS = 2000;
+  const TICK_STALE_MS = 60000;
 
   function computeDataAge(pulse, now = Date.now()) {
     if (!pulse) return null;
@@ -21,6 +28,191 @@
 
   function isLiveDataAvailable(snapshot) {
     return snapshot?.state === "CONNECTED";
+  }
+
+  function classifyExtensionMessagingFailure(err) {
+    const m = (err && err.message ? err.message : String(err || "")).toLowerCase();
+    if (m.includes("invalidated") || m.includes("extension context")) return "invalidated";
+    if (m.includes("receiving end") || m.includes("could not establish connection")) return "receiving_end";
+    return null;
+  }
+
+  function isExtensionMessagingFailure(err) {
+    return classifyExtensionMessagingFailure(err) != null;
+  }
+
+  function isReceivingEndFailure(err) {
+    return classifyExtensionMessagingFailure(err) === "receiving_end";
+  }
+
+  function isExtensionContextInvalidated(err) {
+    return classifyExtensionMessagingFailure(err) === "invalidated";
+  }
+
+  function parseStaleReloadLatch(raw) {
+    if (!raw || raw === "1") return null;
+    try {
+      const v = JSON.parse(raw);
+      if (!v || typeof v !== "object") return null;
+      if (typeof v.version !== "string" || typeof v.at !== "number" || !Number.isFinite(v.at)) {
+        return null;
+      }
+      return { version: v.version, at: v.at };
+    } catch {
+      return null;
+    }
+  }
+
+  function shouldAutoReloadForInvalidated(latch, version, now = Date.now(), cooldownMs = INVALIDATED_RELOAD_COOLDOWN_MS) {
+    if (!latch) return true;
+    if (latch.version !== version) return true;
+    return now - latch.at >= cooldownMs;
+  }
+
+  function nextStaleReloadLatch(version, now = Date.now()) {
+    return { version, at: now };
+  }
+
+  function computeSwWakeBackoffMs(attempt, jitter = 0) {
+    const exp = Math.min(
+      SW_WAKE_BACKOFF_MAX_MS,
+      SW_WAKE_BACKOFF_BASE_MS * Math.pow(2, Math.max(0, attempt - 1))
+    );
+    return exp + (jitter > 0 ? Math.floor(Math.random() * jitter) : 0);
+  }
+
+  function shouldRetryReceivingEnd(attempt, max = SW_WAKE_MAX_RETRIES) {
+    return attempt >= 1 && attempt < max;
+  }
+
+  function shouldOpenNewRealtimeSocket(readyState, connectInFlight) {
+    if (connectInFlight) return false;
+    if (readyState === 0 || readyState === 1) return false;
+    return true;
+  }
+
+  function evaluateMarketHopHealth(input) {
+    const age = input?.tickAgeMs;
+    const hasPrice = input?.hasPrice === true || (age != null && Number.isFinite(age));
+    if (age != null && age <= TICK_LIVE_MS) return "CONNECTED";
+    if (hasPrice && (age == null || age <= TICK_STALE_MS)) return "DEGRADED";
+    return "DISCONNECTED";
+  }
+
+  function evaluateApiHopHealth(input) {
+    const now = input?.now ?? Date.now();
+    const retryCount = input?.retryCount ?? 0;
+    if (!input?.backendUp) {
+      if (input?.reconnecting && retryCount >= MAX_RECONNECT_RETRIES) return "FAILED";
+      if (input?.reconnecting || retryCount > 0) return "RECONNECTING";
+      return retryCount >= MAX_RECONNECT_RETRIES ? "FAILED" : "DISCONNECTED";
+    }
+    const last = input.lastSuccessfulRequest;
+    if (last == null) return "DEGRADED";
+    if (now - last <= API_FRESH_MS) return "CONNECTED";
+    return "DEGRADED";
+  }
+
+  function evaluateVoiceComponentHealth(input) {
+    if (input?.failed) return "FAILED";
+    if (input?.connecting) return "CONNECTING";
+    if (input?.sessionActive) return "CONNECTED";
+    return "DISCONNECTED";
+  }
+
+  function evaluateChatStreamHealth(input) {
+    if (input?.failed) return "FAILED";
+    if (input?.busy) return "BUSY";
+    return "READY";
+  }
+
+  function canConfidentlyAnalyse(marketHop) {
+    return marketHop === "CONNECTED";
+  }
+
+  /**
+   * DESK ONLINE — request path usable (not TV Last).
+   * Requires API hop CONNECTED + market hop not DISCONNECTED.
+   * Cached/degraded health and failed chat never qualify.
+   */
+  function isDeskOnline(input) {
+    if (input?.healthDegraded === true) return false;
+    const now = input?.now ?? Date.now();
+    const api =
+      input?.apiHop ||
+      evaluateApiHopHealth({
+        backendUp: input?.backendUp,
+        lastSuccessfulRequest: input?.lastSuccessfulRequest ?? input?.lastApiSuccessAt,
+        reconnecting: input?.reconnecting,
+        retryCount: input?.retryCount,
+        now,
+      });
+    const market =
+      input?.marketHop ||
+      evaluateMarketHopHealth({
+        tickAgeMs: input?.tickAgeMs,
+        hasPrice: input?.hasPrice === true,
+      });
+    if (api !== "CONNECTED") return false;
+    if (market === "DISCONNECTED") return false;
+    if (input?.chatHop === "FAILED" || input?.chatFailed === true) return false;
+    return true;
+  }
+
+  function buildHopHealthSnapshot(input) {
+    const now = input?.now ?? Date.now();
+    const market = evaluateMarketHopHealth({
+      tickAgeMs: input?.tickAgeMs,
+      hasPrice: Number.isFinite(input?.lastPrice),
+    });
+    const api = evaluateApiHopHealth({
+      backendUp: input?.backendUp,
+      lastSuccessfulRequest: input?.lastApiSuccessAt,
+      reconnecting: input?.reconnecting,
+      retryCount: input?.retryCount,
+      now,
+    });
+    return {
+      market,
+      api,
+      stt: evaluateVoiceComponentHealth({
+        sessionActive: input?.sttActive,
+        connecting: input?.sttConnecting,
+        failed: input?.sttFailed,
+        lastActivityAt: input?.lastSttAt,
+      }),
+      tts: evaluateVoiceComponentHealth({
+        sessionActive: input?.ttsActive,
+        connecting: input?.ttsConnecting,
+        failed: input?.ttsFailed,
+        lastActivityAt: input?.lastTtsAt,
+      }),
+      chatStream: evaluateChatStreamHealth({ busy: input?.chatBusy, failed: input?.chatFailed }),
+      reconnect: input?.reconnecting ? "ATTEMPTING" : "IDLE",
+      lastTickAt: input?.lastTickAt ?? (input?.tickAgeMs != null ? now - input.tickAgeMs : null),
+      lastPrice: Number.isFinite(input?.lastPrice) ? input.lastPrice : null,
+      lastApiSuccessAt: input?.lastApiSuccessAt ?? null,
+      lastSttAt: input?.lastSttAt ?? null,
+      lastTtsAt: input?.lastTtsAt ?? null,
+      lastError: input?.lastError ?? null,
+    };
+  }
+
+  function formatHopHealthPanel(hop, now = Date.now()) {
+    const ts = (v) => (v ? new Date(v).toISOString() : "—");
+    const age = (v) => (v == null ? "—" : `${Math.max(0, now - v)}ms ago`);
+    return [
+      `MARKET FEED: ${hop.market}`,
+      `LAST TICK: ${ts(hop.lastTickAt)} (${age(hop.lastTickAt)})`,
+      `PRICE: ${hop.lastPrice != null ? hop.lastPrice : "—"}`,
+      `API: ${hop.api}`,
+      `LAST API SUCCESS: ${ts(hop.lastApiSuccessAt)} (${age(hop.lastApiSuccessAt)})`,
+      `STT: ${hop.stt}`,
+      `TTS: ${hop.tts}`,
+      `CHAT STREAM: ${hop.chatStream}`,
+      `RECONNECT: ${hop.reconnect}`,
+      hop.lastError ? `LAST ERROR: ${hop.lastError}` : "LAST ERROR: —",
+    ].join("\n");
   }
 
   function computeBackoffMs(retryCount, jitter = 250) {
@@ -39,6 +231,8 @@
       if (input.reconnecting || retryCount > 0) return "RECONNECTING";
       return retryCount >= maxRetries ? "FAILED" : "DISCONNECTED";
     }
+    // Cached/degraded health is never CONNECTED / desk ONLINE.
+    if (input.healthDegraded) return "DEGRADED";
     if (input.reconnecting) return marketFresh ? "CONNECTED" : "DEGRADED";
     if (marketFresh) return "CONNECTED";
     return "DEGRADED";
@@ -64,6 +258,7 @@
       state,
       backendUp: Boolean(input.backendUp),
       marketFresh: isMarketFresh(marketMeta, now),
+      healthDegraded: input.healthDegraded === true,
       backendVersion: input.backendVersion ?? null,
       apiBaseUrl: input.apiBaseUrl ?? null,
       lastSuccessfulRequest: input.lastSuccessfulRequest ?? null,
@@ -162,12 +357,13 @@
     let lastError = null;
     let retryCount = 0;
     let reconnecting = false;
+    let healthDegraded = false;
     let marketMeta = null;
     let transitions = [];
     let lastTransition = null;
     let reconnectTimer = null;
     let reconnectLoopActive = false;
-    let probeInFlight = false;
+    let probePromise = null;
 
     function snapshot(now = Date.now()) {
       const next = evaluateConnectionState({
@@ -175,6 +371,7 @@
         marketPulse: marketMeta,
         retryCount,
         reconnecting,
+        healthDegraded,
         lastError,
         now,
       });
@@ -184,6 +381,7 @@
       return buildConnectionSnapshot({
         state: next,
         backendUp,
+        healthDegraded,
         backendVersion,
         apiBaseUrl,
         lastSuccessfulRequest,
@@ -212,6 +410,7 @@
         marketPulse: marketMeta,
         retryCount,
         reconnecting,
+        healthDegraded,
         lastError,
       });
       applyState(next, reason);
@@ -226,38 +425,57 @@
     }
 
     async function probeBackend(forceReconnect = false) {
-      if (probeInFlight) return snapshot();
-      probeInFlight = true;
-      if (forceReconnect) {
-        reconnecting = true;
-        applyState(retryCount > 0 ? "RECONNECTING" : "CONNECTING", "manual reconnect");
-      } else if (state === "DISCONNECTED" || state === "FAILED") {
-        applyState("CONNECTING", "initial probe");
-      }
+      if (probePromise) return probePromise;
+
+      probePromise = (async () => {
+        if (forceReconnect) {
+          reconnecting = true;
+          applyState(retryCount > 0 ? "RECONNECTING" : "CONNECTING", "manual reconnect");
+        } else if (state === "DISCONNECTED" || state === "FAILED") {
+          applyState("CONNECTING", "initial probe");
+        }
+
+        try {
+          const result = await deps.pingHealth({
+            quick: !forceReconnect,
+            warm: true,
+            clearCache: forceReconnect,
+          });
+          if (result?.ok) {
+            backendUp = true;
+            apiBaseUrl = result.base || apiBaseUrl;
+            backendVersion = result.version || backendVersion;
+            if (forceReconnect) retryCount = 0;
+            reconnecting = false;
+            if (result.degraded === true) {
+              // Cached/slow local health — reachable but never desk ONLINE.
+              healthDegraded = true;
+              lastError = result.reason || "cached health — degraded";
+              recompute(forceReconnect ? "backend restored degraded" : "health degraded");
+            } else {
+              healthDegraded = false;
+              lastSuccessfulRequest = Date.now();
+              lastError = null;
+              recompute(forceReconnect ? "backend restored" : "health ok");
+            }
+          } else {
+            throw new Error(result?.error || "Backend not reachable");
+          }
+        } catch (err) {
+          backendUp = false;
+          healthDegraded = false;
+          lastError = err instanceof Error ? err.message : String(err);
+          retryCount += 1;
+          recompute("health failed");
+        }
+        return snapshot();
+      })();
 
       try {
-        const result = await deps.pingHealth({ quick: !forceReconnect, warm: true, clearCache: forceReconnect });
-        if (result?.ok) {
-          backendUp = true;
-          apiBaseUrl = result.base || apiBaseUrl;
-          backendVersion = result.version || backendVersion;
-          lastSuccessfulRequest = Date.now();
-          lastError = null;
-          if (forceReconnect) retryCount = 0;
-          reconnecting = false;
-          recompute(forceReconnect ? "backend restored" : "health ok");
-        } else {
-          throw new Error(result?.error || "Backend not reachable");
-        }
-      } catch (err) {
-        backendUp = false;
-        lastError = err instanceof Error ? err.message : String(err);
-        retryCount += 1;
-        recompute("health failed");
+        return await probePromise;
       } finally {
-        probeInFlight = false;
+        probePromise = null;
       }
-      return snapshot();
     }
 
     function scheduleReconnect() {
@@ -303,6 +521,7 @@
       if (base) apiBaseUrl = base;
       lastError = null;
       backendUp = true;
+      healthDegraded = false;
       return recompute("request ok");
     }
 
@@ -342,9 +561,34 @@
   const api = {
     MARKET_FRESH_MS,
     MAX_RECONNECT_RETRIES,
+    SW_WAKE_MAX_RETRIES,
+    SW_WAKE_BACKOFF_BASE_MS,
+    SW_WAKE_BACKOFF_MAX_MS,
+    INVALIDATED_RELOAD_COOLDOWN_MS,
+    API_FRESH_MS,
+    TICK_LIVE_MS,
+    TICK_STALE_MS,
     computeDataAge,
     isMarketFresh,
     isLiveDataAvailable,
+    classifyExtensionMessagingFailure,
+    isExtensionMessagingFailure,
+    isReceivingEndFailure,
+    isExtensionContextInvalidated,
+    parseStaleReloadLatch,
+    shouldAutoReloadForInvalidated,
+    nextStaleReloadLatch,
+    computeSwWakeBackoffMs,
+    shouldRetryReceivingEnd,
+    shouldOpenNewRealtimeSocket,
+    evaluateMarketHopHealth,
+    evaluateApiHopHealth,
+    evaluateVoiceComponentHealth,
+    evaluateChatStreamHealth,
+    canConfidentlyAnalyse,
+    isDeskOnline,
+    buildHopHealthSnapshot,
+    formatHopHealthPanel,
     computeBackoffMs,
     evaluateConnectionState,
     transitionState,

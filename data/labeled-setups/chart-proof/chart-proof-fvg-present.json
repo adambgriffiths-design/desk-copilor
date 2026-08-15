@@ -1,0 +1,29 @@
+{
+  "id": "chart-proof-fvg-present",
+  "ctx": {},
+  "state": {},
+  "label": {
+    "id": "chart-proof-fvg-present",
+    "timestamp": "2026-08-13T00:00:00Z",
+    "market_state_snapshot": "replay-fixtures/chart-proof-fvg-present",
+    "expected_observation": {
+      "fvg_status": "present",
+      "fvg_direction": "bullish",
+      "market_structure": "bullish",
+      "mss_direction": "none",
+      "displacement": "present",
+      "liquidity_swept": false,
+      "htf_bias_aligned": true,
+      "tradeable_bias": "bullish",
+      "data_quality": "good",
+      "session": "ny"
+    },
+    "adam_verdict": "WAIT",
+    "would_take": false,
+    "grade": "pass",
+    "why_taken": "Chart proof — bullish 1m FVG gap ≥ 3 pts unfilled in lookback",
+    "why_rejected_alternatives": "No trade verdict required — observation proof only",
+    "fvg_validity": "present_not_tradeable",
+    "notes": "Minimal OHLC fixture — FVG present (validity label not in observation engine)"
+  }
+}

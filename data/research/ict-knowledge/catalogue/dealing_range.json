@@ -1,0 +1,73 @@
+{
+  "concept_id": "dealing_range",
+  "name": "Dealing range (general ICT)",
+  "aliases": ["ICT dealing range", "dealing ranges"],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "dealing_range_buyside_then_sellside__s-iqN0h2Fgg__93",
+      "definition_text": "Whenever ICT refers to a dealing range: a range where price has taken out buy side, then reversed and taken out sell side (or the reverse polarity in later examples). That high-to-low (or low-to-high) span is the dealing range.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Both sides of liquidity taken (buy side and sell side) to establish the range extremes",
+        "Range usefulness framed after both sides are taken"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "General / multi-timeframe topical study — NOT specifically the NY first-hour dealing range",
+      "variations_note": "KEEP SEPARATE from first_hour_dealing_range (9:30–10:30 FHDR). This is the general dealing-range construct from the 2022 topical lecture.",
+      "confidence": "quoted",
+      "cue_start": "00:01:33.990",
+      "cue_end": "00:02:00.469",
+      "timestamp_sec": 93.99,
+      "source": {
+        "video_id": "s-iqN0h2Fgg",
+        "title": "2022 ICT Mentorship Topical Study - Dealing Ranges",
+        "url": "https://www.youtube.com/watch?v=s-iqN0h2Fgg",
+        "transcript_path": "data/ict-transcripts/raw/s-iqN0h2Fgg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "dealing_range_premium_discount_use__s-iqN0h2Fgg__1879",
+      "definition_text": "Once a dealing range is established (both buy side and sell side taken): with bearish bias, anticipate a run back up into premium for shorts; with the opposite case, anticipate trade back down into discount / discount array below the 50% of the dealing range, with FVGs as targets.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Dealing range already established (both sides taken)",
+        "Directional bias stated (lecture example: bearish)",
+        "Premium for shorts / discount arrays below equilibrium for continuation lower"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Intraday examples inside an established dealing range",
+      "variations_note": "Use-case / targeting layer on top of the definitional occurrence — keep separate from FHDR break→FPFVG continuation.",
+      "confidence": "quoted",
+      "cue_start": "00:31:11.350",
+      "cue_end": "00:32:14.549",
+      "timestamp_sec": 1871.35,
+      "source": {
+        "video_id": "s-iqN0h2Fgg",
+        "title": "2022 ICT Mentorship Topical Study - Dealing Ranges",
+        "url": "https://www.youtube.com/watch?v=s-iqN0h2Fgg",
+        "transcript_path": "data/ict-transcripts/raw/s-iqN0h2Fgg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "Possibly related to dealing-range / equilibrium framing in structure facts — audit before linking",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "Unknown — general dealing-range construct may not map 1:1 to FHDR",
+    "gap_vs_baseline_v2": "Do not conflate topical dealing-range with FHDR 9:30–10:30",
+    "hypothesis_id": "H_ICT_DEALING_RANGE_GENERAL",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Catalogue-only. No production implication from Batch2 extract."
+  },
+  "extraction_notes": "New concept file Batch2 from official topical lecture s-iqN0h2Fgg. Distinct from first_hour_dealing_range."
+}

@@ -69,15 +69,15 @@ async function main() {
     contractErrors: [],
   });
   assert(/do NOT guess/i.test(gatePrompt), "gate prompt forbids guessing");
-  assert(gatePrompt.includes("conditional language"), "gate prompt requires conditional tone");
+  assert(/STANCE|STRATEGIC BIAS/i.test(gatePrompt), "gate prompt requires decision envelope");
 
   const premature = "NASDAQ is bullish. Buy here.";
   const evidenceBased =
-    "I'm leaning bullish, but I'm not calling the entry yet. Higher-timeframe structure is bullish, sell-side liquidity has been taken, and we've got the displacement I want. I'm waiting for the retrace into the one-minute FVG. If that FVG fails, the long thesis is invalid.";
+    "STRATEGIC BIAS: daily — bullish (context only). TACTICAL BIAS: 1-minute — bullish. No conflict — stance is wait. EXECUTION: wait for retrace into the one-minute fair value gap. INVALIDATION: if that gap fails the long thesis is invalid. FACTS: sell-side liquidity taken. INTERPRETATION: one-sided bullish case, trigger not hit. DECISION: wait. Cites fvg.";
 
   assert(/\bbuy here\b/i.test(premature), "premature fixture is shallow");
-  assert(/leaning bullish/i.test(evidenceBased), "evidence fixture uses conditional lean");
-  assert(/not calling the entry/i.test(evidenceBased), "evidence fixture separates entry");
+  assert(/stance is wait/i.test(evidenceBased), "evidence fixture uses one stance");
+  assert(/wait for retrace/i.test(evidenceBased), "evidence fixture separates execution");
   assert(/invalid/i.test(evidenceBased), "evidence fixture defines invalidation");
 
   assert(

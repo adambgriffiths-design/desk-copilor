@@ -25,28 +25,19 @@ function spokenFromScaffold(
   const biasNote = expandTradingAbbreviations(
     ctx.biasStack.summary?.split(";")[0]?.trim() || ""
   );
-  const mss = ctx.structureFacts.mss;
+  const entryPhrase =
+    scaffold.entryStatus === "WAIT"
+      ? `WAIT FOR: ${scaffold.waitFor || scaffold.entryZone}`
+      : `entry zone ${scaffold.entryZone} is active now`;
 
   const parts: string[] = [];
   parts.push(`Nasdaq futures trading at ${price}`);
-  if (mss && !/\b\d{5}/.test(mss.description)) {
-    parts.push(expandTradingAbbreviations(mss.description));
-  }
-  if (biasNote) {
-    parts.push(`Bias is ${bias} — ${biasNote}`);
-  } else {
-    parts.push(`Bias is ${bias}`);
-  }
-  const entryPhrase =
-    scaffold.entryStatus === "WAIT"
-      ? "waiting for entry"
-      : "entry zone is active now";
-  parts.push(`Call is ${call}, ${entryPhrase}`);
-  if (scaffold.entryLabel.includes("inverted") && /potential sell/i.test(call)) {
-    parts.push("Entry uses inverted bullish fair value gap as resistance, not unfilled support");
-  } else if (scaffold.entryLabel.includes("inverted") && /potential buy/i.test(call)) {
-    parts.push("Entry uses inverted bearish fair value gap as support, not unfilled resistance");
-  }
+  parts.push(
+    biasNote
+      ? `MENTOR VIEW: higher-timeframe bias is ${bias} (daily context — not the trade) — ${biasNote}`
+      : `MENTOR VIEW: higher-timeframe bias is ${bias} (daily context — not the trade)`
+  );
+  parts.push(`TRADE DECISION: scaffold ${call}, ${entryPhrase}`);
   parts.push(`Target one ${target}`);
 
   return expandTradingAbbreviations(`${parts.join(". ")}.`);
@@ -95,7 +86,7 @@ export function buildScopedSpokenBrief(
       const f = fvgs[fvgs.length - 1];
       return `Most recent one-minute ${f.type} fair value gap ${f.bottom.toFixed(2)} to ${f.top.toFixed(2)}.`;
     }
-    return `No recent market structure shift in lookback. Tradeable bias is ${bias}.`;
+    return `No recent market structure shift in lookback. MENTOR VIEW: higher-timeframe bias is ${bias} (context — not the trade).`;
   }
 
   if (intent === "first_presented_fvg") {
@@ -129,9 +120,11 @@ export function buildVoiceSpokenBrief(
       ctx.biasStack.summary?.split(";")[0]?.trim() || ""
     );
     if (biasNote) {
-      return expandTradingAbbreviations(`Tradeable bias is ${bias} — ${biasNote}. Call is ${call}.`);
+      return expandTradingAbbreviations(
+        `MENTOR VIEW: higher-timeframe bias is ${bias} (daily context — not the trade) — ${biasNote}. TRADE DECISION: ${call === "stand aside" ? "FLAT or WAIT" : "confirm against structured stance"}.`
+      );
     }
-    return `Tradeable bias is ${bias}. Call is ${call}.`;
+    return `MENTOR VIEW: higher-timeframe bias is ${bias} (daily context — not the trade). TRADE DECISION: ${call === "stand aside" ? "FLAT or WAIT" : "confirm against structured stance"}.`;
   }
 
   if (isGenericChartQuestion(question)) {

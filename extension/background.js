@@ -32,6 +32,21 @@ function dbgBg(hypothesisId, location, message, data) {
     data: data || {},
     timestamp: Date.now(),
   };
+  // #region agent log
+  fetch("http://127.0.0.1:7739/ingest/47d0d229-274e-48ee-bfd4-654ac892ba81", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "9c9bf7" },
+    body: JSON.stringify({
+      sessionId: "9c9bf7",
+      runId: "berlin-ext-1",
+      hypothesisId,
+      location,
+      message,
+      data: data || {},
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
   const body = JSON.stringify(payload);
   const headers = { "Content-Type": "application/json", "X-Debug-Session-Id": "600bac" };
   fetch("http://127.0.0.1:7740/", {
@@ -51,7 +66,10 @@ function dbgBg(hypothesisId, location, message, data) {
 async function apiFetchTracked(path, options = {}) {
   try {
     const data = await apiFetch(path, options);
-    connectionManager.recordRequestSuccess(cachedBase);
+    // Casual warm/session must not mint desk ONLINE via lastSuccessfulRequest.
+    if (options.trackSuccess !== false) {
+      connectionManager.recordRequestSuccess(cachedBase);
+    }
     return data;
   } catch (err) {
     connectionManager.recordRequestFailure(err);
@@ -93,13 +111,111 @@ async function reloadTradingViewTabs() {
   }
 }
 
-chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === "install" || details.reason === "update") {
-    ensureVercelApiBase().catch(() => {});
-    notifyTradingViewTabsOverlaySync().catch(() => {});
-    reloadTradingViewTabs().catch(() => {});
+const ISOLATED_SCRIPTS = [
+  "plain-language.js",
+  "desk-persona.js",
+  "session-context.js",
+  "connection-state.js",
+  "request-trace.js",
+  "weather-local.js",
+  "casual-chat.js",
+  "pending-request.js",
+  "transcription-guard.js",
+  "chart-intent.js",
+  "desk-route-intent.js",
+  "voice-context-fix.js",
+  "voice-interpret.js",
+  "voice-emotion.js",
+  "voice-quick-reply.js",
+  "voice-spoken-sanitize.js",
+  "voice-latency.js",
+  "voice-realtime.js",
+  "voice.js",
+  "desk-memory.js",
+  "level-toggles.js",
+  "chart-draw.js",
+  "chart-price.js",
+  "chart-snapshot.js",
+  "desk-ui-components.js",
+  "desk-mock-analysis.js",
+  "desk-verdict-ui.js",
+  "desk-tracker.js",
+  "content.js",
+];
+
+async function reinjectDeskScripts() {
+  const patterns = ["*://www.tradingview.com/*", "*://*.tradingview.com/*"];
+  const seen = new Set();
+  let n = 0;
+  for (const url of patterns) {
+    const tabs = await chrome.tabs.query({ url });
+    for (const tab of tabs) {
+      if (!tab.id || seen.has(tab.id)) continue;
+      seen.add(tab.id);
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["tv-bridge.js"],
+          world: "MAIN",
+        });
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ISOLATED_SCRIPTS,
+          world: "ISOLATED",
+        });
+        n += 1;
+      } catch (e) {
+        dbgBg("L", "background.js:reinjectDeskScripts", "fail", {
+          tabId: tab.id,
+          err: e instanceof Error ? e.message : String(e),
+        });
+      }
+    }
   }
+  dbgBg("L", "background.js:reinjectDeskScripts", "done", { tabs: n });
+}
+
+chrome.runtime.onInstalled.addListener((details) => {
+  ensureApiBase().catch(() => {});
+  notifyTradingViewTabsOverlaySync().catch(() => {});
+  if (details.reason === "install" || details.reason === "update") {
+    reloadTradingViewTabs().catch(() => {});
+  } else {
+    reinjectDeskScripts().catch(() => {});
+  }
+  dbgBg("L", "background.js:onInstalled", "installed", { reason: details.reason });
 });
+
+chrome.runtime.onStartup.addListener(() => {
+  ensureApiBase().catch(() => {});
+});
+
+// Pin preview apiBaseUrl as soon as the service worker wakes (Options sync storage).
+ensureApiBase().catch(() => {});
+
+/** Prefer explicit pin over any stale in-memory cachedBase (e.g. leftover localhost). */
+async function resolveRequestBase(requested) {
+  const want = typeof requested === "string" ? normalizeBase(requested) : "";
+  if (want && isAllowedBase(want)) return want;
+  const custom = await getStoredCustomBase();
+  if (custom) {
+    if (cachedBase === custom) return custom;
+    return resolveApiBase({ force: cachedBase != null && cachedBase !== custom });
+  }
+  // AUTO: never short-circuit on sticky cachedBase (hung local health-ok once).
+  // resolveApiBase probes localhost and only trusts recent Vercel via HEALTH_TTL.
+  return resolveApiBase();
+}
+
+/** Drop sticky AUTO cache after stream hard-fail / timeout so next turn re-probes. */
+function clearStickyBaseAfterStreamFailure(base) {
+  const b = normalizeBase(base || cachedBase);
+  if (!b) {
+    clearApiCache();
+    return;
+  }
+  if (isLocalBase(b) || isVercelBase(b)) clearApiCache();
+}
 
 /** Keep service worker alive while a TradingView tab has the panel open. */
 chrome.runtime.onConnect.addListener((port) => {
@@ -112,8 +228,11 @@ chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== "desk-copilot-chat-stream") return;
 
   let portOpen = true;
+  const ac = new AbortController();
+  const timeoutId = setTimeout(() => ac.abort(), 90000);
   port.onDisconnect.addListener(() => {
     portOpen = false;
+    ac.abort();
   });
 
   function safePortPost(message) {
@@ -129,12 +248,24 @@ chrome.runtime.onConnect.addListener((port) => {
 
   port.onMessage.addListener(async (msg) => {
     if (msg.type !== "START") return;
+    const reqId = msg.requestId || null;
+    const t0 = Date.now();
+    dbgBg("C", "background.js:chat-stream", "received", { reqId, forceMarket: msg.forceMarket === true });
     try {
-      const base = cachedBase && isVercelBase(cachedBase) ? cachedBase : await resolveApiBase();
+      const base = await resolveRequestBase(msg.apiBase);
+      dbgBg("C", "background.js:chat-stream", "api-start", { reqId, base, ms: Date.now() - t0 });
+      // #region agent log
+      dbgBg("A", "background.js:chat-stream", "berlin-debug-base", {
+        reqId,
+        base,
+        q: String(msg.messages?.at?.(-1)?.content || "").slice(0, 80),
+        casualOnly: msg.casualOnly === true,
+      });
+      // #endregion
       const res = await fetch(`${base}/api/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(90000),
+        signal: ac.signal,
         body: JSON.stringify({
           messages: msg.messages,
           symbol: msg.symbol,
@@ -142,21 +273,50 @@ chrome.runtime.onConnect.addListener((port) => {
           voiceInput: msg.voiceInput === true,
           voiceSttClean: msg.voiceSttClean === true,
           casualOnly: msg.casualOnly === true,
-          chartLastPrice: msg.chartLastPrice,
+          chartLastPrice: msg.historicalFixture ? undefined : msg.chartLastPrice,
           forceMarket: msg.forceMarket === true,
           memory: msg.memory,
+          conversationTurn: msg.conversationTurn,
+          conversationId: msg.conversationId,
+          intent: msg.intent,
+          marketSnapshotId: msg.marketSnapshotId,
+          requestId: msg.requestId,
+          ...(msg.historicalFixture
+            ? { historicalFixture: msg.historicalFixture }
+            : {}),
         }),
       });
 
       const ct = res.headers.get("content-type") || "";
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
+        // #region agent log
+        dbgBg("A", "background.js:chat-stream", "berlin-debug-http-fail", {
+          reqId,
+          base,
+          status: res.status,
+          error: String(err.error || "").slice(0, 160),
+          q: String(msg.messages?.at?.(-1)?.content || "").slice(0, 80),
+        });
+        // #endregion
         connectionManager.recordRequestFailure(new Error(err.error || `HTTP ${res.status}`));
+        clearStickyBaseAfterStreamFailure(base);
         safePortPost({ type: "error", error: err.error || `HTTP ${res.status}` });
         safePortPost({ type: "done" });
         return;
       }
       connectionManager.recordRequestSuccess(base);
+      dbgBg("C", "background.js:chat-stream", "api-response", {
+        reqId,
+        ms: Date.now() - t0,
+        ct: ct.slice(0, 40),
+        json: ct.includes("application/json"),
+        // #region agent log
+        base,
+        status: res.status,
+        q: String(msg.messages?.at?.(-1)?.content || "").slice(0, 80),
+        // #endregion
+      });
 
       if (ct.includes("application/json")) {
         const data = await res.json();
@@ -168,6 +328,7 @@ chrome.runtime.onConnect.addListener((port) => {
       const reader = res.body?.getReader();
       if (!reader) {
         safePortPost({ type: "error", error: "No stream body" });
+        safePortPost({ type: "done" });
         return;
       }
 
@@ -197,10 +358,14 @@ chrome.runtime.onConnect.addListener((port) => {
       safePortPost({ type: "done" });
     } catch (e) {
       connectionManager.recordRequestFailure(e);
+      clearStickyBaseAfterStreamFailure(cachedBase);
       safePortPost({
         type: "error",
         error: e instanceof Error ? e.message : String(e),
       });
+      safePortPost({ type: "done" });
+    } finally {
+      clearTimeout(timeoutId);
     }
   });
 });
@@ -314,8 +479,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       .catch((e) => sendResponse({ error: e.message }));
     return true;
   }
+  if (msg.type === "GET_API_BASE_DEBUG") {
+    getApiBaseDebugSnapshot()
+      .then((snap) => sendResponse(snap))
+      .catch((e) => sendResponse({ error: e.message }));
+    return true;
+  }
   if (msg.type === "TTS") {
-    Promise.resolve(cachedBase && isVercelBase(cachedBase) ? cachedBase : resolveApiBase())
+    Promise.resolve(resolveRequestBase())
       .then(async (base) => {
         const res = await fetch(`${base}/api/voice/tts`, {
           method: "POST",
@@ -430,7 +601,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (msg.type === "PREPARE_VERDICT") {
-    apiFetchTracked("/api/warm", { timeoutMs: 15000 }).catch(() => {});
+    apiFetchTracked("/api/warm", { timeoutMs: 15000, trackSuccess: false }).catch(() => {});
     chrome.storage.session
       .set({ dcVerdictRequest: { symbol: msg.symbol || "MNQ1!", ts: Date.now() } })
       .then(() => sendResponse({ ok: true }))
@@ -466,6 +637,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   if (msg.type === "VERDICT_ASYNC") {
     const tabId = sender.tab?.id;
+    const reqId = msg.requestId || null;
+    const t0 = Date.now();
+    dbgBg("C", "background.js:VERDICT_ASYNC", "received", { reqId, tabId, hasSnapshot: Boolean(msg.chartSnapshot), hasImage: Boolean(msg.base64) });
     deliverVerdict(tabId, { status: "analyzing" }).catch(() => {});
     apiFetchTracked("/api/live-verdict", {
       method: "POST",
@@ -479,15 +653,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         chartLastPrice: msg.chartLastPrice,
         chartSnapshot: msg.chartSnapshot,
         debug: msg.debug === true,
+        requestId: reqId,
       }),
       timeoutMs: 120000,
     })
-      .then((data) => deliverVerdict(tabId, { data, ts: Date.now() }))
+      .then((data) => {
+        dbgBg("C", "background.js:VERDICT_ASYNC", "complete", {
+          reqId,
+          ms: Date.now() - t0,
+          hasSpoken: Boolean(data?.spokenBrief || data?.verdict),
+        });
+        deliverVerdict(tabId, { data, ts: Date.now() });
+      })
       .catch((e) => {
         const message = e instanceof Error ? e.message : String(e);
+        dbgBg("E", "background.js:VERDICT_ASYNC", "error", { reqId, ms: Date.now() - t0, message: message.slice(0, 160) });
         deliverVerdict(tabId, { error: message, ts: Date.now() });
       });
-    sendResponse({ ok: true });
+    sendResponse({ ok: true, requestId: reqId });
     return true;
   }
   if (msg.type === "LEVELS") {
@@ -521,11 +704,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       body,
       signal: AbortSignal.timeout(1500),
     }).catch(() => {});
+    const staleRun = msg.payload?.runId;
+    if (staleRun === "ticker-3" && !globalThis.__dcStaleReloadArmed) {
+      globalThis.__dcStaleReloadArmed = true;
+      dbgBg("L", "background.js:DEBUG_LOG", "stale-build-reload", { runId: staleRun });
+      try {
+        chrome.runtime.reload();
+      } catch {
+        /* ignore */
+      }
+    }
     sendResponse({ ok: true });
     return false;
   }
   if (msg.type === "WARM") {
-    apiFetchTracked("/api/warm", { timeoutMs: 12000 })
+    apiFetchTracked("/api/warm", { timeoutMs: 12000, trackSuccess: false })
       .then(() => sendResponse({ ok: true }))
       .catch((e) => sendResponse({ ok: false, error: e.message }));
     return true;
@@ -536,13 +729,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         ? connectionManager.forceReconnect()
         : connectionManager.probeBackend(false);
     run
-      .then((snap) => {
+      .then(async (snap) => {
+        const debug = await getApiBaseDebugSnapshot().catch(() => null);
         sendResponse({
           ok: snap.backendUp,
           base: snap.apiBaseUrl,
           version: snap.backendVersion,
+          backendKind: snap.apiBaseUrl ? classifyBackendKind(snap.apiBaseUrl) : null,
           connectionState: snap.state,
           diagnostics: snap,
+          debug,
           statusLine: DeskCopilotConnection.formatConnectionStatus(snap),
           liveDataAvailable: DeskCopilotConnection.isLiveDataAvailable(snap),
         });
@@ -572,7 +768,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return false;
   }
   if (msg.type === "STATS") {
-    apiFetchTracked("/api/session", { timeoutMs: 120000 })
+    apiFetchTracked("/api/session", { timeoutMs: 120000, trackSuccess: false })
       .then((data) => sendResponse(data))
       .catch((e) => sendResponse({ error: e.message }));
     return true;

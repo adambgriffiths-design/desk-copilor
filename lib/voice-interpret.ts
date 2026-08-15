@@ -38,6 +38,10 @@ Output ONLY the corrected sentence. No quotes, no explanation.`;
 export const CANONICAL_RULE_FIXES: [RegExp, string][] = [
   [/\bem en q\b/gi, "MNQ"],
   [/\bm and q\b/gi, "MNQ"],
+  [/\bwhats\b/gi, "what's"],
+  [/\bwhos\b/gi, "who's"],
+  [/\bwheres\b/gi, "where's"],
+  [/\bhows\b/gi, "how's"],
   [/\bf v g\b/gi, "fair value gap"],
   [/\bo r g\b/gi, "opening range gap"],
   [/\bwhat do you see on the char\b/gi, "what do you see on the chart"],

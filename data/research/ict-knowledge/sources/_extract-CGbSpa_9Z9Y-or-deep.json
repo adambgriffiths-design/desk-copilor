@@ -1,0 +1,871 @@
+{
+  "video_id": "CGbSpa_9Z9Y",
+  "cues": 788,
+  "hit_clusters": 83,
+  "hits": [
+    {
+      "i": 0,
+      "start": "00:00:01.199",
+      "end": "00:00:04.010",
+      "sec": 1.199,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "hey folks welcome back this is our first hey folks welcome back this is our first hey folks welcome back this is our first lesson in ICT bond trading Concepts lesson in ICT bond trading Concepts"
+    },
+    {
+      "i": 5,
+      "start": "00:00:10.370",
+      "end": "00:00:10.380",
+      "sec": 10.37,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "lesson in ICT bond trading Concepts lesson in ICT bond trading Concepts again we're dealing with commodities so again we're dealing with commodities so again we're dealing with commodities so it's very important that I remind you it's very important that I remind you it's very important that I remind you that I'm not a licensed CTA"
+    },
+    {
+      "i": 14,
+      "start": "00:00:18.480",
+      "end": "00:00:21.050",
+      "sec": 18.48,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "this is not trade advice and everything that's being referred to in this month's that's being referred to in this month's that's being referred to in this month's content and in these lessons are content and in these lessons are content and in these lessons are referred to as a paper trade only okay June 2017 ICT mentorship ICT bond"
+    },
+    {
+      "i": 17,
+      "start": "00:00:28.320",
+      "end": "00:00:32.510",
+      "sec": 28.32,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "content and in these lessons are content and in these lessons are referred to as a paper trade only okay June 2017 ICT mentorship ICT bond okay June 2017 ICT mentorship ICT bond okay June 2017 ICT mentorship ICT bond trading lesson one Basics and opening trading lesson one Basics and opening"
+    },
+    {
+      "i": 22,
+      "start": "00:00:46.020",
+      "end": "00:00:48.049",
+      "sec": 46.02,
+      "matched": [
+        "opening\\s*range",
+        "bond",
+        "treasur"
+      ],
+      "snippet": "trading lesson one Basics and opening trading lesson one Basics and opening range concept okay when I refer to the treasury bond okay when I refer to the treasury bond okay when I refer to the treasury bond what I'm referring to specifically is what I'm referring to specifically is"
+    },
+    {
+      "i": 31,
+      "start": "00:00:59.510",
+      "end": "00:00:59.520",
+      "sec": 59.51,
+      "matched": [
+        "bond",
+        "treasur"
+      ],
+      "snippet": "Contract Contract and the trade symbol for this is z b and and the trade symbol for this is z b and and the trade symbol for this is z b and it's for the third year treasury bond it's for the third year treasury bond it's for the third year treasury bond and the trading session that these"
+    },
+    {
+      "i": 39,
+      "start": "00:01:08.030",
+      "end": "00:01:08.040",
+      "sec": 68.03,
+      "matched": [
+        "8\\s*[:\\.]?\\s*20",
+        "new\\s+york"
+      ],
+      "snippet": "Concepts I'm going to be teaching this Concepts I'm going to be teaching this week are primarily used for week are primarily used for week are primarily used for an analysis on the New York session an analysis on the New York session an analysis on the New York session and it begins at 8 20 a.m to 3 P.M New"
+    },
+    {
+      "i": 45,
+      "start": "00:01:19.799",
+      "end": "00:01:23.030",
+      "sec": 79.799,
+      "matched": [
+        "8\\s*[:\\.]?\\s*20",
+        "bond",
+        "treasur",
+        "new\\s+york"
+      ],
+      "snippet": "and it begins at 8 20 a.m to 3 P.M New and it begins at 8 20 a.m to 3 P.M New York time and the contract delivery months for the and the contract delivery months for the and the contract delivery months for the treasury bond 30-year note treasury bond 30-year note"
+    },
+    {
+      "i": 76,
+      "start": "00:02:02.270",
+      "end": "00:02:02.280",
+      "sec": 122.27,
+      "matched": [
+        "treasur"
+      ],
+      "snippet": "then the last two digits of the trading then the last two digits of the trading year year year or an example z b u17 for September or an example z b u17 for September or an example z b u17 for September 2017's contract of the 30-year treasury"
+    },
+    {
+      "i": 82,
+      "start": "00:02:11.210",
+      "end": "00:02:11.220",
+      "sec": 131.21,
+      "matched": [
+        "bond",
+        "treasur"
+      ],
+      "snippet": "2017's contract of the 30-year treasury 2017's contract of the 30-year treasury bond bond bond you can see that to the right you can see that to the right you can see that to the right in this image"
+    },
+    {
+      "i": 90,
+      "start": "00:02:19.790",
+      "end": "00:02:19.800",
+      "sec": 139.79,
+      "matched": [
+        "bond",
+        "treasur"
+      ],
+      "snippet": "treasury bond September contract zbu17 treasury bond September contract zbu17 at the top at the top at the top it trades on the Chicago Board of Trade it trades on the Chicago Board of Trade it trades on the Chicago Board of Trade exchange and it is a Futures Contract"
+    },
+    {
+      "i": 109,
+      "start": "00:02:54.660",
+      "end": "00:02:57.170",
+      "sec": 174.66,
+      "matched": [
+        "opening\\s*range",
+        "bond"
+      ],
+      "snippet": "a full handle or full figure move equals a full handle or full figure move equals 32 ticks or is referred to as 30 seconds 32 ticks movement equals one thousand 32 ticks movement equals one thousand 32 ticks movement equals one thousand dollars per contract okay Bond opening range concept talking"
+    },
+    {
+      "i": 112,
+      "start": "00:03:05.099",
+      "end": "00:03:08.270",
+      "sec": 185.099,
+      "matched": [
+        "opening\\s*range",
+        "bond"
+      ],
+      "snippet": "32 ticks movement equals one thousand 32 ticks movement equals one thousand dollars per contract okay Bond opening range concept talking okay Bond opening range concept talking okay Bond opening range concept talking about nostalgic things here folks about nostalgic things here folks"
+    },
+    {
+      "i": 119,
+      "start": "00:03:15.649",
+      "end": "00:03:15.659",
+      "sec": 195.649,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "these are the things that I cut my teeth these are the things that I cut my teeth on as a commodity Trader years and years on as a commodity Trader years and years on as a commodity Trader years and years ago ago ago all right so when we look at the Bond"
+    },
+    {
+      "i": 127,
+      "start": "00:03:24.649",
+      "end": "00:03:24.659",
+      "sec": 204.649,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "bond",
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "Market opening range concept the highest Market opening range concept the highest volume is going to be seen between 8 AM volume is going to be seen between 8 AM volume is going to be seen between 8 AM and 9 30 a.m New York time true day for the bond market is 8 A.M to true day for the bond market is 8 A.M to"
+    },
+    {
+      "i": 130,
+      "start": "00:03:32.809",
+      "end": "00:03:32.819",
+      "sec": 212.809,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "bond",
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "volume is going to be seen between 8 AM and 9 30 a.m New York time true day for the bond market is 8 A.M to true day for the bond market is 8 A.M to true day for the bond market is 8 A.M to 3 P.M New York time 3 P.M New York time 3 P.M New York time the opening range begins at 8 A.M New"
+    },
+    {
+      "i": 136,
+      "start": "00:03:46.260",
+      "end": "00:03:50.210",
+      "sec": 226.26,
+      "matched": [
+        "opening\\s*range",
+        "bond",
+        "new\\s+york"
+      ],
+      "snippet": "the opening range begins at 8 A.M New the opening range begins at 8 A.M New York time and ends 9 A.M New York time narrow your focus the opening range between 8 AM and 9 A.M the opening range between 8 AM and 9 A.M the opening range between 8 AM and 9 A.M tends to create the bond market high or"
+    },
+    {
+      "i": 140,
+      "start": "00:03:54.949",
+      "end": "00:03:54.959",
+      "sec": 234.949,
+      "matched": [
+        "opening\\s*range",
+        "bond",
+        "high\\s+or\\s+low",
+        "fair\\s+value"
+      ],
+      "snippet": "the opening range between 8 AM and 9 A.M the opening range between 8 AM and 9 A.M tends to create the bond market high or tends to create the bond market high or tends to create the bond market high or low of the day it can be a run-on stops low of the day it can be a run-on stops low of the day it can be a run-on stops or a fair value setup in other words a"
+    },
+    {
+      "i": 148,
+      "start": "00:04:04.070",
+      "end": "00:04:04.080",
+      "sec": 244.07,
+      "matched": [
+        "fair\\s+value"
+      ],
+      "snippet": "bullish order block or a bearish order bullish order block or a bearish order block or trade down until liquidity void block or trade down until liquidity void block or trade down until liquidity void or fill in a fair value Gap or fill in a fair value Gap or fill in a fair value Gap it is also the location for liquidity"
+    },
+    {
+      "i": 157,
+      "start": "00:04:18.289",
+      "end": "00:04:18.299",
+      "sec": 258.289,
+      "matched": [
+        "bond",
+        "treasur"
+      ],
+      "snippet": "pools to build around for the Stock Market opening to be rated let's take a look at a couple examples let's take a look at a couple examples let's take a look at a couple examples here here here look up the treasury bond"
+    },
+    {
+      "i": 171,
+      "start": "00:04:34.129",
+      "end": "00:04:34.139",
+      "sec": 274.129,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "chart and I have the 8 A.M to 9 A.M chart and I have the 8 A.M to 9 A.M delineated here delineated here delineated here so in this area what we look for is the so in this area what we look for is the so in this area what we look for is the opening range or the high and the low"
+    },
+    {
+      "i": 177,
+      "start": "00:04:45.120",
+      "end": "00:04:46.670",
+      "sec": 285.12,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "opening range or the high and the low opening range or the high and the low between those two delineations in time as you can see here as you can see here as you can see here we have a block of price action we have a block of price action"
+    },
+    {
+      "i": 182,
+      "start": "00:04:56.160",
+      "end": "00:04:59.930",
+      "sec": 296.16,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "we have a block of price action we have a block of price action this is our opening range we have our opening range low our opening Range High and price trades down below the low that and price trades down below the low that"
+    },
+    {
+      "i": 184,
+      "start": "00:05:06.900",
+      "end": "00:05:09.530",
+      "sec": 306.9,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "we have our opening range low our opening Range High and price trades down below the low that and price trades down below the low that and price trades down below the low that was formed between 8 AM and 9 A.M this is a stop run and a potential"
+    },
+    {
+      "i": 188,
+      "start": "00:05:16.550",
+      "end": "00:05:16.560",
+      "sec": 316.55,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "and price trades down below the low that was formed between 8 AM and 9 A.M this is a stop run and a potential this is a stop run and a potential this is a stop run and a potential reversal reversal reversal notice the highest volume of the day is"
+    },
+    {
+      "i": 194,
+      "start": "00:05:27.360",
+      "end": "00:05:30.529",
+      "sec": 327.36,
+      "matched": [
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "notice the highest volume of the day is notice the highest volume of the day is between 8 AM and 9 A.M notice also on the lower low that was notice also on the lower low that was notice also on the lower low that was created Post 9 A.M New York time created Post 9 A.M New York time"
+    },
+    {
+      "i": 199,
+      "start": "00:05:35.450",
+      "end": "00:05:35.460",
+      "sec": 335.45,
+      "matched": [
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "created Post 9 A.M New York time created Post 9 A.M New York time that lower low was seen with lower that lower low was seen with lower that lower low was seen with lower volume volume volume so there was massive buying taking place"
+    },
+    {
+      "i": 207,
+      "start": "00:05:46.129",
+      "end": "00:05:46.139",
+      "sec": 346.129,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "right after 8 A.M right after 8 A.M but as price made that lower low it did but as price made that lower low it did but as price made that lower low it did not see a large influx of volume all not see a large influx of volume all not see a large influx of volume all we're seeing there is a movement towards"
+    },
+    {
+      "i": 219,
+      "start": "00:05:58.610",
+      "end": "00:05:58.620",
+      "sec": 358.61,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "buying early buying early just having a stop loss too close to the just having a stop loss too close to the just having a stop loss too close to the marketplace marketplace marketplace this is a volume Divergence price making"
+    },
+    {
+      "i": 227,
+      "start": "00:06:07.070",
+      "end": "00:06:07.080",
+      "sec": 367.07,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "a lower low that lower low should have a lower low that lower low should have been met with a higher been met with a higher been met with a higher bar on volume this is a sign of bar on volume this is a sign of bar on volume this is a sign of impending weakness for the down move so"
+    },
+    {
+      "i": 234,
+      "start": "00:06:15.360",
+      "end": "00:06:19.969",
+      "sec": 375.36,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "impending weakness for the down move so that means there's no more selling that means there's no more selling that means there's no more selling pressure it's basically a run-on stops price moves higher price moves higher price moves higher find some support at the opening range"
+    },
+    {
+      "i": 238,
+      "start": "00:06:25.550",
+      "end": "00:06:25.560",
+      "sec": 385.55,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "price moves higher price moves higher find some support at the opening range find some support at the opening range find some support at the opening range as well as well as well a big Range High"
+    },
+    {
+      "i": 251,
+      "start": "00:06:47.629",
+      "end": "00:06:47.639",
+      "sec": 407.629,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "okay another example okay another example we have our 8 to 9 A.M block of price we have our 8 to 9 A.M block of price we have our 8 to 9 A.M block of price action that we needed action that we needed action that we needed let's start opening range"
+    },
+    {
+      "i": 259,
+      "start": "00:06:55.670",
+      "end": "00:06:55.680",
+      "sec": 415.67,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "again our opening range is defined high again our opening range is defined high and low and low and low opening range low we have a order block last two down we have a order block last two down"
+    },
+    {
+      "i": 264,
+      "start": "00:07:05.029",
+      "end": "00:07:05.039",
+      "sec": 425.029,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "we have a order block last two down we have a order block last two down closed candles inside of the opening closed candles inside of the opening closed candles inside of the opening range range range and the opening Range High as you can"
+    },
+    {
+      "i": 272,
+      "start": "00:07:14.390",
+      "end": "00:07:14.400",
+      "sec": 434.39,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "see price trades down into see price trades down into the bullish order block the bullish order block the bullish order block it around the notion of it around the notion of it around the notion of the 8 AM to 9 A.M opening range concept"
+    },
+    {
+      "i": 278,
+      "start": "00:07:22.610",
+      "end": "00:07:22.620",
+      "sec": 442.61,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "the 8 AM to 9 A.M opening range concept the 8 AM to 9 A.M opening range concept and price rallies away and price rallies away and price rallies away basis of a full shorter block basis of a full shorter block basis of a full shorter block and notice as the price makes the higher"
+    },
+    {
+      "i": 286,
+      "start": "00:07:33.770",
+      "end": "00:07:33.780",
+      "sec": 453.77,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "high high going into the 11 o'clock hour going into the 11 o'clock hour going into the 11 o'clock hour volume volume volume was declining"
+    },
+    {
+      "i": 292,
+      "start": "00:07:42.599",
+      "end": "00:07:45.290",
+      "sec": 462.599,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "was declining was declining as price made a new high at 154.21 price makes a subsequent decline backed price makes a subsequent decline backed price makes a subsequent decline backed out into the opening range and then goes out into the opening range and then goes"
+    },
+    {
+      "i": 297,
+      "start": "00:07:52.680",
+      "end": "00:07:55.790",
+      "sec": 472.68,
+      "matched": [
+        "opening\\s*range",
+        "volume"
+      ],
+      "snippet": "out into the opening range and then goes out into the opening range and then goes into consolidation the volume Divergence here the volume Divergence here the volume Divergence here was a early sign that the rally up into was a early sign that the rally up into"
+    },
+    {
+      "i": 304,
+      "start": "00:08:04.670",
+      "end": "00:08:04.680",
+      "sec": 484.67,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "the 15421 the 15421 was a weak move was a weak move was a weak move therefore therefore therefore volume precedes price"
+    },
+    {
+      "i": 310,
+      "start": "00:08:13.730",
+      "end": "00:08:13.740",
+      "sec": 493.73,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "volume precedes price volume precedes price weakness was seen after 15421 had posted weakness was seen after 15421 had posted weakness was seen after 15421 had posted ideally volume should have had a higher ideally volume should have had a higher ideally volume should have had a higher bar"
+    },
+    {
+      "i": 319,
+      "start": "00:08:23.869",
+      "end": "00:08:23.879",
+      "sec": 503.869,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "on its highest high up moving in the so now we're working with commodities we so now we're working with commodities we so now we're working with commodities we have a more accurate depiction of buying have a more accurate depiction of buying have a more accurate depiction of buying and selling pressure with real volume"
+    },
+    {
+      "i": 327,
+      "start": "00:08:33.469",
+      "end": "00:08:33.479",
+      "sec": 513.469,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "the vertical lines down here the green the vertical lines down here the green blue and dark blue lines are blue and dark blue lines are blue and dark blue lines are delineations of volume okay another example we have our 8 to 9 am delineation"
+    },
+    {
+      "i": 330,
+      "start": "00:08:42.659",
+      "end": "00:08:46.430",
+      "sec": 522.659,
+      "matched": [
+        "opening\\s*range",
+        "volume"
+      ],
+      "snippet": "blue and dark blue lines are delineations of volume okay another example we have our 8 to 9 am delineation we have our 8 to 9 am delineation we have our 8 to 9 am delineation our opening range opening range whoa"
+    },
+    {
+      "i": 333,
+      "start": "00:08:51.180",
+      "end": "00:08:53.810",
+      "sec": 531.18,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "we have our 8 to 9 am delineation we have our 8 to 9 am delineation our opening range opening range whoa opening range whoa opening range whoa inside the opening range the last down inside the opening range the last down"
+    },
+    {
+      "i": 351,
+      "start": "00:09:21.110",
+      "end": "00:09:21.120",
+      "sec": 561.11,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "and we have the secondary one either one would fit the bill this is a bullish order block we expect this is a bullish order block we expect this is a bullish order block we expect a rally a rally a rally and notice the largest volume was seen"
+    },
+    {
+      "i": 359,
+      "start": "00:09:29.329",
+      "end": "00:09:29.339",
+      "sec": 569.329,
+      "matched": [
+        "new\\s+york"
+      ],
+      "snippet": "again at between 8 AM and 9 A.M New York again at between 8 AM and 9 A.M New York time time time and price moves up to run and price moves up to run and price moves up to run into the 15426 level but notice that"
+    },
+    {
+      "i": 369,
+      "start": "00:09:43.850",
+      "end": "00:09:43.860",
+      "sec": 583.85,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "look at the high that was formed look at the high that was formed report before 2 P.M report before 2 P.M report before 2 P.M that high that high that high that volume Spike there was not seen"
+    },
+    {
+      "i": 377,
+      "start": "00:09:53.269",
+      "end": "00:09:53.279",
+      "sec": 593.269,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "with a greater volume with a greater volume measuring later on in the day in the measuring later on in the day in the measuring later on in the day in the evening time so when we traded the 15426 evening time so when we traded the 15426 evening time so when we traded the 15426 it was done so on light volume but it"
+    },
+    {
+      "i": 383,
+      "start": "00:10:03.779",
+      "end": "00:10:06.889",
+      "sec": 603.779,
+      "matched": [
+        "opening\\s*range",
+        "volume"
+      ],
+      "snippet": "it was done so on light volume but it it was done so on light volume but it also reached above with the Divergence in volume it reached with the Divergence in volume it reached with the Divergence in volume it reached above the opening range above the opening range"
+    },
+    {
+      "i": 390,
+      "start": "00:10:13.370",
+      "end": "00:10:13.380",
+      "sec": 613.37,
+      "matched": [
+        "fair\\s+value"
+      ],
+      "snippet": "hi hi so it ran the stops above that range and so it ran the stops above that range and so it ran the stops above that range and failed to go any higher and traded down failed to go any higher and traded down failed to go any higher and traded down and closed in the fair value Gap"
+    },
+    {
+      "i": 396,
+      "start": "00:10:21.949",
+      "end": "00:10:21.959",
+      "sec": 621.949,
+      "matched": [
+        "fair\\s+value"
+      ],
+      "snippet": "and closed in the fair value Gap and closed in the fair value Gap seen at the 154 10 level seen at the 154 10 level seen at the 154 10 level so we have a blending of things that so we have a blending of things that so we have a blending of things that we've already learned about in the Forex"
+    },
+    {
+      "i": 404,
+      "start": "00:10:32.570",
+      "end": "00:10:32.580",
+      "sec": 632.57,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "portion of this mentorship but now we're portion of this mentorship but now we're blending other things with specific blending other things with specific blending other things with specific commodities commodities commodities now when we look at the opening range"
+    },
+    {
+      "i": 412,
+      "start": "00:10:41.389",
+      "end": "00:10:41.399",
+      "sec": 641.389,
+      "matched": [
+        "opening\\s*range",
+        "bond"
+      ],
+      "snippet": "for bonds what I like to do is I like to for bonds what I like to do is I like to define the opening range with define the opening range with define the opening range with much like I did the Asian range I look much like I did the Asian range I look much like I did the Asian range I look for the bodies but also incorporate"
+    },
+    {
+      "i": 420,
+      "start": "00:10:50.930",
+      "end": "00:10:50.940",
+      "sec": 650.93,
+      "matched": [
+        "new\\s+york"
+      ],
+      "snippet": "wicks and then I also incorporate wicks and then I also incorporate previous highs and lows that are just to previous highs and lows that are just to previous highs and lows that are just to the left of eight to nine a.m New York the left of eight to nine a.m New York the left of eight to nine a.m New York time"
+    },
+    {
+      "i": 457,
+      "start": "00:11:41.090",
+      "end": "00:11:41.100",
+      "sec": 701.09,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "in Forex we're looking for that same in Forex we're looking for that same General theme occur with the 8 to 9 A.M General theme occur with the 8 to 9 A.M General theme occur with the 8 to 9 A.M time period time period time period in the bond market"
+    },
+    {
+      "i": 465,
+      "start": "00:11:50.810",
+      "end": "00:11:50.820",
+      "sec": 710.81,
+      "matched": [
+        "8\\s*[:\\.]?\\s*20"
+      ],
+      "snippet": "now I like to see signals form now I like to see signals form at 8 20 or after at 8 20 or after at 8 20 or after they can occur as early as 8 A.M and they can occur as early as 8 A.M and they can occur as early as 8 A.M and sometimes a little bit before just like"
+    },
+    {
+      "i": 473,
+      "start": "00:11:59.930",
+      "end": "00:11:59.940",
+      "sec": 719.93,
+      "matched": [
+        "8\\s*[:\\.]?\\s*20",
+        "new\\s+york"
+      ],
+      "snippet": "a New York session open at 7 A.M but I a New York session open at 7 A.M but I generally prefer to see it occur between generally prefer to see it occur between generally prefer to see it occur between 8 A.M and 8 30. so basically the target 8 A.M and 8 30. so basically the target 8 A.M and 8 30. so basically the target time is 8 20 or CME opening see there's"
+    },
+    {
+      "i": 479,
+      "start": "00:12:08.990",
+      "end": "00:12:09.000",
+      "sec": 728.99,
+      "matched": [
+        "8\\s*[:\\.]?\\s*20",
+        "new\\s+york"
+      ],
+      "snippet": "time is 8 20 or CME opening see there's time is 8 20 or CME opening see there's a blending of that time element again a blending of that time element again a blending of that time element again so if we know that there's a strong so if we know that there's a strong so if we know that there's a strong influx of New York Traders coming in at"
+    },
+    {
+      "i": 485,
+      "start": "00:12:18.050",
+      "end": "00:12:18.060",
+      "sec": 738.05,
+      "matched": [
+        "8\\s*[:\\.]?\\s*20",
+        "new\\s+york"
+      ],
+      "snippet": "influx of New York Traders coming in at influx of New York Traders coming in at 8 20 New York time 8 20 New York time 8 20 New York time London Traders are still awake they're London Traders are still awake they're London Traders are still awake they're still on the on the clock looking to"
+    },
+    {
+      "i": 493,
+      "start": "00:12:27.230",
+      "end": "00:12:27.240",
+      "sec": 747.23,
+      "matched": [
+        "treasur"
+      ],
+      "snippet": "take some Trading take some Trading and if UK Traders or european Traders and if UK Traders or european Traders and if UK Traders or european Traders want to be participating in the treasury want to be participating in the treasury want to be participating in the treasury markets and it's a very big Market it's"
+    },
+    {
+      "i": 501,
+      "start": "00:12:36.650",
+      "end": "00:12:36.660",
+      "sec": 756.65,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "not as big as Forex but it's very liquid not as big as Forex but it's very liquid and one of the wonderful things about and one of the wonderful things about and one of the wonderful things about the bond market it's the least the bond market it's the least the bond market it's the least manipulated of all markets now think"
+    },
+    {
+      "i": 507,
+      "start": "00:12:44.870",
+      "end": "00:12:44.880",
+      "sec": 764.87,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "manipulated of all markets now think manipulated of all markets now think about that remember I made my career about that remember I made my career about that remember I made my career okay focus in the commodity markets with okay focus in the commodity markets with okay focus in the commodity markets with the bonds"
+    },
+    {
+      "i": 515,
+      "start": "00:12:55.550",
+      "end": "00:12:55.560",
+      "sec": 775.55,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "I like the bond market because it had I like the bond market because it had the least in terms of manipulation you the least in terms of manipulation you the least in terms of manipulation you don't get a lot of don't get a lot of don't get a lot of tomfoolery in that market compared to"
+    },
+    {
+      "i": 525,
+      "start": "00:13:07.490",
+      "end": "00:13:07.500",
+      "sec": 787.49,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "is a lack of manipulation it just means is a lack of manipulation it just means on par with all other asset classes on par with all other asset classes on par with all other asset classes generally you see the least with the generally you see the least with the generally you see the least with the bond market"
+    },
+    {
+      "i": 530,
+      "start": "00:13:16.190",
+      "end": "00:13:16.200",
+      "sec": 796.19,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "generally you see the least with the bond market now when we go into fomc or interest now when we go into fomc or interest now when we go into fomc or interest rate based reports or approaching those rate based reports or approaching those rate based reports or approaching those types of things the bond market can get"
+    },
+    {
+      "i": 536,
+      "start": "00:13:25.850",
+      "end": "00:13:25.860",
+      "sec": 805.85,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "types of things the bond market can get types of things the bond market can get a little wonky it can hit uh a little a little wonky it can hit uh a little a little wonky it can hit uh a little silly you can do things that doesn't silly you can do things that doesn't silly you can do things that doesn't make any sense and the easiest way to"
+    },
+    {
+      "i": 552,
+      "start": "00:13:42.769",
+      "end": "00:13:42.779",
+      "sec": 822.769,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "the announcement or rate decision the announcement or rate decision anything like that even non-farm payroll anything like that even non-farm payroll anything like that even non-farm payroll as well there's nothing uh as well there's nothing uh as well there's nothing uh you know sparing the bond market when it"
+    },
+    {
+      "i": 586,
+      "start": "00:14:22.310",
+      "end": "00:14:22.320",
+      "sec": 862.31,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "career as a one-focused market Trader career as a one-focused market Trader there is a there is a there is a plethora of opportunities for trading plethora of opportunities for trading plethora of opportunities for trading the bond market it's highly liquid it's"
+    },
+    {
+      "i": 592,
+      "start": "00:14:30.650",
+      "end": "00:14:30.660",
+      "sec": 870.65,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "the bond market it's highly liquid it's the bond market it's highly liquid it's really nice when it's trending when it really nice when it's trending when it really nice when it's trending when it starts to move in One Direction It starts to move in One Direction It starts to move in One Direction It generally stays in that direction when"
+    },
+    {
+      "i": 602,
+      "start": "00:14:40.910",
+      "end": "00:14:40.920",
+      "sec": 880.91,
+      "matched": [
+        "fair\\s+value"
+      ],
+      "snippet": "little choppy little choppy but if you know what you're looking in but if you know what you're looking in but if you know what you're looking in terms of terms of terms of fair value gaps or Turtle soups"
+    },
+    {
+      "i": 616,
+      "start": "00:14:57.110",
+      "end": "00:14:57.120",
+      "sec": 897.11,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "know amount of Pips or ticks in this know amount of Pips or ticks in this case for this particular asset case for this particular asset case for this particular asset now obviously everyone wants to be a now obviously everyone wants to be a now obviously everyone wants to be a Trader for the bond market they want to"
+    },
+    {
+      "i": 622,
+      "start": "00:15:05.750",
+      "end": "00:15:05.760",
+      "sec": 905.75,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "Trader for the bond market they want to Trader for the bond market they want to capture 32 ticks or a full handle and capture 32 ticks or a full handle and capture 32 ticks or a full handle and try to capture a thousand dollars per try to capture a thousand dollars per try to capture a thousand dollars per contract this Market generally doesn't"
+    },
+    {
+      "i": 658,
+      "start": "00:15:53.050",
+      "end": "00:15:53.060",
+      "sec": 953.05,
+      "matched": [
+        "fair\\s+value"
+      ],
+      "snippet": "allows for low expectations in terms of allows for low expectations in terms of the daily range it has respect of the daily range it has respect of the daily range it has respect of liquidity pools liquidity gaps fair liquidity pools liquidity gaps fair liquidity pools liquidity gaps fair value gaps all the things that we talked"
+    },
+    {
+      "i": 694,
+      "start": "00:16:36.310",
+      "end": "00:16:36.320",
+      "sec": 996.31,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "nothing about this asset class makes it nothing about this asset class makes it perfect but if 4X was ever to go into a perfect but if 4X was ever to go into a perfect but if 4X was ever to go into a meltdown or I was unable to trade 4X meltdown or I was unable to trade 4X meltdown or I was unable to trade 4X I would go back to trading bonds without"
+    },
+    {
+      "i": 700,
+      "start": "00:16:44.569",
+      "end": "00:16:44.579",
+      "sec": 1004.569,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "I would go back to trading bonds without I would go back to trading bonds without skipping a beat it would be no problem skipping a beat it would be no problem skipping a beat it would be no problem at all for me to go back to trading at all for me to go back to trading at all for me to go back to trading bonds because it's a very good trading"
+    },
+    {
+      "i": 706,
+      "start": "00:16:52.670",
+      "end": "00:16:52.680",
+      "sec": 1012.67,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "bonds because it's a very good trading bonds because it's a very good trading Market it can be swing traded it can be Market it can be swing traded it can be Market it can be swing traded it can be short-term traded it certainly can be short-term traded it certainly can be short-term traded it certainly can be day traded and when the conditions are"
+    },
+    {
+      "i": 722,
+      "start": "00:17:10.370",
+      "end": "00:17:10.380",
+      "sec": 1030.37,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "can be done because it's like a currency can be done because it's like a currency sometimes it Trends very very well so sometimes it Trends very very well so sometimes it Trends very very well so now you have a beginning basis point to now you have a beginning basis point to now you have a beginning basis point to start looking at the bond market and you"
+    },
+    {
+      "i": 728,
+      "start": "00:17:19.850",
+      "end": "00:17:19.860",
+      "sec": 1039.85,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "start looking at the bond market and you start looking at the bond market and you can pull up barchart.com and look at a can pull up barchart.com and look at a can pull up barchart.com and look at a 15-minute time frame for one day 15-minute time frame for one day 15-minute time frame for one day pull up the"
+    },
+    {
+      "i": 744,
+      "start": "00:17:36.710",
+      "end": "00:17:36.720",
+      "sec": 1056.71,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "respectively respectively and and and you can keep a running Journal of you can keep a running Journal of you can keep a running Journal of what the bond Market's doing now I'm"
+    },
+    {
+      "i": 752,
+      "start": "00:17:47.270",
+      "end": "00:17:47.280",
+      "sec": 1067.27,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "going to counsel you to do this just as going to counsel you to do this just as a general daily procedure even if your a general daily procedure even if your a general daily procedure even if your intentions are never to day trade or intentions are never to day trade or intentions are never to day trade or trade the bond market so you never want"
+    },
+    {
+      "i": 776,
+      "start": "00:18:12.230",
+      "end": "00:18:12.240",
+      "sec": 1092.23,
+      "matched": [
+        "bond"
+      ],
+      "snippet": "doing what Gold's doing and the foreign doing what Gold's doing and the foreign currencies as a whole currencies as a whole currencies as a whole so hopefully this has been a good so hopefully this has been a good so hopefully this has been a good introduction to the bond market and one"
+    }
+  ]
+}

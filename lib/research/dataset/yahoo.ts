@@ -32,30 +32,30 @@ function barToCandle(bar: Bar, scale: number): ResearchCandle {
   };
 }
 
-/**
- * Yahoo Finance MNQ=F → validated research candle dataset.
- * Scales to NQ-equivalent OHLC by default so TickStream NQ fixtures compare directly.
- */
-export async function loadDatasetFromYahoo(
-  opts: LoadYahooDatasetOptions = {}
-): Promise<ResearchCandleDataset> {
-  const interval = opts.interval ?? "1m";
-  const range = opts.range ?? "7d";
+/** Map Yahoo bars → research candles (optional window filter). Does not validate 1m continuity. */
+export function yahooBarsToCandles(
+  bars: Bar[],
+  opts: Pick<LoadYahooDatasetOptions, "priceScale" | "startSec" | "endSec"> = {}
+): ResearchCandle[] {
   const scale = opts.priceScale ?? YAHOO_MNQ_TO_NQ_SCALE;
-
-  const bars = await fetchBars(interval, range);
   let candles = bars.map((b) => barToCandle(b, scale));
-
   if (opts.startSec != null) {
     candles = candles.filter((c) => c.timestamp >= opts.startSec!);
   }
   if (opts.endSec != null) {
     candles = candles.filter((c) => c.timestamp <= opts.endSec!);
   }
-
   candles = candlesFromRawInput(candles);
   candles.sort((a, b) => a.timestamp - b.timestamp);
+  return candles;
+}
 
+/** Build a research dataset from already-fetched Yahoo bars (avoids a second HTTP round-trip). */
+export function datasetFromYahooBars(
+  bars: Bar[],
+  opts: LoadYahooDatasetOptions = {}
+): ResearchCandleDataset {
+  const candles = yahooBarsToCandles(bars, opts);
   const requestedStart = opts.startSec ?? (candles[0]?.timestamp ?? 0);
   const requestedEnd = opts.endSec ?? (candles.at(-1)?.timestamp ?? requestedStart);
 
@@ -68,4 +68,17 @@ export async function loadDatasetFromYahoo(
     requestedEnd,
     created_at: opts.created_at,
   });
+}
+
+/**
+ * Yahoo Finance MNQ=F → validated research candle dataset.
+ * Scales to NQ-equivalent OHLC by default so TickStream NQ fixtures compare directly.
+ */
+export async function loadDatasetFromYahoo(
+  opts: LoadYahooDatasetOptions = {}
+): Promise<ResearchCandleDataset> {
+  const interval = opts.interval ?? "1m";
+  const range = opts.range ?? "7d";
+  const bars = await fetchBars(interval, range);
+  return datasetFromYahooBars(bars, opts);
 }

@@ -1,0 +1,54 @@
+{
+  "EDGE_CLAIM": "NONE",
+  "configVersion": "archive-carve-v1",
+  "at": "2026-08-15T14:33:22.743Z",
+  "source": "nq-history-archive-1m",
+  "archive": {
+    "bars": 950405,
+    "first": "2023-10-02",
+    "last": "2026-08-14",
+    "tradingDays": 739
+  },
+  "rules": [
+    "Chronological only — no random shuffle",
+    "UNTOUCHED_HOLDOUT sealed: never use asOfs for candidate tuning / selection",
+    "VALIDATION reserved for gate metrics — no PnL weight tuning",
+    "Same cadence + baseline-v2 + even sampling across splits",
+    "Measurement only — EDGE_CLAIM NONE"
+  ],
+  "splits": [
+    {
+      "id": "DEVELOPMENT",
+      "split": "development",
+      "fromYmd": "2023-10-02",
+      "toYmd": "2025-05-31",
+      "sealed": false,
+      "purpose": "Fixture building / candidate exploration only — never peek holdout",
+      "tradingDays": 429,
+      "firstTradingDay": "2023-10-02",
+      "lastTradingDay": "2025-05-30"
+    },
+    {
+      "id": "VALIDATION",
+      "split": "validation",
+      "fromYmd": "2025-06-01",
+      "toYmd": "2025-12-31",
+      "sealed": false,
+      "purpose": "Gate metrics before any freeze discussion — no weight tuning",
+      "tradingDays": 152,
+      "firstTradingDay": "2025-06-02",
+      "lastTradingDay": "2025-12-31"
+    },
+    {
+      "id": "UNTOUCHED_HOLDOUT",
+      "split": "holdout",
+      "fromYmd": "2026-01-01",
+      "toYmd": "2026-08-14",
+      "sealed": true,
+      "purpose": "Sealed measurement only — no candidate tuning / no peek for selection",
+      "tradingDays": 158,
+      "firstTradingDay": "2026-01-01",
+      "lastTradingDay": "2026-08-14"
+    }
+  ]
+}

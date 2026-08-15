@@ -204,6 +204,18 @@ export const ICT_STAT_RULES: IctStatRule[] = [
     confidence: "user_verified",
   },
   {
+    id: "london-asia-high-bsl-raid",
+    concept: "Session liquidity / London",
+    rule:
+      "Taking Asia session high during London is a raid on buy-side liquidity, not a bullish continuation. Typical ICT: London takes ASH, then look for displacement / continuation lower, or stay flat until 1m structure confirms. Do not flip bullish because a high was taken or price is above Asia. Do not auto-force a short from the raid alone.",
+    timeWindow: "London (2–5am ET)",
+    source: {
+      videoId: "user-approved",
+      title: "Desk copilot trader rule (Aug 2026) — London ASH raid",
+    },
+    confidence: "user_verified",
+  },
+  {
     id: "fpfvg-per-session",
     concept: "First presented FVG",
     rule:
@@ -247,7 +259,9 @@ export function formatIctKnowledgeForPrompt(
   const sessionNote =
     sessionId === "ny_am"
       ? "\n\n**Active NY AM session:** prioritize ORG CE window 9:31–10:00 and first presented 1m FVG 9:30–10:00 rules."
-      : "";
+      : sessionId === "london"
+        ? "\n\n**Active London session:** taking Asia high is a buy-side liquidity raid — not a bullish continuation. Stay flat or wait for displacement lower."
+        : "";
 
   return `## ICT STATED PROBABILITIES & SESSION RULES (sourced — apply in context; do not recite verbatim)
 
@@ -280,8 +294,13 @@ export function ictSessionHints(now: Date, sessionId: SessionId): string[] {
     hints.push("Pre-market range 9:00–9:30 — not opening range; mark REL highs/lows before bell.");
   }
 
-  if (sessionId === "london" && m >= 3 * 60 && m < 3 * 60 + 30) {
-    hints.push("London open: first presented 1m FVG in first ~30 min after displacement (user-verified extension).");
+  if (sessionId === "london") {
+    hints.push(
+      "London taking Asia session high is a buy-side liquidity raid — not a bullish continuation. Stay flat or wait for displacement lower; do not recommend longs because ASH was swept or price is above Asia."
+    );
+    if (m >= 3 * 60 && m < 3 * 60 + 30) {
+      hints.push("London open: first presented 1m FVG in first ~30 min after displacement (user-verified extension).");
+    }
   }
 
   if (sessionId === "asia" && (m >= 20 * 60 || m < 30)) {

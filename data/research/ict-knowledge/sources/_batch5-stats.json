@@ -1,0 +1,21 @@
+{
+  "concepts": 21,
+  "occurrences": 88,
+  "inventory_available": 26,
+  "inventory_caption_missing": 3,
+  "inventory_total": 896,
+  "coverage_pct": 2.9,
+  "batch5_probed": 12,
+  "batch5_available": 10,
+  "batch5_caption_missing": 2,
+  "new_concept_ids": [
+    "fair_value_gap",
+    "inverted_fair_value_gap",
+    "equilibrium_premium_discount",
+    "liquidity_run",
+    "liquidity_pool",
+    "open_float_liquidity",
+    "liquidity_void",
+    "low_resistance_liquidity_run"
+  ]
+}

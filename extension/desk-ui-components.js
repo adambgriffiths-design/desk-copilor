@@ -174,15 +174,60 @@
     return "UNAVAILABLE";
   }
 
+  /** Amber KAREN only when auto-voice wants a mic and there is no session. */
+  function isKarenVoiceDownState(opts = {}) {
+    const {
+      autoVoice = false,
+      userOff = false,
+      listening = false,
+      speaking = false,
+      connecting = false,
+      engineMode = "off",
+      realtimeActive = false,
+      realtimeWants = false,
+    } = opts;
+    if (userOff || !autoVoice) return false;
+    if (listening || speaking) return false;
+    if (connecting) return false;
+    if (engineMode === "cascade" || engineMode === "realtime") return false;
+    if (realtimeActive || realtimeWants) return false;
+    return true;
+  }
+
+  /**
+   * Idle/READY green = desk ONLINE (request path), never TV Last alone.
+   * DEGRADED/cached health must not paint LIVE.
+   */
+  function isKarenReadyOnline(opts = {}) {
+    if (opts.healthDegraded === true) return false;
+    if (opts.deskOnline === true) return true;
+    if (opts.deskOnline === false) return false;
+    const state = String(opts.connState || opts.connectionState || "").toUpperCase();
+    // Hop-aware path when provided
+    if (opts.apiHop || opts.marketHop) {
+      if (opts.apiHop !== "CONNECTED") return false;
+      if (opts.marketHop === "DISCONNECTED") return false;
+      if (opts.chatHop === "FAILED") return false;
+      return true;
+    }
+    // Snapshot fallback: only machine CONNECTED (not DEGRADED+backendUp, not tvLive)
+    return state === "CONNECTED";
+  }
+
   function mapKarenStatus(phase, opts = {}) {
-    const { listening, speaking, degraded } = opts;
-    if (degraded) return "DEGRADED";
+    const { listening, speaking, degraded, connecting, engineMode } = opts;
+    // Listening/speaking always win — Whisper cascade is a working mic, not a dead Karen.
     if (speaking) return "THINKING";
     if (listening) return "LISTENING";
     const p = String(phase || "idle").toLowerCase();
     if (p === "listening") return "LISTENING";
     if (p === "thinking" || p === "chatting" || p === "speaking") return "THINKING";
     if (p === "analyzing" || p === "capturing" || p === "snapshot" || p === "marking_levels") return "ANALYZING";
+    if (connecting) return "WAITING";
+    if (engineMode === "cascade" || engineMode === "realtime") return "LISTENING";
+    if (degraded) return "DEGRADED";
+    // Idle: LIVE green when online, grey READY when offline/reconnecting/failed.
+    if (isKarenReadyOnline(opts)) return "LIVE";
     return "READY";
   }
 
@@ -280,12 +325,81 @@
     el.textContent = "";
   }
 
+  function escHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (ch) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])
+    );
+  }
+
+  function renderEqhEqlTrack(payload, opts = {}) {
+    let host = document.getElementById("dc-levels-track");
+    if (!host) {
+      const status = document.getElementById("dc-levels-status");
+      if (!status) return;
+      host = document.createElement("div");
+      host.id = "dc-levels-track";
+      host.className = "dc-levels-track";
+      status.insertAdjacentElement("afterend", host);
+    }
+    const enabled = opts.enabled !== false;
+    const rows = payload?.eqhEqlLiquidity?.rows;
+    if (!enabled || !payload) {
+      host.hidden = true;
+      host.innerHTML = "";
+      return;
+    }
+    const list = Array.isArray(rows) ? rows : [];
+    const statusLabel = {
+      active: "Active",
+      touched: "Touched",
+      swept: "Swept",
+      closed_through: "Closed through",
+      invalidated: "Invalidated",
+    };
+    const items = list
+      .map((row) => {
+        const kind = row.kind === "eql" ? "EQL" : "EQH";
+        const st = statusLabel[row.status] || row.status;
+        const swings = (row.swingPrices || []).map((p) => Number(p).toFixed(2)).join(" · ");
+        const sweep =
+          row.sweptAt != null && row.sweepPrice != null
+            ? `<div class="dc-eqh-meta">Swept ${escHtml(Number(row.sweepPrice).toFixed(2))} · ${escHtml(row.sweptAtLabel || "")}</div>`
+            : "";
+        return `<article class="dc-eqh-row dc-eqh-${escHtml(row.status)}" data-kind="${escHtml(row.kind)}">
+          <div class="dc-eqh-top">
+            <span class="dc-eqh-kind">${kind}</span>
+            <span class="dc-eqh-name">${escHtml(row.label)}</span>
+            <span class="dc-eqh-price">${escHtml(Number(row.price).toFixed(2))}</span>
+          </div>
+          <div class="dc-eqh-meta">
+            <span class="dc-eqh-status">${escHtml(st)}</span>
+            · ${row.swingCount || 0} swings ${escHtml(swings)}
+            · ${row.tickDifference ?? 0} of ${row.toleranceTicks ?? 0} ticks
+          </div>
+          <div class="dc-eqh-meta">Formed ${escHtml(row.formedAtLabel || "—")} · confirmed ${escHtml(row.confirmationLabel || "—")}</div>
+          ${sweep}
+          <p class="dc-eqh-why">${escHtml(row.why || "")}</p>
+        </article>`;
+      })
+      .join("");
+    host.hidden = false;
+    host.innerHTML = list.length
+      ? `<div class="dc-levels-track-head">Relative equal liquidity</div>${items}`
+      : `<div class="dc-levels-track-head">Relative equal liquidity</div><p class="dc-eqh-empty">No confirmed relative equal highs or lows in lookback.</p>`;
+  }
+
   function renderKarenVerdictMeta(contract, opts = {}) {
     const dqEl = document.getElementById("dc-verdict-dq");
     if (dqEl && contract) {
       const dq = String(contract.data_quality || "DEGRADED").toUpperCase();
-      const key = dq === "GOOD" ? "LIVE" : dq === "OFFLINE" ? "OFFLINE" : dq === "DEGRADED" ? "DEGRADED" : "STALE";
-      dqEl.innerHTML = renderStatusBadge(key, `Data quality · ${dq}`);
+      if (dq === "GOOD") {
+        dqEl.innerHTML = "";
+        dqEl.classList.add("hidden");
+      } else {
+        dqEl.classList.remove("hidden");
+        const key = dq === "OFFLINE" ? "OFFLINE" : dq === "DEGRADED" ? "DEGRADED" : "STALE";
+        dqEl.innerHTML = renderStatusBadge(key, `Data quality · ${dq}`);
+      }
     }
     const invLabel = document.getElementById("dc-verdict-invalidation-wrap");
     if (invLabel && contract) {
@@ -299,7 +413,7 @@
     if (opts.liveDataOffline && card) card.classList.add("dc-verdict-offline");
   }
 
-  window.DeskCopilotUI = {
+  const api = {
     STATUS,
     renderStatusBadge,
     setBadgeEl,
@@ -308,12 +422,25 @@
     updateKarenStatus,
     updateMarketDataCard,
     updateLevelStatus,
+    renderEqhEqlTrack,
     renderKarenVerdictMeta,
     absorbMarketDataMessage,
     isMarketDataMessage,
     mapConnectionToDataStatus,
     mapConnectionToMarketStatus,
     mapKarenStatus,
+    isKarenVoiceDownState,
+    isKarenReadyOnline,
     normalizeKey,
   };
+  if (typeof window !== "undefined") window.DeskCopilotUI = api;
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+      mapKarenStatus,
+      isKarenVoiceDownState,
+      isKarenReadyOnline,
+      mapConnectionToDataStatus,
+      mapConnectionToMarketStatus,
+    };
+  }
 })();

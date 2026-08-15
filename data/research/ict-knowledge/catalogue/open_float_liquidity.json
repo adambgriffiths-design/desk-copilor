@@ -1,0 +1,49 @@
+{
+  "concept_id": "open_float_liquidity",
+  "name": "Open float liquidity pools",
+  "aliases": [
+    "open float",
+    "large funds open float"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "open_float_3m_window__vqtA1S9JH34__63",
+      "definition_text": "Large-funds open float liquidity above old highs or below old lows is generally targeted every quarter. Method: take last three months of data \u2014 or last month and a half plus next month and a half \u2014 encapsulating ~three months to identify which HTF liquidity pools to focus on.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Higher-timeframe chart",
+        "~3-month lookback / lookaround window for pool selection"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 05 Core \u2014 Defining Open Float Liquidity Pools",
+      "variations_note": "Selection method for which pools matter \u2014 not the same as generic liquidity_pool definition.",
+      "confidence": "quoted",
+      "cue_start": "00:01:03.709",
+      "cue_end": "00:01:44.149",
+      "timestamp_sec": 63.709,
+      "source": {
+        "video_id": "vqtA1S9JH34",
+        "title": "ICT Mentorship Core Content - Month 05 - Defining Open Float Liquidity Pools",
+        "url": "https://www.youtube.com/watch?v=vqtA1S9JH34",
+        "transcript_path": "data/ict-transcripts/raw/vqtA1S9JH34.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "none direct",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "Likely none (quarterly HTF)",
+    "gap_vs_baseline_v2": "Intraday Karen does not use open-float windows",
+    "hypothesis_id": "H_ICT_OPEN_FLOAT_LQ",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch5 Month05. Catalogue-only HTF framing."
+  },
+  "extraction_notes": "Batch5."
+}

@@ -59,6 +59,14 @@ assert(
 );
 assert(
   classifyExportQuality({
+    source: "yahoo_fallback",
+    candleCount: 30,
+    reasons: ["yahoo_fallback_used"],
+  }) === "degraded",
+  "yahoo fallback with bars is degraded, not missing"
+);
+assert(
+  classifyExportQuality({
     source: "none",
     reason: "widget_not_found",
     candleCount: 0,
@@ -173,6 +181,18 @@ const scored = scoreChartQuality(
   nowSec
 );
 assert(scored.quality === "partial", "scoreChartQuality partial");
+
+const yahooScored = scoreChartQuality(
+  {
+    ok: true,
+    source: "yahoo_fallback",
+    candles: candles(30, nowSec - 30 * 60 - 400),
+    drawings: [{ type: "horizontal_line", price: 25120, label: "Relative Equal Lows" }],
+  },
+  nowSec
+);
+assert(yahooScored.quality === "degraded", "yahoo fallback scores degraded even if last bar is old");
+assert(isChartQualityUsable(yahooScored), "yahoo fallback usable for structure");
 
 // --- unavailable message includes reason snippet ---
 const msg = buildChartExportUnavailableMessage(["stale_last_bar", "export_failed"]);

@@ -45,6 +45,10 @@ export type MarketState = {
     pdh: number;
     pdl: number;
     pdc: number;
+    /** cme_session_1m = last Globex 1m close; yahoo_daily_fallback = settlement/calendar. */
+    pdcSource?: "cme_session_1m" | "yahoo_daily_fallback";
+    /** Unix seconds — PDC source candle. */
+    pdcFormedAt?: number;
     nearestSupport?: number;
     nearestSupportLabel?: string;
     nearestResistance?: number;
@@ -63,6 +67,14 @@ export type MarketState = {
   };
   candleHash: string;
   stateHash: string;
+  snapshotId?: string;
+  priceAgreement?: {
+    tv?: { value: number; timestamp?: number | null; source: string };
+    backend: { value: number; source: string };
+    marketState: { value: number; source: string };
+    agree: boolean;
+    difference: number;
+  };
 };
 
 function simpleHash(input: string): string {
@@ -107,6 +119,8 @@ export function formatMarketStateForPrompt(state: MarketState): string {
     candles: recentCandles,
     candleHash: state.candleHash,
     stateHash: state.stateHash,
+    snapshotId: state.snapshotId,
+    priceAgreement: state.priceAgreement,
   };
   return [
     "=== MARKET_STATE (analyze ONLY this object — do not invent prices or levels not listed) ===",

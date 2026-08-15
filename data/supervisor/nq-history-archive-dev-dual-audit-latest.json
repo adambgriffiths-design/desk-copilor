@@ -1,0 +1,896 @@
+{
+  "EDGE_CLAIM": "NONE",
+  "status": "dev_dual_audit_complete",
+  "at": "2026-08-15T18:06:38.954Z",
+  "holdout": "PROTECTED",
+  "carve": {
+    "configVersion": "archive-carve-v1",
+    "split": "DEVELOPMENT",
+    "fromYmd": "2023-10-02",
+    "toYmd": "2025-05-31",
+    "tradingDays": 429
+  },
+  "method": {
+    "tradingBrainBaseline": "baseline-v2",
+    "cadenceMinutes": 10,
+    "limitTotal": 1500,
+    "perSubLimit": 375,
+    "subCount": 4,
+    "lookbackDays": 60,
+    "sampleMode": "even",
+    "outcomeHorizonMinutes": 30,
+    "smoke": false,
+    "logicAltered": false
+  },
+  "counts": {
+    "TOTAL_STATES": 1500,
+    "WAIT": 1188,
+    "NO_TRADE": 239,
+    "ACTIONABLE": 71,
+    "LONG": 39,
+    "SHORT": 32,
+    "PIT": 0,
+    "X_tradingDays": 429
+  },
+  "metrics": {
+    "DECISIONS_TOTAL": 105,
+    "LONG": 41,
+    "SHORT": 32,
+    "WAIT": 18,
+    "NO_TRADE": 14,
+    "ACTIONABLE_LONG_SHORT": 71,
+    "TARGET_BEFORE_INVALIDATION_RATE": 0.21428571428571427,
+    "INVALIDATION_BEFORE_TARGET_RATE": 0.7857142857142857,
+    "MEDIAN_MFE": 12,
+    "MEDIAN_MAE": 9.5,
+    "WAIT_GOOD_AVOIDANCE_RATE": 0,
+    "WAIT_MISSED_OPPORTUNITY_RATE": 0.7222222222222222,
+    "NO_TRADE_GOOD_RATE": 0,
+    "NO_TRADE_OVERCAUTIOUS_RATE": 0.7142857142857143,
+    "DATA_QUALITY_EXCLUSIONS": 2,
+    "LOOKAHEAD_VIOLATIONS": 0,
+    "INVALID_RECORDS": 0,
+    "UNIQUE_STATE_TRANSITIONS": 105
+  },
+  "waitAudit": {
+    "canDeliverTrueWaits": 1188,
+    "canDeliverFalseWaits": 0,
+    "waitClassCounts": {
+      "GOOD_WAIT": 3,
+      "MISSED_OPPORTUNITY": 899,
+      "INCONCLUSIVE": 286,
+      "nullClass": 0
+    },
+    "goodWaitRate": 0.0025252525252525255,
+    "missedOpportunityRate": 0.7567340067340067,
+    "inconclusiveRate": 0.24074074074074073,
+    "topWaitDrivers": [
+      {
+        "driver": "ENGINE: canDeliver=true but WAIT (selective restraint)",
+        "frequency": 1188,
+        "pctOfWaits": 1,
+        "missedOpportunity": 899,
+        "goodWait": 3,
+        "inconclusive": 286,
+        "missedRateGivenDriver": 0.7567340067340067,
+        "impactScore": 2087
+      },
+      {
+        "driver": "EVIDENCE: fvg=present",
+        "frequency": 1021,
+        "pctOfWaits": 0.8594276094276094,
+        "missedOpportunity": 807,
+        "goodWait": 3,
+        "inconclusive": 211,
+        "missedRateGivenDriver": 0.7904015670910872,
+        "impactScore": 1828
+      },
+      {
+        "driver": "EVIDENCE: displacement=present",
+        "frequency": 871,
+        "pctOfWaits": 0.7331649831649831,
+        "missedOpportunity": 661,
+        "goodWait": 3,
+        "inconclusive": 207,
+        "missedRateGivenDriver": 0.7588978185993112,
+        "impactScore": 1532
+      },
+      {
+        "driver": "EVIDENCE: contradictions_n=1",
+        "frequency": 441,
+        "pctOfWaits": 0.3712121212121212,
+        "missedOpportunity": 334,
+        "goodWait": 0,
+        "inconclusive": 107,
+        "missedRateGivenDriver": 0.7573696145124716,
+        "impactScore": 775
+      },
+      {
+        "driver": "EVIDENCE: displacement=absent",
+        "frequency": 317,
+        "pctOfWaits": 0.2668350168350168,
+        "missedOpportunity": 238,
+        "goodWait": 0,
+        "inconclusive": 79,
+        "missedRateGivenDriver": 0.750788643533123,
+        "impactScore": 555
+      },
+      {
+        "driver": "EVIDENCE: fvg=absent",
+        "frequency": 167,
+        "pctOfWaits": 0.14057239057239057,
+        "missedOpportunity": 92,
+        "goodWait": 0,
+        "inconclusive": 75,
+        "missedRateGivenDriver": 0.5508982035928144,
+        "impactScore": 259
+      },
+      {
+        "driver": "EVIDENCE: both_sides_supported",
+        "frequency": 113,
+        "pctOfWaits": 0.09511784511784512,
+        "missedOpportunity": 84,
+        "goodWait": 0,
+        "inconclusive": 29,
+        "missedRateGivenDriver": 0.7433628318584071,
+        "impactScore": 197
+      },
+      {
+        "driver": "EVIDENCE: contradictions_n=2",
+        "frequency": 19,
+        "pctOfWaits": 0.015993265993265993,
+        "missedOpportunity": 17,
+        "goodWait": 0,
+        "inconclusive": 2,
+        "missedRateGivenDriver": 0.8947368421052632,
+        "impactScore": 36
+      }
+    ],
+    "postWaitMfeMae": {
+      "medianMfe": 11.5,
+      "medianMae": 11.5,
+      "meanMfe": 20.04233361415333,
+      "meanMae": 21.518744734625106,
+      "byClass": {
+        "GOOD_WAIT": {
+          "n": 3,
+          "medianMfe": 9.5,
+          "medianMae": 9.5
+        },
+        "MISSED_OPPORTUNITY": {
+          "n": 899,
+          "medianMfe": 13.25,
+          "medianMae": 12.75
+        },
+        "INCONCLUSIVE": {
+          "n": 286,
+          "medianMfe": 7.75,
+          "medianMae": 8
+        }
+      },
+      "note": "For WAIT rows, outcome.mfe/mae are LONG-direction excursion proxies used by classifyWait; class labels encode both-side clean follow-through heuristics."
+    },
+    "waitBySession": {
+      "OTHER": 857,
+      "NY_LUNCH": 118,
+      "NY_PM": 109,
+      "NY_AM": 104
+    },
+    "waitByTime": {
+      "other": 857,
+      "1130-1330_lunch": 118,
+      "1330-1600_afternoon": 109,
+      "1000-1130": 84,
+      "0930-1000": 20
+    },
+    "waitMissBySession": {
+      "OTHER": {
+        "wait": 857,
+        "missed": 623,
+        "rate": 0.7269544924154026
+      },
+      "NY_LUNCH": {
+        "wait": 118,
+        "missed": 97,
+        "rate": 0.8220338983050848
+      },
+      "NY_PM": {
+        "wait": 109,
+        "missed": 96,
+        "rate": 0.8807339449541285
+      },
+      "NY_AM": {
+        "wait": 104,
+        "missed": 83,
+        "rate": 0.7980769230769231
+      }
+    },
+    "verdict": "structurally_overcautious",
+    "verdictRationale": "High MISSED_OPPORTUNITY share among WAITs with low GOOD_WAIT share (heuristic). Suggests restraint often coincides with clean post-WAIT directional follow-through — candidate for later DEV threshold experiments, not an edge claim."
+  },
+  "actionableAudit": {
+    "all": {
+      "n": 71,
+      "medianMfe": 12,
+      "meanMfe": 21.08450704225352,
+      "medianMae": 9.5,
+      "meanMae": 15.04225352112676,
+      "medianMfeR": 1.5681089743589745,
+      "medianMaeR": 1.0529891304347827,
+      "meanProxyR": -0.32987342208222037,
+      "medianProxyR": -0.6107904386798859,
+      "withParsableRisk": 70,
+      "targetBeforeInv": 8,
+      "invBeforeTarget": 33,
+      "targetBeforeInvRate": 0.1951219512195122,
+      "invBeforeTargetRate": 0.8048780487804879,
+      "scoredTargetInv": 41
+    },
+    "long": {
+      "n": 39,
+      "medianMfe": 11.75,
+      "meanMfe": 18.71794871794872,
+      "medianMae": 10.75,
+      "meanMae": 15.621794871794872,
+      "medianMfeR": 1.267605633802817,
+      "medianMaeR": 0.9615384615384616,
+      "meanProxyR": -0.3038544222468737,
+      "medianProxyR": 0.08411214953271029,
+      "withParsableRisk": 39,
+      "targetBeforeInv": 5,
+      "invBeforeTarget": 16,
+      "targetBeforeInvRate": 0.23809523809523808,
+      "invBeforeTargetRate": 0.7619047619047619,
+      "scoredTargetInv": 21
+    },
+    "short": {
+      "n": 32,
+      "medianMfe": 17.375,
+      "meanMfe": 23.96875,
+      "medianMae": 9,
+      "meanMae": 14.3359375,
+      "medianMfeR": 2.0434782608695654,
+      "medianMaeR": 1.0816326530612246,
+      "meanProxyR": -0.3626070025202372,
+      "medianProxyR": -1.0816326530612246,
+      "withParsableRisk": 31,
+      "targetBeforeInv": 3,
+      "invBeforeTarget": 17,
+      "targetBeforeInvRate": 0.15,
+      "invBeforeTargetRate": 0.85,
+      "scoredTargetInv": 20
+    },
+    "bySession": {
+      "NY_LUNCH": {
+        "n": 8,
+        "medianMfe": 23.625,
+        "meanMfe": 31.28125,
+        "medianMae": 16,
+        "meanMae": 20.5625,
+        "medianMfeR": 1.7892156862745097,
+        "medianMaeR": 1.1396617566830334,
+        "meanProxyR": 0.45351373314037613,
+        "medianProxyR": -0.5306873977086743,
+        "withParsableRisk": 8,
+        "targetBeforeInv": 1,
+        "invBeforeTarget": 4,
+        "targetBeforeInvRate": 0.2,
+        "invBeforeTargetRate": 0.8,
+        "scoredTargetInv": 5
+      },
+      "OTHER": {
+        "n": 53,
+        "medianMfe": 11.25,
+        "meanMfe": 17.13679245283019,
+        "medianMae": 9,
+        "meanMae": 11.915094339622641,
+        "medianMfeR": 1.2859767299448868,
+        "medianMaeR": 1.0025083612040133,
+        "meanProxyR": 0.019155699378136964,
+        "medianProxyR": -0.20468509984639022,
+        "withParsableRisk": 52,
+        "targetBeforeInv": 7,
+        "invBeforeTarget": 23,
+        "targetBeforeInvRate": 0.23333333333333334,
+        "invBeforeTargetRate": 0.7666666666666667,
+        "scoredTargetInv": 30
+      },
+      "NY_AM": {
+        "n": 5,
+        "medianMfe": 26.5,
+        "meanMfe": 27.55,
+        "medianMae": 34.75,
+        "meanMae": 39.75,
+        "medianMfeR": 1.9057971014492754,
+        "medianMaeR": 0.5050251256281407,
+        "meanProxyR": -1.2688861491723629,
+        "medianProxyR": -0.4648241206030151,
+        "withParsableRisk": 5,
+        "targetBeforeInv": 0,
+        "invBeforeTarget": 2,
+        "targetBeforeInvRate": 0,
+        "invBeforeTargetRate": 1,
+        "scoredTargetInv": 2
+      },
+      "NY_PM": {
+        "n": 5,
+        "medianMfe": 33.25,
+        "meanMfe": 40.15,
+        "medianMae": 16,
+        "meanMae": 14.65,
+        "medianMfeR": 10.125,
+        "medianMaeR": 4.5,
+        "meanProxyR": -4.274183006535948,
+        "medianProxyR": -4.5,
+        "withParsableRisk": 5,
+        "targetBeforeInv": 0,
+        "invBeforeTarget": 4,
+        "targetBeforeInvRate": 0,
+        "invBeforeTargetRate": 1,
+        "scoredTargetInv": 4
+      }
+    },
+    "byTime": {
+      "1130-1330_lunch": {
+        "n": 8,
+        "medianMfe": 23.625,
+        "meanMfe": 31.28125,
+        "medianMae": 16,
+        "meanMae": 20.5625,
+        "medianMfeR": 1.7892156862745097,
+        "medianMaeR": 1.1396617566830334,
+        "meanProxyR": 0.45351373314037613,
+        "medianProxyR": -0.5306873977086743,
+        "withParsableRisk": 8,
+        "targetBeforeInv": 1,
+        "invBeforeTarget": 4,
+        "targetBeforeInvRate": 0.2,
+        "invBeforeTargetRate": 0.8,
+        "scoredTargetInv": 5
+      },
+      "other": {
+        "n": 53,
+        "medianMfe": 11.25,
+        "meanMfe": 17.13679245283019,
+        "medianMae": 9,
+        "meanMae": 11.915094339622641,
+        "medianMfeR": 1.2859767299448868,
+        "medianMaeR": 1.0025083612040133,
+        "meanProxyR": 0.019155699378136964,
+        "medianProxyR": -0.20468509984639022,
+        "withParsableRisk": 52,
+        "targetBeforeInv": 7,
+        "invBeforeTarget": 23,
+        "targetBeforeInvRate": 0.23333333333333334,
+        "invBeforeTargetRate": 0.7666666666666667,
+        "scoredTargetInv": 30
+      },
+      "1000-1130": {
+        "n": 5,
+        "medianMfe": 26.5,
+        "meanMfe": 27.55,
+        "medianMae": 34.75,
+        "meanMae": 39.75,
+        "medianMfeR": 1.9057971014492754,
+        "medianMaeR": 0.5050251256281407,
+        "meanProxyR": -1.2688861491723629,
+        "medianProxyR": -0.4648241206030151,
+        "withParsableRisk": 5,
+        "targetBeforeInv": 0,
+        "invBeforeTarget": 2,
+        "targetBeforeInvRate": 0,
+        "invBeforeTargetRate": 1,
+        "scoredTargetInv": 2
+      },
+      "1330-1600_afternoon": {
+        "n": 5,
+        "medianMfe": 33.25,
+        "meanMfe": 40.15,
+        "medianMae": 16,
+        "meanMae": 14.65,
+        "medianMfeR": 10.125,
+        "medianMaeR": 4.5,
+        "meanProxyR": -4.274183006535948,
+        "medianProxyR": -4.5,
+        "withParsableRisk": 5,
+        "targetBeforeInv": 0,
+        "invBeforeTarget": 4,
+        "targetBeforeInvRate": 0,
+        "invBeforeTargetRate": 1,
+        "scoredTargetInv": 4
+      }
+    },
+    "expectancyProxy": {
+      "definition": "HEURISTIC expectancy proxy (not PnL, not edge): mean(proxyR) where proxyR = +mfeR if target-before-inv, −maeR if inv-before-target, else (mfeR−maeR) when both R defined; R = excursion/|entry−invalidation| when inv parses. Horizon=30m. DEV only.",
+      "meanProxyR_all": -0.32987342208222037,
+      "medianProxyR_all": -0.6107904386798859,
+      "meanProxyR_long": -0.3038544222468737,
+      "meanProxyR_short": -0.3626070025202372,
+      "nWithProxyR": 70
+    },
+    "best": [
+      {
+        "asOf": "2024-11-22T09:07:00.000Z",
+        "verdict": "SHORT",
+        "mfe": 104.75,
+        "mae": 2.75,
+        "proxyR": 9.488372093023255,
+        "targetBeforeInvalidation": null,
+        "evidenceAtT": {
+          "lastPrice": 20798.5,
+          "pdh": 20905.75,
+          "pdl": 20514.25,
+          "tradeableBias": "neutral",
+          "marketStructure": "bearish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "Price displaced downward by 6.50 points. A bullish FVG exists between 20805.75–20812.00.",
+          "sessionLabel": "OTHER",
+          "timeBucketEt": "other",
+          "dayOfWeekEt": "Fri"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2025-03-27T19:38:00.000Z",
+        "verdict": "SHORT",
+        "mfe": 92.75,
+        "mae": 16,
+        "proxyR": -5.333333333333333,
+        "targetBeforeInvalidation": false,
+        "evidenceAtT": {
+          "lastPrice": 20067.75,
+          "pdh": 20536.75,
+          "pdl": 20003.25,
+          "tradeableBias": "neutral",
+          "marketStructure": "bearish",
+          "displacement": "absent",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "fvg"
+          ],
+          "factsPreview": "PDC liquidity at 20059.75 was swept. No impulsive displacement detected in lookback. A bearish FVG exists between 20086.00–20105.50.",
+          "sessionLabel": "NY_PM",
+          "timeBucketEt": "1330-1600_afternoon",
+          "dayOfWeekEt": "Thu"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2024-09-30T13:19:00.000Z",
+        "verdict": "LONG",
+        "mfe": 85.5,
+        "mae": 8.5,
+        "proxyR": -1.0625,
+        "targetBeforeInvalidation": false,
+        "evidenceAtT": {
+          "lastPrice": 20176,
+          "pdh": 20395.75,
+          "pdl": 20173,
+          "tradeableBias": "neutral",
+          "marketStructure": "bullish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "PDL liquidity at 20173.00 was swept. Price displaced downward by 7.00 points. A bullish FVG exists between 20130.25–20135.50.",
+          "sessionLabel": "OTHER",
+          "timeBucketEt": "other",
+          "dayOfWeekEt": "Mon"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2024-11-20T17:07:00.000Z",
+        "verdict": "SHORT",
+        "mfe": 76.75,
+        "mae": 7.25,
+        "proxyR": 2.7524752475247527,
+        "targetBeforeInvalidation": null,
+        "evidenceAtT": {
+          "lastPrice": 20656.75,
+          "pdh": 20792.5,
+          "pdl": 20382.5,
+          "tradeableBias": "neutral",
+          "marketStructure": "bearish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "Price displaced downward by 16.50 points. A bearish FVG exists between 20675.25–20679.00.",
+          "sessionLabel": "NY_LUNCH",
+          "timeBucketEt": "1130-1330_lunch",
+          "dayOfWeekEt": "Wed"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2024-10-16T14:10:00.000Z",
+        "verdict": "LONG",
+        "mfe": 65.75,
+        "mae": 16.25,
+        "proxyR": 1.4347826086956523,
+        "targetBeforeInvalidation": null,
+        "evidenceAtT": {
+          "lastPrice": 20283.5,
+          "pdh": 20659.25,
+          "pdl": 20254,
+          "tradeableBias": "neutral",
+          "marketStructure": "bullish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "PDL liquidity at 20254.00 was swept. Price displaced upward by 21.00 points. A bullish FVG exists between 20272.00–20277.50.",
+          "sessionLabel": "NY_AM",
+          "timeBucketEt": "1000-1130",
+          "dayOfWeekEt": "Wed"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      }
+    ],
+    "worst": [
+      {
+        "asOf": "2025-05-22T14:57:00.000Z",
+        "verdict": "SHORT",
+        "mfe": 0.5,
+        "mae": 92,
+        "proxyR": -2.1904761904761907,
+        "invalidationBeforeTarget": true,
+        "evidenceAtT": {
+          "lastPrice": 21176,
+          "pdh": 21558.5,
+          "pdl": 21072.75,
+          "tradeableBias": "neutral",
+          "marketStructure": "bearish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "Price displaced downward by 18.50 points. A bearish FVG exists between 21183.50–21193.75.",
+          "sessionLabel": "NY_AM",
+          "timeBucketEt": "1000-1130",
+          "dayOfWeekEt": "Thu"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2025-02-25T09:18:00.000Z",
+        "verdict": "LONG",
+        "mfe": 4,
+        "mae": 58.75,
+        "proxyR": -3.219178082191781,
+        "invalidationBeforeTarget": true,
+        "evidenceAtT": {
+          "lastPrice": 21379.75,
+          "pdh": 21813,
+          "pdl": 21366.5,
+          "tradeableBias": "neutral",
+          "marketStructure": "bullish",
+          "displacement": "absent",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "fvg"
+          ],
+          "factsPreview": "PDL liquidity at 21366.50 was swept. PDC liquidity at 21385.25 was swept. No impulsive displacement detected in lookback. A bullish FVG exists between 21336.50–21343.25.",
+          "sessionLabel": "OTHER",
+          "timeBucketEt": "other",
+          "dayOfWeekEt": "Tue"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2025-03-03T17:18:00.000Z",
+        "verdict": "LONG",
+        "mfe": 25.25,
+        "mae": 57.75,
+        "proxyR": -1.6382978723404256,
+        "invalidationBeforeTarget": true,
+        "evidenceAtT": {
+          "lastPrice": 20939.25,
+          "pdh": 20944.25,
+          "pdl": 20460.5,
+          "tradeableBias": "neutral",
+          "marketStructure": "bullish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "PDH liquidity at 20944.25 was swept. PDC liquidity at 20909.00 was swept. Price displaced upward by 20.00 points. A bullish FVG exists between 20932.75–20940.50.",
+          "sessionLabel": "NY_LUNCH",
+          "timeBucketEt": "1130-1330_lunch",
+          "dayOfWeekEt": "Mon"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2025-05-30T14:37:00.000Z",
+        "verdict": "LONG",
+        "mfe": 4,
+        "mae": 50.25,
+        "proxyR": -0.4648241206030151,
+        "invalidationBeforeTarget": null,
+        "evidenceAtT": {
+          "lastPrice": 21395.5,
+          "pdh": 21858.75,
+          "pdl": 21301,
+          "tradeableBias": "bullish",
+          "marketStructure": "bullish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "htf_bias",
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "PDL liquidity at 21301.00 was swept. PDC liquidity at 21317.00 was swept. Price displaced upward by 23.25 points. A bullish FVG exists between 21323.25–21330.25.",
+          "sessionLabel": "NY_AM",
+          "timeBucketEt": "1000-1130",
+          "dayOfWeekEt": "Fri"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      },
+      {
+        "asOf": "2025-02-18T16:48:00.000Z",
+        "verdict": "LONG",
+        "mfe": 9.25,
+        "mae": 44.5,
+        "proxyR": -2.3421052631578947,
+        "invalidationBeforeTarget": true,
+        "evidenceAtT": {
+          "lastPrice": 22206.5,
+          "pdh": 22281.75,
+          "pdl": 22192.5,
+          "tradeableBias": "neutral",
+          "marketStructure": "bullish",
+          "displacement": "present",
+          "fvgStatus": "present",
+          "citedConcepts": [
+            "mss",
+            "displacement",
+            "fvg"
+          ],
+          "factsPreview": "PDL liquidity at 22192.50 was swept. Price displaced upward by 15.25 points. A bullish FVG exists between 22193.75–22200.50.",
+          "sessionLabel": "NY_LUNCH",
+          "timeBucketEt": "1130-1330_lunch",
+          "dayOfWeekEt": "Tue"
+        },
+        "note": "Frozen evidence at t; MFE/MAE from post-freeze horizon only."
+      }
+    ]
+  },
+  "segments": [
+    {
+      "key": "WAIT",
+      "dimension": "verdict",
+      "decisions": 1188,
+      "long": 0,
+      "short": 0,
+      "wait": 1188,
+      "noTrade": 0,
+      "actionable": 0,
+      "medianMfe": null,
+      "medianMae": null,
+      "targetBeforeInvRate": null
+    },
+    {
+      "key": "NO_TRADE",
+      "dimension": "verdict",
+      "decisions": 239,
+      "long": 0,
+      "short": 0,
+      "wait": 0,
+      "noTrade": 239,
+      "actionable": 0,
+      "medianMfe": null,
+      "medianMae": null,
+      "targetBeforeInvRate": null
+    },
+    {
+      "key": "LONG",
+      "dimension": "verdict",
+      "decisions": 41,
+      "long": 41,
+      "short": 0,
+      "wait": 0,
+      "noTrade": 0,
+      "actionable": 39,
+      "medianMfe": 11.75,
+      "medianMae": 10.75,
+      "targetBeforeInvRate": 0.23809523809523808
+    },
+    {
+      "key": "SHORT",
+      "dimension": "verdict",
+      "decisions": 32,
+      "long": 0,
+      "short": 32,
+      "wait": 0,
+      "noTrade": 0,
+      "actionable": 32,
+      "medianMfe": 17.375,
+      "medianMae": 9,
+      "targetBeforeInvRate": 0.15
+    },
+    {
+      "key": "OTHER",
+      "dimension": "session",
+      "decisions": 1075,
+      "long": 29,
+      "short": 25,
+      "wait": 857,
+      "noTrade": 164,
+      "actionable": 53,
+      "medianMfe": 11.25,
+      "medianMae": 9,
+      "targetBeforeInvRate": 0.23333333333333334
+    },
+    {
+      "key": "NY_PM",
+      "dimension": "session",
+      "decisions": 156,
+      "long": 3,
+      "short": 3,
+      "wait": 109,
+      "noTrade": 41,
+      "actionable": 5,
+      "medianMfe": 33.25,
+      "medianMae": 16,
+      "targetBeforeInvRate": 0
+    },
+    {
+      "key": "NY_AM",
+      "dimension": "session",
+      "decisions": 126,
+      "long": 4,
+      "short": 1,
+      "wait": 104,
+      "noTrade": 17,
+      "actionable": 5,
+      "medianMfe": 26.5,
+      "medianMae": 34.75,
+      "targetBeforeInvRate": 0
+    },
+    {
+      "key": "NY_LUNCH",
+      "dimension": "session",
+      "decisions": 143,
+      "long": 5,
+      "short": 3,
+      "wait": 118,
+      "noTrade": 17,
+      "actionable": 8,
+      "medianMfe": 23.625,
+      "medianMae": 16,
+      "targetBeforeInvRate": 0.2
+    },
+    {
+      "key": "other",
+      "dimension": "time_bucket_et",
+      "decisions": 1075,
+      "long": 29,
+      "short": 25,
+      "wait": 857,
+      "noTrade": 164,
+      "actionable": 53,
+      "medianMfe": 11.25,
+      "medianMae": 9,
+      "targetBeforeInvRate": 0.23333333333333334
+    },
+    {
+      "key": "1330-1600_afternoon",
+      "dimension": "time_bucket_et",
+      "decisions": 156,
+      "long": 3,
+      "short": 3,
+      "wait": 109,
+      "noTrade": 41,
+      "actionable": 5,
+      "medianMfe": 33.25,
+      "medianMae": 16,
+      "targetBeforeInvRate": 0
+    },
+    {
+      "key": "0930-1000",
+      "dimension": "time_bucket_et",
+      "decisions": 28,
+      "long": 0,
+      "short": 0,
+      "wait": 20,
+      "noTrade": 8,
+      "actionable": 0,
+      "medianMfe": null,
+      "medianMae": null,
+      "targetBeforeInvRate": null
+    },
+    {
+      "key": "1130-1330_lunch",
+      "dimension": "time_bucket_et",
+      "decisions": 143,
+      "long": 5,
+      "short": 3,
+      "wait": 118,
+      "noTrade": 17,
+      "actionable": 8,
+      "medianMfe": 23.625,
+      "medianMae": 16,
+      "targetBeforeInvRate": 0.2
+    },
+    {
+      "key": "1000-1130",
+      "dimension": "time_bucket_et",
+      "decisions": 98,
+      "long": 4,
+      "short": 1,
+      "wait": 84,
+      "noTrade": 9,
+      "actionable": 5,
+      "medianMfe": 26.5,
+      "medianMae": 34.75,
+      "targetBeforeInvRate": 0
+    },
+    {
+      "key": "bearish",
+      "dimension": "htf_bias",
+      "decisions": 1133,
+      "long": 5,
+      "short": 14,
+      "wait": 922,
+      "noTrade": 192,
+      "actionable": 18,
+      "medianMfe": 13.75,
+      "medianMae": 9.375,
+      "targetBeforeInvRate": 0.2727272727272727
+    },
+    {
+      "key": "bullish",
+      "dimension": "htf_bias",
+      "decisions": 323,
+      "long": 15,
+      "short": 4,
+      "wait": 264,
+      "noTrade": 40,
+      "actionable": 19,
+      "medianMfe": 11.25,
+      "medianMae": 9,
+      "targetBeforeInvRate": 0.38461538461538464
+    },
+    {
+      "key": "neutral",
+      "dimension": "htf_bias",
+      "decisions": 44,
+      "long": 21,
+      "short": 14,
+      "wait": 2,
+      "noTrade": 7,
+      "actionable": 34,
+      "medianMfe": 13.125,
+      "medianMae": 10,
+      "targetBeforeInvRate": 0
+    }
+  ],
+  "elapsedMs": 1722646
+}

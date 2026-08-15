@@ -9,7 +9,7 @@
 (function () {
   const OVERLAY_ID = "dc-level-overlay";
   const PAGE_SCRIPT_ID = "dc-tv-page-bridge";
-  const BRIDGE_REV = "1.4.73";
+  const BRIDGE_REV = "1.4.112";
   const STORAGE_KEY = "dc-levels-cache";
   const PRICE_HINT_MAX_AGE_MS = 60000;
 
@@ -18,19 +18,28 @@
   let activePriceHint = null;
   let activeVisibleRange = null;
   let overlayOn = false;
+  let lastDrawFingerprint = "";
+  let overlayLabelsOnly = false;
   let resizeObserver = null;
   let resizeDebounce = null;
+  let trackRaf = null;
+  let rangePollTimer = null;
+  let lastTrackKey = "";
+  let lastAxisScanAt = 0;
+  let interacting = false;
+  let interactionPane = null;
   let drawGeneration = 0;
   let overlayGeneration = 0;
   let nativeDrawInFlight = false;
   let drawMutex = Promise.resolve();
+  const AXIS_INSET_DEFAULT_PX = 84;
 
   function syncBridgeRegistry() {
     return new Promise((resolve) => {
       const timer = setTimeout(() => {
         window.removeEventListener("message", onMsg);
         resolve(false);
-      }, 1200);
+      }, 280);
       function onMsg(event) {
         if (event.source !== window) return;
         if (event.data?.type === "DC_SYNC_REGISTRY_RESULT" || event.data?.type === "DC_BRIDGE_READY") {
@@ -203,8 +212,29 @@
     const anchor = priceAnchor(levels, zones, priceHint);
     const yTop = paneRect.top + 12;
     const yBot = paneRect.bottom - 36;
+    const axis = scanPriceLabels(paneRect, anchor);
+    const axisInsetPx = estimateAxisInset(paneRect, axis);
 
-    // Prefer live API prices — avoids misreading volume (~15k) as MNQ price scale
+    // Live axis first — API visibleMin/Max is a snapshot and will not track pan/zoom.
+    if (axis) {
+      const minP = Math.min(axis.top.price, axis.bot.price);
+      const maxP = Math.max(axis.top.price, axis.bot.price);
+      const axisYTop = Math.min(axis.top.y, axis.bot.y);
+      const axisYBot = Math.max(axis.top.y, axis.bot.y);
+      if (maxP > minP && axisYBot > axisYTop && isMnqPrice(minP, anchor) && isMnqPrice(maxP, anchor)) {
+        return {
+          pane,
+          paneRect,
+          minP,
+          maxP,
+          yTop: axisYTop,
+          yBot: axisYBot,
+          source: "axis",
+          axisInsetPx,
+        };
+      }
+    }
+
     if (
       priceHint &&
       Number.isFinite(priceHint.visibleMin) &&
@@ -221,18 +251,8 @@
         yTop,
         yBot,
         source: "api",
+        axisInsetPx,
       };
-    }
-
-    const axis = scanPriceLabels(paneRect, anchor);
-    if (axis) {
-      const minP = Math.min(axis.top.price, axis.bot.price);
-      const maxP = Math.max(axis.top.price, axis.bot.price);
-      const axisYTop = Math.min(axis.top.y, axis.bot.y);
-      const axisYBot = Math.max(axis.top.y, axis.bot.y);
-      if (maxP > minP && axisYBot > axisYTop && isMnqPrice(minP, anchor) && isMnqPrice(maxP, anchor)) {
-        return { pane, paneRect, minP, maxP, yTop: axisYTop, yBot: axisYBot, source: "axis" };
-      }
     }
 
     const prices = [
@@ -252,7 +272,16 @@
     }
     if (maxP <= minP) return null;
 
-    return { pane, paneRect, minP, maxP, yTop, yBot, source: "hint" };
+    return { pane, paneRect, minP, maxP, yTop, yBot, source: "hint", axisInsetPx };
+  }
+
+  function estimateAxisInset(paneRect, axis) {
+    if (axis?.points?.length) {
+      const axisX = Math.min(...axis.points.map((p) => p.x));
+      const inset = paneRect.right - axisX;
+      if (inset >= 40 && inset <= 220) return inset;
+    }
+    return AXIS_INSET_DEFAULT_PX;
   }
 
   function ensureOverlay() {
@@ -262,9 +291,13 @@
     root.id = OVERLAY_ID;
     root.setAttribute("aria-hidden", "true");
     document.body.appendChild(root);
-    if (!document.getElementById("dc-level-overlay-style")) {
-      const style = document.createElement("style");
-      style.id = "dc-level-overlay-style";
+    const styleId = "dc-level-overlay-style";
+    let style = document.getElementById(styleId);
+    if (!style || style.dataset.dcRev !== BRIDGE_REV) {
+      if (style) style.remove();
+      style = document.createElement("style");
+      style.id = styleId;
+      style.dataset.dcRev = BRIDGE_REV;
       style.textContent = `
 #${OVERLAY_ID} { position: fixed; inset: 0; pointer-events: none; z-index: 999990; }
 #${OVERLAY_ID} .dc-lvl-zone {
@@ -275,14 +308,12 @@
   border-left: 1px solid; border-right: 1px solid;
   opacity: 0.88;
 }
-#${OVERLAY_ID} .dc-lvl-label {
-  position: fixed; font: 10px/1.2 system-ui, sans-serif;
-  pointer-events: none; white-space: nowrap; opacity: 0.92;
-}
 #${OVERLAY_ID} .dc-lvl-ce {
-  position: fixed; height: 0; border-top: 1px solid #e879f9; opacity: 0.95;
+  position: fixed; height: 2px; background: #e879f9; opacity: 1; border: none;
 }
-#${OVERLAY_ID} .dc-lvl-line { position: fixed; height: 0; border-top: 2px dashed; opacity: 0.92; }
+#${OVERLAY_ID} .dc-lvl-line {
+  position: fixed; height: 2px; opacity: 1; border: none; pointer-events: none;
+}
 `;
       document.head.appendChild(style);
     }
@@ -308,7 +339,8 @@
     return left + ratio * width;
   }
 
-  function renderOverlay(levels, zones, priceHint, visibleRange) {
+  function renderOverlay(levels, zones, priceHint, visibleRange, opts) {
+    const labelsOnly = opts?.labelsOnly === true;
     const pane = findChartPane();
     const scale = buildScale(levels, zones, priceHint, pane);
     const root = ensureOverlay();
@@ -325,10 +357,11 @@
       yOffsetPx: scale.yTop,
     });
 
-    const { paneRect } = scale;
+    const { paneRect, axisInsetPx } = scale;
     const range = visibleRange || activeVisibleRange;
+    const light = isLightChartPane(scale.pane);
     let drawn = 0;
-    const endX = paneRect.right - 4;
+    const endX = paneRect.right - Math.max(4, axisInsetPx || AXIS_INSET_DEFAULT_PX);
 
     for (const zone of zones || []) {
       const top = Number(zone.top);
@@ -345,40 +378,30 @@
         : endX;
       const leftX = Math.min(startX, zoneEndX, endX);
       const rightX = Math.max(startX, zoneEndX);
-      const box = document.createElement("div");
-      box.className = zone.kind === "fhdr" ? "dc-lvl-zone dc-fhdr" : "dc-lvl-zone";
-      box.style.left = `${leftX}px`;
-      box.style.width = `${Math.max(8, Math.min(endX, rightX) - leftX)}px`;
-      box.style.top = `${Math.min(yTop, yBot)}px`;
-      box.style.height = `${Math.max(2, Math.abs(yBot - yTop))}px`;
-      box.style.backgroundColor = zone.fill || "rgba(251, 191, 133, 0.38)";
-      box.style.borderColor = zone.borderColor || zone.color || "#78716c";
-      root.appendChild(box);
-      drawn += 1;
+      if (!labelsOnly) {
+        const box = document.createElement("div");
+        box.className = zone.kind === "fhdr" ? "dc-lvl-zone dc-fhdr" : "dc-lvl-zone";
+        box.style.left = `${Math.round(leftX)}px`;
+        box.style.width = `${Math.max(8, Math.round(Math.min(endX, rightX) - leftX))}px`;
+        box.style.top = `${Math.round(Math.min(yTop, yBot))}px`;
+        box.style.height = `${Math.max(2, Math.round(Math.abs(yBot - yTop)))}px`;
+        box.style.backgroundColor = zone.fill || "rgba(251, 191, 133, 0.38)";
+        box.style.borderColor = zone.borderColor || zone.color || "#78716c";
+        root.appendChild(box);
+        drawn += 1;
 
-      if (zone.kind === "fvg" && Number.isFinite(Number(zone.ce))) {
-        const ceY = priceToY(Number(zone.ce), scale);
-        const ce = document.createElement("div");
-        ce.className = "dc-lvl-ce";
-        ce.style.left = `${leftX}px`;
-        ce.style.width = `${Math.max(8, Math.min(endX, rightX) - leftX)}px`;
-        ce.style.top = `${ceY}px`;
-        root.appendChild(ce);
+        if (zone.kind === "fvg" && Number.isFinite(Number(zone.ce))) {
+          const ceY = priceToY(Number(zone.ce), scale);
+          const ce = document.createElement("div");
+          ce.className = "dc-lvl-ce";
+          ce.style.left = `${Math.round(leftX)}px`;
+          ce.style.width = `${Math.max(8, Math.round(Math.min(endX, rightX) - leftX))}px`;
+          ce.style.top = `${Math.round(ceY - 1)}px`;
+          root.appendChild(ce);
+        }
       }
 
-      if (zone.showLabel !== false && zone.label) {
-        const zoneAlign = zone.labelAlign === "bottom" ? "bottom" : "top";
-        const zoneLane = Number.isFinite(Number(zone.labelLane)) ? Number(zone.labelLane) : 0;
-        appendLabel(
-          root,
-          formatOverlayLabel(zone.displayLabel || zone.label, zone.id),
-          leftX,
-          Math.min(yTop, yBot),
-          zone.borderColor || zone.color || "#78716c",
-          zoneAlign,
-          zoneLane
-        );
-      }
+      // Names are native TV drawings — overlay never paints HTML pills.
     }
 
     for (const level of levels) {
@@ -388,37 +411,26 @@
       if (y < paneRect.top - 2 || y > paneRect.bottom + 2) continue;
 
       const startX = timeToX(Number(level.startTime), range, paneRect);
-      const line = document.createElement("div");
-      line.className = "dc-lvl-line";
-      line.style.left = `${Math.min(startX, endX)}px`;
-      line.style.width = `${Math.max(8, endX - Math.min(startX, endX))}px`;
-      line.style.top = `${y}px`;
-      line.style.borderColor = level.color || "#22d3ee";
-      if (level.group === "structure" || level.dash) {
-        line.style.borderTopStyle = "dashed";
-      }
-      root.appendChild(line);
-      drawn += 1;
-
-      if (level.showLabel !== false && level.label) {
-        const levelAlign = level.labelAlign === "bottom" ? "bottom" : "top";
-        const levelLane = Number.isFinite(Number(level.labelLane)) ? Number(level.labelLane) : 0;
-        appendLabel(
+      if (!labelsOnly) {
+        appendOverlayLine(
           root,
-          formatOverlayLabel(level.displayLabel || level.label, level.id),
           Math.min(startX, endX),
+          Math.max(8, endX - Math.min(startX, endX)),
           y,
-          level.color || "#22d3ee",
-          levelAlign,
-          levelLane
+          overlayLineColorForLevel(level, light),
+          level.dash
         );
+        drawn += 1;
       }
+
+      // Level names stay on native rays so they track pan/zoom.
     }
 
     return {
       ok: drawn > 0,
       method: "overlay",
       count: drawn,
+      labelsOnly,
       source: scale.source,
     };
   }
@@ -431,11 +443,9 @@
     const watchGen = overlayGeneration;
     resizeObserver = new ResizeObserver(() => {
       if (!overlayOn || watchGen !== overlayGeneration) return;
-      clearTimeout(resizeDebounce);
-      resizeDebounce = setTimeout(() => {
-        if (!overlayOn || watchGen !== overlayGeneration) return;
-        renderOverlay(activeLevels, activeZones, activePriceHint, activeVisibleRange);
-      }, 350);
+      lastTrackKey = "";
+      requestVisibleRange();
+      paintOverlayNow();
     });
     resizeObserver.observe(pane);
   }
@@ -451,16 +461,137 @@
     }
   }
 
+  function onChartInteractStart() {
+    interacting = true;
+    requestVisibleRange();
+  }
+
+  function onChartInteractEnd() {
+    interacting = false;
+    lastTrackKey = "";
+    requestVisibleRange();
+    paintOverlayNow();
+  }
+
+  function attachInteractionWatch() {
+    detachInteractionWatch();
+    const pane = findChartPane();
+    if (!pane) return;
+    interactionPane = pane;
+    pane.addEventListener("wheel", onChartInteractStart, { passive: true, capture: true });
+    pane.addEventListener("pointerdown", onChartInteractStart, { capture: true });
+    window.addEventListener("pointerup", onChartInteractEnd, true);
+    window.addEventListener("pointercancel", onChartInteractEnd, true);
+  }
+
+  function detachInteractionWatch() {
+    if (interactionPane) {
+      interactionPane.removeEventListener("wheel", onChartInteractStart, true);
+      interactionPane.removeEventListener("pointerdown", onChartInteractStart, true);
+    }
+    window.removeEventListener("pointerup", onChartInteractEnd, true);
+    window.removeEventListener("pointercancel", onChartInteractEnd, true);
+    interactionPane = null;
+    interacting = false;
+  }
+
+  function overlayTrackKey() {
+    const pane = findChartPane();
+    const r = pane?.getBoundingClientRect();
+    return [
+      r?.left,
+      r?.top,
+      r?.width,
+      r?.height,
+      activeVisibleRange?.from,
+      activeVisibleRange?.to,
+      activePriceHint?.visibleMin,
+      activePriceHint?.visibleMax,
+      overlayLabelsOnly ? 1 : 0,
+    ].join("|");
+  }
+
+  function maybeRefreshLiveScale() {
+    const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+    if (now - lastAxisScanAt < (interacting ? 32 : 160)) return;
+    lastAxisScanAt = now;
+    const pane = findChartPane();
+    if (!pane) return;
+    const paneRect = pane.getBoundingClientRect();
+    const axis = scanPriceLabels(paneRect, priceAnchor(activeLevels, activeZones, activePriceHint));
+    if (!axis) return;
+    const minP = Math.min(axis.top.price, axis.bot.price);
+    const maxP = Math.max(axis.top.price, axis.bot.price);
+    if (!(maxP > minP) || !isMnqPrice(minP) || !isMnqPrice(maxP)) return;
+    activePriceHint = { ...(activePriceHint || {}), visibleMin: minP, visibleMax: maxP };
+  }
+
+  function paintOverlayNow() {
+    if (!overlayOn) return;
+    renderOverlay(activeLevels, activeZones, activePriceHint, activeVisibleRange, {
+      labelsOnly: overlayLabelsOnly,
+    });
+  }
+
+  function tickOverlayTrack() {
+    if (!overlayOn) {
+      trackRaf = null;
+      return;
+    }
+    maybeRefreshLiveScale();
+    const key = overlayTrackKey();
+    if (key !== lastTrackKey) {
+      lastTrackKey = key;
+      paintOverlayNow();
+    }
+    trackRaf = requestAnimationFrame(tickOverlayTrack);
+  }
+
+  function startTrackLoop() {
+    if (trackRaf != null) return;
+    lastTrackKey = "";
+    trackRaf = requestAnimationFrame(tickOverlayTrack);
+  }
+
+  function stopTrackLoop() {
+    if (trackRaf != null) {
+      cancelAnimationFrame(trackRaf);
+      trackRaf = null;
+    }
+    lastTrackKey = "";
+  }
+
+  function startRangePoll() {
+    stopRangePoll();
+    rangePollTimer = setInterval(() => {
+      if (!overlayOn) return;
+      requestVisibleRange();
+    }, interacting ? 80 : 220);
+  }
+
+  function stopRangePoll() {
+    if (rangePollTimer) {
+      clearInterval(rangePollTimer);
+      rangePollTimer = null;
+    }
+  }
+
   function startSyncLoop() {
     attachResizeWatch();
+    attachInteractionWatch();
+    startRangePoll();
+    startTrackLoop();
   }
 
   function stopSyncLoop() {
+    stopTrackLoop();
+    stopRangePoll();
+    detachInteractionWatch();
     detachResizeWatch();
   }
 
   function waitForTvResult(generation, opts) {
-    const maxWaitMs = Math.max(5000, Number(opts?.maxWaitMs) || 60000);
+    const maxWaitMs = Math.max(1500, Number(opts?.maxWaitMs) || 12000);
     const pollMs = Math.max(250, Number(opts?.pollMs) || 500);
     return new Promise((resolve) => {
       let settled = false;
@@ -542,6 +673,22 @@
     await waitForTvResult(generation, { maxWaitMs: 8000 });
   }
 
+  function applyViewportMessage(data) {
+    if (!data) return;
+    if (data.range && Number.isFinite(data.range.from) && Number.isFinite(data.range.to)) {
+      activeVisibleRange = data.range;
+    }
+    const pMin = Number(data.priceMin);
+    const pMax = Number(data.priceMax);
+    if (Number.isFinite(pMin) && Number.isFinite(pMax) && pMax > pMin) {
+      activePriceHint = { ...(activePriceHint || {}), visibleMin: pMin, visibleMax: pMax };
+    }
+  }
+
+  function requestVisibleRange() {
+    window.postMessage({ type: "DC_GET_VISIBLE_RANGE" }, "*");
+  }
+
   function refreshVisibleRange() {
     return new Promise((resolve) => {
       const timer = setTimeout(() => {
@@ -552,12 +699,18 @@
         if (event.source !== window || event.data?.type !== "DC_VISIBLE_RANGE") return;
         clearTimeout(timer);
         window.removeEventListener("message", onMsg);
-        resolve(event.data.range || null);
+        applyViewportMessage(event.data);
+        resolve(event.data.range || activeVisibleRange || null);
       }
       window.addEventListener("message", onMsg);
-      window.postMessage({ type: "DC_GET_VISIBLE_RANGE" }, "*");
+      requestVisibleRange();
     });
   }
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== window || event.data?.type !== "DC_VISIBLE_RANGE") return;
+    applyViewportMessage(event.data);
+  });
 
   function normalizeInput(input) {
     if (Array.isArray(input)) return { levels: input, zones: [], priceHint: null };
@@ -572,12 +725,16 @@
   const LABEL_CLUSTER_DEFAULT = 8;
   const LABEL_CLUSTER_MAX = 14;
   const LABEL_CLUSTER_RATIO = 0.0035;
-  const LABEL_MIN_GAP_PX = 18;
+  const LABEL_MIN_GAP_PX = 4;
   const LABEL_OFFSET_TOP_PX = 4;
-  const LABEL_OFFSET_BOTTOM_PX = 14;
-  const LABEL_LANE_X_STEP_PX = 10;
-  const LABEL_EST_HEIGHT_PX = 12;
+  const LABEL_OFFSET_BOTTOM_PX = 16;
+  const LABEL_LANE_STEP_PX = 20;
+  const LABEL_LANE_X_STEP_PX = 28;
+  const LABEL_EST_HEIGHT_PX = 18;
   const LABEL_MAX_LANES = 24;
+  const LINE_THICK_PX = 2;
+  const DASH_ON_MIN_PX = 10;
+  const DASH_GAP_MIN_PX = 6;
 
   const LABEL_ID_PRIORITY = {
     pdh: 100,
@@ -612,12 +769,29 @@
   }
 
   function labelLaneToAlign(lane) {
-    return lane % 2 === 0 ? "top" : "bottom";
+    const n = Math.max(0, Math.floor(Number(lane) || 0));
+    return ["top", "middle", "bottom"][n % 3];
+  }
+
+  function labelLaneToHorzAlign(lane) {
+    const n = Math.max(0, Math.floor(Number(lane) || 0));
+    return ["left", "center", "right"][n % 3];
+  }
+
+  function labelLaneToTimeShiftSec(lane, visibleSpanSec) {
+    const n = Math.max(0, Math.floor(Number(lane) || 0));
+    if (n === 0) return 0;
+    const span = Number.isFinite(visibleSpanSec) && visibleSpanSec > 0 ? visibleSpanSec : 3600;
+    return n * Math.max(90, Math.floor(span / 16));
+  }
+
+  function isSlashJoinedChartLabel(text) {
+    return /\s\/\s/.test(String(text || ""));
   }
 
   function labelYOffsetPx(lineY, align, lane) {
     const stack = Math.floor(Math.max(0, lane || 0) / 2);
-    const step = stack * LABEL_MIN_GAP_PX;
+    const step = stack * LABEL_LANE_STEP_PX;
     if (align === "bottom") return lineY + LABEL_OFFSET_BOTTOM_PX + step;
     return lineY - LABEL_OFFSET_TOP_PX - step;
   }
@@ -652,7 +826,21 @@
     return maxLanes - 1;
   }
 
+  function overlayNameFor(ref) {
+    return formatOverlayLabel(ref.label, ref.id);
+  }
+
+  function nativeTitleFor(ref) {
+    const extra = String(ref.displayLabel || "").trim();
+    if (extra && !isSlashJoinedChartLabel(extra)) return extra;
+    const short = overlayNameFor(ref).trim();
+    if (short) return short;
+    return String(ref.label || "").trim();
+  }
+
   function formatOverlayLabel(text, id) {
+    const short = window.DeskCopilotPlainLanguage?.formatChartOverlayLabel;
+    if (typeof short === "function") return short(text || "", id);
     const fmt = window.DeskCopilotPlainLanguage?.formatChartLevelLabel;
     if (typeof fmt === "function") return fmt(text || "", id);
     return String(text || "")
@@ -661,13 +849,84 @@
       .replace(/^DC(?=[A-Z(])/, "");
   }
 
-  function appendLabel(root, text, x, lineY, color, align, lane) {
+  function isLightChartPane(pane) {
+    try {
+      const root = document.documentElement;
+      const body = document.body;
+      const cls = `${root?.className || ""} ${body?.className || ""} ${pane?.className || ""}`;
+      if (/\b(theme-light|tv-theme--light)\b/i.test(cls)) return true;
+      if (/\b(theme-dark|tv-theme--dark)\b/i.test(cls)) return false;
+      const el = pane || body;
+      if (!el || typeof getComputedStyle !== "function") return false;
+      const bg = getComputedStyle(el).backgroundColor || "";
+      const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!m) return false;
+      const lum = (0.2126 * Number(m[1]) + 0.7152 * Number(m[2]) + 0.0722 * Number(m[3])) / 255;
+      return lum > 0.55;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Type hues stay distinct — never flatten session/PD/REL onto one teal. */
+  function overlayLineColorForLevel(level, light) {
+    const id = String(level?.id || "");
+    const group = String(level?.group || "");
+    let hex = String(level?.color || "").toLowerCase();
+    if (/^reh(_|$)/i.test(id) || /^rel(_|$)/i.test(id) || /^eqh(_|$)/i.test(id) || /^eql(_|$)/i.test(id)) {
+      hex = "#e879f9";
+    } else if (group === "session" || /^(asia_|london_|ny_)/i.test(id)) {
+      hex = "#38bdf8";
+    } else if (id === "org_ce") {
+      hex = "#e879f9";
+    } else if (group === "org" || /^org_/i.test(id)) {
+      hex = "#22d3ee";
+    } else if (group === "gap" || /^(ndog|nwog)/i.test(id)) {
+      hex = "#ef4444";
+    } else if (group === "daily" || /^(pdh|pdl|pdc|pdo|pdeq|cdeq|cdo)$/i.test(id)) {
+      hex = "#a78bfa";
+    } else if (hex === "#94a3b8" || hex === "#64748b") {
+      hex = "#38bdf8";
+    } else if (hex === "#cbd5e1") {
+      hex = "#a78bfa";
+    } else if (!hex) {
+      hex = "#22d3ee";
+    }
+    if (!light) return hex;
+    if (hex === "#38bdf8") return "#0284c7";
+    if (hex === "#22d3ee") return "#0e7490";
+    if (hex === "#e879f9") return "#c026d3";
+    if (hex === "#a78bfa") return "#6d28d9";
+    if (hex === "#ef4444") return "#b91c1c";
+    return hex;
+  }
+
+  function readableOverlayLineColor(color, light) {
+    return overlayLineColorForLevel({ color }, light);
+  }
+
+  function overlayDashPair(dash) {
+    const m = String(dash || "").trim().match(/^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)/);
+    const on = m ? Number(m[1]) : DASH_ON_MIN_PX;
+    const off = m ? Number(m[2]) : DASH_GAP_MIN_PX;
+    return {
+      on: Math.max(DASH_ON_MIN_PX, on),
+      off: Math.max(DASH_GAP_MIN_PX, off),
+    };
+  }
+
+  /** 2px repeating dashes — CSS border-top:dashed on height:0 disappears at zoom. */
+  function appendOverlayLine(root, x, width, y, color, dash) {
     const el = document.createElement("div");
-    el.className = "dc-lvl-label";
-    el.textContent = text;
-    el.style.color = color;
-    el.style.left = `${x + labelOffsetXPx(lane)}px`;
-    el.style.top = `${labelYOffsetPx(lineY, align, lane)}px`;
+    el.className = "dc-lvl-line";
+    const { on, off } = overlayDashPair(dash);
+    const period = on + off;
+    el.style.left = `${Math.round(x)}px`;
+    el.style.width = `${Math.max(8, Math.round(width))}px`;
+    el.style.top = `${Math.round(y - LINE_THICK_PX / 2)}px`;
+    el.style.height = `${LINE_THICK_PX}px`;
+    el.style.backgroundImage = `repeating-linear-gradient(to right, ${color} 0 ${on}px, transparent ${on}px ${period}px)`;
+    el.style.backgroundColor = "transparent";
     root.appendChild(el);
     return el;
   }
@@ -684,19 +943,30 @@
 
   function assignStaggeredLabelAlign(levels, zones, opts) {
     for (const level of levels || []) {
-      level.labelLane = undefined;
       level.displayLabel = undefined;
-      if (level.showLabel !== false) level.showLabel = true;
+      const title = nativeTitleFor(level);
+      level.displayLabel = title || undefined;
+      level.showLabel = Boolean(title);
+      level.labelLane = undefined;
+      level.labelAlign = undefined;
+      level.labelHorzAlign = undefined;
+      level.labelTimeShiftSec = undefined;
     }
     for (const zone of zones || []) {
-      zone.labelLane = undefined;
       zone.displayLabel = undefined;
-      if (zone.showLabel !== false) zone.showLabel = true;
+      const title = nativeTitleFor(zone);
+      zone.displayLabel = title || undefined;
+      zone.showLabel = Boolean(title);
+      zone.labelLane = undefined;
+      zone.labelAlign = undefined;
+      zone.labelHorzAlign = undefined;
+      zone.labelTimeShiftSec = undefined;
     }
 
     const items = [];
     for (const level of levels || []) {
       if (!level.label || level.showLabel === false) continue;
+      if (!Number.isFinite(Number(level.price)) || Number(level.price) <= 0) continue;
       items.push({ kind: "level", ref: level, price: level.price });
     }
     for (const zone of zones || []) {
@@ -705,46 +975,62 @@
     }
     if (!items.length) return;
 
-    items.sort((a, b) => b.price - a.price);
+    items.sort((a, b) => b.price - a.price || labelPriorityForDraw(b) - labelPriorityForDraw(a));
     const prices = items.map((i) => i.price);
     const pMin = opts?.priceMin ?? Math.min(...prices);
     const pMax = opts?.priceMax ?? Math.max(...prices);
-    const plotH = opts?.plotHeightPx ?? 480;
-    const yOff = opts?.yOffsetPx ?? 0;
     const threshold = labelClusterThreshold(pMin, pMax, opts?.clusterPoints);
+    const spanSec = opts?.visibleSpanSec;
 
-    let clusterStart = 0;
-    for (let i = 1; i <= items.length; i++) {
-      const chained =
-        i < items.length && items[i - 1].price - items[i].price <= threshold;
-      if (chained) continue;
-
-      const cluster = items.slice(clusterStart, i);
-      cluster.sort((a, b) => labelPriorityForDraw(b) - labelPriorityForDraw(a));
-      const placed = [];
-
-      for (let ci = 0; ci < cluster.length; ci++) {
-        const item = cluster[ci];
-        const lineY = priceToLineY(item.price, pMin, pMax, plotH, yOff);
-        const lane = findLabelLane(lineY, placed, LABEL_MAX_LANES, ci % 2);
-        item.ref.labelLane = lane;
-        item.ref.labelAlign = labelLaneToAlign(lane);
-        placed.push(labelBBox(lineY, labelLaneToAlign(lane), lane));
-      }
-      clusterStart = i;
+    const clusters = [];
+    for (const item of items) {
+      const last = clusters[clusters.length - 1];
+      if (last && Math.abs(last[last.length - 1].price - item.price) <= threshold) last.push(item);
+      else clusters.push([item]);
     }
+    for (const cluster of clusters) {
+      cluster.sort((a, b) => labelPriorityForDraw(b) - labelPriorityForDraw(a) || b.price - a.price);
+      cluster.forEach((item, i) => {
+        item.ref.labelLane = i;
+        item.ref.labelAlign = labelLaneToAlign(i);
+        item.ref.labelHorzAlign = labelLaneToHorzAlign(i);
+        item.ref.labelTimeShiftSec = labelLaneToTimeShiftSec(i, spanSec);
+      });
+    }
+  }
+
+  function drawingPayloadFingerprint(levels, zones) {
+    const lv = (levels || [])
+      .map((l) => `${l.id}:${Number(l.price).toFixed(2)}:${l.label || ""}:${l.color || ""}`)
+      .sort()
+      .join("|");
+    const zn = (zones || [])
+      .map((z) => `${z.id}:${Number(z.top).toFixed(2)}:${Number(z.bottom).toFixed(2)}:${z.label || ""}`)
+      .sort()
+      .join("|");
+    return `${lv}#${zn}`;
   }
 
   async function drawOnChart(input, preferOverlay) {
     return withDrawMutex(async () => {
+      const { levels, zones, priceHint } = normalizeInput(input);
+      const reason = input?.reason || input?.drawReason || "user";
+      const fp = drawingPayloadFingerprint(levels, zones);
+      if (reason === "tick") {
+        return { ok: true, method: "skipped_tick", skipped: true, generation: drawGeneration };
+      }
+      if (fp && fp === lastDrawFingerprint && reason !== "user" && reason !== "reconnect" && reason !== "toggle") {
+        return { ok: true, method: "skipped_unchanged", skipped: true, generation: drawGeneration };
+      }
+
       const myGeneration = ++drawGeneration;
       overlayGeneration = myGeneration;
       nativeDrawInFlight = false;
       overlayOn = false;
+      overlayLabelsOnly = false;
       stopSyncLoop();
       clearOverlay();
 
-      const { levels, zones, priceHint } = normalizeInput(input);
       activeLevels = levels || [];
       activeZones = zones || [];
       activePriceHint = priceHint;
@@ -753,22 +1039,39 @@
       }
 
       await injectPageBridge();
-      await preClearNativeShapes(myGeneration);
-      if (myGeneration !== drawGeneration) {
-        return { ok: false, method: "overlay", reason: "superseded", generation: myGeneration };
-      }
-
-      activeVisibleRange = await refreshVisibleRange();
       if (myGeneration !== drawGeneration) {
         return { ok: false, method: "overlay", reason: "superseded", generation: myGeneration };
       }
 
       const priceMin = priceHint?.visibleMin;
       const priceMax = priceHint?.visibleMax;
+      let plotHeightPx = 480;
+      try {
+        const pane = findChartPane();
+        const h = pane?.getBoundingClientRect?.().height;
+        if (Number.isFinite(h) && h > 80) plotHeightPx = h;
+      } catch (_) {
+        /* keep default */
+      }
+      let visibleSpanSec = 3600;
+      try {
+        const from = Number(activeVisibleRange?.from);
+        const to = Number(activeVisibleRange?.to);
+        if (Number.isFinite(from) && Number.isFinite(to) && to > from) {
+          visibleSpanSec = Math.max(180, to - from);
+        }
+      } catch (_) {
+        /* keep default */
+      }
       if (Number.isFinite(priceMin) && Number.isFinite(priceMax)) {
-        assignStaggeredLabelAlign(activeLevels, activeZones, { priceMin, priceMax });
+        assignStaggeredLabelAlign(activeLevels, activeZones, {
+          priceMin,
+          priceMax,
+          plotHeightPx,
+          visibleSpanSec,
+        });
       } else {
-        assignStaggeredLabelAlign(activeLevels, activeZones);
+        assignStaggeredLabelAlign(activeLevels, activeZones, { plotHeightPx, visibleSpanSec });
       }
 
       if (!preferOverlay && (activeLevels.length || activeZones.length)) {
@@ -782,7 +1085,7 @@
           },
           "*"
         );
-        const tvResult = await waitForTvResult(myGeneration);
+        const tvResult = await waitForTvResult(myGeneration, { maxWaitMs: 12000 });
         nativeDrawInFlight = false;
 
         if (myGeneration !== drawGeneration) {
@@ -791,13 +1094,17 @@
 
         if (tvResult.ok) {
           overlayOn = false;
-          stopSyncLoop();
+          overlayLabelsOnly = false;
+          overlayGeneration = myGeneration;
           clearOverlay();
+          stopSyncLoop();
+          lastDrawFingerprint = fp;
           return {
             ...tvResult,
             mode: "native",
+            overlayLabels: false,
             generation: myGeneration,
-            hint: "TradingView lines with labels.",
+            hint: "TradingView rays with native drawing labels.",
           };
         }
 
@@ -823,6 +1130,7 @@
       }
 
       overlayOn = true;
+      overlayLabelsOnly = false;
       overlayGeneration = myGeneration;
       const overlayResult = renderOverlay(
         activeLevels,
@@ -839,12 +1147,13 @@
           ? "aligned to price scale"
           : "aligned to level range — zoom chart if lines look off";
 
+      if (overlayResult.ok) lastDrawFingerprint = fp;
       return {
         ...overlayResult,
         mode: "overlay",
         generation: myGeneration,
         hint: overlayResult.ok
-          ? `Overlay (${sourceNote}) — lines + staggered labels.`
+          ? `Overlay (${sourceNote}) — lines only; names need native TV drawings.`
           : "Could not find chart — zoom in on candles, or use Pine indicator",
       };
     });
@@ -864,6 +1173,7 @@
     activePriceHint = null;
     activeVisibleRange = null;
     overlayOn = false;
+    overlayLabelsOnly = false;
     stopSyncLoop();
     clearOverlay();
     void withDrawMutex(async () => {

@@ -1,0 +1,23 @@
+{
+  "note": "Competing hypotheses. Status is evidence state, not edge. Single-day numbers cannot mark SUPPORTED.",
+  "hypotheses": [
+    {
+      "id": "H-A",
+      "description": "HTF dominates LTF",
+      "architectureVersion": null,
+      "status": "UNTESTED"
+    },
+    {
+      "id": "H-B",
+      "description": "LTF can override HTF on a valid proven liquidity event",
+      "architectureVersion": "architecture-v2",
+      "status": "UNTESTED"
+    },
+    {
+      "id": "H-C",
+      "description": "HTF is context but does not block tactical countertrend",
+      "architectureVersion": "architecture-v3",
+      "status": "UNTESTED"
+    }
+  ]
+}

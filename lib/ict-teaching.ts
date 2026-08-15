@@ -56,7 +56,7 @@ const CONCEPT_DEFS: Record<string, TeachingAnswer> = {
   liquidity: {
     concept: "Liquidity",
     definition:
-      "Resting orders above equal highs (buy-side liquidity) or below equal lows (sell-side liquidity). ICT looks for sweeps through PDH, PDL, session highs/lows, and equal pools before a directional move.",
+      "Resting orders above equal highs (buy-side liquidity) or below equal lows (sell-side liquidity). ICT looks for sweeps through PDH, PDL, session highs/lows, and equal pools before a directional move. Sweeping a high takes buy-side liquidity and is not itself a bullish signal; sweeping a low takes sell-side liquidity and is not itself a bearish signal.",
     source_note: "Desk playbook — liquidity model",
     mode: "teaching",
   },

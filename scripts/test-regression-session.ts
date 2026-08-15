@@ -30,6 +30,7 @@ import {
 import {
   resolveWeatherLocation,
   weatherAmbiguousPrompt,
+  isAmbiguousWeatherLocation,
   WEATHER_LOCATION_PROMPT,
 } from "../lib/weather-location";
 import { tryWebSearchReply } from "../lib/web-search-reply";
@@ -309,10 +310,12 @@ assert(
 );
 
 async function runAsyncChecks() {
+  // Product: bare "Telford" is a known UK county town — not an ambiguous prompt.
+  assert(!isAmbiguousWeatherLocation("Telford"), "bare Telford is not an ambiguous weather location");
   const bareTelford = await tryWebSearchReply("weather in Telford");
   assert(
-    bareTelford === weatherAmbiguousPrompt("Telford"),
-    "bare Telford asks which region"
+    bareTelford !== weatherAmbiguousPrompt("Telford"),
+    "bare Telford proceeds (does not ask which region)"
   );
 
   const personaInstant = await tryCasualChatReplyInstant("Tell me about yourself");

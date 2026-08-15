@@ -44,12 +44,35 @@ import {
   tryIntelligenceReply,
 } from "@/lib/conversational-query";
 import { buildDeskMarketIntelligence, formatIntelligenceForPrompt } from "@/lib/market-intelligence";
+import {
+  answerComparativeLevelFollowUp,
+  isLevelComparativeFollowUp,
+} from "@/lib/level-comparative-followup";
 import { classifyAnalysisDepth, requiresDeepAnalysisPipeline, type AnalysisDepth } from "@/lib/analysis-depth";
 import {
   evaluateAnalysisQualityGate,
   formatQualityGateForPrompt,
   type QualityGateResult,
 } from "@/lib/analysis-quality-gate";
+import { flushDecisionMemoryWrites } from "@/lib/decision-envelope-history";
+import type { DecisionEnvelope } from "@/lib/decision-envelope";
+import { validateDecisionEnvelope } from "@/lib/decision-envelope";
+import {
+  formatMentorTradeSpoken,
+  formatQualityGateSpokenReply,
+  formatStructuredWaitFollowUp,
+  formatWhyNotDirectionFollowUp,
+  resolveUserPresentationMode,
+} from "@/lib/decision-contract-output";
+import { getLastPipelineResult } from "@/lib/desk-pipeline";
+import {
+  classifyMentorIntent,
+  mentorContextFromMessages,
+  parseWhyNotDirection,
+  type MentorIntentContext,
+} from "@/lib/mentor-intent";
+import { isDecisionHistoryTimeQuery } from "@/lib/decision-history-query";
+import { answerLiveDecisionHistoryQuery } from "@/lib/decision-time-travel";
 import { CASUAL_CHAT_SYSTEM_PROMPT } from "@/lib/casual-chat-prompt";
 import { formatMemoryForPrompt, normalizeMemory, userMemoryReply, isUserMemoryQuestion, type DeskMemory } from "@/lib/desk-memory";
 
@@ -78,6 +101,14 @@ function wantsMarketContext(text: string): boolean {
   );
 }
 
+export type BuiltChatPrompt = {
+  system: string;
+  marketDataWarning: string | null;
+  qualityGate?: QualityGateResult;
+  richTrading: boolean;
+  analysisDepth: ReturnType<typeof classifyAnalysisDepth>;
+};
+
 export type ChatPromptInput = {
   messages: ChatMessage[];
   symbol?: string;
@@ -86,18 +117,294 @@ export type ChatPromptInput = {
   voiceInput?: boolean;
   voiceRaw?: string;
   chartLastPrice?: number | null;
+  chartLastPriceSource?: string | null;
+  chartLastPriceTs?: number | null;
+  chartSnapshot?: import("./chart-snapshot").ChartSnapshotPayload | null;
+  chartExportFailed?: boolean;
   memory?: DeskMemory | null;
+  /**
+   * Same-request reuse only: when the stream route already ran buildChatSystemPrompt
+   * for the CURRENT_MARKET_READ fast path and fell through to LLM.
+   */
+  prebuiltPrompt?: BuiltChatPrompt;
 };
+
+export function attachPriorReadContext(
+  ctx: MentorIntentContext,
+  lastVerdict?: string | null
+): MentorIntentContext {
+  const verdict = String(lastVerdict || "").trim();
+  if (verdict) ctx.lastVerdict = verdict;
+  return ctx;
+}
+
+/**
+ * Same-request CURRENT_MARKET_READ deterministic fast path.
+ * Default ON — skip OpenAI when this request already has a valid quality-gate envelope.
+ * Disable with KAREN_INSTANT_READ_LLM_SKIP=0|false|no|off.
+ * Never reads lastPipeline / LIVE ring / Redis / HISTORICAL / Analyse RAM.
+ */
+export function isInstantReadLlmSkipEnabled(): boolean {
+  const v = process.env.KAREN_INSTANT_READ_LLM_SKIP?.trim().toLowerCase();
+  if (v === "0" || v === "false" || v === "no" || v === "off") return false;
+  if (v === "1" || v === "true" || v === "yes" || v === "on") return true;
+  return true;
+}
+
+export type InstantReadSkipResult = {
+  reply: string;
+  decisionEnvelope: DecisionEnvelope;
+  responseSource: "envelope_instant";
+};
+
+/**
+ * Present THIS request's quality-gate DecisionEnvelope without OpenAI.
+ * Envelope must already exist from evaluateAnalysisQualityGate on the same request.
+ */
+export function tryInstantReadFromQualityGate(opts: {
+  question: string;
+  mentorCtx?: MentorIntentContext;
+  qualityGate?: QualityGateResult | null;
+  /** When set, never take the LIVE envelope instant path (historical uses fixture formatters). */
+  historicalFixture?: unknown | null;
+  /** Must be true — mirrors tradingStream on /api/chat/stream. */
+  tradingStream?: boolean;
+}): InstantReadSkipResult | null {
+  if (!isInstantReadLlmSkipEnabled()) return null;
+  if (opts.tradingStream !== true) return null;
+  // LIVE instant path only — historical uses fixture session / existing historical formatters.
+  if (opts.historicalFixture) return null;
+  const intent = classifyMentorIntent(opts.question, opts.mentorCtx);
+  if (intent !== "CURRENT_MARKET_READ") return null;
+  const gate = opts.qualityGate;
+  if (!gate || gate.canDeliverVerdict !== true) return null;
+  const env = gate.decisionEnvelope;
+  if (!env) return null;
+  const verr = validateDecisionEnvelope(env);
+  if (verr.length > 0) return null;
+  if (!env.stance || !env.primaryHorizon?.timeframe || !env.primaryHorizon?.lean) return null;
+  if (!env.read?.htfContext?.horizon || !env.read?.currentStructure?.horizon) return null;
+  if (!String(env.invalidation?.condition || "").trim()) return null;
+  let reply: string;
+  try {
+    reply = formatMentorTradeSpoken(env, { mode: resolveUserPresentationMode() });
+  } catch {
+    return null;
+  }
+  if (!reply.trim()) return null;
+  const mode = resolveUserPresentationMode();
+  if (mode === "structured") {
+    if (!/TRADE DECISION:/i.test(reply) || !/MENTOR VIEW:/i.test(reply)) return null;
+  } else if (
+    !/\bI(?:'m| am)\s+(WAITING|LONG|SHORT|NO_TRADE)\b/i.test(reply) &&
+    !/\bso I(?:'m| am)\s+(WAITING|LONG|SHORT|NO_TRADE)\b/i.test(reply) &&
+    !/\bUntil then I(?:'m| am)\s+(WAITING|LONG|SHORT|NO_TRADE)\b/i.test(reply)
+  ) {
+    return null;
+  }
+  return {
+    reply: expandTradingAbbreviations(reply),
+    decisionEnvelope: env,
+    responseSource: "envelope_instant",
+  };
+}
+
+export type CurrentMarketReadFastPathResult =
+  | {
+      kind: "instant";
+      reply: string;
+      decisionEnvelope: DecisionEnvelope;
+      responseSource: "envelope_instant";
+      formatMs: number;
+      promptBuildMs: number;
+      openaiCalls: 0;
+    }
+  | {
+      kind: "quality_gate";
+      reply: string;
+      promptBuildMs: number;
+      openaiCalls: 0;
+    }
+  | {
+      kind: "fallback_llm";
+      prebuilt: BuiltChatPrompt;
+      promptBuildMs: number;
+    }
+  | { kind: "skip" };
+
+/**
+ * Route-level CURRENT_MARKET_READ fast path: one buildChatSystemPrompt, then
+ * formatMentorTradeSpoken — never calls OpenAI. On soft miss, returns prebuilt
+ * for streamChatReply so the pipeline is not evaluated twice.
+ */
+export async function tryCurrentMarketReadFastPath(
+  input: ChatPromptInput,
+  opts: { tradingStream: boolean }
+): Promise<CurrentMarketReadFastPathResult> {
+  if (!isInstantReadLlmSkipEnabled()) return { kind: "skip" };
+  if (!opts.tradingStream) return { kind: "skip" };
+
+  const lastUser =
+    [...input.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  // History intents never rebuild MarketState / quality-gate for a live read.
+  if (isDecisionHistoryTimeQuery(lastUser)) return { kind: "skip" };
+  const mentorCtx = mentorContextFromMessages(input.messages);
+  attachPriorReadContext(mentorCtx, input.lastVerdict);
+  if (classifyMentorIntent(lastUser, mentorCtx) !== "CURRENT_MARKET_READ") {
+    return { kind: "skip" };
+  }
+
+  const t0 = Date.now();
+  const prebuilt = await buildChatSystemPrompt(input);
+  const promptBuildMs = Date.now() - t0;
+  const { qualityGate, richTrading, analysisDepth } = prebuilt;
+  const richPath =
+    richTrading ||
+    requiresDeepAnalysisPipeline(analysisDepth) ||
+    mustUseTradingStream(lastUser);
+
+  if (
+    richPath &&
+    qualityGate &&
+    !qualityGate.canDeliverVerdict &&
+    !isGeneralConversation(lastUser) &&
+    !isCasualChat(lastUser)
+  ) {
+    const reply = formatQualityGateSpokenReply(qualityGate, {
+      mode: resolveUserPresentationMode(),
+    });
+    return {
+      kind: "quality_gate",
+      reply: expandTradingAbbreviations(reply),
+      promptBuildMs,
+      openaiCalls: 0,
+    };
+  }
+
+  const tFormat = Date.now();
+  const instant = tryInstantReadFromQualityGate({
+    question: lastUser,
+    mentorCtx,
+    qualityGate,
+    tradingStream: true,
+  });
+  if (instant) {
+    return {
+      kind: "instant",
+      reply: instant.reply,
+      decisionEnvelope: instant.decisionEnvelope,
+      responseSource: instant.responseSource,
+      formatMs: Date.now() - tFormat,
+      promptBuildMs,
+      openaiCalls: 0,
+    };
+  }
+
+  return { kind: "fallback_llm", prebuilt, promptBuildMs };
+}
+
+const PREVIOUS_DECISION_BANNER =
+  "PREVIOUS DECISION — explaining the last spoken call, not a new snapshot.";
+const PREVIOUS_DECISION_BANNER_PLAIN =
+  "About my previous read (not a new snapshot):";
+
+function labelPreviousDecision(spoken: string): string {
+  const t = String(spoken || "").trim();
+  if (!t) return t;
+  if (/^PREVIOUS DECISION/i.test(t) || /^About my previous read/i.test(t)) return t;
+  const banner =
+    resolveUserPresentationMode() === "plain"
+      ? PREVIOUS_DECISION_BANNER_PLAIN
+      : PREVIOUS_DECISION_BANNER;
+  return `${banner}\n${t}`;
+}
+
+export type StructuredWaitFollowUpResult = {
+  reply: string;
+  responseSource: "wait_structured";
+  openaiCalls: 0;
+};
+
+/**
+ * F6 surgical wire: WAIT_EXPLANATION → recorded last pipeline decision →
+ * formatStructuredWaitFollowUp. Sync only — no market refresh, no forbidden
+ * latency / market-error / replay-UI modules.
+ */
+export function tryStructuredWaitFollowUpFromLastPipeline(
+  question: string,
+  mentorCtx?: MentorIntentContext
+): StructuredWaitFollowUpResult | null {
+  const intent = classifyMentorIntent(question, mentorCtx);
+  if (intent !== "WAIT_EXPLANATION") return null;
+  const pipe = getLastPipelineResult();
+  const env = pipe?.analysis_contract?.decision;
+  if (!pipe || !env) return null;
+  const ctx = {
+    long_case: pipe.interpretation.long_case,
+    short_case: pipe.interpretation.short_case,
+    entry_model: pipe.interpretation.entry_model,
+    rejected_alternative: pipe.analysis_contract?.rejected_alternative,
+  };
+  let spoken: string;
+  try {
+    spoken = formatStructuredWaitFollowUp(env, ctx, {
+      mode: resolveUserPresentationMode(),
+    });
+  } catch {
+    return null;
+  }
+  if (!String(spoken || "").trim()) return null;
+  return {
+    reply: expandTradingAbbreviations(labelPreviousDecision(spoken)),
+    responseSource: "wait_structured",
+    openaiCalls: 0,
+  };
+}
+
+export type StructuredWhyNotFollowUpResult = {
+  reply: string;
+  responseSource: "why_not_structured";
+  openaiCalls: 0;
+};
+
+/**
+ * Why-not long/short → last pipeline envelope → formatWhyNotDirectionFollowUp.
+ * Deterministic; skips OpenAI when an envelope is available.
+ */
+export function tryStructuredWhyNotFollowUpFromLastPipeline(
+  question: string,
+  mentorCtx?: MentorIntentContext
+): StructuredWhyNotFollowUpResult | null {
+  const direction = parseWhyNotDirection(question);
+  if (!direction) return null;
+  const pipe = getLastPipelineResult();
+  const env = pipe?.analysis_contract?.decision;
+  if (!pipe || !env) return null;
+  const ctx = {
+    long_case: pipe.interpretation.long_case,
+    short_case: pipe.interpretation.short_case,
+    entry_model: pipe.interpretation.entry_model,
+    rejected_alternative: pipe.analysis_contract?.rejected_alternative,
+  };
+  let spoken: string;
+  try {
+    spoken = formatWhyNotDirectionFollowUp(env, direction, ctx, {
+      mode: resolveUserPresentationMode(),
+    });
+  } catch {
+    return null;
+  }
+  if (!String(spoken || "").trim()) return null;
+  return {
+    reply: expandTradingAbbreviations(labelPreviousDecision(spoken)),
+    responseSource: "why_not_structured",
+    openaiCalls: 0,
+  };
+}
 
 export async function buildChatSystemPrompt(
   input: ChatPromptInput
-): Promise<{
-  system: string;
-  marketDataWarning: string | null;
-  qualityGate?: QualityGateResult;
-  richTrading: boolean;
-  analysisDepth: ReturnType<typeof classifyAnalysisDepth>;
-}> {
+): Promise<BuiltChatPrompt> {
   const recentUser = input.messages
     .filter((m) => m.role === "user")
     .slice(-3)
@@ -123,10 +430,16 @@ export async function buildChatSystemPrompt(
     richTrading
   ) {
     try {
+      // Reuse ~45s Yahoo cache unless a live chart tick forces refresh.
+      // Quality gate still runs on the reused MarketState — freshness not weakened.
       const intel = await Promise.race([
         buildDeskMarketIntelligence({
           chartLastPrice: input.chartLastPrice,
-          forceFresh: true,
+          chartLastPriceSource: input.chartLastPriceSource,
+          chartLastPriceTs: input.chartLastPriceTs,
+          chartSnapshot: input.chartSnapshot,
+          chartExportFailed: input.chartExportFailed,
+          forceFresh: input.chartLastPrice != null,
         }),
         new Promise<never>((_, reject) => {
           setTimeout(() => reject(new Error("Market data timed out")), 25000);
@@ -137,6 +450,8 @@ export async function buildChatSystemPrompt(
         const gate = evaluateAnalysisQualityGate(intel, analysisDepth);
         qualityGateResult = gate;
         qualityGateBlock = formatQualityGateForPrompt(gate);
+        // Persist LIVE DecisionEnvelope to shared store when Redis is configured.
+        await flushDecisionMemoryWrites();
       }
     } catch (err) {
       marketDataWarning =
@@ -185,8 +500,36 @@ export async function trySnapshotChatReply(
   question: string,
   chartLastPrice?: number | null,
   recentText?: string,
-  messages?: ChatMessage[]
+  messages?: ChatMessage[],
+  priceMeta?: { source?: string | null; timestamp?: number | null }
 ): Promise<string | null> {
+  // Comparative level arithmetic first — no full chart read; works even if
+  // isCasualChat would otherwise swallow anaphora ("which is closer?").
+  if (isLevelComparativeFollowUp(question, messages, recentText)) {
+    let deskLastClose: number | null = null;
+    try {
+      const intel = await buildDeskMarketIntelligence({
+        chartLastPrice,
+        chartLastPriceSource: priceMeta?.source,
+        chartLastPriceTs: priceMeta?.timestamp,
+        forceFresh: chartLastPrice != null,
+      });
+      deskLastClose = intel.ctx.daily?.lastClose ?? intel.state.lastPrice ?? null;
+    } catch {
+      deskLastClose = null;
+    }
+    const spoken = answerComparativeLevelFollowUp({
+      question,
+      messages,
+      recentText,
+      chartLastPrice,
+      chartLastPriceSource: priceMeta?.source,
+      chartLastPriceTs: priceMeta?.timestamp,
+      deskLastClose,
+    });
+    if (spoken) return expandTradingAbbreviations(spoken);
+  }
+
   if (isCasualChat(question, recentText)) return null;
   if (shouldDeferCasualRoute(question, messages)) return null;
   if (prefersRichTradingAnswer(question)) return null;
@@ -201,14 +544,21 @@ export async function trySnapshotChatReply(
   if (!isSnapshotIntent(intent) && !useIntel) return null;
   try {
     const forceFresh = intent === "price" || chartLastPrice != null;
-    const intel = await buildDeskMarketIntelligence({ chartLastPrice, forceFresh });
+    const intel = await buildDeskMarketIntelligence({
+      chartLastPrice,
+      chartLastPriceSource: priceMeta?.source,
+      chartLastPriceTs: priceMeta?.timestamp,
+      forceFresh,
+    });
     const intelMode = classifyQueryMode(question, conversationContext);
     if (intelMode !== "legacy_snapshot" || useIntel) {
       const answer = tryIntelligenceReply(intel, question, conversationContext);
       if (answer) return answer.spoken;
     }
     if (!isSnapshotIntent(intent)) return null;
-    const spoken = buildMarketSnapshotAnswer(intel.ctx, intent, question).spoken;
+    const spoken = buildMarketSnapshotAnswer(intel.ctx, intent, question, {
+      dataQuality: intel.observation.data_quality,
+    }).spoken;
     if (
       isFirstPresentedFvgQuestion(question) &&
       intent === "first_presented_fvg" &&
@@ -293,7 +643,8 @@ export async function tryCasualChatReplyInstant(
 export async function streamCasualChatReply(
   question: string,
   messages?: ChatMessage[],
-  memory?: DeskMemory | null
+  memory?: DeskMemory | null,
+  opts?: { force?: boolean }
 ) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not set");
@@ -303,6 +654,7 @@ export async function streamCasualChatReply(
     .map((m) => m.content)
     .join(" ");
   if (
+    !opts?.force &&
     !isCasualChat(question, recentText) &&
     !isInCasualThread(messages || []) &&
     !isGeneralConversation(question)
@@ -411,6 +763,13 @@ export async function generateChatReply(
 
   const lastUser = [...input.messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
+  if (isDecisionHistoryTimeQuery(lastUser)) {
+    const traveled = answerLiveDecisionHistoryQuery(lastUser);
+    if (traveled?.reply) {
+      return { reply: traveled.reply, marketDataWarning: null };
+    }
+  }
+
   if (!mustUseTradingStream(lastUser)) {
     const casualReply = await tryCasualChatReply(lastUser, input.messages, {
       memory: input.memory,
@@ -436,9 +795,11 @@ export async function generateChatReply(
   }
 
   const { system, marketDataWarning, qualityGate, richTrading, analysisDepth } =
-    await buildChatSystemPrompt(input);
+    input.prebuiltPrompt ?? (await buildChatSystemPrompt(input));
   const history = input.messages.slice(-16);
 
+  const mentorCtx = mentorContextFromMessages(input.messages);
+  attachPriorReadContext(mentorCtx, input.lastVerdict);
   const richVoice =
     input.voiceInput && prefersRichTradingAnswer(lastUser);
   const richPath =
@@ -446,11 +807,22 @@ export async function generateChatReply(
     requiresDeepAnalysisPipeline(analysisDepth) ||
     mustUseTradingStream(lastUser);
   if (richPath && qualityGate && !qualityGate.canDeliverVerdict) {
-    const reply =
-      qualityGate.waitReason ??
-      `WAIT — ${qualityGate.missing.slice(0, 4).join("; ")}`;
+    const reply = formatQualityGateSpokenReply(qualityGate, {
+      mode: resolveUserPresentationMode(),
+    });
     return { reply: expandTradingAbbreviations(reply), marketDataWarning };
   }
+
+  const instant = tryInstantReadFromQualityGate({
+    question: lastUser,
+    mentorCtx,
+    qualityGate,
+    tradingStream: mustUseTradingStream(lastUser),
+  });
+  if (instant) {
+    return { reply: instant.reply, marketDataWarning };
+  }
+
   const openai = new OpenAI({ apiKey });
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
@@ -468,10 +840,28 @@ export async function streamChatReply(input: ChatPromptInput) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not set");
 
-  const { system, qualityGate, richTrading, analysisDepth } = await buildChatSystemPrompt(input);
+  const lastUserEarly =
+    [...input.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  // Defense: history must never fall through to quality-gate / OpenAI MarketState rebuild.
+  if (isDecisionHistoryTimeQuery(lastUserEarly)) {
+    const traveled = answerLiveDecisionHistoryQuery(lastUserEarly);
+    if (traveled?.reply) {
+      return {
+        stream: null,
+        instantReply: traveled.reply,
+        responseSource: traveled.responseSource,
+        openaiCalls: 0 as const,
+      };
+    }
+  }
+
+  const { system, qualityGate, richTrading, analysisDepth } =
+    input.prebuiltPrompt ?? (await buildChatSystemPrompt(input));
   const history = input.messages.slice(-16);
   const lastUser =
     [...input.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const mentorCtx = mentorContextFromMessages(input.messages);
+  attachPriorReadContext(mentorCtx, input.lastVerdict);
   const richVoice =
     input.voiceInput && prefersRichTradingAnswer(lastUser);
   const richPath =
@@ -479,17 +869,37 @@ export async function streamChatReply(input: ChatPromptInput) {
     requiresDeepAnalysisPipeline(analysisDepth) ||
     mustUseTradingStream(lastUser);
   if (richPath && qualityGate && !qualityGate.canDeliverVerdict) {
-    const reply =
-      qualityGate.waitReason ??
-      `WAIT — ${qualityGate.missing.slice(0, 4).join("; ")}`;
-    throw new Error(`QUALITY_GATE:${reply}`);
+    const reply = formatQualityGateSpokenReply(qualityGate, {
+      mode: resolveUserPresentationMode(),
+    });
+    // Return spoken WAIT as a normal reply — do not HTTP 500 / needsChartRead-bounce the extension.
+    return { stream: null, instantReply: reply };
+  }
+
+  // Secondary safety net (non-stream / direct callers). Stream route prefers
+  // tryCurrentMarketReadFastPath so streamChatReply is not entered on success.
+  const instant = tryInstantReadFromQualityGate({
+    question: lastUser,
+    mentorCtx,
+    qualityGate,
+    tradingStream: mustUseTradingStream(lastUser),
+  });
+  if (instant) {
+    return {
+      stream: null,
+      decisionEnvelope: instant.decisionEnvelope,
+      instantReply: instant.reply,
+      responseSource: instant.responseSource,
+      openaiCalls: 0 as const,
+    };
   }
 
   const openai = new OpenAI({ apiKey });
-  return openai.chat.completions.create({
+  const stream = await openai.chat.completions.create({
     model: "gpt-4o",
     max_tokens: richVoice ? 420 : input.voiceInput ? 220 : 550,
     stream: true,
     messages: [{ role: "system", content: system }, ...history],
   });
+  return { stream, openaiCalls: 1 as const };
 }

@@ -6,9 +6,11 @@ import {
   prefersRichTradingAnswer,
 } from "./chart-question-intent";
 import { needsMarketIntelligenceAnswer } from "./conversational-query";
+import { isMentorMarketTurn } from "./mentor-intent";
 
 export type ChartReadContext = {
   lastAssistant?: string;
+  lastMentorIntent?: string;
 };
 
 function offeredChartRead(assistant: string): boolean {
@@ -22,6 +24,7 @@ function offeredChartRead(assistant: string): boolean {
 export function wantsChartRead(text: string, context?: ChartReadContext): boolean {
   const t = text.trim().toLowerCase();
   if (!t) return false;
+  if (isMentorMarketTurn(text, { lastAssistant: context?.lastAssistant })) return false;
 
   if (
     /^(yes|yeah|yep|yup|sure|ok|okay|go ahead|please|please do|do it|absolutely|for sure)[.!]?$/i.test(
@@ -36,23 +39,11 @@ export function wantsChartRead(text: string, context?: ChartReadContext): boolea
     return true;
   }
   if (/\b(look at|check|read|scan)\s+(the\s+)?(chart|this|it)\b/.test(t)) return true;
-  if (/\bwhat do you see\b/.test(t)) return true;
-  if (/\bwhat (are you|you) seeing\b/.test(t)) return true;
   if (isChartStatusQuestion(t)) return false;
   if (/\bwhat('s| is) on the chart\b/.test(t)) return true;
   if (/\bwhat('s| is) the chart[?.!]?$/.test(t)) return true;
   if (/\bwhat('s| is) this\b/.test(t)) return true;
-  if (
-    /\bwhat('s| is) (happening|going on)\b/.test(t) &&
-    /\b(market|mnq|nasdaq|setup|trade|futures)\b/.test(t)
-  ) {
-    return true;
-  }
-  if (/\b(your|the)\s+(read|verdict|take)\b/.test(t)) return true;
-  if (/\bhow (does|do) (this|the chart|it) look\b/.test(t)) return true;
-  if (/\b(tell me|talk me through|walk me through) (about )?(the )?(chart|setup|this)\b/.test(t)) {
-    return true;
-  }
+  if (/\b(your|the)\s+(verdict)\b/.test(t) && /\b(get|give|need)\b/.test(t)) return true;
   if (/\b(quick|live) (read|look)\b/.test(t)) return true;
   if (/\bis this (a )?(good )?(setup|trade|long|short)\b/.test(t)) return true;
   if (
@@ -70,6 +61,12 @@ export function wantsChartRead(text: string, context?: ChartReadContext): boolea
 
 /** Screenshot + vision read — explicit ask only, not every vague line. */
 export function needsFullChartRead(text: string, context?: ChartReadContext): boolean {
+  if (
+    isMentorMarketTurn(text, { lastAssistant: context?.lastAssistant }) &&
+    !isChartReadCommand(text)
+  ) {
+    return false;
+  }
   if (isChartReadCommand(text)) return true;
   if (isChartStatusQuestion(text)) return false;
   if (wantsChartRead(text, context)) return true;
@@ -86,13 +83,16 @@ export function needsScopedChartAnswer(text: string): boolean {
 }
 
 const CHART_READ_EXACT =
-  /^(read|the read|get read|a read|get a read|get the read|full read|chart read|read the chart|what do you see|get me a read|give me a read|market read|quick read)$/i;
+  /^(read|the read|get read|a read|get a read|get the read|full read|chart read|read the chart|get me a read|give me a read|market read|quick read)$/i;
 
 export function isChartReadCommand(text: string): boolean {
   const t = String(text || "").trim();
   if (!t) return false;
   if (CHART_READ_EXACT.test(t)) return true;
-  if (/\b(get the read|full read|what do you see|give me a read|market read|quick read)\b/i.test(t)) {
+  // Conversational "give me a read on the chart" / "give me market read" is TEXT stream.
+  // Exact "give me a read" / "market read" still match CHART_READ_EXACT above.
+  // Do not substring-match "market read" — that steals "give me market read" into screenshot.
+  if (/\b(get the read|full read|quick read|read the chart)\b/i.test(t)) {
     return true;
   }
   return false;
@@ -106,7 +106,6 @@ export function normalizeChartReadCommand(text: string): string {
     return "get the read";
   }
   if (/^full read$/i.test(lower)) return "full read";
-  if (/^what do you see$/i.test(lower)) return "what do you see on the chart";
   if (/^chart read$/i.test(lower)) return "what do you see on the chart";
   return t;
 }

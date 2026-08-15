@@ -1,0 +1,59 @@
+{
+  "id": "mnqu2026-4rel-cluster",
+  "title": "MNQU2026 four-REL near-price over-detect",
+  "primaryImage": "image-d5115bdc-dc0e-4b5b-84a8-9ddc7b0138de.png",
+  "instrument": "MNQU2026",
+  "asOf": "2026-08-14",
+  "note": "PRIMARY visual regression. Four magenta REL lines in the upper-half consolidation after London High. Current price sits on the topmost REL. Named session/PD levels (NY PM/RTH/Pre High, London High, Asia High, PDH, NDOG, London Low, Asia/NY lows) are a separate drawing path and must not be merged into REL or hidden as noise RELs.",
+  "structure": {
+    "londonHigh": 30290,
+    "asiaHighChop": 30258,
+    "primaryStructuralLows": [30218, 30218.5],
+    "internalLowPairs": [
+      [30221, 30221.5],
+      [30224, 30224.5],
+      [30227, 30227.25]
+    ],
+    "currentPrice": 30227.25,
+    "namedSessionPdNotRel": [
+      "Previous Day High",
+      "NY PM High",
+      "NY RTH High",
+      "NY Pre High",
+      "London High",
+      "Asia High",
+      "Current Day Equilibrium",
+      "Previous Day Close",
+      "New Day Opening Gap Top",
+      "New Day Opening Gap Bottom",
+      "London Low",
+      "NY PM Low",
+      "NY RTH Low",
+      "NY Pre Low",
+      "Asia Low"
+    ]
+  },
+  "expectedOld": {
+    "overlayRelInCluster": 4,
+    "reason": "Each equal-looking internal pair that failed to break the structural low became its own class-A REL line."
+  },
+  "expectedNew": {
+    "overlayRelInCluster": 1,
+    "primaryLevel": 30218,
+    "liquidityRole": "PRIMARY",
+    "removedAsNoise": "internal pairs at ~30221 / 30224 / 30227",
+    "mergedInto": "one sell-side area whose representative level is the structural low 30218",
+    "contributingSwingsPreserved": true
+  },
+  "eqhEquivalent": {
+    "primaryStructuralHighs": [30180, 30180.5],
+    "internalHighPairs": [
+      [30177, 30177.5],
+      [30174, 30174.5],
+      [30171, 30171.25]
+    ],
+    "expectedOldOverlayReh": 4,
+    "expectedNewOverlayReh": 1,
+    "primaryLevel": 30180.5
+  }
+}

@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
 
     const openai = new OpenAI({ apiKey });
     const speed =
-      typeof body.speed === "number" && body.speed >= 0.5 && body.speed <= 1.2
+      typeof body.speed === "number" && body.speed >= 0.5 && body.speed <= 1.15
         ? body.speed
-        : 0.92;
+        : 1.05;
     const instructions =
       typeof body.instructions === "string" ? body.instructions.trim().slice(0, 500) : "";
     const useEmotive = instructions.length > 0;

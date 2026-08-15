@@ -1,0 +1,638 @@
+{
+  "video_id": "ORbtHOUzAIM",
+  "cues": 540,
+  "hit_clusters": 58,
+  "hits": [
+    {
+      "i": 3,
+      "start": "00:00:05.450",
+      "end": "00:00:05.460",
+      "sec": 5.45,
+      "matched": [
+        "index"
+      ],
+      "snippet": "hey folks welcome back hey folks welcome back our continuing series of our continuing series of our continuing series of the major four asset classes and we're the major four asset classes and we're the major four asset classes and we're gonna be talking about index Trading"
+    },
+    {
+      "i": 11,
+      "start": "00:00:14.749",
+      "end": "00:00:14.759",
+      "sec": 14.749,
+      "matched": [
+        "index"
+      ],
+      "snippet": "and that's Futures index trading so it's and that's Futures index trading so it's important to remind you again please important to remind you again please important to remind you again please take the time to read the disclaimers take the time to read the disclaimers take the time to read the disclaimers here everything that I'm discussing as"
+    },
+    {
+      "i": 19,
+      "start": "00:00:28.439",
+      "end": "00:00:31.310",
+      "sec": 28.439,
+      "matched": [
+        "index"
+      ],
+      "snippet": "it relates to index Futures should be it relates to index Futures should be viewed in light of a paper trade only all right June 2017 ICT mentorship ICT all right June 2017 ICT mentorship ICT all right June 2017 ICT mentorship ICT index trading Concepts lesson one Basics index trading Concepts lesson one Basics"
+    },
+    {
+      "i": 24,
+      "start": "00:00:43.020",
+      "end": "00:00:46.790",
+      "sec": 43.02,
+      "matched": [
+        "opening\\s*range",
+        "index"
+      ],
+      "snippet": "index trading Concepts lesson one Basics index trading Concepts lesson one Basics and opening range concept okay index trading basics okay index trading basics okay index trading basics we're gonna be focusing primarily on the we're gonna be focusing primarily on the"
+    },
+    {
+      "i": 39,
+      "start": "00:01:04.609",
+      "end": "00:01:04.619",
+      "sec": 64.609,
+      "matched": [
+        "new\\s+york"
+      ],
+      "snippet": "is es and which stands for the e-mini s is es and which stands for the e-mini s p 500. p 500. p 500. the trading session we're going to be the trading session we're going to be the trading session we're going to be focusing primarily on is the New York"
+    },
+    {
+      "i": 49,
+      "start": "00:01:15.710",
+      "end": "00:01:15.720",
+      "sec": 75.71,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "new\\s+york"
+      ],
+      "snippet": "specifically keying it on the 9 30 a.m specifically keying it on the 9 30 a.m to 4 pm New York time to 4 pm New York time to 4 pm New York time and the contract delivery months for the and the contract delivery months for the and the contract delivery months for the e-mini s p are March"
+    },
+    {
+      "i": 77,
+      "start": "00:01:57.170",
+      "end": "00:01:57.180",
+      "sec": 117.17,
+      "matched": [
+        "index"
+      ],
+      "snippet": "fifty dollars per one point fifty dollars per one point and you're leveraging and you're leveraging and you're leveraging is seen by fifty dollars times the S P is seen by fifty dollars times the S P is seen by fifty dollars times the S P 500 Index at the time of this days close"
+    },
+    {
+      "i": 83,
+      "start": "00:02:05.690",
+      "end": "00:02:05.700",
+      "sec": 125.69,
+      "matched": [
+        "index"
+      ],
+      "snippet": "500 Index at the time of this days close 500 Index at the time of this days close of this recording as you see here on the of this recording as you see here on the of this recording as you see here on the right hand side it's about a hundred and right hand side it's about a hundred and right hand side it's about a hundred and twenty two thousand dollars leveraged"
+    },
+    {
+      "i": 87,
+      "start": "00:02:14.640",
+      "end": "00:02:17.330",
+      "sec": 134.64,
+      "matched": [
+        "spoo"
+      ],
+      "snippet": "right hand side it's about a hundred and right hand side it's about a hundred and twenty two thousand dollars leveraged right spoos or that's the slang name right spoos or that's the slang name right spoos or that's the slang name everyone referred to it back in the 80s everyone referred to it back in the 80s"
+    },
+    {
+      "i": 94,
+      "start": "00:02:25.130",
+      "end": "00:02:25.140",
+      "sec": 145.13,
+      "matched": [
+        "spoo"
+      ],
+      "snippet": "or so or so um that's 1983 folks that are less than um that's 1983 folks that are less than um that's 1983 folks that are less than 30 years old 30 years old 30 years old so spoos uh is this slang for for S P"
+    },
+    {
+      "i": 100,
+      "start": "00:02:34.309",
+      "end": "00:02:34.319",
+      "sec": 154.309,
+      "matched": [
+        "opening\\s*range",
+        "spoo",
+        "volume"
+      ],
+      "snippet": "so spoos uh is this slang for for S P so spoos uh is this slang for for S P 500 trading so spoos opening range 500 trading so spoos opening range 500 trading so spoos opening range concept concept concept okay the highest volume for s p trading"
+    },
+    {
+      "i": 108,
+      "start": "00:02:44.750",
+      "end": "00:02:44.760",
+      "sec": 164.75,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "volume",
+        "30\\s*minute",
+        "new\\s+york"
+      ],
+      "snippet": "is going to be seen between 9 30 a.m and is going to be seen between 9 30 a.m and 10 a.m New York time so it's only a 30 10 a.m New York time so it's only a 30 10 a.m New York time so it's only a 30 minute span of time where that surge of minute span of time where that surge of minute span of time where that surge of the highest volume generally kicks off"
+    },
+    {
+      "i": 116,
+      "start": "00:02:53.990",
+      "end": "00:02:54.000",
+      "sec": 173.99,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "spoo",
+        "new\\s+york"
+      ],
+      "snippet": "right at the opening right at the opening true day for spoos is going to be viewed true day for spoos is going to be viewed true day for spoos is going to be viewed as 9 30 a.m New York time to 4 P.M New as 9 30 a.m New York time to 4 P.M New as 9 30 a.m New York time to 4 P.M New York time"
+    },
+    {
+      "i": 124,
+      "start": "00:03:02.809",
+      "end": "00:03:02.819",
+      "sec": 182.809,
+      "matched": [
+        "new\\s+york"
+      ],
+      "snippet": "now the market does trade 24 hours now the market does trade 24 hours but we're going to focus primarily on but we're going to focus primarily on but we're going to focus primarily on the New York session as it relates to the New York session as it relates to the New York session as it relates to day trading"
+    },
+    {
+      "i": 131,
+      "start": "00:03:14.089",
+      "end": "00:03:14.099",
+      "sec": 194.089,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "one\\s+hour",
+        "new\\s+york"
+      ],
+      "snippet": "opening range is going to be seen with 9 opening range is going to be seen with 9 30 a.m New York time and ends at 10 30 30 a.m New York time and ends at 10 30 30 a.m New York time and ends at 10 30 a.m New York Times They have an opening a.m New York Times They have an opening a.m New York Times They have an opening range of one hour"
+    },
+    {
+      "i": 139,
+      "start": "00:03:22.369",
+      "end": "00:03:22.379",
+      "sec": 202.369,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "spoo",
+        "high\\s+or\\s+low"
+      ],
+      "snippet": "okay we're gonna be narrowing our Focus okay we're gonna be narrowing our Focus to the opening range between 9 30 a.m to to the opening range between 9 30 a.m to to the opening range between 9 30 a.m to 10 30 a.m which tends to create the 10 30 a.m which tends to create the 10 30 a.m which tends to create the spoos market high or low of the day it"
+    },
+    {
+      "i": 147,
+      "start": "00:03:30.949",
+      "end": "00:03:30.959",
+      "sec": 210.949,
+      "matched": [
+        "opening\\s*range",
+        "fair\\s+value"
+      ],
+      "snippet": "can be a run on stops or fair value can be a run on stops or fair value setup setup setup as you can see here in the chart this is as you can see here in the chart this is as you can see here in the chart this is shaded in this is the opening range one"
+    },
+    {
+      "i": 155,
+      "start": "00:03:39.830",
+      "end": "00:03:39.840",
+      "sec": 219.83,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30"
+      ],
+      "snippet": "hour hour between between between 9 30 and 10 30. now every chart that 9 30 and 10 30. now every chart that 9 30 and 10 30. now every chart that we're shown here in bar chart.com is"
+    },
+    {
+      "i": 163,
+      "start": "00:03:48.050",
+      "end": "00:03:48.060",
+      "sec": 228.05,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "central\\s+time"
+      ],
+      "snippet": "shown in central time which is going to shown in central time which is going to be an hour earlier so that's why you're be an hour earlier so that's why you're be an hour earlier so that's why you're seeing it highlighted as 8 30 to 9 30 seeing it highlighted as 8 30 to 9 30 seeing it highlighted as 8 30 to 9 30 but in reality"
+    },
+    {
+      "i": 171,
+      "start": "00:03:56.750",
+      "end": "00:03:56.760",
+      "sec": 236.75,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "new\\s+york"
+      ],
+      "snippet": "on the East Coast time on the East Coast time New York time in the U.S it's actually New York time in the U.S it's actually New York time in the U.S it's actually referring to 9 30 to 10 30. referring to 9 30 to 10 30. referring to 9 30 to 10 30. true day beginning"
+    },
+    {
+      "i": 182,
+      "start": "00:04:17.750",
+      "end": "00:04:17.760",
+      "sec": 257.75,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "S P 500 e-mini s p September contract S P 500 e-mini s p September contract 2017 this is a 15 minute candle stick 2017 this is a 15 minute candle stick 2017 this is a 15 minute candle stick chart chart chart and we'll delineate the opening range 9"
+    },
+    {
+      "i": 190,
+      "start": "00:04:27.590",
+      "end": "00:04:27.600",
+      "sec": 267.59,
+      "matched": [
+        "opening\\s*range",
+        "10\\s*[:\\.]?\\s*30",
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "30 to 10 30 a.m New York time 30 to 10 30 a.m New York time you can see the volume is the highest you can see the volume is the highest you can see the volume is the highest during that portion of the day during that portion of the day during that portion of the day and we have our opening range here"
+    },
+    {
+      "i": 196,
+      "start": "00:04:39.180",
+      "end": "00:04:41.870",
+      "sec": 279.18,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "and we have our opening range here and we have our opening range here and we can look at the opening range see that return back inside of the see that return back inside of the see that return back inside of the previous up close candle or bush order previous up close candle or bush order"
+    },
+    {
+      "i": 202,
+      "start": "00:04:49.310",
+      "end": "00:04:49.320",
+      "sec": 289.31,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "previous up close candle or bush order block and then later on we can see price and then later on we can see price and then later on we can see price trading up to a reference point inside trading up to a reference point inside trading up to a reference point inside the opening range as well for a liter"
+    },
+    {
+      "i": 208,
+      "start": "00:04:57.950",
+      "end": "00:04:57.960",
+      "sec": 297.95,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "the opening range as well for a liter the opening range as well for a liter transaction for transaction for transaction for a short one more example okay we're looking at one more example okay we're looking at"
+    },
+    {
+      "i": 217,
+      "start": "00:05:12.650",
+      "end": "00:05:12.660",
+      "sec": 312.65,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30"
+      ],
+      "snippet": "is a five minute chart on a different is a five minute chart on a different day day day we're dealing the same thing the 8 30 to we're dealing the same thing the 8 30 to we're dealing the same thing the 8 30 to 9 30 on bar chart it's the same thing as"
+    },
+    {
+      "i": 223,
+      "start": "00:05:21.230",
+      "end": "00:05:21.240",
+      "sec": 321.23,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "9 30 on bar chart it's the same thing as 9 30 on bar chart it's the same thing as 9 30 to 10 30 New York time 9 30 to 10 30 New York time 9 30 to 10 30 New York time so there's our opening range so there's our opening range so there's our opening range highest volume"
+    },
+    {
+      "i": 230,
+      "start": "00:05:31.790",
+      "end": "00:05:31.800",
+      "sec": 331.79,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "the opening range high and low the opening range high and low inside the opening range there is a inside the opening range there is a inside the opening range there is a return back to return back to return back to a Polish order block the last down"
+    },
+    {
+      "i": 249,
+      "start": "00:05:57.230",
+      "end": "00:05:57.240",
+      "sec": 357.23,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30"
+      ],
+      "snippet": "another example here another example here the September contract again for evening the September contract again for evening the September contract again for evening s p 2017. s p 2017. s p 2017. five minute chart dealing the AMD 9 30"
+    },
+    {
+      "i": 257,
+      "start": "00:06:06.230",
+      "end": "00:06:06.240",
+      "sec": 366.23,
+      "matched": [
+        "opening\\s*range",
+        "10\\s*[:\\.]?\\s*30",
+        "volume"
+      ],
+      "snippet": "to 10 30 opening range to 10 30 opening range highest volume again throwing that highest volume again throwing that highest volume again throwing that portion of the day portion of the day portion of the day our high and low of the opening range"
+    },
+    {
+      "i": 271,
+      "start": "00:06:21.290",
+      "end": "00:06:21.300",
+      "sec": 381.29,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "for the higher the low to be violated for the higher the low to be violated later in the day if it's going to be a later in the day if it's going to be a later in the day if it's going to be a bullish day we'll look for that upper bullish day we'll look for that upper bullish day we'll look for that upper end of the opening range to be violated"
+    },
+    {
+      "i": 279,
+      "start": "00:06:30.710",
+      "end": "00:06:30.720",
+      "sec": 390.71,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "or treated to or treated to reverse it as a sell-off day where if we reverse it as a sell-off day where if we reverse it as a sell-off day where if we had a move primarily moving up during had a move primarily moving up during had a move primarily moving up during the opening range we would look for the"
+    },
+    {
+      "i": 287,
+      "start": "00:06:41.570",
+      "end": "00:06:41.580",
+      "sec": 401.57,
+      "matched": [
+        "opening\\s*range",
+        "spoo"
+      ],
+      "snippet": "opening range low to be retraded to opening range low to be retraded to if we're bears but the extension or long if we're bears but the extension or long if we're bears but the extension or long wide ranges in opening range for spoos wide ranges in opening range for spoos wide ranges in opening range for spoos that will give us a range to reach back"
+    },
+    {
+      "i": 297,
+      "start": "00:06:54.710",
+      "end": "00:06:54.720",
+      "sec": 414.71,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "end end in this case we have the Run below it so in this case we have the Run below it so in this case we have the Run below it so a turtle soup a turtle soup a turtle soup right here below the opening range later"
+    },
+    {
+      "i": 309,
+      "start": "00:07:04.850",
+      "end": "00:07:04.860",
+      "sec": 424.85,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "and it reaches all the way back to the and it reaches all the way back to the opening Range High opening Range High opening Range High to run the stop that we're seeing during to run the stop that we're seeing during to run the stop that we're seeing during the opening range"
+    },
+    {
+      "i": 314,
+      "start": "00:07:13.249",
+      "end": "00:07:13.259",
+      "sec": 433.249,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "to run the stop that we're seeing during the opening range now now now I mentioned that there would be a I mentioned that there would be a I mentioned that there would be a discussion with the other two indices"
+    },
+    {
+      "i": 324,
+      "start": "00:07:23.930",
+      "end": "00:07:23.940",
+      "sec": 443.93,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "new\\s+york"
+      ],
+      "snippet": "with with the enqueue or NASDAQ in the opening the enqueue or NASDAQ in the opening the enqueue or NASDAQ in the opening range is the same for this range is the same for this range is the same for this it's 9 30 to 10 30 New York time"
+    },
+    {
+      "i": 329,
+      "start": "00:07:33.290",
+      "end": "00:07:33.300",
+      "sec": 453.29,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "range is the same for this it's 9 30 to 10 30 New York time and the volume is seen as being high and the volume is seen as being high and the volume is seen as being high that morning that morning that morning and we have the high end and the low end"
+    },
+    {
+      "i": 339,
+      "start": "00:07:43.490",
+      "end": "00:07:43.500",
+      "sec": 463.49,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "and inside that opening range we can and inside that opening range we can look for reference points look for reference points look for reference points and we have a very shorter block that we and we have a very shorter block that we and we have a very shorter block that we can return back into that's prior to the"
+    },
+    {
+      "i": 347,
+      "start": "00:07:52.249",
+      "end": "00:07:52.259",
+      "sec": 472.249,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "opening range but we have a rejection opening range but we have a rejection block will be just below it with the block will be just below it with the block will be just below it with the last up close candle inside the opening last up close candle inside the opening last up close candle inside the opening range and that could be used as well for"
+    },
+    {
+      "i": 362,
+      "start": "00:08:13.870",
+      "end": "00:08:13.880",
+      "sec": 493.87,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30"
+      ],
+      "snippet": "that are short here that are short here and a short here and a short here and a short here today for the NASDAQ e-mini futures is today for the NASDAQ e-mini futures is today for the NASDAQ e-mini futures is the same you're getting at 9 30 and"
+    },
+    {
+      "i": 368,
+      "start": "00:08:29.220",
+      "end": "00:08:31.369",
+      "sec": 509.22,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "new\\s+york"
+      ],
+      "snippet": "the same you're getting at 9 30 and the same you're getting at 9 30 and closing at 4 00 PM New York time the other and to see I like to follow is the other and to see I like to follow is the other and to see I like to follow is the Dow mini future the Dow mini future"
+    },
+    {
+      "i": 375,
+      "start": "00:08:38.029",
+      "end": "00:08:38.039",
+      "sec": 518.029,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "volume",
+        "new\\s+york"
+      ],
+      "snippet": "and the opening range is the same for it and the opening range is the same for it 9 30 in the morning New York time 9 30 in the morning New York time 9 30 in the morning New York time to 10 30 in the morning New York time largest volume during that morning and largest volume during that morning and"
+    },
+    {
+      "i": 380,
+      "start": "00:08:47.630",
+      "end": "00:08:47.640",
+      "sec": 527.63,
+      "matched": [
+        "9\\s*[:\\.]?\\s*30",
+        "volume",
+        "30\\s*minute"
+      ],
+      "snippet": "largest volume during that morning and largest volume during that morning and again it's the first 30 minutes 9 30 to again it's the first 30 minutes 9 30 to again it's the first 30 minutes 9 30 to 10 o'clock it has the largest volume of 10 o'clock it has the largest volume of 10 o'clock it has the largest volume of the day typically for the morning"
+    },
+    {
+      "i": 408,
+      "start": "00:09:19.070",
+      "end": "00:09:19.080",
+      "sec": 559.07,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "later in the morning creating the later in the morning creating the rejection and notice that that Wick that rejection and notice that that Wick that rejection and notice that that Wick that went down it failed to go lower than the went down it failed to go lower than the went down it failed to go lower than the low formed in the opening range"
+    },
+    {
+      "i": 416,
+      "start": "00:09:27.829",
+      "end": "00:09:27.839",
+      "sec": 567.829,
+      "matched": [
+        "opening\\s*range",
+        "volume"
+      ],
+      "snippet": "that that volume bar that makes the low of the day volume bar that makes the low of the day volume bar that makes the low of the day inside the opening range is the high inside the opening range is the high inside the opening range is the high green volume bar then we have that"
+    },
+    {
+      "i": 424,
+      "start": "00:09:37.910",
+      "end": "00:09:37.920",
+      "sec": 577.91,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "second attempt to trade down below 21 to second attempt to trade down below 21 to 65. but it does it with a lower volume 65. but it does it with a lower volume 65. but it does it with a lower volume or the red volume bar or the red volume bar or the red volume bar not enough volume it's weak we mentioned"
+    },
+    {
+      "i": 430,
+      "start": "00:09:48.110",
+      "end": "00:09:48.120",
+      "sec": 588.11,
+      "matched": [
+        "bond",
+        "volume"
+      ],
+      "snippet": "not enough volume it's weak we mentioned not enough volume it's weak we mentioned in the commodity section where futures in the commodity section where futures in the commodity section where futures in bonds and and regular Commodities in bonds and and regular Commodities in bonds and and regular Commodities volume precedes price so if we're going"
+    },
+    {
+      "i": 438,
+      "start": "00:09:57.949",
+      "end": "00:09:57.959",
+      "sec": 597.949,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "to be making a lower low or retesting an to be making a lower low or retesting an old low or old high it should be seen old low or old high it should be seen old low or old high it should be seen with with with higher volume if it's not then that"
+    },
+    {
+      "i": 446,
+      "start": "00:10:06.829",
+      "end": "00:10:06.839",
+      "sec": 606.829,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "means volume is preceding price in the means volume is preceding price in the sense that it's not as strong as I sense that it's not as strong as I sense that it's not as strong as I otherwise would look otherwise would look otherwise would look trading back down there at the time that"
+    },
+    {
+      "i": 454,
+      "start": "00:10:14.870",
+      "end": "00:10:14.880",
+      "sec": 614.87,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "Wick was a bold bearish candle and it Wick was a bold bearish candle and it otherwise would have been very scary to otherwise would have been very scary to otherwise would have been very scary to see that but when that candle see that but when that candle see that but when that candle closed the volume for that particular"
+    },
+    {
+      "i": 460,
+      "start": "00:10:24.710",
+      "end": "00:10:24.720",
+      "sec": 624.71,
+      "matched": [
+        "volume"
+      ],
+      "snippet": "closed the volume for that particular closed the volume for that particular candle didn't register the equivalent to candle didn't register the equivalent to candle didn't register the equivalent to what was seen in the low the day earlier what was seen in the low the day earlier what was seen in the low the day earlier in the day making the very low of the"
+    },
+    {
+      "i": 468,
+      "start": "00:10:35.210",
+      "end": "00:10:35.220",
+      "sec": 635.21,
+      "matched": [
+        "opening\\s*range",
+        "volume"
+      ],
+      "snippet": "day during the opening range day during the opening range so that rejection block seen here did so that rejection block seen here did so that rejection block seen here did not see a higher run in volume not see a higher run in volume not see a higher run in volume and it was eventually rejected and price"
+    },
+    {
+      "i": 492,
+      "start": "00:11:05.090",
+      "end": "00:11:05.100",
+      "sec": 665.09,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "look for specifics about time of day look for specifics about time of day that are unique with trading indices that are unique with trading indices that are unique with trading indices this introduction is the focused this introduction is the focused this introduction is the focused primarily on the opening range"
+    },
+    {
+      "i": 500,
+      "start": "00:11:14.030",
+      "end": "00:11:14.040",
+      "sec": 674.03,
+      "matched": [
+        "opening\\s*range",
+        "9\\s*[:\\.]?\\s*30",
+        "10\\s*[:\\.]?\\s*30",
+        "new\\s+york"
+      ],
+      "snippet": "it's split in it's split in the full spectrum is a 60 Minute opening the full spectrum is a 60 Minute opening the full spectrum is a 60 Minute opening range from 9 30 in the morning to 10 30 range from 9 30 in the morning to 10 30 range from 9 30 in the morning to 10 30 in the morning New York time but the"
+    },
+    {
+      "i": 510,
+      "start": "00:11:24.949",
+      "end": "00:11:24.959",
+      "sec": 684.949,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "build on that idea as well when we start build on that idea as well when we start talking about trading the am trend talking about trading the am trend talking about trading the am trend when we have the opening range idea when we have the opening range idea when we have the opening range idea defined and we have bias and we have"
+    },
+    {
+      "i": 518,
+      "start": "00:11:34.610",
+      "end": "00:11:34.620",
+      "sec": 694.61,
+      "matched": [
+        "opening\\s*range"
+      ],
+      "snippet": "institutional order flow also referred institutional order flow also referred to on higher time frames the opening to on higher time frames the opening to on higher time frames the opening range will give us range will give us range will give us otherwise"
+    },
+    {
+      "i": 530,
+      "start": "00:11:46.430",
+      "end": "00:11:46.440",
+      "sec": 706.43,
+      "matched": [
+        "30\\s*minute"
+      ],
+      "snippet": "wouldn't even be aware of it but there's wouldn't even be aware of it but there's a very specific relationship to the a very specific relationship to the a very specific relationship to the first hours range high and low and the first hours range high and low and the first hours range high and low and the first 30 minutes high low as you'll see"
+    }
+  ]
+}

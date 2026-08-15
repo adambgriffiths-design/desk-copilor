@@ -1,0 +1,17 @@
+{
+  "bars": 90,
+  "engineMs": 216912,
+  "avgEngineMs": 2410.14,
+  "candidatePct": {
+    "engine_events": 100,
+    "daily_proximity": 0,
+    "bar_anatomy": 100,
+    "price_cross": 0,
+    "composite": 100,
+    "wait_compression_skip": 0
+  },
+  "estimatedFullEvalReductionPct": {
+    "composite": 0,
+    "wait_compression": 0
+  }
+}

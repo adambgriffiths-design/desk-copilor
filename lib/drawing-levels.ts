@@ -28,12 +28,13 @@ import {
   getEstMinutes,
   priorEstDateKey,
   resolvePdLevelAnchorTimes,
+  sessionHighLow,
   RTH_CLOSE_MIN,
   RTH_OPEN_MIN,
 } from "./market-data";
 import type { RelativeEqualPool } from "./structure";
 import { rehRelTolerance } from "./structure";
-import { formatChartLevelLabel } from "./plain-language";
+import { formatChartLevelLabel, formatChartOverlayLabel } from "./plain-language";
 
 const FHDR_END_MIN = 10 * 60 + 30;
 
@@ -95,7 +96,8 @@ function resolveFvgStartTime(
   return estTimeOnDateKey(fvg.formedAt ?? getEstDateKey(new Date()), 18, 0);
 }
 
-export type LabelAlign = "top" | "bottom";
+export type LabelAlign = "top" | "middle" | "bottom";
+export type LabelHorzAlign = "left" | "center" | "right";
 
 /** Min distance from live price — REH must sit above, REL below (MNQ points). */
 export const REH_REL_PRICE_EPS = 0.25;
@@ -106,15 +108,17 @@ export const LABEL_CLUSTER_PRICE_DEFAULT = 8;
 export const LABEL_CLUSTER_PRICE_MAX = 14;
 export const LABEL_CLUSTER_PRICE_RATIO = 0.0035;
 
-/** Minimum vertical gap between label bounding boxes (overlay + chart PNG). */
-export const LABEL_MIN_GAP_PX = 18;
+/** Extra pad between label bounding boxes (overlay + chart PNG). */
+export const LABEL_MIN_GAP_PX = 4;
 export const LABEL_OFFSET_TOP_PX = 4;
-export const LABEL_OFFSET_BOTTOM_PX = 14;
+export const LABEL_OFFSET_BOTTOM_PX = 16;
+/** Vertical distance between same-side stagger lanes (must clear the pill). */
+export const LABEL_LANE_STEP_PX = 20;
 /** Horizontal nudge per stagger lane (overlay). */
-export const LABEL_LANE_X_STEP_PX = 10;
+export const LABEL_LANE_X_STEP_PX = 28;
 
-/** Estimated label height for bbox overlap checks. */
-export const LABEL_EST_HEIGHT_PX = 12;
+/** Estimated label height for bbox overlap checks (dark pill + padding). */
+export const LABEL_EST_HEIGHT_PX = 16;
 
 /** Max stagger lanes searched per label (above/below stacks). */
 export const LABEL_MAX_LANES = 24;
@@ -128,13 +132,27 @@ export type DrawingLevel = {
   group: "org" | "gap" | "session" | "daily" | "structure";
   /** Unix seconds — line begins here (extends right). */
   startTime?: number;
-  /** Label above ("top") or below ("bottom") the line when clustered with nearby levels. */
+  /** Native TV vertLabelsAlign — relative to this ray, never the pane gutter. */
   labelAlign?: LabelAlign;
-  /** Stagger index within a price cluster (0 = nearest the line). */
+  /** Native TV horzLabelsAlign — slides the title along this ray. */
+  labelHorzAlign?: LabelHorzAlign;
+  /** Stagger index within a price cluster (0 = on the formation). */
   labelLane?: number;
-  /** Shorter overlay label when an identical label shares the same price. */
+  /** Seconds to nudge the ray start so clustered titles separate along the same price. */
+  labelTimeShiftSec?: number;
+  /** Native TV title for this drawing only — never a slash-joined cluster name. */
   displayLabel?: string;
   showLabel?: boolean;
+  /** Research overlay (EQH/EQL importance). Older chart-draw ignores unknown fields. */
+  importance?: "LOW" | "MEDIUM" | "HIGH";
+  why?: string;
+  visualClass?: "A" | "B" | "C" | "D";
+  liquidityArea?: {
+    type: "BUY_SIDE" | "SELL_SIDE";
+    priceLow: number;
+    priceHigh: number;
+    representativeLevel: number;
+  };
 };
 
 export type DrawingZone = {
@@ -152,11 +170,15 @@ export type DrawingZone = {
   endTime?: number;
   /** Overlay + native chart label */
   showLabel?: boolean;
-  /** Label above ("top") or below ("bottom") when clustered with nearby levels/zones. */
+  /** Native TV vertLabelsAlign — relative to this drawing, never the pane gutter. */
   labelAlign?: LabelAlign;
-  /** Stagger index within a price cluster (0 = nearest the line). */
+  /** Native TV horzLabelsAlign — slides the title along this drawing. */
+  labelHorzAlign?: LabelHorzAlign;
+  /** Stagger index within a price cluster (0 = on the formation). */
   labelLane?: number;
-  /** Shorter overlay label when an identical label shares the same price. */
+  /** Seconds to nudge the start so clustered titles separate along the same price. */
+  labelTimeShiftSec?: number;
+  /** Native TV title for this drawing only — never a slash-joined cluster name. */
   displayLabel?: string;
   kind?: "fvg" | "fhdr";
   ce?: number;
@@ -181,14 +203,14 @@ export type FirstPresentedFvgDraw = {
   startTime?: number;
 };
 
-/** No yellow — cyan org, fuchsia CE, red gaps, slate sessions, violet daily, amber FHDR, teal FPFVG. */
+/** Distinct hues — cyan session, fuchsia REL, violet PD, teal ORG, red gaps. */
 export const LEVEL_COLORS = {
   org: "#22d3ee",
   orgCe: "#e879f9",
   orgMuted: "#64748b",
   gap: "#ef4444",
-  session: "#94a3b8",
-  daily: "#cbd5e1",
+  session: "#38bdf8",
+  daily: "#a78bfa",
   dailyEq: "#a78bfa",
   structure: "#fb7185",
   fhdr: "#f59e0b",
@@ -209,9 +231,17 @@ function push(
   out.push(level);
 }
 
+function priorSessionDateKey(m1: Bar[], fetchedAt: string): string {
+  const today = getEstDateKey(new Date(fetchedAt));
+  const fromBars = priorEstDateKey(m1, today);
+  if (fromBars) return fromBars;
+  const prior = new Date(new Date(fetchedAt).getTime() - 24 * 60 * 60 * 1000);
+  return getEstDateKey(prior);
+}
+
 function sessionBarWindows(m1: Bar[], fetchedAt: string) {
   const today = getEstDateKey(new Date(fetchedAt));
-  const yesterday = priorEstDateKey(m1, today) ?? today;
+  const yesterday = priorSessionDateKey(m1, fetchedAt);
   return {
     asia: [
       ...barsInEstWindow(m1, 18 * 60, 24 * 60, yesterday),
@@ -251,12 +281,27 @@ export function resolveDrawingCurrentPrice(
   return null;
 }
 
+/** Overlay DTO — production RelativeEqualPool plus optional research fields. Trading detectors stay unchanged. */
+export type DrawingRelativeEqualPool = RelativeEqualPool & {
+  importance?: "LOW" | "MEDIUM" | "HIGH";
+  why?: string;
+  visualClass?: "A" | "B" | "C" | "D";
+  liquidityArea?: {
+    type: "BUY_SIDE" | "SELL_SIDE";
+    priceLow: number;
+    priceHigh: number;
+    representativeLevel: number;
+    contributingSwingCount?: number;
+    status?: string;
+  };
+};
+
 /** REH above price, REL below — when price unknown, return all pools (fallback). */
-export function filterRelativeEqualPoolsByPrice(
-  pools: RelativeEqualPool[],
+export function filterRelativeEqualPoolsByPrice<T extends RelativeEqualPool>(
+  pools: T[],
   currentPrice: number | null | undefined,
   eps = REH_REL_PRICE_EPS
-): RelativeEqualPool[] {
+): T[] {
   if (currentPrice == null || !Number.isFinite(currentPrice) || currentPrice <= 0) {
     return pools;
   }
@@ -267,11 +312,48 @@ export function filterRelativeEqualPoolsByPrice(
   });
 }
 
+/**
+ * One visible shelf cannot be buy-side and sell-side. Keep the stronger pool
+ * (more swings, else farther from live price, else REL). Does not change
+ * lib/reh-rel.ts detectors.
+ */
+export function collapseOppositeRelativeEqualOnSameShelf<T extends RelativeEqualPool>(
+  pools: T[],
+  currentPrice?: number | null,
+  shelfPts = LABEL_CLUSTER_PRICE_MIN
+): T[] {
+  const pad = Number.isFinite(shelfPts) && shelfPts > 0 ? shelfPts : LABEL_CLUSTER_PRICE_MIN;
+  const drop = new Set<number>();
+  for (let i = 0; i < pools.length; i++) {
+    if (drop.has(i) || pools[i]!.type !== "reh") continue;
+    for (let j = 0; j < pools.length; j++) {
+      if (i === j || drop.has(j) || pools[j]!.type !== "rel") continue;
+      if (Math.abs(pools[i]!.price - pools[j]!.price) > pad + 1e-9) continue;
+      const a = pools[i]!;
+      const b = pools[j]!;
+      const aBars = a.barCount || 0;
+      const bBars = b.barCount || 0;
+      let keepReh = aBars > bBars;
+      if (aBars === bBars && currentPrice != null && Number.isFinite(currentPrice)) {
+        keepReh = Math.abs(a.price - currentPrice) >= Math.abs(b.price - currentPrice);
+      } else if (aBars === bBars) {
+        keepReh = false;
+      }
+      drop.add(keepReh ? j : i);
+    }
+  }
+  return pools.filter((_, idx) => !drop.has(idx));
+}
+
 /** Level prices from one-minute execution data (ORG, sessions) + daily arrays for HTF. */
 export function buildDrawingLevels(
   ctx: MarketContext,
   m1: Bar[] = [],
-  opts?: { currentPrice?: number | null }
+  opts?: {
+    currentPrice?: number | null;
+    /** Analysis overlay override — production structureFacts stay untouched. */
+    relativeEqualPools?: DrawingRelativeEqualPool[];
+  }
 ): DrawingLevel[] {
   const levels: DrawingLevel[] = [];
   const seen = new Set<string>();
@@ -343,21 +425,24 @@ export function buildDrawingLevels(
 
   const sessionWindows = sessionBarWindows(m1, ctx.fetchedAt);
 
-  const sessionLines: Array<
-    [string, number, string, Bar[], number | undefined, "high" | "low"]
-  > = [
-    ["asia_high", ctx.sessions.asiaHigh, "Asia Session High", sessionWindows.asia, ctx.sessions.asiaHighTime, "high"],
-    ["asia_low", ctx.sessions.asiaLow, "Asia Session Low", sessionWindows.asia, ctx.sessions.asiaLowTime, "low"],
-    ["london_high", ctx.sessions.londonHigh, "London Session High", sessionWindows.london, ctx.sessions.londonHighTime, "high"],
-    ["london_low", ctx.sessions.londonLow, "London Session Low", sessionWindows.london, ctx.sessions.londonLowTime, "low"],
-    ["ny_pre_high", ctx.sessions.nyPreHigh, "New York Pre-Market High", sessionWindows.nyPre, ctx.sessions.nyPreHighTime, "high"],
-    ["ny_pre_low", ctx.sessions.nyPreLow, "New York Pre-Market Low", sessionWindows.nyPre, ctx.sessions.nyPreLowTime, "low"],
-    ["ny_rth_high", ctx.sessions.nyRthHigh, "New York Regular Trading Hours High", sessionWindows.nyRth, ctx.sessions.nyRthHighTime, "high"],
-    ["ny_rth_low", ctx.sessions.nyRthLow, "New York Regular Trading Hours Low", sessionWindows.nyRth, ctx.sessions.nyRthLowTime, "low"],
-    ["ny_pm_high", ctx.sessions.nyPmHigh, "New York Afternoon Session High", sessionWindows.nyPm, ctx.sessions.nyPmHighTime, "high"],
-    ["ny_pm_low", ctx.sessions.nyPmLow, "New York Afternoon Session Low", sessionWindows.nyPm, ctx.sessions.nyPmLowTime, "low"],
+  const sessionLines: Array<[string, string, Bar[], number | undefined, "high" | "low"]> = [
+    ["asia_high", "Asia Session High", sessionWindows.asia, ctx.sessions.asiaHighTime, "high"],
+    ["asia_low", "Asia Session Low", sessionWindows.asia, ctx.sessions.asiaLowTime, "low"],
+    ["london_high", "London Session High", sessionWindows.london, ctx.sessions.londonHighTime, "high"],
+    ["london_low", "London Session Low", sessionWindows.london, ctx.sessions.londonLowTime, "low"],
+    ["ny_pre_high", "New York Pre-Market High", sessionWindows.nyPre, ctx.sessions.nyPreHighTime, "high"],
+    ["ny_pre_low", "New York Pre-Market Low", sessionWindows.nyPre, ctx.sessions.nyPreLowTime, "low"],
+    ["ny_rth_high", "New York Regular Trading Hours High", sessionWindows.nyRth, ctx.sessions.nyRthHighTime, "high"],
+    ["ny_rth_low", "New York Regular Trading Hours Low", sessionWindows.nyRth, ctx.sessions.nyRthLowTime, "low"],
+    ["ny_pm_high", "New York Afternoon Session High", sessionWindows.nyPm, ctx.sessions.nyPmHighTime, "high"],
+    ["ny_pm_low", "New York Afternoon Session Low", sessionWindows.nyPm, ctx.sessions.nyPmLowTime, "low"],
   ];
-  for (const [id, price, label, windowBars, timeHint, kind] of sessionLines) {
+  for (const [id, label, windowBars, timeHint, kind] of sessionLines) {
+    // Unformed sessions (empty window) must not inherit the day's high/low or a 0-price gutter.
+    if (!windowBars.length) continue;
+    const fromWindow = sessionHighLow(windowBars);
+    const price = kind === "low" ? fromWindow?.low : fromWindow?.high;
+    if (price == null || !Number.isFinite(price) || price <= 0) continue;
     const startTime = anchorFromSessionWindow(windowBars, price, kind, timeHint);
     push(levels, seen, {
       id,
@@ -393,8 +478,10 @@ export function buildDrawingLevels(
   }
 
   const currentPrice = resolveDrawingCurrentPrice(ctx, m1, opts?.currentPrice);
-  const rehRelPools = filterRelativeEqualPoolsByPrice(
-    ctx.structureFacts.relativeEqualPools ?? [],
+  const overlayPools: DrawingRelativeEqualPool[] =
+    opts?.relativeEqualPools ?? ctx.structureFacts.relativeEqualPools ?? [];
+  const rehRelPools = collapseOppositeRelativeEqualOnSameShelf(
+    filterRelativeEqualPoolsByPrice(overlayPools, currentPrice),
     currentPrice
   );
   const rehRelCounts = { reh: 0, rel: 0 };
@@ -408,6 +495,17 @@ export function buildDrawingLevels(
       dash: "6 4",
       group: "structure",
       startTime: pool.startTime,
+      importance: pool.importance,
+      why: pool.why,
+      visualClass: pool.visualClass,
+      liquidityArea: pool.liquidityArea
+        ? {
+            type: pool.liquidityArea.type,
+            priceLow: pool.liquidityArea.priceLow,
+            priceHigh: pool.liquidityArea.priceHigh,
+            representativeLevel: pool.liquidityArea.representativeLevel,
+          }
+        : undefined,
     });
   }
 
@@ -582,7 +680,42 @@ export function labelPriorityForDraw(item: LabelTagged): number {
 }
 
 export function labelLaneToAlign(lane: number): LabelAlign {
-  return lane % 2 === 0 ? "top" : "bottom";
+  const n = Math.max(0, Math.floor(Number(lane) || 0));
+  return (["top", "middle", "bottom"] as const)[n % 3];
+}
+
+/** Native TV horzLabelsAlign — slide nearby independent titles along the same ray. */
+export function labelLaneToHorzAlign(lane: number): LabelHorzAlign {
+  const n = Math.max(0, Math.floor(Number(lane) || 0));
+  return (["left", "center", "right"] as const)[n % 3];
+}
+
+/** Seconds to nudge the ray start so clustered native titles separate along the same price. */
+export function labelLaneToTimeShiftSec(lane: number, visibleSpanSec = 3600): number {
+  const n = Math.max(0, Math.floor(Number(lane) || 0));
+  if (n === 0) return 0;
+  const span = Number.isFinite(visibleSpanSec) && visibleSpanSec > 0 ? visibleSpanSec : 3600;
+  const step = Math.max(90, Math.floor(span / 16));
+  return n * step;
+}
+
+/** Distinct native-TV layout slot — never a merged name. */
+export function nativeLabelLayoutKey(ref: {
+  labelAlign?: LabelAlign;
+  labelHorzAlign?: LabelHorzAlign;
+  labelTimeShiftSec?: number;
+}): string {
+  return `${ref.labelAlign || "top"}|${ref.labelHorzAlign || "left"}|${Math.max(0, Number(ref.labelTimeShiftSec) || 0)}`;
+}
+
+/** True when a title stuffed two level names onto one drawing (`A / B`). */
+export function isSlashJoinedChartLabel(text: string): boolean {
+  return /\s\/\s/.test(String(text || ""));
+}
+
+/** Same visible name in a price cluster (REH/REL duplicates, EQH/EQL aliases). */
+export function canonicalChartLabelKey(label: string, id?: string): string {
+  return formatChartLevelLabel(label, id).toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 /** Pixel Y for a label given line Y, align, and lane (for PNG / overlay). */
@@ -591,9 +724,10 @@ export function labelYOffsetPx(
   align: LabelAlign = "top",
   lane = 0
 ): number {
-  const stack = Math.floor(Math.max(0, lane) / 2);
-  const step = stack * LABEL_MIN_GAP_PX;
+  const stack = Math.floor(Math.max(0, lane) / 3);
+  const step = stack * LABEL_LANE_STEP_PX;
   if (align === "bottom") return lineY + LABEL_OFFSET_BOTTOM_PX + step;
+  if (align === "middle") return lineY - LABEL_EST_HEIGHT_PX / 2;
   return lineY - LABEL_OFFSET_TOP_PX - step;
 }
 
@@ -602,9 +736,28 @@ export function labelOffsetXPx(lane = 0): number {
   return 4 + Math.max(0, lane) * LABEL_LANE_X_STEP_PX;
 }
 
-function applyLabelLane(ref: DrawingLevel | DrawingZone, lane: number): void {
+function applyLabelLane(
+  ref: DrawingLevel | DrawingZone,
+  lane: number,
+  visibleSpanSec?: number
+): void {
   ref.labelLane = lane;
   ref.labelAlign = labelLaneToAlign(lane);
+  ref.labelHorzAlign = labelLaneToHorzAlign(lane);
+  ref.labelTimeShiftSec = labelLaneToTimeShiftSec(lane, visibleSpanSec);
+}
+
+function overlayNameFor(ref: DrawingLevel | DrawingZone): string {
+  return formatChartOverlayLabel(ref.label, ref.id);
+}
+
+/** Visible native title for this drawing only — never a slash-joined cluster name. */
+function nativeTitleFor(ref: DrawingLevel | DrawingZone): string {
+  const extra = String(ref.displayLabel || "").trim();
+  if (extra && !isSlashJoinedChartLabel(extra)) return extra;
+  const short = overlayNameFor(ref).trim();
+  if (short) return short;
+  return String(ref.label || "").trim();
 }
 
 /** Map price to chart Y (high price = smaller Y). */
@@ -653,7 +806,7 @@ export function findLabelLane(
   return maxLanes - 1;
 }
 
-/** Stagger labels via bbox overlap — alternate above/below; all levels stay visible. */
+/** Each drawing keeps its own native TV title. Collision layout re-runs on every refresh. */
 export function assignStaggeredLabelAlign(
   levels: DrawingLevel[],
   zones: DrawingZone[] = [],
@@ -663,22 +816,34 @@ export function assignStaggeredLabelAlign(
     clusterPoints?: number;
     plotHeightPx?: number;
     yOffsetPx?: number;
+    visibleSpanSec?: number;
   }
 ): void {
   for (const level of levels) {
-    level.labelLane = undefined;
     level.displayLabel = undefined;
-    if (level.showLabel !== false) level.showLabel = true;
+    const title = nativeTitleFor(level);
+    level.displayLabel = title || undefined;
+    level.showLabel = Boolean(title);
+    level.labelLane = undefined;
+    level.labelAlign = undefined;
+    level.labelHorzAlign = undefined;
+    level.labelTimeShiftSec = undefined;
   }
   for (const zone of zones) {
-    zone.labelLane = undefined;
     zone.displayLabel = undefined;
-    if (zone.showLabel !== false) zone.showLabel = true;
+    const title = nativeTitleFor(zone);
+    zone.displayLabel = title || undefined;
+    zone.showLabel = Boolean(title);
+    zone.labelLane = undefined;
+    zone.labelAlign = undefined;
+    zone.labelHorzAlign = undefined;
+    zone.labelTimeShiftSec = undefined;
   }
 
   const items: LabelTagged[] = [];
   for (const level of levels) {
     if (!level.label || level.showLabel === false) continue;
+    if (!Number.isFinite(level.price) || level.price <= 0) continue;
     items.push({ kind: "level", ref: level, price: level.price });
   }
   for (const zone of zones) {
@@ -687,34 +852,31 @@ export function assignStaggeredLabelAlign(
   }
   if (items.length === 0) return;
 
-  items.sort((a, b) => b.price - a.price);
+  items.sort((a, b) => b.price - a.price || labelPriorityForDraw(b) - labelPriorityForDraw(a));
   const prices = items.map((i) => i.price);
   const pMin = opts?.priceMin ?? Math.min(...prices);
   const pMax = opts?.priceMax ?? Math.max(...prices);
-  const plotH = opts?.plotHeightPx ?? 480;
-  const yOff = opts?.yOffsetPx ?? 0;
   const threshold = labelClusterThreshold(pMin, pMax, opts?.clusterPoints);
+  const spanSec = opts?.visibleSpanSec;
 
-  let clusterStart = 0;
-  for (let i = 1; i <= items.length; i++) {
-    const chained =
-      i < items.length && items[i - 1].price - items[i].price <= threshold;
-    if (chained) continue;
-
-    const cluster = items.slice(clusterStart, i);
-    cluster.sort((a, b) => labelPriorityForDraw(b) - labelPriorityForDraw(a));
-    const placed: Array<{ top: number; bottom: number }> = [];
-
-    for (let ci = 0; ci < cluster.length; ci++) {
-      const item = cluster[ci];
-      const lineY = priceToLineY(item.price, pMin, pMax, plotH, yOff);
-      const lane = findLabelLane(lineY, placed, LABEL_MAX_LANES, ci % 2);
-      applyLabelLane(item.ref, lane);
-      placed.push(labelBBox(lineY, labelLaneToAlign(lane), lane));
+  const clusters: LabelTagged[][] = [];
+  for (const item of items) {
+    const last = clusters[clusters.length - 1];
+    if (last && Math.abs(last[last.length - 1]!.price - item.price) <= threshold) {
+      last.push(item);
+    } else {
+      clusters.push([item]);
     }
-    clusterStart = i;
+  }
+
+  for (const cluster of clusters) {
+    cluster.sort((a, b) => labelPriorityForDraw(b) - labelPriorityForDraw(a) || b.price - a.price);
+    cluster.forEach((item, i) => applyLabelLane(item.ref, i, spanSec));
   }
 }
+
+/** Alias — call after every native create/update, not only first paint. */
+export const assignCollisionLayout = assignStaggeredLabelAlign;
 
 export function formatLevelsForClipboard(
   levels: DrawingLevel[],

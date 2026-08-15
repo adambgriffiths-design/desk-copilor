@@ -1,0 +1,223 @@
+{
+  "when": "2026-08-14T14:39:18.617Z",
+  "datasetId": "2562961408b256ac94f1",
+  "label": "NQ 2026-08-11 (CME_GLOBEX_18:00_ET)",
+  "bars": {
+    "m1": 1381,
+    "m5": 277,
+    "m15": 93,
+    "daily": 2
+  },
+  "checkpoints": [
+    {
+      "barIndex": 248,
+      "asOf": "2026-08-12T02:08:00.000Z"
+    },
+    {
+      "barIndex": 436,
+      "asOf": "2026-08-12T05:16:00.000Z"
+    },
+    {
+      "barIndex": 624,
+      "asOf": "2026-08-12T08:24:00.000Z"
+    },
+    {
+      "barIndex": 812,
+      "asOf": "2026-08-12T11:32:00.000Z"
+    },
+    {
+      "barIndex": 1000,
+      "asOf": "2026-08-12T14:40:00.000Z"
+    },
+    {
+      "barIndex": 1188,
+      "asOf": "2026-08-12T17:48:00.000Z"
+    }
+  ],
+  "loadMs": 724.7594999999999,
+  "memory": {
+    "start": {
+      "rss": 83,
+      "heap": 17.250953674316406,
+      "external": 4.8563690185546875
+    },
+    "end": {
+      "rss": 165.6328125,
+      "heap": 19.84925079345703,
+      "external": 4.606372833251953
+    }
+  },
+  "perCheckpointAvgMs": 24738.06336666665,
+  "sequential": {
+    "count": 8,
+    "fullRebuildAvg": 7458.004212500004,
+    "fastPathAvg": 7232.071662499999,
+    "samples": 8
+  },
+  "incremental": {
+    "initMs": 8433.939899999998,
+    "barMsAvg": 2447.114124999993,
+    "stats": {
+      "fullRebuilds": 1,
+      "tickUpdates": 0,
+      "tickSkippedDupes": 0,
+      "barUpdates": 8,
+      "structureRebuilds": 8,
+      "eqhEqlRebuilds": 9,
+      "eqhEqlReused": 0,
+      "analysisRuns": 3,
+      "analysisSkipped": 6,
+      "drawingRebuilds": 7,
+      "drawingSkipped": 2,
+      "lastTickMs": 0,
+      "lastBarMs": 2329.3996000000043,
+      "lastFullMs": 8417.88539999997,
+      "lastStructureMs": 1814.7501000000047,
+      "lastEqhMs": 513.3703000000096
+    },
+    "count": 8
+  },
+  "stages": [
+    {
+      "stage": "architecture_evaluate_v1",
+      "calls": 6,
+      "ms": 61324.4,
+      "avgMs": 10220.74,
+      "pct": 41.3
+    },
+    {
+      "stage": "market_context/buildContextAtBarIndex",
+      "calls": 6,
+      "ms": 58771.4,
+      "avgMs": 9795.24,
+      "pct": 39.6
+    },
+    {
+      "stage": "structure/buildStructureFacts",
+      "calls": 6,
+      "ms": 16532.2,
+      "avgMs": 2755.36,
+      "pct": 11.1
+    },
+    {
+      "stage": "structure/REH-REL",
+      "calls": 6,
+      "ms": 7053.3,
+      "avgMs": 1175.54,
+      "pct": 4.8
+    },
+    {
+      "stage": "structure/EQH-EQL(720)",
+      "calls": 6,
+      "ms": 4205,
+      "avgMs": 700.83,
+      "pct": 2.8
+    },
+    {
+      "stage": "desk_pipeline",
+      "calls": 6,
+      "ms": 379.1,
+      "avgMs": 63.18,
+      "pct": 0.3
+    },
+    {
+      "stage": "karen_replay_response",
+      "calls": 6,
+      "ms": 42.3,
+      "avgMs": 7.04,
+      "pct": 0
+    },
+    {
+      "stage": "observation",
+      "calls": 6,
+      "ms": 29.9,
+      "avgMs": 4.98,
+      "pct": 0
+    },
+    {
+      "stage": "structure/liquidity_sweeps",
+      "calls": 6,
+      "ms": 16.6,
+      "avgMs": 2.77,
+      "pct": 0
+    },
+    {
+      "stage": "market_state",
+      "calls": 6,
+      "ms": 14.9,
+      "avgMs": 2.48,
+      "pct": 0
+    },
+    {
+      "stage": "structure/FVG-1m",
+      "calls": 6,
+      "ms": 14,
+      "avgMs": 2.33,
+      "pct": 0
+    },
+    {
+      "stage": "structure/MSS",
+      "calls": 6,
+      "ms": 11.4,
+      "avgMs": 1.9,
+      "pct": 0
+    },
+    {
+      "stage": "interpretation",
+      "calls": 6,
+      "ms": 11.4,
+      "avgMs": 1.9,
+      "pct": 0
+    },
+    {
+      "stage": "chart_snapshot",
+      "calls": 6,
+      "ms": 10.8,
+      "avgMs": 1.79,
+      "pct": 0
+    },
+    {
+      "stage": "serialization/json",
+      "calls": 6,
+      "ms": 6.8,
+      "avgMs": 1.13,
+      "pct": 0
+    },
+    {
+      "stage": "decision_layer",
+      "calls": 6,
+      "ms": 2.3,
+      "avgMs": 0.38,
+      "pct": 0
+    },
+    {
+      "stage": "assertNoFutureLeak",
+      "calls": 6,
+      "ms": 1.8,
+      "avgMs": 0.31,
+      "pct": 0
+    },
+    {
+      "stage": "execution_scaffold",
+      "calls": 6,
+      "ms": 0.6,
+      "avgMs": 0.1,
+      "pct": 0
+    },
+    {
+      "stage": "candle_prep/sliceM1",
+      "calls": 6,
+      "ms": 0.3,
+      "avgMs": 0.05,
+      "pct": 0
+    },
+    {
+      "stage": "candle_prep/slicePrefix",
+      "calls": 6,
+      "ms": 0.1,
+      "avgMs": 0.02,
+      "pct": 0
+    }
+  ],
+  "grandTotalMs": 148428.4
+}

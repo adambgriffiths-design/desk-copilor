@@ -1,0 +1,279 @@
+{
+  "kind": "force_wait_clearance_bins_dense_panel",
+  "generatedAt": "2026-08-15T22:00:13.362Z",
+  "EDGE_CLAIM": "NONE",
+  "HOLDOUT": "SEALED",
+  "VAL": "NOT_TOUCHED",
+  "C4_DEFINED": false,
+  "baseline": "baseline-v2",
+  "smoke": true,
+  "config": {
+    "cadenceMinutes": 5,
+    "lookbackDays": 10,
+    "workers": 2,
+    "panelDaysUsed": [
+      "2023-10-02",
+      "2023-10-16"
+    ],
+    "stampSource": "force-wait-shadow-stamps-y1500-latest.jsonl (FORCE_WAIT ∩ directional c1Shadow)",
+    "clearanceDefinition": "First later same-calendar-day baseline actionableEntry with verdict === gated shadow side. Proxy for ENTRY_STATUS WAIT→ACTIVE delivery (DV records lack entryStatus field).",
+    "sessionDefinition": "same calendar trading day (dense panel convention)",
+    "qualityLabels": "same post-freeze rule as stamp dump (T-before / inv-before / proxyR±0.25)"
+  },
+  "coverage": {
+    "forceWaitDirectionalUniverse": 1074,
+    "onPanelDays": 6,
+    "daysEvaluated": 2,
+    "denseEvals": 96,
+    "pitViolations": 0,
+    "wallMs": 2573.8549000000003,
+    "note": "Sparse Y=1500 stamps ∩ dense-panel days only — NOT the full 1074 FORCE_WAIT universe. Full-universe clearance remains NOT MEASURED / TOO_EARLY without denser coverage."
+  },
+  "all": {
+    "n": 6,
+    "clearanceBinsExclusive": {
+      "within_5m": 0,
+      "within_15m": 0,
+      "within_30m": 0,
+      "within_60m": 0,
+      "same_session": 0,
+      "never": 6
+    },
+    "clearanceCumulativeOfClearedOrAll": {
+      "within_5m": 0,
+      "within_15m": 0,
+      "within_30m": 0,
+      "within_60m": 0,
+      "same_session": 0,
+      "never": 6
+    },
+    "delayClass": {
+      "USEFUL_DELAY": 0,
+      "HARMFUL_DELAY": 0,
+      "HARMFUL_SUPPRESSION": 3,
+      "USEFUL_SUPPRESSION": 3,
+      "INCONCLUSIVE": 0
+    },
+    "latencyMinutes": {
+      "n": 0,
+      "median": null,
+      "mean": null
+    },
+    "qualityCompareClearedBothProxy": {
+      "n": 0,
+      "meanGatedProxyR": null,
+      "meanEventualProxyR": null,
+      "meanDeltaEventualMinusGated": null,
+      "medianGatedMfe": null,
+      "medianEventualMfe": null,
+      "medianGatedMae": null,
+      "medianEventualMae": null,
+      "gatedTBeforeRate": 0.5,
+      "eventualTBeforeRateAmongCleared": null
+    }
+  },
+  "byCitedMss": {
+    "true": {
+      "n": 4,
+      "clearanceBinsExclusive": {
+        "within_5m": 0,
+        "within_15m": 0,
+        "within_30m": 0,
+        "within_60m": 0,
+        "same_session": 0,
+        "never": 4
+      },
+      "clearanceCumulativeOfClearedOrAll": {
+        "within_5m": 0,
+        "within_15m": 0,
+        "within_30m": 0,
+        "within_60m": 0,
+        "same_session": 0,
+        "never": 4
+      },
+      "delayClass": {
+        "USEFUL_DELAY": 0,
+        "HARMFUL_DELAY": 0,
+        "HARMFUL_SUPPRESSION": 3,
+        "USEFUL_SUPPRESSION": 1,
+        "INCONCLUSIVE": 0
+      },
+      "latencyMinutes": {
+        "n": 0,
+        "median": null,
+        "mean": null
+      },
+      "qualityCompareClearedBothProxy": {
+        "n": 0,
+        "meanGatedProxyR": null,
+        "meanEventualProxyR": null,
+        "meanDeltaEventualMinusGated": null,
+        "medianGatedMfe": null,
+        "medianEventualMfe": null,
+        "medianGatedMae": null,
+        "medianEventualMae": null,
+        "gatedTBeforeRate": 0.75,
+        "eventualTBeforeRateAmongCleared": null
+      }
+    },
+    "false": {
+      "n": 2,
+      "clearanceBinsExclusive": {
+        "within_5m": 0,
+        "within_15m": 0,
+        "within_30m": 0,
+        "within_60m": 0,
+        "same_session": 0,
+        "never": 2
+      },
+      "clearanceCumulativeOfClearedOrAll": {
+        "within_5m": 0,
+        "within_15m": 0,
+        "within_30m": 0,
+        "within_60m": 0,
+        "same_session": 0,
+        "never": 2
+      },
+      "delayClass": {
+        "USEFUL_DELAY": 0,
+        "HARMFUL_DELAY": 0,
+        "HARMFUL_SUPPRESSION": 0,
+        "USEFUL_SUPPRESSION": 2,
+        "INCONCLUSIVE": 0
+      },
+      "latencyMinutes": {
+        "n": 0,
+        "median": null,
+        "mean": null
+      },
+      "qualityCompareClearedBothProxy": {
+        "n": 0,
+        "meanGatedProxyR": null,
+        "meanEventualProxyR": null,
+        "meanDeltaEventualMinusGated": null,
+        "medianGatedMfe": null,
+        "medianEventualMfe": null,
+        "medianGatedMae": null,
+        "medianEventualMae": null,
+        "gatedTBeforeRate": 0,
+        "eventualTBeforeRateAmongCleared": null
+      }
+    }
+  },
+  "sampleRows": [
+    {
+      "asOf": "2023-10-02T00:00:00.000Z",
+      "cited_mss": true,
+      "side": "LONG",
+      "clearanceAsOf": null,
+      "latencyMinutes": null,
+      "clearanceBin": "never",
+      "delayClass": "HARMFUL_SUPPRESSION",
+      "gatedLabel": "GOOD",
+      "gatedProxyR": 0.4524714828897338,
+      "gatedMfe": 29.75,
+      "gatedMae": 1.25,
+      "gatedTBefore": true,
+      "eventualLabel": null,
+      "eventualProxyR": null,
+      "eventualMfe": null,
+      "eventualMae": null,
+      "eventualTBefore": null
+    },
+    {
+      "asOf": "2023-10-02T06:00:00.000Z",
+      "cited_mss": false,
+      "side": "SHORT",
+      "clearanceAsOf": null,
+      "latencyMinutes": null,
+      "clearanceBin": "never",
+      "delayClass": "USEFUL_SUPPRESSION",
+      "gatedLabel": "BAD",
+      "gatedProxyR": -4.461538461538462,
+      "gatedMfe": 12.5,
+      "gatedMae": 14.5,
+      "gatedTBefore": false,
+      "eventualLabel": null,
+      "eventualProxyR": null,
+      "eventualMfe": null,
+      "eventualMae": null,
+      "eventualTBefore": null
+    },
+    {
+      "asOf": "2023-10-02T12:10:00.000Z",
+      "cited_mss": true,
+      "side": "LONG",
+      "clearanceAsOf": null,
+      "latencyMinutes": null,
+      "clearanceBin": "never",
+      "delayClass": "USEFUL_SUPPRESSION",
+      "gatedLabel": "BAD",
+      "gatedProxyR": -0.9859154929577465,
+      "gatedMfe": 6.5,
+      "gatedMae": 24,
+      "gatedTBefore": null,
+      "eventualLabel": null,
+      "eventualProxyR": null,
+      "eventualMfe": null,
+      "eventualMae": null,
+      "eventualTBefore": null
+    },
+    {
+      "asOf": "2023-10-16T08:05:00.000Z",
+      "cited_mss": false,
+      "side": "SHORT",
+      "clearanceAsOf": null,
+      "latencyMinutes": null,
+      "clearanceBin": "never",
+      "delayClass": "USEFUL_SUPPRESSION",
+      "gatedLabel": "BAD",
+      "gatedProxyR": -2.5098039215686274,
+      "gatedMfe": 16.75,
+      "gatedMae": 32,
+      "gatedTBefore": false,
+      "eventualLabel": null,
+      "eventualProxyR": null,
+      "eventualMfe": null,
+      "eventualMae": null,
+      "eventualTBefore": null
+    },
+    {
+      "asOf": "2023-10-16T14:15:00.000Z",
+      "cited_mss": true,
+      "side": "LONG",
+      "clearanceAsOf": null,
+      "latencyMinutes": null,
+      "clearanceBin": "never",
+      "delayClass": "HARMFUL_SUPPRESSION",
+      "gatedLabel": "GOOD",
+      "gatedProxyR": 3.419753086419753,
+      "gatedMfe": 69.25,
+      "gatedMae": 2.25,
+      "gatedTBefore": true,
+      "eventualLabel": null,
+      "eventualProxyR": null,
+      "eventualMfe": null,
+      "eventualMae": null,
+      "eventualTBefore": null
+    },
+    {
+      "asOf": "2023-10-16T20:25:00.000Z",
+      "cited_mss": true,
+      "side": "LONG",
+      "clearanceAsOf": null,
+      "latencyMinutes": null,
+      "clearanceBin": "never",
+      "delayClass": "HARMFUL_SUPPRESSION",
+      "gatedLabel": "GOOD",
+      "gatedProxyR": 0.4444444444444444,
+      "gatedMfe": 4,
+      "gatedMae": 6.75,
+      "gatedTBefore": true,
+      "eventualLabel": null,
+      "eventualProxyR": null,
+      "eventualMfe": null,
+      "eventualMae": null,
+      "eventualTBefore": null
+    }
+  ]
+}

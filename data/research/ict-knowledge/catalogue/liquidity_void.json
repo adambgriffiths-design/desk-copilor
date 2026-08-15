@@ -1,0 +1,48 @@
+{
+  "concept_id": "liquidity_void",
+  "name": "Liquidity void",
+  "aliases": [
+    "liquidity voids",
+    "void"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "void_def_wide_one_sided__HTQgH11W37o__58",
+      "definition_text": "A liquidity void is a range in price delivery where one side of the market liquidity is shown in wide or long one-sided ranges or candles; price typically wants to revisit this porous range / void of contrarian liquidity. Contrasts with price in balance (small consolidation / equilibrium) before the voiding run.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "One-sided wide/long candles after consolidation"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 04 Core \u2014 Liquidity Voids",
+      "variations_note": "Overlaps FVG conceptually (Fgac lecture) but KEEP SEPARATE \u2014 void is the wide one-sided delivery object; FVG is the gap/imbalance framing.",
+      "confidence": "quoted",
+      "cue_start": "00:00:58.739",
+      "cue_end": "00:01:38.810",
+      "timestamp_sec": 58.739,
+      "source": {
+        "video_id": "HTQgH11W37o",
+        "title": "ICT Mentorship Core Content - Month 04 - Liquidity Voids",
+        "url": "https://www.youtube.com/watch?v=HTQgH11W37o",
+        "transcript_path": "data/ict-transcripts/raw/HTQgH11W37o.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "imbalance / gap objects \u2014 audit naming",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "May collide with FVG naming in code \u2014 do not merge",
+    "gap_vs_baseline_v2": "Void vs FVG disambiguation needed before any experiment",
+    "hypothesis_id": "H_ICT_LIQUIDITY_VOID",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch5 Month04."
+  },
+  "extraction_notes": "Batch5. Keep separate from fair_value_gap despite lecture overlap notes."
+}

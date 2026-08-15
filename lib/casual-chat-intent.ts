@@ -4,6 +4,22 @@ import { blocksCasualFallback } from "@/lib/pending-request";
 import { isIdentityQuestion, isPersonaQuestion, needsWebSearch } from "@/lib/web-search-intent";
 import { userMemoryReply } from "@/lib/desk-memory";
 import { stripAssistantNamePrefix } from "@/lib/desk-persona";
+import {
+  isComparativeDistancePhrase,
+  isLevelComparativeFollowUp,
+  isLevelSlotFollowUpPhrase,
+  priorHasMentionedLevels,
+} from "@/lib/level-comparative-followup";
+import { assistantLooksLikeMarket } from "@/lib/turn-category";
+import { repairConversationalStt } from "@/lib/conversational-normalize";
+import {
+  isAskMeRequest,
+  isJokeRequest,
+  pickAskMeReply,
+  pickJokeReply,
+  resolveCasualDiversityFollowUp,
+} from "@/lib/casual-diversity";
+import { isRephraseFollowUp } from "@/lib/response-repetition-memory";
 
 /** Explicit reply when casual LLM stream fails for a general question — not a clarification prompt. */
 export const CASUAL_LLM_FAILURE_REPLY =
@@ -11,7 +27,48 @@ export const CASUAL_LLM_FAILURE_REPLY =
 
 const CLARIFY_MORE_REPLY = "Ha — say more, I'm listening.";
 
+/** User wants Karen to start chatting — not an empty “I'm listening” prompt. */
+const CONVERSATION_INITIATION =
+  /\b(?:(?:make|start|have)\s+(?:a\s+)?conversation(?:\s+with\s+me)?|talk\s+to\s+me|keep\s+me\s+company|let'?s\s+chat|say\s+something(?:\s+interesting)?|ask\s+me\s+something|i'?m\s+bored|tell\s+me\s+something\s+interesting)\b/i;
+
+const CONVERSATION_INITIATORS = [
+  "Alright — random one: if you could become ridiculously good at one skill overnight, what would you pick?",
+  "Okay, I'm in — what's the most fun thing you've done lately that wasn't on a screen?",
+  "Deal. Quick one: coffee or tea when the day's dragging — and why?",
+  "Sure. If you had a free afternoon with zero obligations, what would you actually do?",
+  "I'm game. What's a small thing that always puts you in a better mood?",
+  "Alright — what's a take you've got that most people disagree with?",
+];
+
+let conversationInitiationCursor = 0;
+
+export function isConversationInitiation(text: string): boolean {
+  const q = stripLeadingGreeting(String(text || "")).trim().toLowerCase();
+  if (!q || q.length < 2) return false;
+  if (isClearlyTrading(q)) return false;
+  return CONVERSATION_INITIATION.test(q);
+}
+
+export function isDeadEndFiller(text: string): boolean {
+  const t = String(text || "").trim();
+  return (
+    /^Ha — say more/i.test(t) ||
+    /say more,?\s*i'?m listening/i.test(t) ||
+    /^what'?s on your mind\??$/i.test(t) ||
+    /^how can i help\??$/i.test(t) ||
+    /^i'?m listening\.?$/i.test(t)
+  );
+}
+
+/** Rotating pool — varied initiators, never one canned line for every phrase. */
+export function conversationInitiationReply(_question?: string): string {
+  const reply = CONVERSATION_INITIATORS[conversationInitiationCursor % CONVERSATION_INITIATORS.length];
+  conversationInitiationCursor += 1;
+  return reply;
+}
+
 function unresolvedCasualFallback(question: string): string {
+  if (isConversationInitiation(question)) return conversationInitiationReply(question);
   if (isGeneralConversation(question)) return CASUAL_LLM_FAILURE_REPLY;
   return CLARIFY_MORE_REPLY;
 }
@@ -45,16 +102,31 @@ export function normalizeDeskQuestion(text: string): string {
 function isBiasDirectionQuestion(text: string): boolean {
   return (
     /\b(bullish|bearish)\b/.test(text) &&
-    /\b(it|market|chart|bias|mnq|nasdaq|futures|price|we|this)\b/.test(text)
+    (/\b(it|market|chart|bias|mnq|nasdaq|futures|price|we|this|you|are)\b/.test(text) ||
+      /^(?:bullish|bearish)\??$/.test(text.trim()))
   );
 }
 
-export function isClearlyTrading(text: string): boolean {
+export function isClearlyTrading(text: string, recentText?: string): boolean {
   const core = normalizeDeskQuestion(text).toLowerCase();
   const raw = text.trim().toLowerCase();
   if (!core && !raw) return false;
   if (isChartStatusQuestion(core) || isChartStatusQuestion(raw)) return true;
   if (isBiasDirectionQuestion(core) || isBiasDirectionQuestion(raw)) return true;
+  // Comparative distance with an explicit price/level cue is always desk trading.
+  if (
+    isComparativeDistancePhrase(core) &&
+    /\b(price|level|pdh|pdl|support|resistance)\b/.test(core)
+  ) {
+    return true;
+  }
+  if (
+    recentText &&
+    (isLevelComparativeFollowUp(core, undefined, recentText) ||
+      isLevelComparativeFollowUp(raw, undefined, recentText))
+  ) {
+    return true;
+  }
   return TRADING_WORDS.test(core) || TRADING_WORDS.test(raw) || CHART_READ_COMMANDS.test(core) || CHART_READ_COMMANDS.test(raw);
 }
 
@@ -183,6 +255,7 @@ function recentTopic(recentText: string): string {
 function isCasualFollowUp(q: string): boolean {
   const t = q.trim().toLowerCase();
   if (!t) return false;
+  if (isRephraseFollowUp(t)) return true;
   return (
     /\b(what about|and what|how about|how come|tell me more|go on|you think|same|why|really|true|agree|which one)\b/.test(
       t
@@ -198,11 +271,13 @@ export function isGeneralConversation(text: string): boolean {
   if (!q || q.length < 2) return false;
   if (isChartReadCommand(q)) return false;
   if (isClearlyTrading(q)) return false;
+  if (isConversationInitiation(text)) return true;
   if (isPersonaQuestion(q)) return true;
   if (needsWebSearch(q)) return true;
   if (/\?\s*$/.test(q)) return true;
+  // Informal STT: "whats" / "whats the capital" (no apostrophe) must match like "what's".
   if (
-    /^(what|who|where|when|why|how|tell me|explain|describe|define|can you|could you|do you know|is there|are there)\b/i.test(
+    /^(what(?:'?s)?|who(?:'?s)?|where(?:'?s)?|when(?:'?s)?|why|how(?:'?s)?|tell me|explain|describe|define|can you|could you|do you know|is there|are there)\b/i.test(
       q
     )
   ) {
@@ -216,11 +291,30 @@ export function isCasualChat(text: string, recentMessages?: string): boolean {
   const q = stripLeadingGreeting(text).trim().toLowerCase();
   if (!q || q.length < 2) return false;
   if (isGreeting(text) || isLikelyGreetingMisheard(q) || isFarewell(q)) return true;
+  if (isConversationInitiation(text)) return true;
   if (/\b(?:my name'?s|my name is|call me)\s+[a-z]/i.test(q)) return true;
+  // Level comparative / slot anaphora with prior named levels — never casual/GENERAL_CHAT.
+  if (
+    recentMessages &&
+    priorHasMentionedLevels(undefined, recentMessages) &&
+    (isComparativeDistancePhrase(q) || isLevelSlotFollowUpPhrase(q))
+  ) {
+    return false;
+  }
+  if (isClearlyTrading(q, recentMessages)) return false;
   if (needsWebSearch(q)) return true;
   if (isChartReadCommand(q)) return false;
-  if (isClearlyTrading(q)) return false;
-  if (looksCasualPhrase(q)) return true;
+  if (looksCasualPhrase(q)) {
+    // "which one" after PDH/PDL is market; after colour/food stays casual.
+    if (
+      /\bwhich one\b/.test(q) &&
+      recentMessages &&
+      priorHasMentionedLevels(undefined, recentMessages)
+    ) {
+      return false;
+    }
+    return true;
+  }
   if (/\bwhat about\b/.test(q) && recentMessages && recentCasualContext(recentMessages)) {
     return true;
   }
@@ -468,6 +562,20 @@ export function casualChatFallback(
   const memReply = userMemoryReply(question);
   if (memReply) return memReply;
 
+  const diversity = resolveCasualDiversityFollowUp(question, messages);
+  if (diversity) return diversity;
+
+  if (isJokeRequest(q)) {
+    return pickJokeReply({ messages });
+  }
+  if (isAskMeRequest(q) || /\bask me something\b/.test(q)) {
+    return pickAskMeReply({ messages });
+  }
+
+  if (isConversationInitiation(question)) {
+    return conversationInitiationReply(question);
+  }
+
   if (/\bwhat('s| is) your (favorite|favourite)\s+food\b/.test(q)) {
     return "Burger and fries on a lazy day, Chinese when I want variety — what's yours?";
   }
@@ -527,9 +635,6 @@ export function casualChatFallback(
   }
   if (/\bwhat's up\b|\bgood morning\b/.test(q)) {
     return "Not much — just vibing. What's good with you?";
-  }
-  if (/\bjoke\b|\bfunny\b/.test(q)) {
-    return "Why did the trader bring a ladder to the desk? The market kept hitting new highs.";
   }
   if (/\b(coffee|tea|energy drink)\b/.test(q)) {
     return "Coffee — black when it's serious, iced when the day's long.";

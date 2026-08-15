@@ -1,0 +1,27 @@
+{
+  "frozenAt": "2026-08-14",
+  "note": "Research-only frozen snapshots. architecture-v1 is the production baseline (identity overlay). v2/v3 never silently replace production. weights=none.",
+  "versions": {
+    "architecture-v1": {
+      "id": "architecture-v1",
+      "production": true,
+      "overlay": "identity",
+      "weights": "none",
+      "name": "Production current (stay-flat on HTF vs LTF)"
+    },
+    "architecture-v2": {
+      "id": "architecture-v2",
+      "production": false,
+      "overlay": "ltf_override_on_proven_liquidity",
+      "weights": "none",
+      "hypothesisId": "H-B"
+    },
+    "architecture-v3": {
+      "id": "architecture-v3",
+      "production": false,
+      "overlay": "htf_context_no_tactical_block",
+      "weights": "none",
+      "hypothesisId": "H-C"
+    }
+  }
+}

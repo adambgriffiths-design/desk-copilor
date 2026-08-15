@@ -1,0 +1,578 @@
+{
+  "selected_at": "2026-08-15",
+  "total_keyword_hits": 20,
+  "bucket_counts": {
+    "org": 6,
+    "dealing_range": 1,
+    "first_presented_fvg": 0,
+    "opening_range": 13,
+    "fvg_open": 0,
+    "first_hour": 0,
+    "other_priority": 0
+  },
+  "batch_size": 20,
+  "batch": [
+    {
+      "video_id": "pM8oWrcIJqU",
+      "title": "2025 Lecture Series - SMC Trading Opening Range Gaps",
+      "url": "https://www.youtube.com/watch?v=pM8oWrcIJqU",
+      "duration_sec": 1957,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 125
+    },
+    {
+      "video_id": "Sf_uYZBWTrA",
+      "title": "2023 ICT Mentorship - Opening Range Gap Repricing Macro",
+      "url": "https://www.youtube.com/watch?v=Sf_uYZBWTrA",
+      "duration_sec": 1398,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 125
+    },
+    {
+      "video_id": "uIvlS330qrA",
+      "title": "2025 Lecture Series - SMC Opening Range Gaps",
+      "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+      "duration_sec": 1166,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 125
+    },
+    {
+      "video_id": "tbEzAhdv_Ak",
+      "title": "ICT 2026 Futures Review & RTH ORG Commentary \\ April 29, 2026",
+      "url": "https://www.youtube.com/watch?v=tbEzAhdv_Ak",
+      "duration_sec": 4706,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 115
+    },
+    {
+      "video_id": "V5crdCw0AsY",
+      "title": "Chain Of Custody Of Price With RTH ORG",
+      "url": "https://www.youtube.com/watch?v=V5crdCw0AsY",
+      "duration_sec": 864,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 110
+    },
+    {
+      "video_id": "UPKUqW_eaas",
+      "title": "AM Session - Opening Range Gap + Mitigation Block & FVG Entry",
+      "url": "https://www.youtube.com/watch?v=UPKUqW_eaas",
+      "duration_sec": 140,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 100
+    },
+    {
+      "video_id": "s-iqN0h2Fgg",
+      "title": "2022 ICT Mentorship Topical Study - Dealing Ranges",
+      "url": "https://www.youtube.com/watch?v=s-iqN0h2Fgg",
+      "duration_sec": 3859,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "dealing_range"
+      ],
+      "score": 115
+    },
+    {
+      "video_id": "CGbSpa_9Z9Y",
+      "title": "ICT Mentorship Core Content - Month 10 - Bond Trading - Basics & Opening Range Concept",
+      "url": "https://www.youtube.com/watch?v=CGbSpa_9Z9Y",
+      "duration_sec": 1106,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 65
+    },
+    {
+      "video_id": "ORbtHOUzAIM",
+      "title": "ICT Mentorship Core Content - Month 10 - Index Futures - Basics & Opening Range Concept",
+      "url": "https://www.youtube.com/watch?v=ORbtHOUzAIM",
+      "duration_sec": 718,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 65
+    },
+    {
+      "video_id": "Z0VYZoaTIKE",
+      "title": "2025 Lecture Series - SMC Midnight Opening Range",
+      "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+      "duration_sec": 3903,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 65
+    },
+    {
+      "video_id": "G9mVorSyvR0",
+      "title": "ICT 2026 Futures Opening Range Tape-Reading \\ April 14, 2026",
+      "url": "https://www.youtube.com/watch?v=G9mVorSyvR0",
+      "duration_sec": 3320,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "gLt8kAG7noQ",
+      "title": "ICT 2026 Opening Range Tape Reading \\ April 07, 2026",
+      "url": "https://www.youtube.com/watch?v=gLt8kAG7noQ",
+      "duration_sec": 2359,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "Hiq47zliJ_Y",
+      "title": "ICT 2026 Tape-Reading Opening Range \\ April 10, 2026",
+      "url": "https://www.youtube.com/watch?v=Hiq47zliJ_Y",
+      "duration_sec": 1875,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "ib9sa6ldwA4",
+      "title": "2025 Lecture Series - SMC Midnight Opening Range Live NQ Example",
+      "url": "https://www.youtube.com/watch?v=ib9sa6ldwA4",
+      "duration_sec": 435,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "Il_DM4T7nzg",
+      "title": "ICT 2026 Futures Opening Range Tape-Reading \\ April 13, 2026",
+      "url": "https://www.youtube.com/watch?v=Il_DM4T7nzg",
+      "duration_sec": 5450,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "bz4QNPcpmWE",
+      "title": "Part 2 \\ How To Probe Low Probability RTH Opening Ranges 07/14/2026",
+      "url": "https://www.youtube.com/watch?v=bz4QNPcpmWE",
+      "duration_sec": 905,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "fFi2QEApVGM",
+      "title": "Trading Complex Opening Ranges With Fed Impact 07/14/2026",
+      "url": "https://www.youtube.com/watch?v=fFi2QEApVGM",
+      "duration_sec": 1351,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "k2QLuxMIZio",
+      "title": "Teaching Calub Complex Opening Range Delivery \\ June 22, 2026",
+      "url": "https://www.youtube.com/watch?v=k2QLuxMIZio",
+      "duration_sec": 640,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "rtIcbG6twrI",
+      "title": "How To Probe Low Probability RTH Opening Ranges 07/13/2026",
+      "url": "https://www.youtube.com/watch?v=rtIcbG6twrI",
+      "duration_sec": 3086,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "Zm9Q0NDRxoY",
+      "title": "ICT Opening Range Theory \\ 1st Presented FVG Logic",
+      "url": "https://www.youtube.com/watch?v=Zm9Q0NDRxoY",
+      "duration_sec": 2092,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    }
+  ],
+  "all_hits_top40": [
+    {
+      "video_id": "pM8oWrcIJqU",
+      "title": "2025 Lecture Series - SMC Trading Opening Range Gaps",
+      "url": "https://www.youtube.com/watch?v=pM8oWrcIJqU",
+      "duration_sec": 1957,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 125
+    },
+    {
+      "video_id": "Sf_uYZBWTrA",
+      "title": "2023 ICT Mentorship - Opening Range Gap Repricing Macro",
+      "url": "https://www.youtube.com/watch?v=Sf_uYZBWTrA",
+      "duration_sec": 1398,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 125
+    },
+    {
+      "video_id": "uIvlS330qrA",
+      "title": "2025 Lecture Series - SMC Opening Range Gaps",
+      "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+      "duration_sec": 1166,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 125
+    },
+    {
+      "video_id": "s-iqN0h2Fgg",
+      "title": "2022 ICT Mentorship Topical Study - Dealing Ranges",
+      "url": "https://www.youtube.com/watch?v=s-iqN0h2Fgg",
+      "duration_sec": 3859,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "dealing_range"
+      ],
+      "score": 115
+    },
+    {
+      "video_id": "tbEzAhdv_Ak",
+      "title": "ICT 2026 Futures Review & RTH ORG Commentary \\ April 29, 2026",
+      "url": "https://www.youtube.com/watch?v=tbEzAhdv_Ak",
+      "duration_sec": 4706,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 115
+    },
+    {
+      "video_id": "V5crdCw0AsY",
+      "title": "Chain Of Custody Of Price With RTH ORG",
+      "url": "https://www.youtube.com/watch?v=V5crdCw0AsY",
+      "duration_sec": 864,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 110
+    },
+    {
+      "video_id": "UPKUqW_eaas",
+      "title": "AM Session - Opening Range Gap + Mitigation Block & FVG Entry",
+      "url": "https://www.youtube.com/watch?v=UPKUqW_eaas",
+      "duration_sec": 140,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "org"
+      ],
+      "score": 100
+    },
+    {
+      "video_id": "CGbSpa_9Z9Y",
+      "title": "ICT Mentorship Core Content - Month 10 - Bond Trading - Basics & Opening Range Concept",
+      "url": "https://www.youtube.com/watch?v=CGbSpa_9Z9Y",
+      "duration_sec": 1106,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 65
+    },
+    {
+      "video_id": "ORbtHOUzAIM",
+      "title": "ICT Mentorship Core Content - Month 10 - Index Futures - Basics & Opening Range Concept",
+      "url": "https://www.youtube.com/watch?v=ORbtHOUzAIM",
+      "duration_sec": 718,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 65
+    },
+    {
+      "video_id": "Z0VYZoaTIKE",
+      "title": "2025 Lecture Series - SMC Midnight Opening Range",
+      "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+      "duration_sec": 3903,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 65
+    },
+    {
+      "video_id": "G9mVorSyvR0",
+      "title": "ICT 2026 Futures Opening Range Tape-Reading \\ April 14, 2026",
+      "url": "https://www.youtube.com/watch?v=G9mVorSyvR0",
+      "duration_sec": 3320,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "gLt8kAG7noQ",
+      "title": "ICT 2026 Opening Range Tape Reading \\ April 07, 2026",
+      "url": "https://www.youtube.com/watch?v=gLt8kAG7noQ",
+      "duration_sec": 2359,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "Hiq47zliJ_Y",
+      "title": "ICT 2026 Tape-Reading Opening Range \\ April 10, 2026",
+      "url": "https://www.youtube.com/watch?v=Hiq47zliJ_Y",
+      "duration_sec": 1875,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "ib9sa6ldwA4",
+      "title": "2025 Lecture Series - SMC Midnight Opening Range Live NQ Example",
+      "url": "https://www.youtube.com/watch?v=ib9sa6ldwA4",
+      "duration_sec": 435,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "Il_DM4T7nzg",
+      "title": "ICT 2026 Futures Opening Range Tape-Reading \\ April 13, 2026",
+      "url": "https://www.youtube.com/watch?v=Il_DM4T7nzg",
+      "duration_sec": 5450,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 55
+    },
+    {
+      "video_id": "bz4QNPcpmWE",
+      "title": "Part 2 \\ How To Probe Low Probability RTH Opening Ranges 07/14/2026",
+      "url": "https://www.youtube.com/watch?v=bz4QNPcpmWE",
+      "duration_sec": 905,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "fFi2QEApVGM",
+      "title": "Trading Complex Opening Ranges With Fed Impact 07/14/2026",
+      "url": "https://www.youtube.com/watch?v=fFi2QEApVGM",
+      "duration_sec": 1351,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "k2QLuxMIZio",
+      "title": "Teaching Calub Complex Opening Range Delivery \\ June 22, 2026",
+      "url": "https://www.youtube.com/watch?v=k2QLuxMIZio",
+      "duration_sec": 640,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "rtIcbG6twrI",
+      "title": "How To Probe Low Probability RTH Opening Ranges 07/13/2026",
+      "url": "https://www.youtube.com/watch?v=rtIcbG6twrI",
+      "duration_sec": 3086,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    },
+    {
+      "video_id": "Zm9Q0NDRxoY",
+      "title": "ICT Opening Range Theory \\ 1st Presented FVG Logic",
+      "url": "https://www.youtube.com/watch?v=Zm9Q0NDRxoY",
+      "duration_sec": 2092,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "opening_range"
+      ],
+      "score": 50
+    }
+  ]
+}

@@ -1,14 +1,9 @@
 import OpenAI from "openai";
 import { fetchAllTimeframesCached } from "@/lib/market-data";
 import { buildMarketContext, formatContextForLiveVerdict } from "@/lib/levels";
-import { LIVE_VERDICT_SYSTEM } from "@/lib/playbook";
-import { readAllFeedback, getTrainingExamples } from "@/lib/feedback-store";
-import { formatTrainingExamplesForPrompt } from "@/lib/training-examples";
-import { readLearnedRules, formatLearnedRulesForPrompt } from "@/lib/learned-rules-store";
-import { appendSessionLog, type SessionLogEntry } from "@/lib/session-store";
-import { parseVerdictSections, verdictUserTail } from "@/lib/verdict-format";
-import { buildVoiceSpokenBrief } from "@/lib/voice-spoken-brief";
-import { sanitizeSpokenBrief } from "@/lib/voice-spoken-sanitize";
+import { CHART_EVIDENCE_SYSTEM } from "@/lib/playbook";
+import { readLearnedRules } from "@/lib/learned-rules-store";
+import { appendSessionLog } from "@/lib/session-store";
 import {
   classifyChartQuestion,
   isSnapshotIntent,
@@ -17,9 +12,9 @@ import {
 import {
   buildNoCallVerdictResult,
   buildReasoningLogInput,
-  buildReasoningLogOutput,
   CHART_NO_CALL_MESSAGE,
   hasStructuredChartData,
+  hydrateChartSnapshotFromBars,
   isChartQualityUsable,
   parseChartSnapshotInput,
   scoreChartQuality,
@@ -28,8 +23,16 @@ import {
 } from "@/lib/chart-snapshot";
 import { buildMarketState } from "@/lib/market-state-build";
 import { runDecisionPipeline, buildDecisionReasoningLog } from "@/lib/desk-pipeline";
+import { flushDecisionMemoryWrites } from "@/lib/decision-envelope-history";
+import { withManualAnalysePriority } from "@/lib/continuous-decision-recorder";
 import type { DeskPipelineResult } from "@/lib/desk-schema";
 import { resolveSnapshotFromQuestion } from "@/lib/market-snapshot";
+import {
+  enforceVisibleDecisionContract,
+  formatMentorTradeSpoken,
+  formatUnifiedDecisionOutput,
+  resolveUserPresentationMode,
+} from "@/lib/decision-contract-output";
 
 export type VerdictResult = {
   id: string;
@@ -68,86 +71,6 @@ async function loadMarketContext(chartTime?: string, chartLastPrice?: number | n
   return { marketContext, marketDataWarning };
 }
 
-function finalizeVerdictResult(input: {
-  raw: string;
-  marketContext: ReturnType<typeof buildMarketContext> | null;
-  question?: string;
-  intent: ChartQuestionIntent;
-  symbol?: string;
-  chartTime?: string;
-  learnedVersion: number;
-  marketDataWarning: string;
-  scoped?: boolean;
-  structured?: boolean;
-  chartDataSource?: VerdictResult["chartDataSource"];
-  source?: SessionLogEntry["source"];
-  quality?: ChartSnapshotPayload["quality"];
-  qualityReasons?: string[];
-  reasoningLog?: ChartReasoningLog;
-  reasoningInput?: ChartReasoningLog["input"];
-}): VerdictResult {
-  const parsed = parseVerdictSections(input.raw);
-
-  if (input.marketContext) {
-    const canonical = buildVoiceSpokenBrief(
-      input.marketContext,
-      parsed.verdict,
-      input.question
-    );
-    if (canonical) parsed.spokenBrief = canonical;
-    else if (!parsed.spokenBrief.trim() && parsed.verdict.trim()) {
-      parsed.spokenBrief = parsed.verdict.replace(/\n+/g, " ").slice(0, 900);
-    }
-    if (parsed.spokenBrief.trim()) {
-      parsed.spokenBrief = sanitizeSpokenBrief(parsed.spokenBrief, {
-        levelsQuestion: input.intent === "level",
-      });
-    }
-  }
-
-  const reasoningLog: ChartReasoningLog = input.reasoningLog || {
-    ts: new Date().toISOString(),
-    input: input.reasoningInput || {
-      quality: input.quality || "good",
-      reasons: input.qualityReasons || [],
-      candleCount: 0,
-      candleHash: "na",
-      drawingCount: 0,
-    },
-    output: buildReasoningLogOutput(input.raw, parsed),
-  };
-  if (!reasoningLog.output) {
-    reasoningLog.output = buildReasoningLogOutput(input.raw, parsed);
-  }
-
-  const id = crypto.randomUUID();
-  const entry: SessionLogEntry = {
-    id,
-    createdAt: new Date().toISOString(),
-    symbol: input.symbol,
-    chartTime: input.chartTime,
-    verdict: parsed.verdict,
-    source: input.source || "live",
-    marketContext: input.marketContext,
-  };
-  void appendSessionLog(entry).catch(() => {});
-
-  return {
-    id,
-    verdict: parsed.verdict,
-    spokenBrief: parsed.spokenBrief || undefined,
-    marketContext: input.marketContext,
-    marketDataWarning: input.marketDataWarning || null,
-    learnedRulesVersion: input.learnedVersion,
-    intent: input.intent,
-    scoped: input.scoped,
-    structured: input.structured,
-    chartDataSource: input.chartDataSource,
-    quality: input.quality,
-    qualityReasons: input.qualityReasons,
-    reasoningLog,
-  };
-}
 
 function noCallResult(
   snap: ChartSnapshotPayload | null,
@@ -189,7 +112,7 @@ export async function generateSnapshotAnswer(input: {
   const intent = classifyChartQuestion(input.question);
   const [learned, { marketContext, marketDataWarning }] = await Promise.all([
     readLearnedRules(),
-    loadMarketContext(input.chartTime, input.chartLastPrice, true),
+    loadMarketContext(input.chartTime, input.chartLastPrice, false),
   ]);
   if (!marketContext) throw new Error(marketDataWarning || "Market data unavailable");
 
@@ -212,6 +135,19 @@ function imageDetailForIntent(_intent: ChartQuestionIntent): "low" | "auto" {
   return "low";
 }
 
+async function resolveStructuredSnapshot(
+  snap: ChartSnapshotPayload | null,
+  chartLastPrice?: number | null
+): Promise<ChartSnapshotPayload | null> {
+  if (hasStructuredChartData(snap)) return snap;
+  try {
+    const data = await fetchAllTimeframesCached(true, chartLastPrice);
+    return hydrateChartSnapshotFromBars(snap, data.m1, { lastPrice: chartLastPrice });
+  } catch {
+    return snap;
+  }
+}
+
 /** Deterministic institutional pipeline — no LLM reasoning. */
 export async function generatePipelineVerdict(input: {
   chartSnapshot: ChartSnapshotPayload;
@@ -221,61 +157,65 @@ export async function generatePipelineVerdict(input: {
   intent?: ChartQuestionIntent;
   chartLastPrice?: number | null;
 }): Promise<VerdictResult> {
-  const intent = input.intent ?? classifyChartQuestion(input.question || "");
-  const meta = input.chartSnapshot.qualityMeta || scoreChartQuality(input.chartSnapshot);
+  // Manual Analyse holds priority so continuous recorder ticks yield.
+  return withManualAnalysePriority(async () => {
+    const intent = input.intent ?? classifyChartQuestion(input.question || "");
+    const meta = input.chartSnapshot.qualityMeta || scoreChartQuality(input.chartSnapshot);
 
-  if (!isChartQualityUsable(meta)) {
-    return noCallResult(input.chartSnapshot, intent);
-  }
+    if (!isChartQualityUsable(meta)) {
+      return noCallResult(input.chartSnapshot, intent);
+    }
 
-  const { marketContext, marketDataWarning } = await loadMarketContext(
-    input.chartTime,
-    input.chartLastPrice,
-    true
-  );
-  if (!marketContext) {
-    return noCallResult(input.chartSnapshot, intent);
-  }
+    const { marketContext, marketDataWarning } = await loadMarketContext(
+      input.chartTime,
+      input.chartLastPrice,
+      false
+    );
+    if (!marketContext) {
+      return noCallResult(input.chartSnapshot, intent);
+    }
 
-  const state = buildMarketState({
-    ctx: marketContext,
-    chartSnapshot: input.chartSnapshot,
-    symbol: input.symbol,
+    const state = buildMarketState({
+      ctx: marketContext,
+      chartSnapshot: input.chartSnapshot,
+      symbol: input.symbol,
+    });
+
+    const decision = runDecisionPipeline(marketContext, state);
+    await flushDecisionMemoryWrites();
+    const reasoningLog = buildDecisionReasoningLog(decision.deskPipeline!, state);
+    const id = crypto.randomUUID();
+
+    void appendSessionLog({
+      id,
+      createdAt: new Date().toISOString(),
+      symbol: input.symbol,
+      chartTime: input.chartTime,
+      verdict: decision.panelBrief,
+      source: "live",
+      marketContext,
+    }).catch(() => {});
+
+    return {
+      id,
+      verdict: decision.panelBrief,
+      spokenBrief: decision.spokenBrief,
+      marketContext,
+      marketDataWarning: marketDataWarning || null,
+      learnedRulesVersion: 0,
+      intent,
+      scoped: false,
+      structured: true,
+      pipeline: true,
+      noCall: decision.verdict === "no trade",
+      decisionVerdict: decision.verdict,
+      chartDataSource: input.chartSnapshot.source === "yahoo_fallback" ? "yahoo_fallback" : "tv_export",
+      quality: meta.quality,
+      qualityReasons: meta.reasons,
+      reasoningLog,
+      deskPipeline: decision.deskPipeline,
+    };
   });
-
-  const decision = runDecisionPipeline(marketContext, state);
-  const reasoningLog = buildDecisionReasoningLog(decision.deskPipeline!, state);
-  const id = crypto.randomUUID();
-
-  void appendSessionLog({
-    id,
-    createdAt: new Date().toISOString(),
-    symbol: input.symbol,
-    chartTime: input.chartTime,
-    verdict: decision.panelBrief,
-    source: "live",
-    marketContext,
-  }).catch(() => {});
-
-  return {
-    id,
-    verdict: decision.panelBrief,
-    spokenBrief: decision.spokenBrief,
-    marketContext,
-    marketDataWarning: marketDataWarning || null,
-    learnedRulesVersion: 0,
-    intent,
-    scoped: false,
-    structured: true,
-    pipeline: true,
-    noCall: decision.verdict === "no trade",
-    decisionVerdict: decision.verdict,
-    chartDataSource: "tv_export",
-    quality: meta.quality,
-    qualityReasons: meta.reasons,
-    reasoningLog,
-    deskPipeline: decision.deskPipeline,
-  };
 }
 
 /** @deprecated Use generatePipelineVerdict — kept as alias. */
@@ -291,6 +231,51 @@ export async function generateStructuredVerdict(input: {
   return generatePipelineVerdict(input);
 }
 
+async function extractChartEvidenceFromScreenshot(input: {
+  imageBase64: string;
+  mimeType?: string;
+  intent: ChartQuestionIntent;
+  marketContextText?: string;
+  question?: string;
+}): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return "";
+  const mime = input.mimeType || "image/png";
+  const dataUrl = `data:${mime};base64,${input.imageBase64}`;
+  const openai = new OpenAI({ apiKey });
+  const response = await openai.chat.completions.create({
+    model: VERDICT_MODEL,
+    max_tokens: 280,
+    messages: [
+      { role: "system", content: CHART_EVIDENCE_SYSTEM },
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: [
+              "Extract chart observations only. Do not output a Call, Bias-as-trade, Stance, or potential buy/sell.",
+              input.marketContextText,
+              input.question && `Trader asked: ${input.question}`,
+            ]
+              .filter(Boolean)
+              .join("\n\n"),
+          },
+          {
+            type: "image_url",
+            image_url: { url: dataUrl, detail: imageDetailForIntent(input.intent) },
+          },
+        ],
+      },
+    ],
+  });
+  return response.choices[0]?.message?.content?.trim() || "";
+}
+
+/**
+ * Screenshot path — chart evidence only. Trading decision is the pipeline envelope.
+ * Does not change generatePipelineVerdict semantics.
+ */
 export async function generateLiveVerdict(input: {
   imageBase64: string;
   mimeType?: string;
@@ -301,94 +286,90 @@ export async function generateLiveVerdict(input: {
   intent?: ChartQuestionIntent;
   chartLastPrice?: number | null;
 }): Promise<VerdictResult> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY not set");
-
   const intent = input.intent ?? classifyChartQuestion(input.question || "");
-
-  const skipExtras = intent === "full_read";
-  const emptyLearned = {
-    version: 0,
-    updatedAt: "",
-    conceptErrorCounts: {},
-    rules: [],
-    promptAddendum: "",
-  };
-  const [learned, { marketContext, marketDataWarning }, allFeedback] = await Promise.all([
-    skipExtras ? Promise.resolve(emptyLearned) : readLearnedRules(),
-    loadMarketContext(input.chartTime, input.chartLastPrice, true),
-    skipExtras ? Promise.resolve([]) : readAllFeedback(),
-  ]);
-
-  let marketContextText = "";
-  if (marketContext) {
-    marketContextText = formatContextForLiveVerdict(marketContext);
+  const { marketContext, marketDataWarning } = await loadMarketContext(
+    input.chartTime,
+    input.chartLastPrice,
+    false
+  );
+  if (!marketContext) {
+    return noCallResult(null, intent);
   }
 
-  const mime = input.mimeType || "image/png";
-  const dataUrl = `data:${mime};base64,${input.imageBase64}`;
+  const state = buildMarketState({
+    ctx: marketContext,
+    chartSnapshot: null,
+    symbol: input.symbol,
+    chartLastPrice: input.chartLastPrice,
+  });
+  const decision = runDecisionPipeline(marketContext, state);
+  await flushDecisionMemoryWrites();
+  const pipe = decision.deskPipeline!;
+  const env = pipe.analysis_contract?.decision;
+  const reasoningLog = buildDecisionReasoningLog(pipe, state);
 
-  const trainingText = skipExtras
-    ? ""
-    : formatTrainingExamplesForPrompt(getTrainingExamples(allFeedback, 2));
-  const learnedText = skipExtras ? "" : formatLearnedRulesForPrompt(learned);
+  let chartEvidence = "";
+  try {
+    chartEvidence = await extractChartEvidenceFromScreenshot({
+      imageBase64: input.imageBase64,
+      mimeType: input.mimeType,
+      intent,
+      marketContextText: formatContextForLiveVerdict(marketContext),
+      question: input.question,
+    });
+  } catch {
+    chartEvidence = "";
+  }
 
-  const userMessage = [
-    learnedText,
-    trainingText,
-    marketContextText,
-    marketDataWarning && `Note: ${marketDataWarning}`,
-    input.symbol && `Chart symbol: ${input.symbol}`,
-    input.chartTime && `Chart time (EST): ${input.chartTime}`,
-    verdictUserTail(intent, input.voiceInput, input.question),
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-
-  const maxTokens =
-    intent === "full_read"
-      ? input.voiceInput
-        ? 480
-        : 560
-      : input.voiceInput
-        ? 280
-        : 400;
-
-  const openai = new OpenAI({ apiKey });
-  const response = await openai.chat.completions.create({
-    model: VERDICT_MODEL,
-    max_tokens: maxTokens,
-    messages: [
-      { role: "system", content: LIVE_VERDICT_SYSTEM },
-      {
-        role: "user",
-        content: [
-          { type: "text", text: userMessage },
-          {
-            type: "image_url",
-            image_url: { url: dataUrl, detail: imageDetailForIntent(intent) },
-          },
-        ],
-      },
-    ],
+  const panelRaw = env
+    ? formatUnifiedDecisionOutput(env, { chartEvidence, source: "screenshot" })
+    : pipe.panel_brief;
+  const spokenRaw = env
+    ? formatMentorTradeSpoken(env, {
+        chartEvidence,
+        source: "screenshot",
+        mode: resolveUserPresentationMode(),
+      })
+    : pipe.spoken_brief;
+  const enforced = enforceVisibleDecisionContract(panelRaw, env, {
+    chartEvidence,
+    source: "screenshot",
+  });
+  const spokenEnforced = enforceVisibleDecisionContract(spokenRaw, env, {
+    chartEvidence,
+    source: "screenshot",
   });
 
-  const raw = response.choices[0]?.message?.content;
-  if (!raw) throw new Error("No response from model");
-
-  return finalizeVerdictResult({
-    raw,
-    marketContext,
-    question: input.question,
-    intent,
+  const id = crypto.randomUUID();
+  void appendSessionLog({
+    id,
+    createdAt: new Date().toISOString(),
     symbol: input.symbol,
     chartTime: input.chartTime,
-    learnedVersion: learned.version,
-    marketDataWarning,
+    verdict: enforced.text,
+    source: "live",
+    marketContext,
+  }).catch(() => {});
+
+  return {
+    id,
+    verdict: enforced.text,
+    spokenBrief: spokenEnforced.text,
+    marketContext,
+    marketDataWarning: marketDataWarning || null,
+    learnedRulesVersion: 0,
+    intent,
     scoped: intent !== "full_read",
-    structured: false,
+    structured: true,
+    pipeline: true,
+    noCall: decision.verdict === "no trade",
+    decisionVerdict: decision.verdict,
     chartDataSource: "screenshot",
-  });
+    quality: "degraded",
+    qualityReasons: ["screenshot_evidence_only", "decision_from_pipeline"],
+    reasoningLog,
+    deskPipeline: pipe,
+  };
 }
 
 /** Route snapshot vs structured vs vision by question intent. */
@@ -405,7 +386,10 @@ export async function generateChartAnswer(input: {
 }): Promise<VerdictResult> {
   const question = input.question || "what do you see on the chart";
   const intent = classifyChartQuestion(question);
-  const chartSnapshot = parseChartSnapshotInput(input.chartSnapshot);
+  let chartSnapshot = parseChartSnapshotInput(input.chartSnapshot);
+  if (!hasStructuredChartData(chartSnapshot)) {
+    chartSnapshot = await resolveStructuredSnapshot(chartSnapshot, input.chartLastPrice);
+  }
   const isFullRead = intent === "full_read" || !isSnapshotIntent(intent);
 
   if (isSnapshotIntent(intent)) {

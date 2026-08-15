@@ -1,0 +1,123 @@
+{
+  "concept_id": "opening_range_bonds_1h",
+  "name": "Opening range \u2014 Treasury bonds 1-hour (Month 10 Core)",
+  "aliases": [
+    "bond opening range",
+    "Treasury opening range",
+    "ZB opening range 8:00-9:00"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "or_bonds_1h_800_900__CGbSpa_9Z9Y__226",
+      "definition_text": "Bond-market opening range begins at 8:00 a.m. New York time and ends 9:00 a.m. New York time. Narrow focus: the opening range between 8:00 and 9:00 tends to create the bond market high or low of the day \u2014 run-on stops or a fair value setup (bullish/bearish order block).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Treasury bond / 30-year note context",
+        "NY local clock",
+        "1-hour window 8:00\u20139:00"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY bond session; Month 10 Core Content bond OR = 8:00\u20139:00 (1h)",
+      "variations_note": "KEEP SEPARATE from index 9:30\u201310:30 OR and from modern NY equity-index 30m OR. Same Month 10 series, different asset clock.",
+      "confidence": "quoted",
+            "cue_start": "00:03:32.809",
+            "cue_end": "00:04:08.000",
+            "timestamp_sec": 212.809,
+      "source": {
+        "video_id": "CGbSpa_9Z9Y",
+        "title": "ICT Mentorship Core Content - Month 10 - Bond Trading - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=CGbSpa_9Z9Y",
+        "transcript_path": "data/ict-transcripts/raw/CGbSpa_9Z9Y.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "or_bonds_vol_800_930_true_day__CGbSpa_9Z9Y__204",
+      "definition_text": "Highest volume is seen between 8:00 a.m. and 9:30 a.m. New York time. True day for the bond market is 8:00 a.m. to 3:00 p.m. New York time.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Bond volume / session framing"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Bond true day 08:00\u201315:00 NY; volume surge spans into 9:30",
+      "variations_note": "Volume window (8:00\u20139:30) is wider than the 1h OR (8:00\u20139:00) \u2014 parallel nuance to index lecture's 30m volume surge vs 1h OR.",
+      "confidence": "quoted",
+            "cue_start": "00:03:24.649",
+            "cue_end": "00:03:46.260",
+            "timestamp_sec": 204.649,
+      "source": {
+        "video_id": "CGbSpa_9Z9Y",
+        "title": "ICT Mentorship Core Content - Month 10 - Bond Trading - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=CGbSpa_9Z9Y",
+        "transcript_path": "data/ict-transcripts/raw/CGbSpa_9Z9Y.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "or_bonds_session_analysis_820__CGbSpa_9Z9Y__79",
+      "definition_text": "Analysis on the New York session for Treasury bond begins at 8:20 a.m. to 3:00 p.m. New York time (contract delivery months noted for 30-year).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "NY session analysis window stated as 8:20\u201315:00"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Bond NY session analysis start 8:20 vs true-day start 8:00",
+      "variations_note": "KEEP SEPARATE from true-day 8:00\u201315:00 and OR 8:00\u20139:00 \u2014 three distinct clocks in same lecture (analysis start / true day / OR).",
+      "confidence": "quoted",
+            "cue_start": "00:01:11.030",
+            "cue_end": "00:01:19.799",
+            "timestamp_sec": 71.03,
+      "source": {
+        "video_id": "CGbSpa_9Z9Y",
+        "title": "ICT Mentorship Core Content - Month 10 - Bond Trading - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=CGbSpa_9Z9Y",
+        "transcript_path": "data/ict-transcripts/raw/CGbSpa_9Z9Y.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "or_bonds_hl_stop_run_example__CGbSpa_9Z9Y__306",
+      "definition_text": "Opening range high/low between the 8:00\u20139:00 delineations; example trades down below the low formed between 8:00 and 9:00 as a stop run and potential setup.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Bond OR high/low locked from 8:00\u20139:00",
+        "Break beyond OR low framed as stop run"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Post 9:00 bond OR break example",
+      "variations_note": "Use-case example reinforcing HOD/LOD OR geometry \u2014 not a different clock.",
+      "confidence": "quoted",
+      "cue_start": "00:05:06.900",
+      "cue_end": "00:05:20.000",
+      "timestamp_sec": 306.9,
+      "source": {
+        "video_id": "CGbSpa_9Z9Y",
+        "title": "ICT Mentorship Core Content - Month 10 - Bond Trading - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=CGbSpa_9Z9Y",
+        "transcript_path": "data/ict-transcripts/raw/CGbSpa_9Z9Y.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "None dedicated for bond 8:00\u20139:00 OR (Karen desk is index-centric)",
+    "related_karen_evidence_or_gate": "n/a",
+    "overlap_vs_baseline_v2": "None for bonds",
+    "gap_vs_baseline_v2": "Bond OR clocks not in baseline-v2; catalogue for asset-specific OR disambiguation only",
+    "hypothesis_id": "H_ICT_OR_BONDS_1H_MONTH10",
+    "status": "CATALOGUED",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Do not wire into index Karen. Useful only as contrast proof that ICT OR clocks are asset-specific."
+  },
+  "extraction_notes": "Batch4 zero-download mine of CGbSpa_9Z9Y. Bonds vs index: 8:00\u20139:00 vs 9:30\u201310:30 one-hour ORs in paired Month 10 lectures."
+}

@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-c1-wait-entry-actionable-dev-protocol-2026-08-15",
+  "date": "2026-08-15",
+  "git_tree_state": "TREE:.tmp/karen-final-integration/ git:74183b2",
+  "trading_brain_baseline": "baseline-v2",
+  "candidate_version": "c1_wait_entry_actionable",
+  "single_change": "entryStatus WAIT no longer blocks directional LONG/SHORT (EXTENDED still waits)",
+  "dataset_version": "archive-carve-v1",
+  "split": "DEV",
+  "timestamp_manifest": "nq-history-archive-dev-overcaution-candidates-latest.json#smokeY48-even-c10-DEV",
+  "evaluation_cadence": 10,
+  "number_of_days": null,
+  "evaluation_points": 48,
+  "actionable_episodes": null,
+  "pit_violations": 0,
+  "dq_exclusions": 0,
+  "stance_counts": {
+    "LONG": 22,
+    "SHORT": 21,
+    "WAIT": 2,
+    "NO_TRADE": 3
+  },
+  "metrics": {
+    "mfeMedian": 9.5,
+    "maeMedian": 7.25,
+    "targetBeforeInvalidationRate": 0.8214285714285714,
+    "proxyRMean": 0.2137446391869535,
+    "opportunitiesPerDay": null
+  },
+  "hypothesis": "Relaxing entryStatus WAIT→actionable (one knob) reduces structural overcaution vs frozen baseline-v2 without spam or expectancy collapse.",
+  "result": "SUPERSEDED. Prior smoke RESEARCH_MORE (Y=48 incomplete package) replaced by exp-c1-wait-entry-actionable-dev-y1500-2026-08-15 decision=reject (Gate 10 + VAL proxyR fail). Smoke metrics unchanged historical record.",
+  "decision": "research",
+  "notes": "EDGE_CLAIM NONE. HOLDOUT SEALED. Superseded by Y=1500 reject entry. Do not promote binary c1. Production ALS remains none.",
+  "reproducibility_hash": "17b57192bc3c3979b8bd8b6d05fd541e7a7a0a670c7a3516d485950bebc5e494",
+  "promote_from_experiment_id": null
+}

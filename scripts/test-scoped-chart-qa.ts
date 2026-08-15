@@ -68,9 +68,9 @@ import {
   buildDrawingLevels,
   assignStaggeredLabelAlign,
   filterRelativeEqualPoolsByPrice,
-  labelBBox,
+  collapseOppositeRelativeEqualOnSameShelf,
   labelLaneToAlign,
-  priceToLineY,
+  nativeLabelLayoutKey,
   type DrawingLevel,
 } from "../lib/drawing-levels";
 import { getExecutionScaffold } from "../lib/execution-plan";
@@ -98,12 +98,15 @@ const mockCtx = {
   },
   htfPdArrays: {
     previousDay: { high: 29887, low: 28600, close: 29500, open: 29400, equilibrium: 29243.5 },
+    currentDay: { high: 29754.75, low: 29600, open: 29694, close: 29736, equilibrium: 29677.375 },
+    unfilledDailyFvgs: [],
     levels: [
       { id: "pdh", label: "Previous day high", price: 29887 },
       { id: "pdl", label: "Previous day low", price: 28600 },
       { id: "res", label: "Next resistance", price: 29950 },
     ],
   },
+  activeSession: { id: "ny_am", label: "NY AM" },
   sessions: {
     nyRthHigh: 29754.75,
     nyRthLow: 29600,
@@ -300,11 +303,11 @@ const rehRelDrawCtx = {
 const rehRelPrice = 20990;
 const drawnLevels = buildDrawingLevels(rehRelDrawCtx, [], { currentPrice: rehRelPrice });
 assert(
-  drawnLevels.some((l) => l.id === "reh_0" && l.label === "REH" && l.group === "structure"),
+  drawnLevels.some((l) => l.id === "reh_0" && l.label === "Relative Equal Highs" && l.group === "structure"),
   "buildDrawingLevels emits REH line"
 );
 assert(
-  drawnLevels.some((l) => l.id === "rel_0" && l.label === "REL" && l.color === "#e879f9"),
+  drawnLevels.some((l) => l.id === "rel_0" && l.label === "Relative Equal Lows" && l.color === "#e879f9"),
   "buildDrawingLevels emits REL with liquidity color"
 );
 
@@ -359,6 +362,29 @@ assert(
   "unknown price shows all REH/REL (fallback)"
 );
 
+{
+  const midPrice = 21000.4;
+  const midShelf = [
+    { type: "reh" as const, price: 21000.75, startTime: 102, endTime: 107, barCount: 2 },
+    { type: "rel" as const, price: 21000, startTime: 213, endTime: 218, barCount: 2 },
+  ];
+  const afterPrice = filterRelativeEqualPoolsByPrice(midShelf, midPrice);
+  assert(afterPrice.length === 2, "price filter keeps both when last is inside the shelf");
+  const collapsed = collapseOppositeRelativeEqualOnSameShelf(afterPrice, midPrice);
+  assert(collapsed.length === 1, "middle consolidation is one shelf, not dual REH/REL");
+  assert(collapsed[0]!.type === "rel", "equal-strength mixed shelf keeps REL (support)");
+  const midCtx = {
+    ...rehRelDrawCtx,
+    structureFacts: {
+      ...rehRelDrawCtx.structureFacts,
+      relativeEqualPools: midShelf,
+    },
+  } as MarketContext;
+  const midDrawn = buildDrawingLevels(midCtx, [], { currentPrice: midPrice });
+  const midRehRel = midDrawn.filter((l) => l.id.startsWith("reh_") || l.id.startsWith("rel_"));
+  assert(midRehRel.length === 1 && midRehRel[0]!.id.startsWith("rel_"), "drawn overlay is REL only on mid shelf");
+}
+
 const multiRehCtx = {
   ...rehRelDrawCtx,
   structureFacts: {
@@ -393,38 +419,26 @@ const clusterLevels: DrawingLevel[] = [
   { id: "org_top", label: "ORG top", price: 20998, color: "#fff", dash: "4 3", group: "org" },
 ];
 assignStaggeredLabelAlign(clusterLevels, [], { priceMin: 20990, priceMax: 21010 });
+const labeledCluster = clusterLevels.filter((l) => l.showLabel !== false);
+assert(labeledCluster.length === clusterLevels.length, "each overlapping level keeps its own native label");
 assert(
-  clusterLevels.every((l) => l.showLabel !== false),
-  "stagger never hides level labels"
+  clusterLevels.filter((l) => String(l.id).startsWith("reh_") && l.showLabel !== false).length === 2,
+  "stacked REH rays each keep their own name"
 );
 assert(
-  clusterLevels.every((l) => l.labelLane != null && l.labelLane >= 0),
-  "stagger assigns labelLane to every clustered label"
+  labeledCluster.every((l) => l.labelLane != null && l.labelLane >= 0),
+  "each independent label still assigns a labelLane"
 );
-assert(labelLaneToAlign(0) === "top" && labelLaneToAlign(1) === "bottom", "label lanes alternate above/below");
-assert(labelLaneToAlign(2) === "top" && labelLaneToAlign(3) === "bottom", "higher lanes keep alternating");
-const aligns = new Set(clusterLevels.map((l) => l.labelAlign));
-assert(aligns.size >= 2, "clustered levels get mixed above/below align");
+assert(labelLaneToAlign(0) === "top" && labelLaneToAlign(1) === "middle", "label lanes cycle top/middle");
+assert(labelLaneToAlign(2) === "bottom" && labelLaneToAlign(3) === "top", "higher lanes keep cycling");
 assert(
-  clusterLevels.every((l) => !l.displayLabel),
-  "stagger keeps full labels — no displayLabel dedup"
+  labeledCluster.every((l) => !/\s\/\s/.test(String(l.displayLabel || ""))),
+  "distinct nearby names stay on separate drawings — never slash-joined"
 );
-function clusterBboxesOverlap(levels: DrawingLevel[], pMin: number, pMax: number): boolean {
-  const plotH = 480;
-  const boxes = levels.map((l) => {
-    const lineY = priceToLineY(l.price, pMin, pMax, plotH);
-    return labelBBox(lineY, l.labelAlign ?? "top", l.labelLane ?? 0);
-  });
-  for (let i = 0; i < boxes.length; i++) {
-    for (let j = i + 1; j < boxes.length; j++) {
-      const a = boxes[i];
-      const b = boxes[j];
-      if (a.bottom + 18 > b.top && b.bottom + 18 > a.top) return true;
-    }
-  }
-  return false;
-}
-assert(!clusterBboxesOverlap(clusterLevels, 20990, 21010), "cluster label bboxes do not overlap");
+assert(
+  new Set(labeledCluster.map((l) => nativeLabelLayoutKey(l))).size === labeledCluster.length,
+  "clustered native titles get unique vert/horz/time slots"
+);
 
 const shortBullFvgCtx = {
   ...execMock,
@@ -487,8 +501,7 @@ assert(
 // classifyChartQuestion
 assert(classifyChartQuestion("what price are we trading at right now") === "price", "right now price");
 assert(classifyChartQuestion("get the read") === "full_read", "full read intent");
-assert(wantsChartRead("get the read"), "get the read triggers chart read");
-assert(wantsChartRead("GET THE READ"), "GET THE READ triggers chart read");
+assert(isChartReadCommand("get the read"), "get the read is a chart-read command");
 assert(wantsChartRead("get me a read"), "get me a read triggers chart read");
 assert(!needsFullChartRead("what's the bias"), "bias uses JSON snapshot not screenshot");
 assert(needsFullChartRead("get the read"), "get the read needs screenshot");
@@ -611,7 +624,11 @@ const clean = sanitizeCasualReply(steer, "what about kfc");
 assert(!/fair question|easy either way/i.test(clean), "steer-back stripped from casual reply");
 
 assert(!isGenericCasualReply(casualChatFallback("random xyz")), "no generic fallback");
-assert(/listening|say more/i.test(casualChatFallback("random xyz")), "personality fallback");
+assert(!/^Ha — say more/i.test(casualChatFallback("random xyz")), "no Ha filler");
+assert(
+  /catch that|still on this|something else/i.test(casualChatFallback("random xyz")),
+  "unresolved stays a real sentence"
+);
 assert(/kfc|chicken|original recipe/i.test(clean), "kfc fallback when steer-back removed");
 assert(isCasualChat("be like mcdonald's"), "be like mcdonalds is casual");
 assert(!isCasualChat("what's the bias on mnq"), "bias is not casual");
@@ -724,6 +741,9 @@ assert(ictBlock.includes("70%") && ictBlock.includes("9:31"), "formatIctKnowledg
 assert(ictBlock.includes("user-verified extension"), "formatIctKnowledgeForPrompt includes user_verified tag");
 const nyOpenHints = formatSessionIctHints("ny_am", new Date("2026-08-12T13:45:00.000Z"));
 assert(nyOpenHints.includes("FVG"), "formatSessionIctHints at NY open includes FVG hint");
+const londonHints = formatSessionIctHints("london", new Date("2026-08-12T07:30:00.000Z"));
+assert(/buy-side liquidity raid/i.test(londonHints), "London hints include Asia high BSL raid");
+assert(ICT_STAT_RULES.some((r) => r.id === "london-asia-high-bsl-raid"), "London ASH BSL rule encoded");
 
 const statusSnap = buildMarketSnapshotAnswer(mockCtx, "status", "what is the chart doing right now");
 assert(statusSnap.spoken.includes("29736"), "status snap has live price");

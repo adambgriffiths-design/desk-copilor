@@ -1,0 +1,347 @@
+{
+  "concept_id": "first_presented_fvg",
+  "name": "First presented fair value gap (FPFVG)",
+  "aliases": [
+    "first presented FVG",
+    "FPFVG",
+    "1m first presented fair value gap",
+    "first presentation fair value gap"
+  ],
+  "status": "CONFLICTING_SOURCES",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "fpfvg_ny_open__eft9_3ekDCY__632",
+      "definition_text": "Give the opening bell a chance, then wait for first presented fair value gap. If price doesn't start booking where a gap can form \u2014 or starts sharing the ranges \u2014 the scenario would be just wait till 10:00.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "After opening bell",
+        "Wait for first presented FVG",
+        "If sharing ranges / no gap forming \u2192 wait until 10:00"
+      ],
+      "invalidation": [
+        "Sharing ranges / no gap forming during early open \u2192 defer to 10:00 (stated as scenario)"
+      ],
+      "timeframe_session_context": "NY open / opening range period through 10:00",
+      "variations_note": "NY-open FPFVG wait model (official ICT live). Does not fully specify 1m middle-candle-not-9:30 qualification in this excerpt.",
+      "confidence": "quoted",
+      "cue_start": "00:10:30.190",
+      "cue_end": "00:10:48.830",
+      "timestamp_sec": 630.19,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_tab": "streams"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_post_fhdr__6DuByzKLDsc__4208",
+      "definition_text": "First presented fair value gap after first hour's dealing range is broken \u2014 that's the one you sell on (lecture example).",
+      "definition_mode": "quote",
+      "conditions": [
+        "FHDR broken (not merely tested)",
+        "Trending day context in lecture"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "After FHDR break; continuation entry framing",
+      "variations_note": "Distinct from NY-open FPFVG-in-opening-range model \u2014 KEEP SEPARATE.",
+      "confidence": "quoted",
+      "cue_start": "01:10:08.150",
+      "cue_end": "01:10:17.950",
+      "timestamp_sec": 4208.15,
+      "source": {
+        "video_id": "6DuByzKLDsc",
+        "title": "ICT 1st Hour Dealing Range",
+        "url": "https://www.youtube.com/watch?v=6DuByzKLDsc",
+        "transcript_path": "data/ict-transcripts/pilot/dealing-range.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_tab": "streams"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_or_window_rules__DMKLrUJvfg__35",
+      "definition_text": "Opening range for this model is 9:30\u201310:00 NY; look for the first fair value gap in that interval. Rule: the FVG cannot form on the 9:30 candle \u2014 candle number two of the three-candle FVG cannot be 9:30; earliest candle two is 9:31. Once marked, extend that FPFVG to 3:45 p.m. NY (non-trending / consolidation context).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Window: 9:30\u201310:00 New York",
+        "Three-candle FVG; middle (candle two) must not be the 9:30 bar (earliest 9:31)",
+        "Extend marked FPFVG to 3:45 p.m. NY when not in a one-way trending environment",
+        "Needs underlying narrative/bias \u2014 not trade the gap alone",
+        "Usable as FVG, inversion FVG, or reclaimed FVG"
+      ],
+      "invalidation": [
+        "FVG whose candle-two is the 9:30 bar \u2192 discard; look for next FVG in 9:30\u201310:00 window"
+      ],
+      "timeframe_session_context": "NY AM opening range 9:30\u201310:00; RTH examples referenced on 1m",
+      "variations_note": "THIRD_PARTY_EXPLANATION (DanDowdTrading summarizing ICT). Confirms prior inferred 9:31 middle-candle rule. Does NOT discuss post-FHDR FPFVG / gap-beyond-FHDR-boundary in this VTT \u2014 that remains separate (6DuByzKLDsc).",
+      "confidence": "paraphrased",
+      "cue_start": "00:00:17.070",
+      "cue_end": "00:02:06.429",
+      "timestamp_sec": 17.07,
+      "source": {
+        "video_id": "-DMKLrUJvfg",
+        "title": "ICT's First Presented FVG Model - Explained",
+        "url": "https://www.youtube.com/watch?v=-DMKLrUJvfg",
+        "transcript_path": "data/ict-transcripts/raw/-DMKLrUJvfg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "DanDowdTrading",
+        "channel_id": "UCWInp9beoLN_RDZ4KxezcCQ",
+        "provenance": "THIRD_PARTY_EXPLANATION_OF_ICT \u2014 not official ICT upload"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_recap_bias__DMKLrUJvfg__500",
+      "definition_text": "Recap: between 9:30\u201310:00 NY look for first presented FVG; usable both directions (FVG / IFVG / reclaimed); candle two cannot form on 9:30 (9:31 earliest); must have bias/reason to target higher or lower \u2014 not random longs into the gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "9:30\u201310:00 NY first-presented search window",
+        "Candle-two \u2260 9:30",
+        "Bias / draw-on-liquidity context required"
+      ],
+      "invalidation": [
+        "Trading FPFVG without narrative/bias (explicitly discouraged in recap)"
+      ],
+      "timeframe_session_context": "NY 9:30\u201310:00",
+      "variations_note": "Same third-party source as fpfvg_or_window_rules__DMKLrUJvfg__35; kept as separate occurrence (recap cluster).",
+      "confidence": "paraphrased",
+      "cue_start": "00:08:16.710",
+      "cue_end": "00:08:42.790",
+      "timestamp_sec": 496.71,
+      "source": {
+        "video_id": "-DMKLrUJvfg",
+        "title": "ICT's First Presented FVG Model - Explained",
+        "url": "https://www.youtube.com/watch?v=-DMKLrUJvfg",
+        "transcript_path": "data/ict-transcripts/raw/-DMKLrUJvfg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "DanDowdTrading",
+        "provenance": "THIRD_PARTY_EXPLANATION_OF_ICT \u2014 not official ICT upload"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_931_not_930_candle__pM8oWrcIJqU__1487",
+      "definition_text": "This is the very first presented fair value gap of the morning since 9:31 \u2014 it can't be the gap if it forms on the 9:30 candle; you have to wait (stated as the rules for Caleb).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Morning / NY open context in ORG lecture",
+        "FPFVG search begins such that a gap forming on the 9:30 candle is invalid",
+        "Earliest accepted framing: since 9:31"
+      ],
+      "invalidation": [
+        "FVG that forms on the 9:30 candle \u2192 discard; wait for a later first-presented gap"
+      ],
+      "timeframe_session_context": "NY AM open; paired with Opening Range Gaps lecture examples",
+      "variations_note": "OFFICIAL @InnerCircleTrader corroboration of the 9:31 / not-on-9:30-candle rule previously only from third-party -DMKLrUJvfg. Does not restate three-candle 'middle candle' wording in this excerpt \u2014 keep third-party three-candle phrasing separate. Does not discuss post-FHDR FPFVG.",
+      "confidence": "quoted",
+      "cue_start": "00:24:47.710",
+      "cue_end": "00:25:10.710",
+      "timestamp_sec": 1487.71,
+      "source": {
+        "video_id": "pM8oWrcIJqU",
+        "title": "2025 Lecture Series - SMC Trading Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=pM8oWrcIJqU",
+        "transcript_path": "data/ict-transcripts/raw/pM8oWrcIJqU.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_or_vs_silver_bullet__Zm9Q0NDRxoY__682",
+      "definition_text": "Differentiating first presented fair value gap when using opening ranges, not the silver bullet: silver-bullet FPFVG is like the first one that forms after 10:00 inside 10:00\u201311:00. Opening ranges are defined by 30 minutes (not 15 / not 5); look for displacement inside that OR window. Same 30m application for London (~before 2:00) and NY 9:30\u201310:00 indices.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Opening-range model uses 30-minute windows (explicitly rejects 15m/5m)",
+        "Silver-bullet FPFVG framed as first FVG after 10:00 in the 10:00\u201311:00 hour (contrasted, not merged)",
+        "Displacement inside the opening-range window"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Opening-range FPFVG vs silver-bullet 10:00\u201311:00 FPFVG \u2014 KEEP SEPARATE; also London 30m OR analogy",
+      "variations_note": "OFFICIAL ICT. Does NOT state the 9:31 / not-on-9:30-candle rule in this VTT (zero '9:31' hits). Corroboration of that clock rule is from pM8oWrcIJqU, not this title despite the title naming 1st Presented FVG.",
+      "confidence": "quoted",
+      "cue_start": "00:11:22.150",
+      "cue_end": "00:11:48.630",
+      "timestamp_sec": 682.15,
+      "source": {
+        "video_id": "Zm9Q0NDRxoY",
+        "title": "ICT Opening Range Theory \\ 1st Presented FVG Logic",
+        "url": "https://www.youtube.com/watch?v=Zm9Q0NDRxoY",
+        "transcript_path": "data/ict-transcripts/raw/Zm9Q0NDRxoY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_london_130_window__Zm9Q0NDRxoY__649",
+      "definition_text": "The first presented fair value gap during the 1:30 a.m. to 2:00 a.m. window is presented as algorithmic opening-range logic for that London-timed dealing window (study-it framing).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "1:30\u20132:00 a.m. window",
+        "First presented FVG inside that window"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "London / early morning 30m opening-range analogue \u2014 NOT NY 9:30 FPFVG",
+      "variations_note": "KEEP SEPARATE from NY-open FPFVG and from post-FHDR FPFVG.",
+      "confidence": "quoted",
+      "cue_start": "00:10:49.750",
+      "cue_end": "00:10:59.040",
+      "timestamp_sec": 649.75,
+      "source": {
+        "video_id": "Zm9Q0NDRxoY",
+        "title": "ICT Opening Range Theory \\ 1st Presented FVG Logic",
+        "url": "https://www.youtube.com/watch?v=Zm9Q0NDRxoY",
+        "transcript_path": "data/ict-transcripts/raw/Zm9Q0NDRxoY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_midnight_or_displacement__Z0VYZoaTIKE__1714",
+      "definition_text": "First-presented displacement inside the midnight opening range (00:00\u201300:30 NY) is framed as the algorithmic rebook/redelivery tool within that midnight OR \u2014 distinct from NY 9:31 morning FPFVG.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Forms inside midnight OR window",
+        "First presented displacement prioritized"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Midnight OR 00:00\u201300:30 NY \u2014 NOT NY 9:31 FPFVG",
+      "variations_note": "KEEP SEPARATE from official 9:31 / silver-bullet-after-10 / London 1:30 / post-FHDR variants.",
+      "confidence": "quoted",
+      "cue_start": "00:28:26.269",
+      "cue_end": "00:29:15.000",
+      "timestamp_sec": 1706.269,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_931_to_1000_1m__uC4-1SYXJFg__492",
+      "definition_text": "For AM session / opening range 9:30\u201310:00: the first presented fair value gap to use is the very first FVG that forms on a one-minute chart between 9:31 Eastern and 10:00; extend that level through the day/week.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "AM session opening range 9:30\u201310:00 ET",
+        "1-minute chart",
+        "First FVG forming from 9:31 (not treating earlier as default)"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "2025 Lecture Series \u2014 When 9:30am ET Is 1st Presented FVG",
+      "variations_note": "Strong official corroboration of 9:31\u201310:00 1m FPFVG. KEEP SEPARATE from cases where ICT later allows using the 9:30 candle FVG under criteria.",
+      "confidence": "quoted",
+      "cue_start": "00:08:12.390",
+      "cue_end": "00:08:48.310",
+      "timestamp_sec": 492.39,
+      "source": {
+        "video_id": "uC4-1SYXJFg",
+        "title": "2025 Lecture Series - NQ Review When 9:30am ET Is 1st Presented FVG May 18, 2025",
+        "url": "https://www.youtube.com/watch?v=uC4-1SYXJFg",
+        "transcript_path": "data/ict-transcripts/raw/uC4-1SYXJFg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_when_930_candle_usable__uC4-1SYXJFg__568",
+      "definition_text": "Normally a candidate gap would be first presented FVG, but ICT teaches criteria for when/how to use the 9:31 as the first presented FVG vs allowing the 9:30 one-minute FVG; states nothing inherently wrong with using the 9:30-candle FVG, but notes it may be respected less than the 9:30 candlestick level later in the day.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Criteria (lecture) for permitting 9:30 1m FVG as FPFVG"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Same May 18 2025 review \u2014 RTH ORG context also discussed",
+      "variations_note": "CONFLICT/VARIANT vs strict 9:31-only rule \u2014 keep as separate occurrence. Exact visual criteria beyond spoken 'criteria' not fully transcribed here.",
+      "confidence": "quoted",
+      "cue_start": "00:09:28.389",
+      "cue_end": "00:10:01.399",
+      "timestamp_sec": 568.389,
+      "source": {
+        "video_id": "uC4-1SYXJFg",
+        "title": "2025 Lecture Series - NQ Review When 9:30am ET Is 1st Presented FVG May 18, 2025",
+        "url": "https://www.youtube.com/watch?v=uC4-1SYXJFg",
+        "transcript_path": "data/ict-transcripts/raw/uC4-1SYXJFg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_after_reh_raid__uC4-1SYXJFg__781",
+      "definition_text": "Example qualifies first presented FVG because price raided previous early RTH relative equal highs; then measure ORG for consequent encroachment / ~70% likelihood pullback into 50% of ORG.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Raid on prior early-session relative equal highs",
+        "ORG measured at open"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Same May 18 2025 review",
+      "variations_note": "FPFVG qualification via REH raid + ORG CE context \u2014 behavioral variant.",
+      "confidence": "quoted",
+      "cue_start": "00:13:01.310",
+      "cue_end": "00:13:29.269",
+      "timestamp_sec": 781.31,
+      "source": {
+        "video_id": "uC4-1SYXJFg",
+        "title": "2025 Lecture Series - NQ Review When 9:30am ET Is 1st Presented FVG May 18, 2025",
+        "url": "https://www.youtube.com/watch?v=uC4-1SYXJFg",
+        "transcript_path": "data/ict-transcripts/raw/uC4-1SYXJFg.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fpfvg_sellside_example__POUT0pVs4U0__233",
+      "definition_text": "Live/example framing: first presented FVG since morning used in a sellside delivery context (reclaimed FVG language also present). Example-heavy \u2014 not a new geometric rule.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Intraday example under first presented FVG"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Trading Friday Sellside Under 1st Presented FVG",
+      "variations_note": "EXAMPLE ONLY \u2014 do not elevate to definitional conflict.",
+      "confidence": "incomplete_transcript",
+      "cue_start": "00:03:53.589",
+      "cue_end": "00:03:57.519",
+      "timestamp_sec": 233.589,
+      "source": {
+        "video_id": "POUT0pVs4U0",
+        "title": "Trading Friday Sellside Under 1st Presented FVG",
+        "url": "https://www.youtube.com/watch?v=POUT0pVs4U0",
+        "transcript_path": "data/ict-transcripts/raw/POUT0pVs4U0.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "structureFacts.firstPresentedFvg (nyOpening / postFhdr / activeSession); gap-zones first-presented detector",
+    "related_karen_evidence_or_gate": "Backlog H4 \u2014 first-presented FVG privilege vs any FVG",
+    "overlap_vs_baseline_v2": "Detectors exist; weigher privilege may not",
+    "gap_vs_baseline_v2": "NY-open 9:31 / not-on-9:30-candle rule now OFFICIALLY corroborated (pM8oWrcIJqU). Still keep variants separate: silver-bullet after-10, London 1:30\u20132:00, post-FHDR. Three-candle 'middle candle' phrasing remains third-party-only in this catalogue.",
+    "hypothesis_id": "H4",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Official 9:31 corroboration achieved Batch2 \u2014 still NOT_IN_PRODUCTION. Do not wire until Adam schedules a single-change DEV experiment. Prefer pM8oWrcIJqU over -DMKLrUJvfg for the clock rule."
+  },
+  "extraction_notes": "Status CONFLICTING_SOURCES: NY-open FPFVG (eft9 + official pM8oWrcIJqU 9:31 rule + third-party qualification) vs post-FHDR FPFVG (6DuByzKLDsc) vs silver-bullet after-10 / London 1:30 (Zm9Q0NDRxoY). Batch2: official 9:31 corroboration YES via pM8oWrcIJqU. Zm9Q0NDRxoY title names FPFVG but does not state 9:31 in captions. Batch4: added midnight-OR first-displacement variant from Z0VYZoaTIKE. | Batch5: uC4-1SYXJFg adds official 9:31\u201310:00 1m FPFVG + 9:30-candle-usable criteria variant; POUT example; o38k6-twQCg CAPTION_MISSING."
+}

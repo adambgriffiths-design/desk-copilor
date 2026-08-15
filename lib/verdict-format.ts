@@ -55,19 +55,19 @@ export function parseVerdictSections(raw: string): {
 
 export function liveVerdictUserTail(voiceInput?: boolean): string {
   const base =
-    "LIVE SESSION — Analyze this Nasdaq futures one-minute chart. Use auto-fetched daily/fifteen-minute/five-minute JSON context. **All MNQ prices must come from JSON (lastClose, PD arrays, Execution scaffold) — typically 25000–32000. Never cite volume-axis numbers (~15000) from the chart image.** **Make a directional call (potential buy or potential sell) at medium confidence by default** — stand aside only if a hard no-trade rule applies. **Include Entry zone, Entry status (ACTIVE/WAIT/EXTENDED), Target 1** from Execution scaffold. **Do NOT recommend stops.** **Multiple FVGs: retrace to most recent qualifying gap only.** **Never sell into unfilled bullish FVG or buy into unfilled bearish FVG unless inverted (inverse fair value gap).**";
+    "LIVE SESSION — Screenshot is chart evidence only. Do NOT invent an independent trading decision from the image. Copy STANCE, EXECUTION, TARGET, INVALIDATION from the DECISION ENVELOPE / pipeline contract. Separate MENTOR VIEW (what the market is doing) from TRADE DECISION (what you would actually trade). Stance: long | short | flat | wait | monitor. WAIT must name WAIT FOR: exact condition. Never unlabeled bullish/bearish/LONG/SHORT. **All MNQ prices from JSON (lastClose, PD arrays, Execution scaffold) — typically 25000–32000. Never cite volume-axis numbers (~15000).** **Do NOT recommend stops.**";
 
   if (voiceInput) {
-    return `${base}\n\n${LIVE_VERDICT_OUTPUT_WRAPPER}`;
+    return `${base}\n\n${LIVE_VERDICT_OUTPUT_WRAPPER}\n\nVOICE SPOKEN: MENTOR VIEW then TRADE DECISION. Stay flat / WAIT is allowed. Do not invent a long or short.`;
   }
 
-  return `${base} Respond with a dense labeled desk brief in full words (no abbreviations).`;
+  return `${base} Respond with the labeled decision contract in full words (no abbreviations).`;
 }
 
 /** Structured OHLC path — text-only, step reasoning + confidence. */
 export function structuredVerdictUserTail(voiceInput?: boolean, question?: string): string {
   const q = question ? `Trader asked: "${question}" — ` : "";
-  const base = `${q}STRUCTURED CHART READ — Use the candle array as primary evidence. Reason step-by-step: (1) recent price action (2) structure/MSS/displacement (3) nearest levels & gaps from JSON + drawings (4) bias (5) call with Entry zone, Entry status, Target 1 from Execution scaffold. **All prices from JSON/candles only — typically 25000–32000.** **Make a directional call at medium confidence by default.** **Do NOT recommend stops.** Include a brief Reasoning line in the panel before Bias.`;
+  const base = `${q}STRUCTURED CHART READ — Use the candle array as primary evidence (MENTOR VIEW). Copy TRADE DECISION from the DECISION ENVELOPE / pipeline — do not invent an independent Call. **All prices from JSON/candles only — typically 25000–32000.** **Do NOT recommend stops.** Separate MENTOR VIEW from TRADE DECISION.`;
 
   if (voiceInput) {
     return `${base}\n\n${LIVE_VERDICT_OUTPUT_WRAPPER}`;

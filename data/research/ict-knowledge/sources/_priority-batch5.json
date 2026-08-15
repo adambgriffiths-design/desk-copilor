@@ -1,0 +1,721 @@
+{
+  "selected_at": "2026-08-15",
+  "batch_name": "batch5_dr_fvg_liquidity",
+  "total_keyword_hits": 38,
+  "bucket_counts": {
+    "fvg": 9,
+    "liquidity_sides": 11,
+    "liquidity_sweep": 9,
+    "ifvg": 1,
+    "liquidity": 10
+  },
+  "batch_size": 12,
+  "batch": [
+    {
+      "video_id": "-tuXoqSjO78",
+      "title": "Old Daily Lows -Breaker Entry and -IFVG Reentry After Profitable Stop Out",
+      "url": "https://www.youtube.com/watch?v=-tuXoqSjO78",
+      "duration_sec": 2026,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "ifvg"
+      ],
+      "score": 98
+    },
+    {
+      "video_id": "POUT0pVs4U0",
+      "title": "Trading Friday Sellside Under 1st Presented FVG",
+      "url": "https://www.youtube.com/watch?v=POUT0pVs4U0",
+      "duration_sec": 1380,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg",
+        "liquidity_sides"
+      ],
+      "score": 165
+    },
+    {
+      "video_id": "twgtbikJtL0",
+      "title": "Shorting ES with Wick C.E. & Premium FVG To Discount Sellside Liquidity Premarket",
+      "url": "https://www.youtube.com/watch?v=twgtbikJtL0",
+      "duration_sec": 1120,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg",
+        "liquidity_sides"
+      ],
+      "score": 165
+    },
+    {
+      "video_id": "svYZKOrWPRo",
+      "title": "ICT 2024 Mentorship \\ How ICT Picks Winning FVG's & Orderblocks \\ October 25, 2024",
+      "url": "https://www.youtube.com/watch?v=svYZKOrWPRo",
+      "duration_sec": 6688,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 100
+    },
+    {
+      "video_id": "yC-gQhvexGg",
+      "title": "ICT Charter Price Action Model 6 \\ Buyside Trade Plan",
+      "url": "https://www.youtube.com/watch?v=yC-gQhvexGg",
+      "duration_sec": 957,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 110
+    },
+    {
+      "video_id": "22XkhpJR5eA",
+      "title": "ICT Mentorship Core Content - Month 1 - Liquidity Runs",
+      "url": "https://www.youtube.com/watch?v=22XkhpJR5eA",
+      "duration_sec": 1495,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "Gnw54f9v6SA",
+      "title": "ICT Mentorship Core Content - Month 04 - Liquidity Pools",
+      "url": "https://www.youtube.com/watch?v=Gnw54f9v6SA",
+      "duration_sec": 1338,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "O69iFqP1j7o",
+      "title": "ICT Mentorship Core Content - Month 07 - Short Term Trading Low Resistance Liquidity Runs Part 2",
+      "url": "https://www.youtube.com/watch?v=O69iFqP1j7o",
+      "duration_sec": 1551,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "vqtA1S9JH34",
+      "title": "ICT Mentorship Core Content - Month 05 - Defining Open Float Liquidity Pools",
+      "url": "https://www.youtube.com/watch?v=vqtA1S9JH34",
+      "duration_sec": 1651,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "y0lVKWLsZeM",
+      "title": "ICT Mentorship Core Content - Month 07 - Short Term Trading Low Resistance Liquidity Runs Part 1",
+      "url": "https://www.youtube.com/watch?v=y0lVKWLsZeM",
+      "duration_sec": 1503,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "yAZS6840r7U",
+      "title": "2025 Lecture Series - NQ Review Presession Buyside Turtle Soup Trade May 14, 2025",
+      "url": "https://www.youtube.com/watch?v=yAZS6840r7U",
+      "duration_sec": 255,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 100
+    },
+    {
+      "video_id": "dWyXLze4c4k",
+      "title": "2025 Lecture Series - Trading In High Resistance Liquidity Run Conditions With My Lunch Macro",
+      "url": "https://www.youtube.com/watch?v=dWyXLze4c4k",
+      "duration_sec": 545,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 97
+    }
+  ],
+  "all_hits_top40": [
+    {
+      "video_id": "POUT0pVs4U0",
+      "title": "Trading Friday Sellside Under 1st Presented FVG",
+      "url": "https://www.youtube.com/watch?v=POUT0pVs4U0",
+      "duration_sec": 1380,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg",
+        "liquidity_sides"
+      ],
+      "score": 165
+    },
+    {
+      "video_id": "twgtbikJtL0",
+      "title": "Shorting ES with Wick C.E. & Premium FVG To Discount Sellside Liquidity Premarket",
+      "url": "https://www.youtube.com/watch?v=twgtbikJtL0",
+      "duration_sec": 1120,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg",
+        "liquidity_sides"
+      ],
+      "score": 165
+    },
+    {
+      "video_id": "yC-gQhvexGg",
+      "title": "ICT Charter Price Action Model 6 \\ Buyside Trade Plan",
+      "url": "https://www.youtube.com/watch?v=yC-gQhvexGg",
+      "duration_sec": 957,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 110
+    },
+    {
+      "video_id": "22XkhpJR5eA",
+      "title": "ICT Mentorship Core Content - Month 1 - Liquidity Runs",
+      "url": "https://www.youtube.com/watch?v=22XkhpJR5eA",
+      "duration_sec": 1495,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "Gnw54f9v6SA",
+      "title": "ICT Mentorship Core Content - Month 04 - Liquidity Pools",
+      "url": "https://www.youtube.com/watch?v=Gnw54f9v6SA",
+      "duration_sec": 1338,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "O69iFqP1j7o",
+      "title": "ICT Mentorship Core Content - Month 07 - Short Term Trading Low Resistance Liquidity Runs Part 2",
+      "url": "https://www.youtube.com/watch?v=O69iFqP1j7o",
+      "duration_sec": 1551,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "vqtA1S9JH34",
+      "title": "ICT Mentorship Core Content - Month 05 - Defining Open Float Liquidity Pools",
+      "url": "https://www.youtube.com/watch?v=vqtA1S9JH34",
+      "duration_sec": 1651,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "y0lVKWLsZeM",
+      "title": "ICT Mentorship Core Content - Month 07 - Short Term Trading Low Resistance Liquidity Runs Part 1",
+      "url": "https://www.youtube.com/watch?v=y0lVKWLsZeM",
+      "duration_sec": 1503,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 107
+    },
+    {
+      "video_id": "svYZKOrWPRo",
+      "title": "ICT 2024 Mentorship \\ How ICT Picks Winning FVG's & Orderblocks \\ October 25, 2024",
+      "url": "https://www.youtube.com/watch?v=svYZKOrWPRo",
+      "duration_sec": 6688,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 100
+    },
+    {
+      "video_id": "yAZS6840r7U",
+      "title": "2025 Lecture Series - NQ Review Presession Buyside Turtle Soup Trade May 14, 2025",
+      "url": "https://www.youtube.com/watch?v=yAZS6840r7U",
+      "duration_sec": 255,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 100
+    },
+    {
+      "video_id": "-tuXoqSjO78",
+      "title": "Old Daily Lows -Breaker Entry and -IFVG Reentry After Profitable Stop Out",
+      "url": "https://www.youtube.com/watch?v=-tuXoqSjO78",
+      "duration_sec": 2026,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "ifvg"
+      ],
+      "score": 98
+    },
+    {
+      "video_id": "dWyXLze4c4k",
+      "title": "2025 Lecture Series - Trading In High Resistance Liquidity Run Conditions With My Lunch Macro",
+      "url": "https://www.youtube.com/watch?v=dWyXLze4c4k",
+      "duration_sec": 545,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 97
+    },
+    {
+      "video_id": "EwYBWf0fJxM",
+      "title": "NQ AM Session \\ Time Of Day Execution Sellside Delivery \\ December 15, 2023",
+      "url": "https://www.youtube.com/watch?v=EwYBWf0fJxM",
+      "duration_sec": 1238,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 95
+    },
+    {
+      "video_id": "FgacYSN9QEo",
+      "title": "ICT Mentorship Core Content - Month 04 - ICT Fair Value Gaps FVG",
+      "url": "https://www.youtube.com/watch?v=FgacYSN9QEo",
+      "duration_sec": 1077,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 95
+    },
+    {
+      "video_id": "o38k6-twQCg",
+      "title": "2025 Lecture Series - NQ Review Advanced 1st Presented FVG Trade May 16, 2025",
+      "url": "https://www.youtube.com/watch?v=o38k6-twQCg",
+      "duration_sec": 856,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 95
+    },
+    {
+      "video_id": "uC4-1SYXJFg",
+      "title": "2025 Lecture Series - NQ Review When 9:30am ET Is 1st Presented FVG May 18, 2025",
+      "url": "https://www.youtube.com/watch?v=uC4-1SYXJFg",
+      "duration_sec": 2903,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 95
+    },
+    {
+      "video_id": "e6XwTK4hVqI",
+      "title": "Reviewing High Resistance Liquidity Run Conditions - July 21, 2026",
+      "url": "https://www.youtube.com/watch?v=e6XwTK4hVqI",
+      "duration_sec": 828,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 92
+    },
+    {
+      "video_id": "O217xQsEUgI",
+      "title": "Navigating High Resistance Liquidity Run Conditions",
+      "url": "https://www.youtube.com/watch?v=O217xQsEUgI",
+      "duration_sec": 1610,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 92
+    },
+    {
+      "video_id": "tp0qkiWCctw",
+      "title": "Trading In High Resistance Liquidity Run Conditions - July 21, 2026",
+      "url": "https://www.youtube.com/watch?v=tp0qkiWCctw",
+      "duration_sec": 3194,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sweep"
+      ],
+      "score": 92
+    },
+    {
+      "video_id": "nr6CJqNWChw",
+      "title": "ICT 2024 Mentorship \\ How To Identify High Resistance Liquidity Conditions \\ September 27, 2024",
+      "url": "https://www.youtube.com/watch?v=nr6CJqNWChw",
+      "duration_sec": 9113,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 90
+    },
+    {
+      "video_id": "0OIplRTKYOA",
+      "title": "Short Mitigation To Sellside \\ Review Of PD Arrays & Narrative MNQ",
+      "url": "https://www.youtube.com/watch?v=0OIplRTKYOA",
+      "duration_sec": 351,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "aWFSvqxEfg8",
+      "title": "ICT Price Action Lecture:  Liquidity Purge & Revert",
+      "url": "https://www.youtube.com/watch?v=aWFSvqxEfg8",
+      "duration_sec": 3171,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "DzJpkxI057g",
+      "title": "ICT 2024 Mentorship \\ NQ High Resistance Liquidity Conditions Tape Reading \\ October 07, 2024",
+      "url": "https://www.youtube.com/watch?v=DzJpkxI057g",
+      "duration_sec": 3827,
+      "channel_tabs": [
+        "streams"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "g8bhZReDK-Q",
+      "title": "Institutional Market Structure & Standard Deviations With Buyside Liquidity",
+      "url": "https://www.youtube.com/watch?v=g8bhZReDK-Q",
+      "duration_sec": 392,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "HTQgH11W37o",
+      "title": "ICT Mentorship Core Content - Month 04 - Liquidity Voids",
+      "url": "https://www.youtube.com/watch?v=HTQgH11W37o",
+      "duration_sec": 879,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "i4_TbWVmlpM",
+      "title": "Execution On EurUsd: 30 Pips Asian Range To Buyside Liquidity",
+      "url": "https://www.youtube.com/watch?v=i4_TbWVmlpM",
+      "duration_sec": 269,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "npL3ZXJ5zOU",
+      "title": "ICT Mentorship Core Content - Month 04 - Reinforcing Liquidity Concepts & Price Delivery",
+      "url": "https://www.youtube.com/watch?v=npL3ZXJ5zOU",
+      "duration_sec": 2614,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "rClFwdAr9DM",
+      "title": "Example of Buyside Liquidity Purge & Short",
+      "url": "https://www.youtube.com/shorts/rClFwdAr9DM",
+      "duration_sec": null,
+      "channel_tabs": [
+        "shorts"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 85
+    },
+    {
+      "video_id": "7IttD8JmDIo",
+      "title": "NQ Futures Housing Sales Sellside Delivery Live Execution \\ November 30, 2023",
+      "url": "https://www.youtube.com/watch?v=7IttD8JmDIo",
+      "duration_sec": 410,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 80
+    },
+    {
+      "video_id": "kzeFqGK9gCQ",
+      "title": "ICT Reaper FVG - Long NQ Terminus Daily V.I. \\ June 08, 2026",
+      "url": "https://www.youtube.com/watch?v=kzeFqGK9gCQ",
+      "duration_sec": 991,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 80
+    },
+    {
+      "video_id": "rbNhlJSXDaA",
+      "title": "Enigma FVG Projections & Protractions & Review \\ June 27, 2026",
+      "url": "https://www.youtube.com/watch?v=rbNhlJSXDaA",
+      "duration_sec": 4149,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 80
+    },
+    {
+      "video_id": "779jcCqyldY",
+      "title": "ES Futures Live Trade Example November 28, 2023  [FVG \\ Silver Bullet]",
+      "url": "https://www.youtube.com/watch?v=779jcCqyldY",
+      "duration_sec": 245,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "fvg"
+      ],
+      "score": 70
+    },
+    {
+      "video_id": "C_0Jh7HwCUI",
+      "title": "Advanced ICT Liquidity Concepts \\ October 11, 2025",
+      "url": "https://www.youtube.com/watch?v=C_0Jh7HwCUI",
+      "duration_sec": 4442,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 70
+    },
+    {
+      "video_id": "dA2CHAN1DzY",
+      "title": "Trading Premarket and Regular Session Liquidity",
+      "url": "https://www.youtube.com/watch?v=dA2CHAN1DzY",
+      "duration_sec": 1365,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 70
+    },
+    {
+      "video_id": "ai2WZlA-d_w",
+      "title": "Buyside Liquidity Purge & Short Example part 2",
+      "url": "https://www.youtube.com/watch?v=ai2WZlA-d_w",
+      "duration_sec": 92,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity_sides"
+      ],
+      "score": 65
+    },
+    {
+      "video_id": "1QVRfxziw1I",
+      "title": "NQ 23400 Draw On Liquidity September 03, 2025 [Silent Example]",
+      "url": "https://www.youtube.com/watch?v=1QVRfxziw1I",
+      "duration_sec": 569,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 60
+    },
+    {
+      "video_id": "9HUAUF_h2tI",
+      "title": "Silent Study - October 18, 2024 NY Lunch Macro In High Resistance Liquidity",
+      "url": "https://www.youtube.com/watch?v=9HUAUF_h2tI",
+      "duration_sec": 371,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 60
+    },
+    {
+      "video_id": "Qx87ZAANzyA",
+      "title": "NFP Liquidity Drill",
+      "url": "https://www.youtube.com/watch?v=Qx87ZAANzyA",
+      "duration_sec": 61,
+      "channel_tabs": [
+        "videos"
+      ],
+      "transcript_status": "CAPTION_STATUS_UNPROBED",
+      "tags": [
+        "liquidity"
+      ],
+      "score": 40
+    }
+  ]
+}

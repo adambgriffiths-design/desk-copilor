@@ -1,0 +1,99 @@
+{
+  "concept_id": "fair_value_gap",
+  "name": "Fair value gap (FVG)",
+  "aliases": [
+    "FVG",
+    "fair value gaps",
+    "ICT fair value gap"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "fvg_def_range_void__FgacYSN9QEo__35",
+      "definition_text": "A fair value gap is a range in price delivery where one side of the market liquidity is offered and typically confirmed with a liquidity void on the lower time frame charts in the same range of price; price can gap to create a literal vacuum of trading thus posting an actual price gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "One-sided liquidity offered in a delivery range",
+        "Often confirmed by lower-TF liquidity void in same range"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Multi-TF mentorship core (Month 04 FVG lecture)",
+      "variations_note": "General FVG construct \u2014 KEEP SEPARATE from first_presented_fvg (session-timed) and inverted_fair_value_gap.",
+      "confidence": "quoted",
+      "cue_start": "00:00:35.280",
+      "cue_end": "00:00:55.590",
+      "timestamp_sec": 35.28,
+      "source": {
+        "video_id": "FgacYSN9QEo",
+        "title": "ICT Mentorship Core Content - Month 04 - ICT Fair Value Gaps FVG",
+        "url": "https://www.youtube.com/watch?v=FgacYSN9QEo",
+        "transcript_path": "data/ict-transcripts/raw/FgacYSN9QEo.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fvg_fill_after_ssl__FgacYSN9QEo__385",
+      "definition_text": "After sell-side liquidity is taken (e.g. turtle soup / false break below an old low), expect price to trade back up to fill the fair value gap; polarity reverses for buy-side liquidity runs seeking to close an FVG below price.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Opposite-side liquidity already taken",
+        "Unfilled FVG remains as draw / fill objective"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 04 FVG lecture examples (incl. 4h)",
+      "variations_note": "Behavioral fill expectancy after SSL/BSL run \u2014 not a geometry rule.",
+      "confidence": "quoted",
+      "cue_start": "00:06:25.749",
+      "cue_end": "00:09:01.350",
+      "timestamp_sec": 385.749,
+      "source": {
+        "video_id": "FgacYSN9QEo",
+        "title": "ICT Mentorship Core Content - Month 04 - ICT Fair Value Gaps FVG",
+        "url": "https://www.youtube.com/watch?v=FgacYSN9QEo",
+        "transcript_path": "data/ict-transcripts/raw/FgacYSN9QEo.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "fvg_overlaps_void_ob_pools__FgacYSN9QEo__548",
+      "definition_text": "Fair value gaps, liquidity voids, order blocks, and liquidity pools overlap in multiple ways (lecture flags overlap as advanced theme).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [],
+      "invalidation": [],
+      "timeframe_session_context": "Month 04 FVG lecture",
+      "variations_note": "Do not collapse FVG into void/OB/pool \u2014 catalogue as overlap note only.",
+      "confidence": "quoted",
+      "cue_start": "00:09:07.990",
+      "cue_end": "00:09:16.470",
+      "timestamp_sec": 547.99,
+      "source": {
+        "video_id": "FgacYSN9QEo",
+        "title": "ICT Mentorship Core Content - Month 04 - ICT Fair Value Gaps FVG",
+        "url": "https://www.youtube.com/watch?v=FgacYSN9QEo",
+        "transcript_path": "data/ict-transcripts/raw/FgacYSN9QEo.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "FVG / imbalance detectors \u2014 audit before linking",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "General FVG \u2260 FPFVG session rule",
+    "gap_vs_baseline_v2": "Official three-candle middle-candle rule still incomplete in this lecture extract",
+    "hypothesis_id": "H_ICT_FVG_GENERAL",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch5 Month04 core definition. No production implication."
+  },
+  "extraction_notes": "Batch5 from FgacYSN9QEo. Geometry details in lecture are example-specific; keep general def separate from FPFVG."
+}

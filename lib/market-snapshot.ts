@@ -4,6 +4,7 @@ import {
   isFirstPresentedFvgQuestion,
   resolveSnapshotIntent,
 } from "./chart-question-intent";
+import { renderInsufficientData, renderLevelLine, renderPriceLine } from "./conversational-renderer";
 import { getExecutionScaffold } from "./execution-plan";
 import { nearestPdLevels } from "./pd-arrays";
 import { expandTradingAbbreviations } from "./plain-language";
@@ -17,8 +18,34 @@ export type MarketSnapshotResult = {
   panel: string;
 };
 
+/** Optional observation quality — when missing/stale, refuse live price/entry/target/bias claims. */
+export type MarketSnapshotOpts = {
+  dataQuality?: "good" | "degraded" | "stale" | "missing" | string | null;
+};
+
 function roundMnq(p: number): number {
   return Math.round(p * 4) / 4;
+}
+
+function isFinitePositive(n: number | null | undefined): boolean {
+  return typeof n === "number" && Number.isFinite(n) && n > 0;
+}
+
+function priceUsable(ctx: MarketContext): boolean {
+  return isFinitePositive(ctx.daily.lastClose);
+}
+
+function pdLevelUsable(price: number | null | undefined): boolean {
+  return isFinitePositive(price);
+}
+
+function dataTooWeak(opts?: MarketSnapshotOpts): boolean {
+  const q = String(opts?.dataQuality || "").toLowerCase();
+  return q === "missing" || q === "stale";
+}
+
+function insufficientData(detail?: string): string {
+  return renderInsufficientData(detail);
 }
 
 function priceLine(ctx: MarketContext): string {
@@ -27,60 +54,131 @@ function priceLine(ctx: MarketContext): string {
 
 function asksForNearestLevels(question: string): boolean {
   const q = question.toLowerCase();
-  return /\b(support|resistance|nearest level|levels around|nearby level)\b/.test(q);
+  return /\b(support|resistance|nearest level|closest level|levels around|nearby level|which level is (?:closest|nearest|closer))\b/.test(
+    q
+  );
 }
 
-function answerPrice(ctx: MarketContext, question: string): string {
+function answerPrice(ctx: MarketContext, question: string, opts?: MarketSnapshotOpts): string {
+  if (dataTooWeak(opts) || !priceUsable(ctx)) {
+    return insufficientData();
+  }
   const last = priceLine(ctx);
   if (!asksForNearestLevels(question)) {
-    return `We're trading at ${last} on Nasdaq futures.`;
+    return renderPriceLine(last);
   }
   const { support, resistance } = nearestPdLevels(
     ctx.daily.lastClose,
     ctx.htfPdArrays.levels
   );
-  const parts = [`We're trading at ${last} on Nasdaq futures.`];
-  if (support) parts.push(`Nearest support below is ${formatLevelLabel(support.label)} at ${support.price.toFixed(2)}.`);
-  if (resistance)
-    parts.push(`Nearest resistance above is ${formatLevelLabel(resistance.label)} at ${resistance.price.toFixed(2)}.`);
+  const parts = [renderPriceLine(last)];
+  if (support && pdLevelUsable(support.price)) {
+    parts.push(
+      renderLevelLine("support", support.price.toFixed(2), formatLevelLabel(support.label))
+    );
+  }
+  if (resistance && pdLevelUsable(resistance.price)) {
+    parts.push(
+      renderLevelLine("resistance", resistance.price.toFixed(2), formatLevelLabel(resistance.label))
+    );
+  }
   return parts.join(" ");
 }
 
-function answerLevel(ctx: MarketContext, question: string): string {
+function answerLevel(ctx: MarketContext, question: string, opts?: MarketSnapshotOpts): string {
   const q = question.toLowerCase();
   const pd = ctx.htfPdArrays.previousDay;
   const { support, resistance } = nearestPdLevels(
-    ctx.daily.lastClose,
+    priceUsable(ctx) ? ctx.daily.lastClose : 0,
     ctx.htfPdArrays.levels
   );
 
   if (/\bpdh\b|previous day high|\bpreview\w*\b.*\bhigh\b/.test(q)) {
-    return `Previous day high is ${pd.high.toFixed(2)}.`;
+    if (!pdLevelUsable(pd.high)) {
+      return insufficientData("previous day high is not available");
+    }
+    return renderLevelLine("pdh", pd.high.toFixed(2));
   }
   if (/\bpdl\b|previous day low|\bpreview\w*\b.*\b(low|stay low)\b/.test(q)) {
-    return `Previous day low is ${pd.low.toFixed(2)}.`;
+    if (!pdLevelUsable(pd.low)) {
+      return insufficientData("previous day low is not available");
+    }
+    return renderLevelLine("pdl", pd.low.toFixed(2));
   }
-  if (/\bsupport\b/.test(q) && support) {
-    return `Nearest support is ${formatLevelLabel(support.label)} at ${support.price.toFixed(2)}.`;
+  if (
+    /\b(closest|nearest|closer)\b/.test(q) &&
+    /\b(level|price|support|resistance)\b/.test(q) &&
+    priceUsable(ctx)
+  ) {
+    const last = ctx.daily.lastClose;
+    const cands = [
+      support && pdLevelUsable(support.price)
+        ? { label: formatLevelLabel(support.label), price: support.price }
+        : null,
+      resistance && pdLevelUsable(resistance.price)
+        ? { label: formatLevelLabel(resistance.label), price: resistance.price }
+        : null,
+      pdLevelUsable(pd.high) ? { label: "previous day high", price: pd.high } : null,
+      pdLevelUsable(pd.low) ? { label: "previous day low", price: pd.low } : null,
+    ].filter((x): x is { label: string; price: number } => !!x);
+    if (cands.length) {
+      let best = cands[0];
+      let bestDist = Math.abs(best.price - last);
+      for (const c of cands.slice(1)) {
+        const d = Math.abs(c.price - last);
+        if (d < bestDist) {
+          best = c;
+          bestDist = d;
+        }
+      }
+      return `${best.label} at ${best.price.toFixed(2)} is closest to ${last.toFixed(2)} (${bestDist.toFixed(2)} pts).`;
+    }
   }
-  if (/\bresistance\b/.test(q) && resistance) {
-    return `Nearest resistance is ${formatLevelLabel(resistance.label)} at ${resistance.price.toFixed(2)}.`;
+  if (/\bsupport\b/.test(q) && support && pdLevelUsable(support.price)) {
+    return renderLevelLine("support", support.price.toFixed(2), formatLevelLabel(support.label));
+  }
+  if (/\bresistance\b/.test(q) && resistance && pdLevelUsable(resistance.price)) {
+    return renderLevelLine("resistance", resistance.price.toFixed(2), formatLevelLabel(resistance.label));
   }
   if (/\bsession high\b/.test(q)) {
+    if (!pdLevelUsable(ctx.sessions.nyRthHigh)) {
+      return "I don't have enough information to say — session high is not available.";
+    }
     return `New York regular trading hours high is ${ctx.sessions.nyRthHigh.toFixed(2)}.`;
   }
   if (/\bsession low\b/.test(q)) {
+    if (!pdLevelUsable(ctx.sessions.nyRthLow)) {
+      return "I don't have enough information to say — session low is not available.";
+    }
     return `New York regular trading hours low is ${ctx.sessions.nyRthLow.toFixed(2)}.`;
   }
 
-  if (/\bhigh\b/.test(q)) return `Previous day high is ${pd.high.toFixed(2)}.`;
-  if (/\blow\b/.test(q)) return `Previous day low is ${pd.low.toFixed(2)}.`;
+  if (/\bhigh\b/.test(q)) {
+    if (!pdLevelUsable(pd.high)) {
+      return "I don't have enough information to say — previous day high is not available.";
+    }
+    return `Previous day high is ${pd.high.toFixed(2)}.`;
+  }
+  if (/\blow\b/.test(q)) {
+    if (!pdLevelUsable(pd.low)) {
+      return "I don't have enough information to say — previous day low is not available.";
+    }
+    return `Previous day low is ${pd.low.toFixed(2)}.`;
+  }
 
   const bits: string[] = [];
-  if (support) bits.push(`Support ${formatLevelLabel(support.label)} ${support.price.toFixed(2)}.`);
-  if (resistance) bits.push(`Resistance ${formatLevelLabel(resistance.label)} ${resistance.price.toFixed(2)}.`);
+  if (support && pdLevelUsable(support.price)) {
+    bits.push(`Support ${formatLevelLabel(support.label)} ${support.price.toFixed(2)}.`);
+  }
+  if (resistance && pdLevelUsable(resistance.price)) {
+    bits.push(`Resistance ${formatLevelLabel(resistance.label)} ${resistance.price.toFixed(2)}.`);
+  }
   if (!bits.length) {
-    bits.push(`Previous day high ${pd.high.toFixed(2)}, previous day low ${pd.low.toFixed(2)}.`);
+    if (pdLevelUsable(pd.high) && pdLevelUsable(pd.low)) {
+      bits.push(`Previous day high ${pd.high.toFixed(2)}, previous day low ${pd.low.toFixed(2)}.`);
+    } else {
+      return "I don't have enough information to say — key levels are not available.";
+    }
   }
   return bits.join(" ");
 }
@@ -89,12 +187,14 @@ function formatLevelLabel(label: string): string {
   return expandTradingAbbreviations(label.replace(/\([^)]*\)/g, "").trim());
 }
 
-function answerBias(ctx: MarketContext): string {
+function answerBias(ctx: MarketContext, opts?: MarketSnapshotOpts): string {
+  if (dataTooWeak(opts)) return insufficientData();
   const state = buildMarketState({ ctx, chartSnapshot: null });
   return pipelineBiasSummary(ctx, state);
 }
 
-function answerStatus(ctx: MarketContext): string {
+function answerStatus(ctx: MarketContext, opts?: MarketSnapshotOpts): string {
+  if (dataTooWeak(opts) || !priceUsable(ctx)) return insufficientData();
   const last = priceLine(ctx);
   const bias = ctx.biasStack.tradeableBias;
   const biasNote = expandTradingAbbreviations(
@@ -130,21 +230,20 @@ function answerStatus(ctx: MarketContext): string {
 
   parts.push(`Call is ${call}`);
 
-  const levelBits = [
-    `previous day high at ${pd.high.toFixed(2)}`,
-    `previous day low at ${pd.low.toFixed(2)}`,
-  ];
-  if (support) {
+  const levelBits: string[] = [];
+  if (pdLevelUsable(pd.high)) levelBits.push(`previous day high at ${pd.high.toFixed(2)}`);
+  if (pdLevelUsable(pd.low)) levelBits.push(`previous day low at ${pd.low.toFixed(2)}`);
+  if (support && pdLevelUsable(support.price)) {
     levelBits.push(
       `nearest support ${formatLevelLabel(support.label)} at ${support.price.toFixed(2)}`
     );
   }
-  if (resistance) {
+  if (resistance && pdLevelUsable(resistance.price)) {
     levelBits.push(
       `nearest resistance ${formatLevelLabel(resistance.label)} at ${resistance.price.toFixed(2)}`
     );
   }
-  parts.push(`Key levels: ${levelBits.join(", ")}`);
+  if (levelBits.length) parts.push(`Key levels: ${levelBits.join(", ")}`);
 
   return `${parts.join(". ")}.`;
 }
@@ -156,7 +255,8 @@ function entryStatusNote(
   return "WAIT — not at entry yet";
 }
 
-function answerEntry(ctx: MarketContext): string {
+function answerEntry(ctx: MarketContext, opts?: MarketSnapshotOpts): string {
+  if (dataTooWeak(opts) || !priceUsable(ctx)) return insufficientData();
   const scaffold = getExecutionScaffold(ctx);
   if (!scaffold) {
     return `No directional entry scaffold — tradeable bias is ${ctx.biasStack.tradeableBias}.`;
@@ -166,7 +266,8 @@ function answerEntry(ctx: MarketContext): string {
   return `Entry zone ${zone}, ${status}.`;
 }
 
-function answerTarget(ctx: MarketContext): string {
+function answerTarget(ctx: MarketContext, opts?: MarketSnapshotOpts): string {
+  if (dataTooWeak(opts) || !priceUsable(ctx)) return insufficientData();
   const scaffold = getExecutionScaffold(ctx);
   if (!scaffold) {
     return `No target scaffold — tradeable bias is ${ctx.biasStack.tradeableBias}.`;
@@ -174,7 +275,8 @@ function answerTarget(ctx: MarketContext): string {
   return `Target one ${scaffold.target1Price.toFixed(2)} at ${scaffold.target1Label}.`;
 }
 
-function answerEntryAndTarget(ctx: MarketContext): string {
+function answerEntryAndTarget(ctx: MarketContext, opts?: MarketSnapshotOpts): string {
+  if (dataTooWeak(opts) || !priceUsable(ctx)) return insufficientData();
   const scaffold = getExecutionScaffold(ctx);
   if (!scaffold) {
     return `No entry or target scaffold — tradeable bias is ${ctx.biasStack.tradeableBias}.`;
@@ -360,13 +462,14 @@ function answerStructure(ctx: MarketContext, question: string): string {
 export function buildMarketSnapshotAnswer(
   ctx: MarketContext,
   intent: ChartQuestionIntent,
-  question?: string
+  question?: string,
+  opts?: MarketSnapshotOpts
 ): MarketSnapshotResult {
   const q = question || "";
   let spoken: string;
 
   if (asksForEntryAndTarget(q)) {
-    spoken = answerEntryAndTarget(ctx);
+    spoken = answerEntryAndTarget(ctx, opts);
     const normalized = expandTradingAbbreviations(spoken.replace(/\s+/g, " ").trim());
     return {
       intent,
@@ -377,31 +480,34 @@ export function buildMarketSnapshotAnswer(
 
   switch (intent) {
     case "price":
-      spoken = answerPrice(ctx, q);
+      spoken = answerPrice(ctx, q, opts);
       break;
     case "level":
-      spoken = answerLevel(ctx, q);
+      spoken = answerLevel(ctx, q, opts);
       break;
     case "bias":
-      spoken = answerBias(ctx);
+      spoken = answerBias(ctx, opts);
       break;
     case "entry":
-      spoken = answerEntry(ctx);
+      spoken = answerEntry(ctx, opts);
       break;
     case "target":
-      spoken = answerTarget(ctx);
+      spoken = answerTarget(ctx, opts);
       break;
     case "structure":
-      spoken = answerStructure(ctx, q);
+      spoken = dataTooWeak(opts)
+        ? insufficientData()
+        : answerStructure(ctx, q);
       break;
     case "first_presented_fvg":
-      spoken = answerFirstPresentedFvg(ctx, q);
+      spoken = dataTooWeak(opts) ? insufficientData() : answerFirstPresentedFvg(ctx, q);
       break;
     case "status":
-      spoken = answerStatus(ctx);
+      spoken = answerStatus(ctx, opts);
       break;
     default:
-      spoken = answerPrice(ctx, q);
+      // Never invent a live price for unclassified / general questions.
+      spoken = insufficientData();
       break;
   }
 
@@ -414,8 +520,9 @@ export function buildMarketSnapshotAnswer(
 
 export function resolveSnapshotFromQuestion(
   ctx: MarketContext,
-  question: string
+  question: string,
+  opts?: MarketSnapshotOpts
 ): MarketSnapshotResult {
   const intent = resolveSnapshotIntent(question);
-  return buildMarketSnapshotAnswer(ctx, intent, question);
+  return buildMarketSnapshotAnswer(ctx, intent, question, opts);
 }

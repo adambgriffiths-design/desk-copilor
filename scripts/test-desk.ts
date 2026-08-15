@@ -6,10 +6,15 @@ import { execSync } from "child_process";
 
 const SUITES = [
   "test:observation",
+  "test:observation-proof",
+  "test:structure-snapshot",
+  "test:reh-rel",
   "test:contamination",
   "test:decision",
   "test:desk:infra",
   "test:analysis-contract",
+  "test:decision-envelope",
+  "test:session-liquidity",
   "test:replay",
 ] as const;
 

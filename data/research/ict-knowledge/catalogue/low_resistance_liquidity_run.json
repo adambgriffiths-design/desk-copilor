@@ -1,0 +1,49 @@
+{
+  "concept_id": "low_resistance_liquidity_run",
+  "name": "Low resistance liquidity run (LRLR)",
+  "aliases": [
+    "LRLR",
+    "low resistance liquidity runs"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "lrlr_short_term_framing__O69iFqP1j7o__11",
+      "definition_text": "Low resistance liquidity runs taught for short-term / one-shot-one-kill: key off PD arrays based on premium or discount and look to trade from one PD array to the next (ideally discount\u2192premium), using last ~3 months for salient institutional reference points / IPDA data ranges (20/40/60 day refs mentioned).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Short-term trading context",
+        "Premium/discount PD-array path"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 07 Core \u2014 Short Term Trading Low Resistance Liquidity Runs",
+      "variations_note": "This lecture extract is application/framing-heavy; contrast HRLR is clearer in Month1 Liquidity Runs. Do not invent a crisp geometric LRLR definition beyond captions.",
+      "confidence": "paraphrased",
+      "cue_start": "00:00:11.209",
+      "cue_end": "00:01:08.400",
+      "timestamp_sec": 11.209,
+      "source": {
+        "video_id": "O69iFqP1j7o",
+        "title": "ICT Mentorship Core Content - Month 07 - Short Term Trading Low Resistance Liquidity Runs",
+        "url": "https://www.youtube.com/watch?v=O69iFqP1j7o",
+        "transcript_path": "data/ict-transcripts/raw/O69iFqP1j7o.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "none direct",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "Unknown",
+    "gap_vs_baseline_v2": "Needs clearer definitional citation than this application lecture",
+    "hypothesis_id": "H_ICT_LRLR",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch5 Month07 \u2014 thin definitional yield."
+  },
+  "extraction_notes": "Batch5. Partial/application. Keep separate from liquidity_run HRLR occurrence."
+}

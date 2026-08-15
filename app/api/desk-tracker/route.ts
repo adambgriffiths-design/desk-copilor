@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     const intel = await buildDeskMarketIntelligence({
       chartSnapshot,
       chartLastPrice,
-      forceFresh: body.candleClosed === true || chartLastPrice != null,
+      forceFresh: body.candleClosed === true,
     });
     const dq = resolveApiDataQuality(intel, chartLastPrice);
 

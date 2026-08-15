@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(snapshotResponseCache.body, { headers: cors });
     }
 
-    const forceFresh = intent === "price" || chartLastPrice != null;
+    const forceFresh = false;
     const intel = await buildDeskMarketIntelligence({
       chartLastPrice,
       chartLastPriceSource: priceMeta.source,
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
             ? { fpfvg: true }
             : {}),
         };
-        if (!dq.canDecide) {
+        if (!dq.canDecide && chartLastPrice == null) {
           payload = {
             ...payload,
             tradeable_bias: "unknown",
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
         ? { fpfvg: true }
         : {}),
     };
-    if (!dq.canDecide) {
+    if (!dq.canDecide && chartLastPrice == null) {
       payload = {
         ...payload,
         spoken:

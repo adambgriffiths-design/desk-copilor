@@ -45,7 +45,29 @@ export type RehRelObservationBlock = {
 export type MarketObservation = {
   market_structure: ObservationStructure;
   liquidity: {
-    levels: Array<{ label: string; price: number; taken: boolean | "unknown" }>;
+    levels: Array<{
+      id?: string;
+      label: string;
+      price: number;
+      taken: boolean | "unknown";
+      /** Named interaction — never collapse to taken=true without CLOSED_BEYOND proof. */
+      status?:
+        | "UNTOUCHED"
+        | "TESTED"
+        | "TOUCHED"
+        | "BREACHED"
+        | "SWEPT"
+        | "CLOSED_BEYOND"
+        | "INVALIDATED";
+      /** buy_side = highs / BSL; sell_side = lows / SSL */
+      side?: "buy_side" | "sell_side";
+      source?: string;
+      formedAt?: number;
+      qualifyingTickAt?: number;
+      qualifyingTickPrice?: number;
+      candleId?: string;
+      why?: string;
+    }>;
   };
   displacement: DisplacementStatus;
   displacement_points?: number | null;

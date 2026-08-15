@@ -126,6 +126,26 @@ Perfect limit fill at scaffold anchor; no commission/slippage. Zero setups → c
 
 ---
 
+## 2026-08-14 verification (inbox leftover)
+
+Did **not** re-run the ~87 min 1381-bar incremental full+train+test. Checkpoint already complete:
+
+- Run `baseline-2026-08-13T17-48-11-508Z`
+- `checkpoints/state.json`: `lastCompletedChunk` 13 (14/14), `mergedSetupCount` 0
+- `fingerprintPartial` matches prior report: `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`
+
+Re-ran this session:
+
+| Check | Result |
+|-------|--------|
+| Det replay NY open 14:30Z | LONG (deterministic) — `replay-2026-08-14T08-04-59-503Z`, price 29907.5 |
+| Det replay session end 20:59Z | SHORT (deterministic) — `replay-2026-08-14T08-05-02-542Z`, price 29805.75 |
+| `npm run test:research-baseline` | **33 passed, 0 failed** (~710s) |
+
+Pipeline WAIT at those cutoffs is **not** re-measured this session (would require full Phase 1 window, not the snapshot CLI). Prior table still stands: det LONG/SHORT is **not** edge evidence.
+
+No Karen/mentor logic edits. No commit, push, or deploy.
+
 ## NEXT TASK
 
 **None on single-session NQ Aug 12.** Honest methodology is now in place; this session yields zero tradable setups by strategy design (WAIT). Multi-day edge study requires additional real-data datasets not currently loaded — do not manufacture without new data. STOP.

@@ -1,0 +1,170 @@
+{
+  "when": "2026-08-14T16:33:38.036Z",
+  "datasetId": "2562961408b256ac94f1",
+  "window": {
+    "label": "Aug12 NY AM 09:30–11:00 EST",
+    "dateKey": "2026-08-12",
+    "startMin": 570,
+    "endMin": 660
+  },
+  "sparseCheckpoints": 12,
+  "warmup": 60,
+  "checkpointCount": 12,
+  "fullWindowBarCount": 90,
+  "loadMs": 851,
+  "memory": {
+    "start": {
+      "rss": 86,
+      "heap": 17
+    },
+    "end": {
+      "rss": 758,
+      "heap": 34
+    }
+  },
+  "baseline": {
+    "totalMs": 207010,
+    "avgMsPerCheckpoint": 17251,
+    "avgCtxMs": 15803,
+    "avgPipelineMs": 1448,
+    "stanceCounts": {
+      "flat": 10,
+      "wait": 2
+    },
+    "actionableCount": 2,
+    "actionablePct": 16.7,
+    "waitFlatMonitorPct": 100
+  },
+  "waitCompression": {
+    "waitFlatMonitorBars": 11,
+    "consecutiveIdenticalEnvelope": 1,
+    "compressiblePct": 9.1,
+    "pitSafe": "Only when cheap input fingerprint unchanged — must re-eval on structure events / level cross / displacement"
+  },
+  "enginePass": {
+    "totalMs": 156439,
+    "avgMsPerBar": 1738.22
+  },
+  "filters": [
+    {
+      "id": "always",
+      "label": "Baseline (every checkpoint)",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 207010.43819999998,
+      "cheapScanTotalMs": 0,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 1,
+      "missedCount": 0
+    },
+    {
+      "id": "engine_events",
+      "label": "Incremental engine structure events (shouldRunKarenAnalysis bar_close)",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 227869.0344933333,
+      "cheapScanTotalMs": 20858.596293333332,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 0.91,
+      "missedCount": 0
+    },
+    {
+      "id": "daily_proximity",
+      "label": "Price within 8pt of PDH/PDL/PDC (daily slice only)",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 207011.03819999998,
+      "cheapScanTotalMs": 0.6000000000000001,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 1,
+      "missedCount": 0
+    },
+    {
+      "id": "bar_anatomy",
+      "label": "Bar displacement / range expansion vs prior bar",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 207011.03819999998,
+      "cheapScanTotalMs": 0.6000000000000001,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 1,
+      "missedCount": 0
+    },
+    {
+      "id": "session_or_hour",
+      "label": "Session minute change OR hour boundary",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 207011.03819999998,
+      "cheapScanTotalMs": 0.6000000000000001,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 1,
+      "missedCount": 0
+    },
+    {
+      "id": "price_cross_levels",
+      "label": "majorLevelInteraction vs daily PDH/PDL/PDC",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 207011.03819999998,
+      "cheapScanTotalMs": 0.6000000000000001,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 1,
+      "missedCount": 0
+    },
+    {
+      "id": "composite_safe",
+      "label": "OR: engine events | daily proximity | bar anatomy | price cross levels",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 227869.0344933333,
+      "cheapScanTotalMs": 20858.596293333332,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 0.91,
+      "missedCount": 0
+    },
+    {
+      "id": "wait_compression_pit",
+      "label": "PIT: skip when prev WAIT/FLAT/MONITOR and cheap input fingerprint unchanged",
+      "candidateCount": 12,
+      "recallActionable": 1,
+      "missedActionable": [],
+      "falseNegativeRate": 0,
+      "envelopeMismatchAtCandidates": 0,
+      "estimatedMs": 227869.0344933333,
+      "cheapScanTotalMs": 20858.596293333332,
+      "fullEvalTotalMs": 207010.43819999998,
+      "candidatePct": 100,
+      "speedupVsBaseline": 0.91,
+      "missedCount": 0
+    }
+  ]
+}

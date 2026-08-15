@@ -14,6 +14,10 @@ import { buildContradictionReport } from "./contradiction-report";
 import { buildExplainabilityReport, formatExplainabilityBrief } from "./explainability";
 import { buildAnalysisContract, formatAnalysisContract } from "./analysis-contract";
 import { narrateAnalysisContractForVoice } from "./voice-analysis-narrator";
+import {
+  isDecisionHistoryRecordSuppressed,
+  recordDecisionEnvelopeHistory,
+} from "./decision-envelope-history";
 
 export const NO_TRADE_EXPORT_MESSAGE = "No call — couldn't read the chart data right now.";
 
@@ -21,6 +25,15 @@ let lastPipeline: DeskPipelineResult | null = null;
 
 export function getLastPipelineResult(): DeskPipelineResult | null {
   return lastPipeline;
+}
+
+/** Test / historical-UI isolation — swap or clear without running the pipeline. */
+export function replaceLastPipelineResult(
+  next: DeskPipelineResult | null
+): DeskPipelineResult | null {
+  const prev = lastPipeline;
+  lastPipeline = next;
+  return prev;
 }
 
 function computeObservationDelta(
@@ -202,12 +215,50 @@ export function runDeskPipeline(ctx: MarketContext, state: MarketState): DeskPip
     uncertainty,
     analysis_contract: undefined,
   };
-  result.analysis_contract = buildAnalysisContract(result);
+  result.analysis_contract = buildAnalysisContract(result, ctx, state);
   result.mentor_brief = buildMentorBrief(result);
   result.panel_brief = buildPanelBrief(result);
   result.spoken_brief = buildSpokenBrief(result);
 
   lastPipeline = result;
+
+  // LIVE DecisionEnvelope history only — historical builds must suppress recording.
+  const liveEnv = result.analysis_contract?.decision;
+  if (liveEnv && !isDecisionHistoryRecordSuppressed()) {
+    const barSec = state.quality?.lastBarTime;
+    const asOf =
+      typeof barSec === "number" && Number.isFinite(barSec) && barSec > 0
+        ? new Date(barSec * 1000)
+        : new Date(state.updatedAt || Date.now());
+    const asOfIso = asOf.toISOString();
+    const verdict = result.decision.verdict;
+    let entryStatus: string | undefined;
+    try {
+      entryStatus = getExecutionScaffold(ctx)?.entryStatus;
+    } catch {
+      entryStatus = undefined;
+    }
+    recordDecisionEnvelopeHistory({
+      asOf,
+      dataMode: "LIVE",
+      envelope: liveEnv,
+      verdict,
+      stateHash: state.stateHash,
+      decisionKey: `${"LIVE"}@?|${liveEnv.stance}|${verdict}|${asOfIso}`,
+      entryStatus,
+      marketState: {
+        price: state.lastPrice ?? null,
+        stateHash: state.stateHash ?? null,
+        snapshotId: state.snapshotId ?? null,
+        htfBias: result.observation.htf_bias?.tradeable_bias ?? null,
+        structure: result.observation.market_structure ?? null,
+        displacement: result.observation.displacement ?? null,
+        fvgStatus: result.observation.fvg?.status ?? null,
+        verdict: verdict ?? null,
+      },
+    });
+  }
+
   return result;
 }
 

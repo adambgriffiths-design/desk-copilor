@@ -63,7 +63,7 @@ export function buildMarketState(input: {
     : "yahoo";
 
   const pd = input.ctx.htfPdArrays.previousDay;
-  const { support, resistance } = nearestPdLevels(lastPrice, input.ctx.htfPdArrays.levels);
+  const { support, resistance } = nearestPdLevels(lastPrice, input.ctx.htfPdArrays.levels ?? []);
 
   const drawings: MarketStateDrawing[] = (snap?.drawings || []).map((d) => ({
     type: d.type,
@@ -73,15 +73,17 @@ export function buildMarketState(input: {
     ...(d.label ? { label: d.label } : {}),
   }));
 
+  const m1Fvgs = input.ctx.structureFacts.m1UnfilledFvgs ?? [];
+  const dailyFvgs = input.ctx.htfPdArrays.unfilledDailyFvgs ?? [];
   const fvg: MarketStateFvg[] = [
-    ...input.ctx.structureFacts.m1UnfilledFvgs.slice(-4).map((z) => ({
+    ...m1Fvgs.slice(-4).map((z) => ({
       top: z.top,
       bottom: z.bottom,
       direction: z.type,
       timeframe: z.timeframe,
       inverted: z.inverted,
     })),
-    ...input.ctx.htfPdArrays.unfilledDailyFvgs.slice(-2).map((z) => ({
+    ...dailyFvgs.slice(-2).map((z) => ({
       top: z.top,
       bottom: z.bottom,
       direction: z.type,
@@ -99,11 +101,11 @@ export function buildMarketState(input: {
     updatedAt: new Date().toISOString(),
     candles,
     session: {
-      id: input.ctx.activeSession.id,
-      label: input.ctx.activeSession.label,
+      id: input.ctx.activeSession?.id ?? "unknown",
+      label: input.ctx.activeSession?.label ?? "—",
       high: input.ctx.sessions.nyRthHigh,
       low: input.ctx.sessions.nyRthLow,
-      open: input.ctx.htfPdArrays.currentDay.open,
+      open: input.ctx.htfPdArrays.currentDay?.open,
       nyRthHigh: input.ctx.sessions.nyRthHigh,
       nyRthLow: input.ctx.sessions.nyRthLow,
     },
@@ -119,9 +121,11 @@ export function buildMarketState(input: {
         : { summary: input.ctx.structureFacts.summary }),
     },
     levels: {
-      pdh: pd.high,
-      pdl: pd.low,
-      pdc: pd.close,
+      pdh: pd?.high,
+      pdl: pd?.low,
+      pdc: pd?.close,
+      pdcSource: input.ctx.daily.pdhSource,
+      pdcFormedAt: input.ctx.daily.pdcFormedAt,
       ...(support
         ? {
             nearestSupport: support.price,
@@ -152,8 +156,35 @@ export function buildMarketState(input: {
     },
     candleHash,
     stateHash: "",
+    snapshotId: "",
   };
   state.stateHash = buildStateHash(state);
+  state.snapshotId = `ms_${state.stateHash}_${Date.parse(state.updatedAt) || 0}`;
+  const backendClose = input.ctx.daily.m1BarClose ?? input.ctx.daily.lastClose;
+  const tvPx = input.chartLastPrice;
+  const diff =
+    tvPx != null && Number.isFinite(tvPx) && Number.isFinite(backendClose)
+      ? Math.abs(tvPx - backendClose)
+      : 0;
+  const agree = tvPx == null || !Number.isFinite(backendClose) || diff <= 0.25;
+  if (!agree) {
+    state.quality.reasons = [...(state.quality.reasons || []), "tv_backend_price_disagree"];
+  }
+  state.priceAgreement = {
+    ...(tvPx != null
+      ? {
+          tv: {
+            value: tvPx,
+            timestamp: input.chartLastPriceTs ?? null,
+            source: String(input.chartLastPriceSource || "tradingview"),
+          },
+        }
+      : {}),
+    backend: { value: backendClose, source: "m1_close" },
+    marketState: { value: lastPrice, source: lastPriceSource },
+    agree,
+    difference: diff,
+  };
   return state;
 }
 

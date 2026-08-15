@@ -26,6 +26,7 @@ type LevelLine = {
   labelAlign?: LabelAlign;
   labelLane?: number;
   showLabel?: boolean;
+  displayLabel?: string;
 };
 
 function applyLabelStagger(lines: LevelLine[], yMin: number, yMax: number): void {
@@ -47,6 +48,7 @@ function applyLabelStagger(lines: LevelLine[], yMin: number, yMax: number): void
     lines[i].labelAlign = stubs[i].labelAlign;
     lines[i].labelLane = stubs[i].labelLane;
     lines[i].showLabel = stubs[i].showLabel !== false;
+    lines[i].displayLabel = stubs[i].displayLabel;
   }
 }
 
@@ -107,11 +109,11 @@ function buildSvg(bars: Bar[], ctx: MarketContext, chartTimeEst: string): string
   const tagEntries: Array<{ y: number; text: string; color: string }> = [];
   const addTag = (line: LevelLine, lineY: number) => {
     if (line.showLabel === false) return;
-    const align = line.labelAlign === "bottom" ? "bottom" : "top";
+    const align = line.labelAlign === "bottom" ? "bottom" : line.labelAlign === "middle" ? "middle" : "top";
     const lane = line.labelLane ?? 0;
     tagEntries.push({
       y: labelYOffsetPx(lineY, align, lane),
-      text: `${line.label} ${line.price.toFixed(1)}`,
+      text: `${line.displayLabel || line.label} ${line.price.toFixed(1)}`,
       color: line.color,
     });
   };
@@ -148,7 +150,8 @@ function buildSvg(bars: Bar[], ctx: MarketContext, chartTimeEst: string): string
   const priceTags = tagEntries
     .map(
       (t) =>
-        `<text x="${W - PAD.right + 6}" y="${t.y}" fill="${t.color}" font-family="monospace" font-size="11">${esc(t.text)}</text>`
+        `<rect x="${W - PAD.right + 4}" y="${t.y - 11}" width="${Math.min(220, 8 + t.text.length * 6.4)}" height="14" rx="3" fill="rgba(11,15,20,0.94)"/>
+<text x="${W - PAD.right + 8}" y="${t.y}" fill="#f8fafc" font-family="monospace" font-size="11" font-weight="700">${esc(t.text)}</text>`
     )
     .join("\n");
 

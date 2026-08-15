@@ -4,7 +4,7 @@
  */
 (function () {
   const PAGE_SCRIPT_ID = "dc-tv-page-bridge";
-  const BRIDGE_REV = "1.4.73";
+  const BRIDGE_REV = "1.4.112";
   const MIN_CANDLES = 20;
   const STALE_BAR_SEC = 120;
   const EXPORT_FAST_TIMEOUT_MS = 3500;
@@ -37,6 +37,7 @@
     const reason = snap.reason || "";
     if (reason === "widget_not_found" || reason === "export_not_ready" || reason === "timeout") return true;
     if (snap.ok === true) return false;
+    if (reason === "insufficient_candles" && snap.sync?.widgetFound) return false;
     if (reason === "insufficient_candles" && attempt < 2) return true;
     return false;
   }
@@ -75,15 +76,18 @@
 
   function classifyExportQuality(input) {
     const reasons = [...new Set(input.reasons || [])];
+    const yahooFallback =
+      input.source === "yahoo_fallback" || reasons.includes("yahoo_fallback_used");
+    if (input.candleCount < MIN_CANDLES) return "missing";
+    if (yahooFallback) return "degraded";
     const exportFailed =
       input.source === "none" ||
       input.reason === "widget_not_found" ||
       input.reason === "export_not_ready" ||
       input.reason === "timeout" ||
-      reasons.includes("export_failed");
-    if (exportFailed || input.candleCount < MIN_CANDLES || reasons.includes("insufficient_candles")) {
-      return "missing";
-    }
+      reasons.includes("export_failed") ||
+      reasons.includes("insufficient_candles");
+    if (exportFailed) return "missing";
     if (reasons.includes("stale_last_bar")) return "stale";
     if (input.exportPartial || reasons.includes("export_partial_failure") || reasons.includes("missing_ohlc_fields")) {
       return "partial";
@@ -462,6 +466,7 @@
   window.DeskCopilotChartSnapshot = {
     collect: collectSnapshot,
     payload,
+    overlayDrawings: dcOverlayDrawings,
     scoreQuality,
     isQualityUsable,
     pushReasoningLog,

@@ -1,0 +1,52 @@
+{
+  "tasks": [
+    {
+      "id": "live-pilot-queue-authoritative",
+      "title": "Pilot queue authoritative",
+      "prompt": "LIVE PILOT: Tasks are seeded in queue.json only. This sentinel prevents DEFAULT_BACKLOG fallback. Do not dispatch.",
+      "category": "audit",
+      "allowedPaths": ["data/supervisor/"],
+      "priority": 999,
+      "confidence": 0.1
+    },
+    {
+      "id": "research-karen-edge-validation-v2",
+      "title": "Karen edge validation v2 — mentor rubric, pipeline path",
+      "prompt": "Re-run NQ Aug12 edge validation using buildKarenReplayResponse (pipeline) + evaluateMentorResponse rubric. Do NOT use deterministic replay. Do NOT optimize setup count. Score mentor quality per sample timestamp; price outcome secondary. MENTOR EVAL READY: YES prerequisite met. Report: data/supervisor/results/karen-edge-validation-v2-nq-aug12.md",
+      "category": "experiment",
+      "allowedPaths": ["lib/research/", "scripts/", "data/research/", "data/supervisor/results/"],
+      "verifyScript": "test:research-mentor-eval",
+      "priority": 34,
+      "confidence": 0.8
+    },
+    {
+      "id": "research-yahoo-screening-pilot",
+      "title": "Yahoo HTF screening pilot (daily/15m bias scan)",
+      "prompt": "Research-only follow-up to research-yahoo-vs-tickstream: use loadDatasetFromYahoo + compare-sources to screen 60d HTF bias/MSS on Yahoo vs TickStream overlap windows. Document divergence rate. Do NOT replace TickStream validation or run full NQ baseline.",
+      "category": "experiment",
+      "allowedPaths": ["lib/research/", "scripts/test-research*", "data/supervisor/results/"],
+      "verifyScript": "test:research-yahoo-vs-tickstream",
+      "priority": 28,
+      "confidence": 0.7
+    },
+    {
+      "id": "research-nq-load-week-tickstream",
+      "title": "Load 1 week NQ TickStream (Aug 5–12 2026)",
+      "prompt": "Load 1 week NQ CME data via existing tooling. Run: npm run research:dataset -- --symbol NQ --start 2026-08-05T22:00:00Z --end 2026-08-12T22:00:00Z --fixture-id nq-week-aug05-aug12-2026-cme. Validate integrity. Preview checkpoint plan: npx tsx scripts/research-mentor-checkpoint-plan.ts --dataset nq-week-aug05-aug12-2026-cme. Do NOT run full baseline or duplicate Aug 12 mentor eval. Report: data/supervisor/results/research-nq-load-week-tickstream.md. STOP if TICKSTREAM_API_KEY missing.",
+      "category": "experiment",
+      "allowedPaths": ["lib/research/", "scripts/", "data/research/", "data/research-fixtures/", "data/supervisor/results/"],
+      "verifyScript": "test:research-dataset",
+      "priority": 32,
+      "confidence": 0.85
+    },
+    {
+      "id": "research-baseline-chunked-execution",
+      "title": "Design chunked/checkpoint baseline execution for NQ",
+      "prompt": "Design research-tooling for safe incremental/chunked baseline execution on nq-aug12-2026-cme (1381 bars). Per-phase progress, checkpoint/resume, fingerprint equivalence. Do NOT run full NQ baseline.",
+      "category": "experiment",
+      "allowedPaths": ["lib/research/", "scripts/", "data/research/"],
+      "priority": 35,
+      "confidence": 0.8
+    }
+  ]
+}

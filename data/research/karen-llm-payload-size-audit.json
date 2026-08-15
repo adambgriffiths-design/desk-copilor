@@ -1,0 +1,109 @@
+{
+  "mode": "HISTORICAL_FIXTURE_WARM_EQUIVALENT",
+  "note": "Live Yahoo unavailable/weekend — sized via synthetic-ny-am @50 + buildChatSystemPrompt. Tokens = chars/4 estimate (not tiktoken).",
+  "request": "Give me the read (warm HIT path equivalent: fixture already built, forceMarket)",
+  "qualityGate": {
+    "canDeliverVerdict": false,
+    "dataQuality": "GOOD",
+    "missing": [
+      "current price unknown"
+    ],
+    "waitReason": "WAIT — current price unknown"
+  },
+  "sections": {
+    "systemPromptBase": {
+      "chars": 12323,
+      "tokensEst": 3081
+    },
+    "systemBeforeMarket": {
+      "chars": 14465,
+      "tokensEst": 3617
+    },
+    "marketContextInjected": {
+      "chars": 2606,
+      "tokensEst": 652
+    },
+    "marketBlockStandalone": {
+      "chars": 2459,
+      "tokensEst": 615
+    },
+    "histMarketFormatter": {
+      "chars": 2576,
+      "tokensEst": 644
+    },
+    "qualityGateFull": {
+      "chars": 8833,
+      "tokensEst": 2209
+    },
+    "qualityGateProseOnly": {
+      "chars": 1728,
+      "tokensEst": 432
+    },
+    "decisionEnvelopeOnly": {
+      "chars": 7104,
+      "tokensEst": 1776
+    },
+    "fullSystem": {
+      "chars": 26175,
+      "tokensEst": 6544
+    },
+    "conversationHistory": {
+      "chars": 44,
+      "tokensEst": 11,
+      "messages": 3,
+      "tokensEstWithRoleOverhead": 29
+    }
+  },
+  "totals": {
+    "totalInputTokensEst": 6573,
+    "totalInputChars": 26240,
+    "max_tokens_config_text": 550,
+    "outputTokensNote": "Not measured this run (no LLM call by default). Prior warm HIT: LLM 3.7–5.5s, TTFT~618–646ms after context."
+  },
+  "duplication": {
+    "factIdsInMarket": 24,
+    "factIdsAlsoInEnvelope": 0,
+    "sharedLongWordsUnique": 40,
+    "sharedLongWordsSample": [
+      "context",
+      "daily",
+      "bearish",
+      "structure",
+      "tradeable",
+      "short",
+      "24850",
+      "resembles",
+      "continuation",
+      "because",
+      "impulsive",
+      "displacement",
+      "detected",
+      "lookback",
+      "unfilled",
+      "previous",
+      "25100",
+      "untouched",
+      "confirmed",
+      "swept",
+      "24900",
+      "would",
+      "consider",
+      "bias_stack",
+      "facts"
+    ],
+    "gateProseChars": 1728,
+    "envelopeChars": 7104,
+    "marketChars": 2459,
+    "lastVerdictAlsoInjected": false,
+    "historyCap": 16,
+    "historyUsed": 3
+  },
+  "priorWarmHitLatency": {
+    "source": "data/research/karen-live-context-reuse.md Bench A runs 4–5",
+    "contextMs": "1–16",
+    "llmMs": "3712–4629",
+    "ttftMs": "618–646",
+    "totalMs": "3816–4832",
+    "note": "TTFT here is in-process mark after llm_request_started until first chunk — not network wire."
+  }
+}

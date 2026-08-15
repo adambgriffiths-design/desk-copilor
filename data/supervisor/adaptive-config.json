@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "minParallel": 1,
+  "maxParallel": 3,
+  "cpuLimitPct": 90,
+  "ramLimitPct": 92,
+  "scaleUpThresholdCpu": 65,
+  "scaleUpThresholdRam": 75,
+  "scaleDownThresholdCpu": 82,
+  "scaleDownThresholdRam": 85,
+  "recoveryStableBatches": 2,
+  "optimalParallel": 2,
+  "lastBenchmarkAt": "2026-08-13T16:04:06.808Z",
+  "updatedAt": "2026-08-13T16:04:06.810Z"
+}

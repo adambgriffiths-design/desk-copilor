@@ -42,8 +42,24 @@ export type MarketContext = {
     equilibrium: number;
     biasHint: "bullish" | "bearish" | "neutral";
     lastClose: number;
-    /** Unix seconds — first one-minute bar of the current EST day. */
+    /** Raw last 1m bar close before TV last overlay — provenance only. */
+    m1BarClose?: number;
+    /** Unix seconds — first one-minute bar of the current CME Globex session. */
     currentDayStartTime?: number;
+    previousDaySessionKey?: string;
+    currentDaySessionKey?: string;
+    pdhSource?: "cme_session_1m" | "yahoo_daily_fallback";
+    /** Unix seconds — 1m bar that first printed previous-session high (PDH). */
+    pdhFormedAt?: number;
+    /** Unix seconds — last 1m bar of previous Globex session (PDC source candle). */
+    pdcFormedAt?: number;
+    /** Previous Globex session close (same as htfPdArrays.previousDay.close). */
+    previousDayClose?: number;
+    /**
+     * Yahoo calendar/settlement daily close for the prior EST day when available.
+     * Diagnostic only — must not override Globex PDC when pdhSource is cme_session_1m.
+     */
+    yahooDailyClose?: number;
   };
   nwog: {
     top: number;
@@ -124,6 +140,14 @@ export type MarketContext = {
       at: string;
       atTime: number;
     }>;
+    levelInteractions?: Array<{
+      levelId: string;
+      status: string;
+      why: string;
+      atTime?: number;
+      candleId?: string;
+      tickPrice?: number;
+    }>;
     /** Relative equal high/low liquidity pools from clustered 1m swings. */
     relativeEqualPools: Array<{
       price: number;
@@ -135,6 +159,14 @@ export type MarketContext = {
     m1UnfilledFvgs: FvgZone[];
     /** Unfilled 1m FVGs with inverted=true (body closed through gap — polarity flipped). */
     m1InvertedFvgs: FvgZone[];
+    /** First hour dealing range 9:30–10:30 ET (when 1m bars cover the window). */
+    fhdr?: {
+      high: number;
+      low: number;
+      locked: boolean;
+      startTime: number;
+      endTime: number;
+    } | null;
     /** First presented 1m FVG variants — not daily FVG. */
     firstPresentedFvg: {
       nyOpening: FirstPresentedFvgResult | null;

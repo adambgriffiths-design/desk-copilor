@@ -1,0 +1,68 @@
+{
+  "concept_id": "pre_market_range",
+  "name": "Pre-market range",
+  "aliases": ["premarket range", "AM pre-market range"],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "pre_market_range__2K1IcVvq9z8__1541",
+      "definition_text": "If you can be in front of charts by 7:00, do the exercise then; else same thing at 8:00–8:30; same thing at 9–9:30. That is your pre-market range — write it down; do not call it the opening range.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Windows: 7:00–7:30, or 8:00–8:30, or 9:00–9:30 NY local",
+        "In that range: look for equal highs / equal lows (relative equals) prior to / left of the window for bias draw"
+      ],
+      "invalidation": [
+        "If both relative equal highs and relative equal lows present: wait for the first side to be disrupted, then work toward the other — that becomes bias"
+      ],
+      "timeframe_session_context": "NY local morning; 1m / 5m / 15m mentioned for scanning smooth locations",
+      "variations_note": "Primary definition video for this concept in the local seed set.",
+      "confidence": "quoted",
+      "cue_start": "00:25:31.029",
+      "cue_end": "00:27:44.149",
+      "timestamp_sec": 1541.59,
+      "source": {
+        "video_id": "2K1IcVvq9z8",
+        "title": "ICT Gems — Pre-Market Range",
+        "url": "https://www.youtube.com/watch?v=2K1IcVvq9z8",
+        "transcript_path": "data/ict-transcripts/pilot/premarket-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "pre_market_range__eft9_3ekDCY__1416",
+      "definition_text": "Pre-session / pre-market session time referenced as inside the 7:00 to 9:30 opening; a pre-session fair value gap may be used as an anchor when looking for participation lower after a premium open.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Context: premium gap open → bias bearish / look for shorts",
+        "May anchor off old fair value gap that's pre-session or one that forms during opening range"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "7:00–9:30 pre-market session; contrasted with OR-formed FVG",
+      "variations_note": "Does not redefine the 30m pre-market windows; uses 'pre-session' FVG as an entry/anchor tool — keep separate from window definition.",
+      "confidence": "paraphrased",
+      "cue_start": "00:23:18.390",
+      "cue_end": "00:23:43.120",
+      "timestamp_sec": 1416.71,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "relativeEqualPools / REH-REL detection in structure.ts; session ny_pre hints in ict-knowledge.ts",
+    "related_karen_evidence_or_gate": "EQH/EQL / relative equal pools observation; not a dedicated pre-market-range high/low lock",
+    "overlap_vs_baseline_v2": "Relative equal liquidity scanning overlaps partially",
+    "gap_vs_baseline_v2": "Explicit 7:00–7:30 / 8:00–8:30 / 9:00–9:30 pre-market range object + 'first disrupted side' bias rule not in baseline-v2",
+    "hypothesis_id": "H_ICT_PREMARKET_RANGE",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Maps loosely to backlog EQH/EQL / liquidity work; observation-only range tagging first."
+  },
+  "extraction_notes": "Also extract relative_equal_highs_lows as its own concept; do not collapse into pre-market alone."
+}

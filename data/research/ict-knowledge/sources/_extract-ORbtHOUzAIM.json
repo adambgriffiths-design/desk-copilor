@@ -1,0 +1,96 @@
+{
+  "video_id": "ORbtHOUzAIM",
+  "path": "data/ict-transcripts/raw/ORbtHOUzAIM.en.vtt",
+  "cues": 293,
+  "searches": {
+    "dealing_range": [],
+    "org": [],
+    "opening_range": [
+      {
+        "t": "00:02:34.309",
+        "sec": 154.309,
+        "snippet": "[00:02:25.130] um that's 1983 folks that are less than [00:02:27.290] 30 years old [00:02:31.369] so spoos uh is this slang for for S P [00:02:34.309] 500 trading so spoos opening range [00:02:34.319] 500 trading so spoos opening range concept [00:02:35.809] concept [00:02:39.229] okay the highest volume for s p trading"
+      },
+      {
+        "t": "00:02:34.319",
+        "sec": 154.319,
+        "snippet": "[00:02:27.290] 30 years old [00:02:31.369] so spoos uh is this slang for for S P [00:02:34.309] 500 trading so spoos opening range [00:02:34.319] 500 trading so spoos opening range concept [00:02:35.809] concept [00:02:39.229] okay the highest volume for s p trading [00:02:42.110] is going to be seen between 9 30 a.m and"
+      },
+      {
+        "t": "00:03:07.319",
+        "sec": 187.319,
+        "snippet": "[00:03:01.250] now the market does trade 24 hours [00:03:02.809] but we're going to focus primarily on [00:03:04.250] the New York session as it relates to [00:03:07.319] opening range is going to be seen with 9 [00:03:10.009] opening range is going to be seen with 9 [00:03:14.089] 30 a.m New York time and ends at 10 30 [00:03:15.770] a.m New York Times They have an opening"
+      },
+      {
+        "t": "00:03:10.009",
+        "sec": 190.009,
+        "snippet": "[00:03:02.809] but we're going to focus primarily on [00:03:04.250] the New York session as it relates to [00:03:07.319] opening range is going to be seen with 9 [00:03:10.009] opening range is going to be seen with 9 [00:03:14.089] 30 a.m New York time and ends at 10 30 [00:03:15.770] a.m New York Times They have an opening [00:03:18.170] range of one hour"
+      },
+      {
+        "t": "00:03:22.369",
+        "sec": 202.369,
+        "snippet": "[00:03:15.770] a.m New York Times They have an opening [00:03:18.170] range of one hour [00:03:19.610] okay we're gonna be narrowing our Focus [00:03:22.369] to the opening range between 9 30 a.m to [00:03:24.530] 10 30 a.m which tends to create the [00:03:27.050] spoos market high or low of the day it [00:03:28.970] can be a run on stops or fair value"
+      },
+      {
+        "t": "00:03:36.890",
+        "sec": 216.89,
+        "snippet": "[00:03:28.980] can be a run on stops or fair value setup [00:03:30.949] setup [00:03:34.250] as you can see here in the chart this is [00:03:36.890] shaded in this is the opening range one [00:03:36.900] shaded in this is the opening range one hour [00:03:38.570] hour [00:03:38.580] hour between"
+      },
+      {
+        "t": "00:03:36.900",
+        "sec": 216.9,
+        "snippet": "[00:03:30.949] setup [00:03:34.250] as you can see here in the chart this is [00:03:36.890] shaded in this is the opening range one [00:03:36.900] shaded in this is the opening range one hour [00:03:38.570] hour [00:03:38.580] hour between [00:03:39.830] between"
+      },
+      {
+        "t": "00:04:21.890",
+        "sec": 261.89,
+        "snippet": "[00:04:17.750] 2017 this is a 15 minute candle stick [00:04:17.760] 2017 this is a 15 minute candle stick chart [00:04:19.189] chart [00:04:21.890] and we'll delineate the opening range 9 [00:04:25.129] 30 to 10 30 a.m New York time [00:04:27.590] you can see the volume is the highest [00:04:30.590] during that portion of the day"
+      }
+    ],
+    "fpfvg": [],
+    "nine31": [],
+    "nine30": [
+      {
+        "t": "00:01:11.570",
+        "sec": 71.57,
+        "snippet": "[00:01:07.370] focusing primarily on is the New York [00:01:07.380] focusing primarily on is the New York session [00:01:08.510] session [00:01:11.570] specifically keying it on the 9 30 a.m [00:01:15.710] to 4 pm New York time [00:01:17.390] and the contract delivery months for the [00:01:20.149] e-mini s p are March"
+      },
+      {
+        "t": "00:02:42.110",
+        "sec": 162.11,
+        "snippet": "[00:02:34.319] 500 trading so spoos opening range concept [00:02:35.809] concept [00:02:39.229] okay the highest volume for s p trading [00:02:42.110] is going to be seen between 9 30 a.m and [00:02:44.750] 10 a.m New York time so it's only a 30 [00:02:47.089] minute span of time where that surge of [00:02:48.949] the highest volume generally kicks off"
+      },
+      {
+        "t": "00:02:57.290",
+        "sec": 177.29,
+        "snippet": "[00:02:48.949] the highest volume generally kicks off [00:02:51.290] right at the opening [00:02:53.990] true day for spoos is going to be viewed [00:02:57.290] as 9 30 a.m New York time to 4 P.M New [00:02:58.430] York time [00:03:01.250] now the market does trade 24 hours [00:03:02.809] but we're going to focus primarily on"
+      },
+      {
+        "t": "00:03:22.369",
+        "sec": 202.369,
+        "snippet": "[00:03:15.770] a.m New York Times They have an opening [00:03:18.170] range of one hour [00:03:19.610] okay we're gonna be narrowing our Focus [00:03:22.369] to the opening range between 9 30 a.m to [00:03:24.530] 10 30 a.m which tends to create the [00:03:27.050] spoos market high or low of the day it [00:03:28.970] can be a run on stops or fair value"
+      },
+      {
+        "t": "00:03:42.649",
+        "sec": 222.649,
+        "snippet": "[00:03:38.570] hour [00:03:38.580] hour between [00:03:39.830] between [00:03:42.649] 9 30 and 10 30. now every chart that [00:03:44.750] we're shown here in bar chart.com is [00:03:46.250] shown in central time which is going to [00:03:48.050] be an hour earlier so that's why you're"
+      },
+      {
+        "t": "00:03:50.509",
+        "sec": 230.509,
+        "snippet": "[00:03:44.750] we're shown here in bar chart.com is [00:03:46.250] shown in central time which is going to [00:03:48.050] be an hour earlier so that's why you're [00:03:50.509] seeing it highlighted as 8 30 to 9 30 [00:03:52.550] but in reality [00:03:54.410] on the East Coast time [00:03:56.750] New York time in the U.S it's actually"
+      },
+      {
+        "t": "00:04:00.410",
+        "sec": 240.41,
+        "snippet": "[00:03:52.550] but in reality [00:03:54.410] on the East Coast time [00:03:56.750] New York time in the U.S it's actually [00:04:00.410] referring to 9 30 to 10 30. [00:04:01.850] true day beginning [00:04:08.879] okay another example here [00:04:11.149] okay another example here"
+      },
+      {
+        "t": "00:05:18.409",
+        "sec": 318.409,
+        "snippet": "[00:05:11.220] is a five minute chart on a different day [00:05:12.650] day [00:05:16.310] we're dealing the same thing the 8 30 to [00:05:18.409] 9 30 on bar chart it's the same thing as [00:05:21.230] 9 30 to 10 30 New York time [00:05:23.270] so there's our opening range [00:05:26.340] the opening range high and low"
+      }
+    ],
+    "ce": []
+  }
+}

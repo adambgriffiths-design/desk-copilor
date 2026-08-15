@@ -1,0 +1,550 @@
+{
+  "when": "2026-08-14T19:29:58.577Z",
+  "mode": "PROFILE_ONLY post-eqhForce-false",
+  "mem": {
+    "start": {
+      "rssMb": 81.6,
+      "heapMb": 18.4
+    },
+    "end": {
+      "rssMb": 789.7,
+      "heapMb": 30.1
+    }
+  },
+  "pure": {
+    "idx": 601,
+    "t0": "2026-08-12T08:01:00.000Z",
+    "t1": "2026-08-12T08:02:00.000Z",
+    "lengths": {
+      "m1": [
+        602,
+        603
+      ],
+      "m5": [
+        121,
+        121
+      ],
+      "m15": [
+        41,
+        41
+      ],
+      "daily": [
+        1,
+        1
+      ]
+    },
+    "applyClosedBarMs": 783.4738000000007,
+    "applyClosedBarCpuUserMs": 625,
+    "statsBefore": {
+      "fullRebuilds": 1,
+      "tickUpdates": 0,
+      "tickSkippedDupes": 0,
+      "barUpdates": 0,
+      "structureRebuilds": 0,
+      "eqhEqlRebuilds": 1,
+      "eqhEqlReused": 0,
+      "analysisRuns": 1,
+      "analysisSkipped": 0,
+      "drawingRebuilds": 1,
+      "drawingSkipped": 0,
+      "lastTickMs": 0,
+      "lastBarMs": 0,
+      "lastFullMs": 5074.315699999999,
+      "lastStructureMs": 0,
+      "lastEqhMs": 867.6823999999997
+    },
+    "statsAfter": {
+      "fullRebuilds": 1,
+      "tickUpdates": 0,
+      "tickSkippedDupes": 0,
+      "barUpdates": 1,
+      "structureRebuilds": 1,
+      "eqhEqlRebuilds": 2,
+      "eqhEqlReused": 0,
+      "analysisRuns": 2,
+      "analysisSkipped": 0,
+      "drawingRebuilds": 2,
+      "drawingSkipped": 0,
+      "lastTickMs": 0,
+      "lastBarMs": 783.3306000000002,
+      "lastFullMs": 5074.315699999999,
+      "lastStructureMs": 648.7198000000008,
+      "lastEqhMs": 132.98239999999987
+    }
+  },
+  "shared": {
+    "coldMs": 5778.5566,
+    "coldReason": "cold",
+    "missMs": 1359.7435000000005,
+    "missReuse": "miss",
+    "missReason": "bars",
+    "stats": {
+      "fullRebuilds": 1,
+      "tickUpdates": 0,
+      "tickSkippedDupes": 0,
+      "barUpdates": 1,
+      "structureRebuilds": 1,
+      "eqhEqlRebuilds": 2,
+      "eqhEqlReused": 0,
+      "analysisRuns": 3,
+      "analysisSkipped": 0,
+      "drawingRebuilds": 3,
+      "drawingSkipped": 0,
+      "lastTickMs": 0,
+      "lastBarMs": 1068.2708999999995,
+      "lastFullMs": 5776.056400000001,
+      "lastStructureMs": 973.7245000000003,
+      "lastEqhMs": 93.8715000000011
+    }
+  },
+  "htf": {
+    "idx": 1379,
+    "t0": "2026-08-12T20:59:00.000Z",
+    "t1": "2026-08-12T22:00:00.000Z",
+    "lengths": {
+      "m1": [
+        1380,
+        1381
+      ],
+      "m5": [
+        276,
+        277
+      ],
+      "m15": [
+        92,
+        93
+      ],
+      "daily": [
+        1,
+        2
+      ]
+    },
+    "initMs": 11555.047899999998,
+    "syncMs": 13094.831600000001,
+    "fullRebuildsDelta": 1,
+    "lastFullMs": 11554.834899999998,
+    "lastEqhMs": 1151.2475999999951,
+    "buildMarketContextAtMs": 12333.247300000003,
+    "eventLabels": [
+      "htf sync rebuild"
+    ]
+  },
+  "fullRebuildSites": [
+    {
+      "site": "initialize()",
+      "file": "lib/incremental-market-engine.ts",
+      "why": "cold start / symbol change / session miss / firstMatch fail / seek",
+      "whatChanged": "entire feed + asOf",
+      "couldBeIncremental": false,
+      "downstream": "buildMarketContextAt (all HTF+structure) + detectEqhEqlLiquidity(720) + snapshotStructureState"
+    },
+    {
+      "site": "rebuild()",
+      "file": "lib/incremental-market-engine.ts",
+      "why": "test/reference equivalence",
+      "whatChanged": "forced",
+      "couldBeIncremental": false,
+      "downstream": "same as fullRebuild()"
+    },
+    {
+      "site": "applyClosedBar seek-back (bar.time < last.time)",
+      "file": "lib/incremental-market-engine.ts",
+      "why": "PIT rewind / recovery when closed bar precedes current tip",
+      "whatChanged": "m1 truncated/replaced to bar time",
+      "couldBeIncremental": false,
+      "downstream": "fullRebuild — HTF feed not re-sliced here (uses existing feed.*)"
+    },
+    {
+      "site": "syncSeries htfChanged (m5|m15|daily length ≠)",
+      "file": "lib/incremental-market-engine.ts",
+      "why": "HTF series length grew/shrunk vs engine feed",
+      "whatChanged": "feed.m5/m15/daily (+ m1 assigned to sliced)",
+      "couldBeIncremental": "partial — could update HTF HL/FVG incrementally; today full context",
+      "downstream": "fullRebuild: 5m/15m FVG, daily FVG bars, NWOG, ORG, PD arrays, session windows, buildStructureFacts, EQH"
+    },
+    {
+      "site": "syncSeries !ctx || !firstMatch || next.length+1 < prev.length",
+      "file": "lib/incremental-market-engine.ts",
+      "why": "uninitialized / first-bar mismatch / large shrink → initialize",
+      "whatChanged": "full re-slice",
+      "couldBeIncremental": false,
+      "downstream": "initialize → fullRebuild"
+    }
+  ],
+  "unnecessaryOnPure1m": {
+    "5m rebuild": false,
+    "15m rebuild": false,
+    "daily rebuild": false,
+    "HTF PD/NWOG/ORG rebuild": false,
+    "fullRebuild": false,
+    "entire structure-history scan (buildStructureFacts)": true,
+    "EQH full detect": "conditional — updateEqhEqlLiquidity may reuse; this sample often rebuilds",
+    "concepts that cannot have changed (firstPresented after set, untouched HTF FVGs)": true
+  },
+  "stages": [
+    {
+      "id": 1,
+      "name": "market-data acquisition (disk fixture load)",
+      "path": "init",
+      "wallMs": 489.247,
+      "cpuUserMs": 344,
+      "cpuSystemMs": 47,
+      "barsProcessed": 1381,
+      "scansEntireHistory": "n/a",
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": "n/a",
+      "callsExpensiveOps": "JSON parse + Date hydrate",
+      "notes": "once per process; not on each new-bar miss after warm"
+    },
+    {
+      "id": 2,
+      "name": "Tickstream",
+      "path": "init",
+      "wallMs": 0,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": "n/a",
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": "n/a",
+      "callsExpensiveOps": "none in this profile",
+      "notes": "NOT measured — fixture in-process; live prior audits ~8–10s *_live spikes"
+    },
+    {
+      "id": 16,
+      "name": "fullRebuild (initialize cold)",
+      "path": "init",
+      "wallMs": 5074.691,
+      "cpuUserMs": 3375,
+      "cpuSystemMs": 625,
+      "barsProcessed": 602,
+      "scansEntireHistory": true,
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": false,
+      "callsExpensiveOps": "buildMarketContextAt + detectEqhEqlLiquidity(720)",
+      "notes": "lastFullMs=5074.3 lastEqhMs=867.7 fullRebuilds=1"
+    },
+    {
+      "id": 3,
+      "name": "1m processing (applyClosedBar end-to-end)",
+      "path": "pure_1m",
+      "wallMs": 783.474,
+      "cpuUserMs": 625,
+      "cpuSystemMs": 94,
+      "barsProcessed": 603,
+      "scansEntireHistory": true,
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": "partial",
+      "callsExpensiveOps": "afterClosedBar → applyPriceDerived + rebuildOneMinuteStructure + finishUpdate",
+      "notes": "barUpdatesΔ=1 fullRebuildsΔ=0 structureRebuildsΔ=1 eqhRebuildΔ=1 eqhReuseΔ=0 lastStructureMs=648.7 lastEqhMs=133.0"
+    },
+    {
+      "id": 4,
+      "name": "5m processing",
+      "path": "pure_1m",
+      "wallMs": 0,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "none on this path",
+      "notes": "SKIPPED — pure syncSeries/applyClosedBar does not rebuild 5m HL/FVG"
+    },
+    {
+      "id": 5,
+      "name": "15m processing",
+      "path": "pure_1m",
+      "wallMs": 0,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "none on this path",
+      "notes": "SKIPPED — pure path does not rebuild 15m HL/FVG"
+    },
+    {
+      "id": 6,
+      "name": "daily processing",
+      "path": "pure_1m",
+      "wallMs": 0,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "none on this path",
+      "notes": "SKIPPED — pure path bumps currentDay H/L only via applyPriceDerived"
+    },
+    {
+      "id": 12,
+      "name": "HTF calculations",
+      "path": "pure_1m",
+      "wallMs": 0,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "none on this path",
+      "notes": "SKIPPED — PD/NWOG/ORG not recomputed on pure 1m"
+    },
+    {
+      "id": 13,
+      "name": "session/AMD (applyPriceDerived updateSessionExtremes)",
+      "path": "pure_1m",
+      "wallMs": 0.05,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 1,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "updateSessionExtremes single-bar bump",
+      "notes": "already incremental; not a bottleneck"
+    },
+    {
+      "id": 14,
+      "name": "ICT concept calculations",
+      "path": "pure_1m",
+      "wallMs": 0,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": "n/a",
+      "runsBecauseNew1m": "n/a",
+      "theoreticallyIncremental": "n/a",
+      "callsExpensiveOps": "folded into buildStructureFacts",
+      "notes": "no separate ICT runner on closed-bar miss"
+    },
+    {
+      "id": 8,
+      "name": "swing detection (detectMss / findSwings lookback 80)",
+      "path": "pure_1m",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": true,
+      "wallMs": 0.28,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 80,
+      "scansEntireHistory": false,
+      "callsExpensiveOps": "findSwings(wing=2) on last 80",
+      "notes": "cheap; theoretically incremental on new swing confirm"
+    },
+    {
+      "id": 8.5,
+      "name": "REH/REL (detectRelativeEqualPools) — swing-adjacent",
+      "path": "pure_1m",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": true,
+      "wallMs": 436.957,
+      "cpuUserMs": 235,
+      "cpuSystemMs": 31,
+      "barsProcessed": 603,
+      "scansEntireHistory": "partial",
+      "callsExpensiveOps": "session-scoped + last-120 merge → findSwings3Bar + pair",
+      "notes": "leaf of buildStructureFacts; full re-pair every new 1m today"
+    },
+    {
+      "id": 10,
+      "name": "FVG detection (detectM1UnfilledFvgs lookback 80)",
+      "path": "pure_1m",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": "partial",
+      "wallMs": 2.489,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 80,
+      "scansEntireHistory": false,
+      "callsExpensiveOps": "detectUnfilledIntradayFvgs(1m,80)",
+      "notes": "partially incremental (fill/invert vs last bar + append)"
+    },
+    {
+      "id": 10.5,
+      "name": "first-presented FVG",
+      "path": "pure_1m",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": "partial",
+      "wallMs": 334.113,
+      "cpuUserMs": 297,
+      "cpuSystemMs": 16,
+      "barsProcessed": 603,
+      "scansEntireHistory": "partial",
+      "callsExpensiveOps": "session-open scan for first 1m FVG",
+      "notes": "stable after first present; still re-run every bar"
+    },
+    {
+      "id": 9,
+      "name": "liquidity detection (levelInteractions + sweeps)",
+      "path": "pure_1m",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": "partial",
+      "wallMs": 301.849,
+      "cpuUserMs": 16,
+      "cpuSystemMs": 16,
+      "barsProcessed": 603,
+      "scansEntireHistory": "partial",
+      "callsExpensiveOps": "classifyLevelInteraction ×17 (lookback 40) + detectLiquiditySweeps",
+      "notes": "PDH/PDL use session bars; others full m1 classify"
+    },
+    {
+      "id": 7,
+      "name": "buildStructureFacts (composite)",
+      "path": "pure_1m",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": true,
+      "wallMs": 1811.226,
+      "cpuUserMs": 1031,
+      "cpuSystemMs": 156,
+      "barsProcessed": 603,
+      "scansEntireHistory": true,
+      "callsExpensiveOps": "MSS + REH/REL + FVG + FP + interactions + sweeps",
+      "notes": "called every afterClosedBar via rebuildOneMinuteStructure"
+    },
+    {
+      "id": 11,
+      "name": "EQH/EQL (engine lastEqhMs + leaf force vs update)",
+      "path": "pure_1m",
+      "wallMs": 132.982,
+      "cpuUserMs": 344,
+      "cpuSystemMs": 94,
+      "barsProcessed": 603,
+      "scansEntireHistory": "partial",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "updateEqhEqlLiquidity → detectEqhEqlLiquidity when rebuild",
+      "notes": "eqhForce=false; engine lastEqhMs=133.0; leaf force=236.7ms; leaf update mode=rebuild 454.7ms; reuseΔ=0"
+    },
+    {
+      "id": 15,
+      "name": "quality gate (assemble intel + auditDataQuality)",
+      "path": "pure_1m",
+      "wallMs": 31.299,
+      "cpuUserMs": 15,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": "n/a",
+      "callsExpensiveOps": "assembleDeskMarketIntelligenceFromEngine + auditDataQuality",
+      "notes": "{\"hash\":\"3a9019b0\"}"
+    },
+    {
+      "id": 16.1,
+      "name": "fullRebuild calls on pure 1m miss",
+      "path": "pure_1m",
+      "wallMs": 0,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": false,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "none",
+      "notes": "fullRebuildsΔ=0 (expect 0) — pure path uses rebuildOneMinuteStructure only"
+    },
+    {
+      "id": 4,
+      "name": "5m processing (HL + unfilled FVGs lookback 40)",
+      "path": "htf_coincident",
+      "wallMs": 3.596,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 277,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": "only_on_htf_fullRebuild",
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "detectUnfilledIntradayFvgs(5m)",
+      "notes": "runs inside buildMarketContextAt on fullRebuild"
+    },
+    {
+      "id": 5,
+      "name": "15m processing (HL + unfilled FVGs lookback 40)",
+      "path": "htf_coincident",
+      "wallMs": 1.166,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 93,
+      "scansEntireHistory": false,
+      "runsBecauseNew1m": "only_on_htf_fullRebuild",
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "detectUnfilledIntradayFvgs(15m)",
+      "notes": "runs inside buildMarketContextAt on fullRebuild"
+    },
+    {
+      "id": 6,
+      "name": "daily processing (buildFvgDailyBars)",
+      "path": "htf_coincident",
+      "wallMs": 219.866,
+      "cpuUserMs": 171,
+      "cpuSystemMs": 0,
+      "barsProcessed": 1383,
+      "scansEntireHistory": true,
+      "runsBecauseNew1m": "only_on_htf_fullRebuild",
+      "theoreticallyIncremental": "partial",
+      "callsExpensiveOps": "buildFvgDailyBars scans m1 for session day OHLC",
+      "notes": "fullRebuild path"
+    },
+    {
+      "id": 13,
+      "name": "session/AMD (windows + resolveSessionContext)",
+      "path": "htf_coincident",
+      "wallMs": 1863.679,
+      "cpuUserMs": 1516,
+      "cpuSystemMs": 219,
+      "barsProcessed": 1381,
+      "scansEntireHistory": "partial",
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": true,
+      "callsExpensiveOps": "barsInEstWindow ×5 (filter m1)",
+      "notes": "full rebuild re-scans session windows"
+    },
+    {
+      "id": 12,
+      "name": "HTF calculations (PD arrays + NWOG + ORG + bias/PD zone)",
+      "path": "htf_coincident",
+      "wallMs": 3195.238,
+      "cpuUserMs": 1984,
+      "cpuSystemMs": 344,
+      "barsProcessed": 1381,
+      "scansEntireHistory": true,
+      "runsBecauseNew1m": "only_on_htf_fullRebuild",
+      "theoreticallyIncremental": "partial",
+      "callsExpensiveOps": "computeNwog + computeOrg + buildFvgDailyBars + computeHtfPdArrays",
+      "notes": "fullRebuild recomputes all HTF"
+    },
+    {
+      "id": 14,
+      "name": "ICT concept calculations (bundle: structure+HTF+session — not separate API)",
+      "path": "htf_coincident",
+      "wallMs": 0.051,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "barsProcessed": 0,
+      "scansEntireHistory": "n/a",
+      "runsBecauseNew1m": "n/a",
+      "theoreticallyIncremental": "n/a",
+      "callsExpensiveOps": "no standalone ICT runner on miss path",
+      "notes": "concepts live inside buildStructureFacts / HTF / session — see those stages"
+    },
+    {
+      "id": 16,
+      "name": "fullRebuild (htf sync rebuild via syncSeries)",
+      "path": "htf_coincident",
+      "wallMs": 13094.832,
+      "cpuUserMs": 8984,
+      "cpuSystemMs": 1266,
+      "barsProcessed": 1381,
+      "scansEntireHistory": true,
+      "runsBecauseNew1m": true,
+      "theoreticallyIncremental": "partial",
+      "callsExpensiveOps": "buildMarketContextAt + detectEqhEqlLiquidity — triggered by HTF length change",
+      "notes": "htfIdx=1379 2026-08-12T20:59:00.000Z→2026-08-12T22:00:00.000Z m1 1380→1381 m5 276→277 m15 92→93 daily 1→2 fullRebuildsΔ=1 lastFullMs=11554.8 lastEqhMs=1151.2 initMs=11555.0 buildMarketContextAtLeaf=12333.2 (includes structure)"
+    }
+  ]
+}

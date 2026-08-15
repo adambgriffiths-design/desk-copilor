@@ -5,8 +5,9 @@ Desk Copilot’s Chrome extension talks to the Next.js API. Local dev uses `npm 
 ## Vercel
 
 1. Push this repo to GitHub and import the project in [Vercel](https://vercel.com).
-2. Set environment variable:
-   - `OPENAI_API_KEY` — required for verdicts, chat, and transcription
+2. Set environment variables:
+   - `OPENAI_API_KEY` — required for verdicts, chat, voice, and web search synthesis
+   - `TAVILY_API_KEY`, `SERPER_API_KEY`, or `BRAVE_SEARCH_API_KEY` — recommended for live web answers (weather uses web search synthesis; without a key DuckDuckGo is tried but may rate-limit)
 3. Deploy. Note the production URL (e.g. `https://desk-copilot.vercel.app`).
 4. In Chrome: **Desk Copilot extension → right-click icon → Options** → paste the URL (no trailing slash) → Save.
 5. Reload TradingView tabs.

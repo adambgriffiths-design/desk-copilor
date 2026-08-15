@@ -1,0 +1,189 @@
+{
+  "concept_id": "opening_range_ny_30m",
+  "name": "Opening range (NY 30-minute)",
+  "aliases": [
+    "opening range",
+    "OR",
+    "30-minute opening range"
+  ],
+  "status": "CONFLICTING_SOURCES",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "opening_range_ny_30m__uwFJ0t7SAOU__104",
+      "definition_text": "When ICT talks about the opening range: from 9:30 to traditionally about 10:00 \u2014 about 30 minutes. Inside that 30 minutes he measures willingness for price (wherever it opens) to get back to the previous session close if it's a gap down.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Measured once market starts trading at 9:30",
+        "Gap-down case: willingness to reprice to previous session close in first 30 minutes"
+      ],
+      "invalidation": [
+        "If no immediate willingness to reprice back to previous session close on a gap down \u2192 described as extremely bearish; attention turns to deeper discount objectives on 15m / hourly / daily"
+      ],
+      "timeframe_session_context": "NY RTH open; 9:30\u2013~10:00 ET; ~30-minute window",
+      "variations_note": "Defines opening range strictly as NY 9:30\u201310:00 measurement window for gap-fill willingness.",
+      "confidence": "quoted",
+      "cue_start": "00:01:44.950",
+      "cue_end": "00:02:17.869",
+      "timestamp_sec": 104.95,
+      "source": {
+        "video_id": "uwFJ0t7SAOU",
+        "title": "ICT Gems \u2014 Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uwFJ0t7SAOU",
+        "transcript_path": "tmp/ict-transcripts/org-gaps.uwFJ0t7SAOU.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "opening_range_ny_30m__eft9_3ekDCY__3483",
+      "definition_text": "The first 30 minutes of trading is the opening range \u2014 not a 15-minute opening range, not the ORB / 5-minute ORB people talk about. That first 30 minutes gives the rhyme and reason for the entire morning session.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Focus on first 30 minutes after open as the important time window"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY morning; first 30 minutes of trading; explicitly rejects 15m/5m ORB framing",
+      "variations_note": "Same 30m NY OR definition as uwFJ0t7SAOU, with explicit rejection of retail ORB lengths and morning-session tone claim.",
+      "confidence": "quoted",
+      "cue_start": "00:58:03.510",
+      "cue_end": "00:58:25.910",
+      "timestamp_sec": 3483.51,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "opening_range_ny_30m__2K1IcVvq9z8__1545",
+      "definition_text": "Pre-market range is NOT the opening range. The opening range is the first 30 minutes after the opening bell at the New York session (post 9:30 to 10:00). There is no 15-minute opening range; it's a 30-minute opening range \u2014 algorithmic.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "NY session opening bell defines the OR window"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY local / Eastern; 9:30\u201310:00 contrasted with pre-market windows",
+      "variations_note": "Aligns with NY 30m OR; same video ALSO uses 'opening range' for post-premarket hourly slots (see opening_range_hourly_model) \u2014 CONFLICTING_SOURCES status on this concept_id.",
+      "confidence": "quoted",
+      "cue_start": "00:25:41.590",
+      "cue_end": "00:26:30.390",
+      "timestamp_sec": 1545.269,
+      "source": {
+        "video_id": "2K1IcVvq9z8",
+        "title": "ICT Gems \u2014 Pre-Market Range",
+        "url": "https://www.youtube.com/watch?v=2K1IcVvq9z8",
+        "transcript_path": "data/ict-transcripts/pilot/premarket-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "opening_range_ny_30m__6DuByzKLDsc__2631",
+      "definition_text": "First hour's range / first hour's dealing range is NOT the opening range, which is 30 minutes.",
+      "definition_mode": "quote",
+      "conditions": [],
+      "invalidation": [],
+      "timeframe_session_context": "Contrast: OR = 30m; FHDR = first hour (9:30\u201310:30)",
+      "variations_note": "Negative definition reinforcing OR \u2260 FHDR.",
+      "confidence": "quoted",
+      "cue_start": "00:43:49.070",
+      "cue_end": "00:43:56.590",
+      "timestamp_sec": 2629.07,
+      "source": {
+        "video_id": "6DuByzKLDsc",
+        "title": "ICT 1st Hour Dealing Range",
+        "url": "https://www.youtube.com/watch?v=6DuByzKLDsc",
+        "transcript_path": "data/ict-transcripts/pilot/dealing-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "opening_range_ny_30m__Zm9Q0NDRxoY__699",
+      "definition_text": "When using opening ranges (not silver bullet): opening ranges are defined by 30 minutes \u2014 not 15 minutes, not 5 minutes. Same 30-minute application for London session and for 9:30\u201310:00 when trading indices; retail 15-minute focus called limiting.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "30-minute opening-range definition",
+        "Applies to NY 9:30\u201310:00 indices and London-timed OR analogue"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY 9:30\u201310:00 and London 30m OR windows; contrasted with silver-bullet hour",
+      "variations_note": "Official ICT reinforcement of 30m OR; KEEP DISTINCT from silver-bullet 10:00\u201311:00 FPFVG framing in same video.",
+      "confidence": "quoted",
+      "cue_start": "00:11:39.030",
+      "cue_end": "00:11:48.630",
+      "timestamp_sec": 699.03,
+      "source": {
+        "video_id": "Zm9Q0NDRxoY",
+        "title": "ICT Opening Range Theory \\ 1st Presented FVG Logic",
+        "url": "https://www.youtube.com/watch?v=Zm9Q0NDRxoY",
+        "transcript_path": "data/ict-transcripts/raw/Zm9Q0NDRxoY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "opening_range_judas_930_1000__Sf_uYZBWTrA__532",
+      "definition_text": "Judas swing forms at 9:30 to 10 o'clock \u2014 that is your opening range (time window). In the same lecture, opening range gap is separately defined as Friday close \u2192 Monday 9:30 open difference.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "NY 9:30\u201310:00 window labeled opening range / Judas"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY AM 9:30\u201310:00 Judas / OR time window",
+      "variations_note": "KEEP SEPARATE from ORG gap geometry in same video \u2014 opening range \u2260 opening range gap. Reinforces 30m NY OR clock while proving naming collision risk.",
+      "confidence": "quoted",
+      "cue_start": "00:08:52.130",
+      "cue_end": "00:09:01.370",
+      "timestamp_sec": 532.13,
+      "source": {
+        "video_id": "Sf_uYZBWTrA",
+        "title": "2023 ICT Mentorship - Opening Range Gap Repricing Macro",
+        "url": "https://www.youtube.com/watch?v=Sf_uYZBWTrA",
+        "transcript_path": "data/ict-transcripts/raw/Sf_uYZBWTrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "opening_range_ny_30m_algo_only__Z0VYZoaTIKE__607",
+      "definition_text": "Opening range in the morning session specifically aimed at 9:30 to 10:00 \u2014 the 30-minute algorithmic opening range. There is no other opening range except for that 30-minute interval; if less than 30 minutes it is not algorithmic.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "NY morning 9:30\u201310:00",
+        "30-minute length required for algorithmic OR claim"
+      ],
+      "invalidation": [
+        "Sub-30m OR framing rejected as non-algorithmic"
+      ],
+      "timeframe_session_context": "NY AM 9:30\u201310:00; lecture also maps same logic to midnight",
+      "variations_note": "Strong official reinforcement of 30m NY OR. CONFLICTS with Month 10 index 1h OR (ORbtHOUzAIM 9:30\u201310:30) \u2014 keep both; see opening_range_index_futures_1h.",
+      "confidence": "quoted",
+      "cue_start": "00:09:46.870",
+      "cue_end": "00:10:18.550",
+      "timestamp_sec": 586.87,
+      "source": {
+        "video_id": "Z0VYZoaTIKE",
+        "title": "2025 Lecture Series - SMC Midnight Opening Range",
+        "url": "https://www.youtube.com/watch?v=Z0VYZoaTIKE",
+        "transcript_path": "data/ict-transcripts/raw/Z0VYZoaTIKE.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "Session/time context; ORG-related prompt knowledge in lib/ict-knowledge.ts (prompt layer, not baseline-v2 weights)",
+    "related_karen_evidence_or_gate": "No baseline-v2 gate encodes 30m OR vs 15m ORB; FHDR is computed separately in structure.ts",
+    "overlap_vs_baseline_v2": "Time windows appear in ICT prompt hints; FHDR observation exists",
+    "gap_vs_baseline_v2": "Opening-range high/low as a locked 9:30\u201310:00 observation object is not clearly a Layer-1 field distinct from ORG/FHDR",
+    "hypothesis_id": "H_ICT_OR_NY_30M_OBS",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Later DEV: observation-only OR high/low lock at 10:00 \u2014 no weigher. Conflicts: Month10 1h index OR; hourly model; Judas naming vs ORG. Do not wire until clock chosen."
+  },
+  "extraction_notes": "Status CONFLICTING_SOURCES: hourly post-premarket language (2K1); Judas 9:30\u201310\u2260ORG (Sf); Batch4: Z0VY reinforces 30m-only algorithmic NY OR while Month 10 ORbt teaches index OR as 9:30\u201310:30 1h \u2014 kept separate under opening_range_index_futures_1h."
+}

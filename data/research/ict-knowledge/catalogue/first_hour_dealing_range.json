@@ -1,0 +1,98 @@
+{
+  "concept_id": "first_hour_dealing_range",
+  "name": "First hour dealing range (FHDR)",
+  "aliases": [
+    "first hour's dealing range",
+    "first hour's range",
+    "FHDR"
+  ],
+  "status": "CONFLICTING_SOURCES",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "fhdr__6DuByzKLDsc__2421",
+      "definition_text": "First hour of trading from 9:30 to 10:30. The first hour's range / first hour's dealing range is what 'the algorithm refers to' \u2014 distinct from people trading a supposed 5-minute / 15-minute / 30-minute opening range.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Window 9:30\u201310:30 ET",
+        "Explicitly not the 30-minute opening range"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY RTH first hour; locked visually at 10:30 on chart in the lecture",
+      "variations_note": "Primary definitional source in local seed.",
+      "confidence": "quoted",
+      "cue_start": "00:40:21.470",
+      "cue_end": "00:43:56.590",
+      "timestamp_sec": 2421.47,
+      "source": {
+        "video_id": "6DuByzKLDsc",
+        "title": "ICT 1st Hour Dealing Range",
+        "url": "https://www.youtube.com/watch?v=6DuByzKLDsc",
+        "transcript_path": "data/ict-transcripts/pilot/dealing-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "fhdr_break_fpfvg__6DuByzKLDsc__4208",
+      "definition_text": "In a trending day, after first hour's dealing range is broken: first presented fair value gap after that break is 'the one that when you sell on' (example context was short continuation). Earlier: if we can trade on a closing basis below a wick inside the FHDR, that sets the stage for lower prices in the afternoon / PM session. A mere test/retrace into FHDR is called 'not breaking it'.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Trending day context in lecture",
+        "Break of FHDR (distinguished from testing)",
+        "Closing-basis language used for related FHDR-wick criteria"
+      ],
+      "invalidation": [
+        "Testing FHDR then retracing back in is not treated as the break"
+      ],
+      "timeframe_session_context": "After 10:30; PM session continuation framing",
+      "variations_note": "This occurrence is FHDR-break \u2192 FPFVG use-case; keep also under first_presented_fvg as a separate occurrence.",
+      "confidence": "quoted",
+      "cue_start": "01:09:12.510",
+      "cue_end": "01:10:17.950",
+      "timestamp_sec": 4152.51,
+      "source": {
+        "video_id": "6DuByzKLDsc",
+        "title": "ICT 1st Hour Dealing Range",
+        "url": "https://www.youtube.com/watch?v=6DuByzKLDsc",
+        "transcript_path": "data/ict-transcripts/pilot/dealing-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "fhdr_vs_month10_index_or_label__ORbtHOUzAIM__194",
+      "definition_text": "Cross-link conflict: Month 10 Core Content index lecture (ORbtHOUzAIM) labels the same 9:30\u201310:30 New York window as an 'opening range of one hour' that tends to create the spoos HOD/LOD \u2014 whereas FHDR lectures use 9:30\u201310:30 as first-hour dealing range and explicitly contrast it with a 30-minute opening range.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Same clock 9:30\u201310:30 ET",
+        "Different concept labels across eras/lectures (OR 1h vs FHDR)"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY 9:30\u201310:30 naming collision across sources",
+      "variations_note": "Do not merge Month 10 '1h opening range' into FHDR. Catalogue both; status CONFLICTING_SOURCES for naming/role.",
+      "confidence": "paraphrased",
+      "cue_start": "00:03:07.319",
+      "cue_end": "00:03:30.949",
+      "timestamp_sec": 187.319,
+      "source": {
+        "video_id": "ORbtHOUzAIM",
+        "title": "ICT Mentorship Core Content - Month 10 - Index Futures - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=ORbtHOUzAIM",
+        "transcript_path": "data/ict-transcripts/raw/ORbtHOUzAIM.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "structureFacts.fhdr (high/low/locked) in structure.ts / observation evidence structure.fhdr.*",
+    "related_karen_evidence_or_gate": "firstPresentedFvg.postFhdr detector exists",
+    "overlap_vs_baseline_v2": "FHDR computed 9:30\u201310:30; post-FHDR FPFVG path exists in detectors",
+    "gap_vs_baseline_v2": "Lecture's 'test vs break' and closing-basis break nuance may not match detector break rule; not assumed correct until DEV test",
+    "hypothesis_id": "H_ICT_FHDR_BREAK_SEMANTICS",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Related backlog H4/H5 style \u2014 observation semantics audit first, no weight change."
+  },
+  "extraction_notes": "Batch4: naming collision with Month 10 index 1h OR (same 9:30\u201310:30 clock, different label/role). Equilibrium/halfway point of FHDR also mentioned (~50:22) \u2014 candidate for a later occurrence row if needed."
+}

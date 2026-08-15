@@ -1,0 +1,70 @@
+{
+  "when": "2026-08-14T19:01:51.774Z",
+  "meta": {
+    "idx": 601,
+    "t0": "2026-08-12T08:01:00.000Z",
+    "t1": "2026-08-12T08:02:00.000Z",
+    "m1": [
+      602,
+      603
+    ],
+    "m5": [
+      121,
+      121
+    ],
+    "m15": [
+      41,
+      41
+    ],
+    "daily": [
+      1,
+      1
+    ]
+  },
+  "htfCoincidentTail": {
+    "prev": "2026-08-12T20:59:00.000Z",
+    "last": "2026-08-12T22:00:00.000Z",
+    "m5": [
+      276,
+      277
+    ],
+    "m15": [
+      92,
+      93
+    ],
+    "daily": [
+      1,
+      2
+    ],
+    "gapSec": 3660
+  },
+  "local": {
+    "initMs": 6455.6869,
+    "barMs": 1311.5144,
+    "lastFullMs": 6455.0317,
+    "lastEqhInit": 371.5041000000001,
+    "lastBarMs": 1311.2903000000006,
+    "lastStructureMs": 1076.3135000000002,
+    "lastEqhBar": 231.72659999999996,
+    "structureRebuilds": 1,
+    "eqhRebuilds": 2,
+    "eqhReused": 0,
+    "fullRebuilds": 1,
+    "barUpdates": 1
+  },
+  "shared": {
+    "sharedColdMs": 6251.089099999999,
+    "coldReuse": "cold",
+    "sharedMissMs": 2697.2093999999997,
+    "missReuse": "miss",
+    "missReason": "bars",
+    "lastBarMs": 2695.8849999999984,
+    "lastStructureMs": 1432.7780000000002,
+    "lastEqhMs": 1261.7603999999992,
+    "structureRebuilds": 1,
+    "eqhRebuilds": 2,
+    "eqhReused": 0,
+    "fullRebuilds": 1,
+    "barUpdates": 1
+  }
+}

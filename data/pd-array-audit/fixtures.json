@@ -1,0 +1,54 @@
+{
+  "description": "Deterministic synthetic OHLC fixtures for PD-array golden-case audit. Timestamps are EST via estTimeOnDateKey.",
+  "fixtures": [
+    {
+      "id": "PDH-PDL-001",
+      "concept": "PDH/PDL",
+      "asOf": "2026-01-06T10:30 ET",
+      "daily": [
+        { "date": "2026-01-05", "o": 20950, "h": 21050, "l": 20900, "c": 21000 },
+        { "date": "2026-01-06", "o": 21010, "h": 21040, "l": 20980, "c": 21020 }
+      ],
+      "expected": { "pdh": 21050, "pdl": 20900, "prevKey": "2026-01-05" }
+    },
+    {
+      "id": "CDO-001",
+      "concept": "Daily Open",
+      "asOf": "2026-01-06T10:00 ET",
+      "note": "First calendar-day 1m open=20980; 9:30 bar open=21010",
+      "expected": { "cdo": 20980, "cdoAnchor930Open": 21010 }
+    },
+    {
+      "id": "WEEKLY-OPEN-001",
+      "concept": "Weekly Open",
+      "asOf": "2026-01-12T10:00 ET",
+      "expected": { "weekOpen": 21150, "priorWeekClose": 21100 }
+    },
+    {
+      "id": "ROLLOVER-CAL-001",
+      "concept": "Daily Open calendar rollover",
+      "asOf": "2026-01-06T09:35 ET",
+      "expected": { "cdo": 21005 }
+    },
+    {
+      "id": "ROLLOVER-CME-001",
+      "concept": "Weekly Open CME rollover",
+      "asOfBefore": "2026-01-11T17:30 ET",
+      "asOfAfter": "2026-01-11T18:30 ET",
+      "expected": { "weekOpenBefore": 21080, "weekOpenAfter": 21150 }
+    },
+    {
+      "id": "LOOKBACK-001",
+      "concept": "PDH lookback",
+      "asOf": "2026-01-07T11:00 ET",
+      "expected": { "pdh": 21050, "notMonHigh": 20900 }
+    },
+    {
+      "id": "PDH-ANCHOR-001",
+      "concept": "PDH/PDL anchor timestamps",
+      "asOf": "2026-01-06T10:00 ET",
+      "expected": { "pdh": 21050, "pdl": 20900, "pdhFormedAt": "2026-01-05T11:00 ET", "pdlFormedAt": "2026-01-05T14:00 ET" }
+    }
+  ],
+  "undefined": ["PWH", "PWL", "PMH", "PML", "Monthly Open"]
+}

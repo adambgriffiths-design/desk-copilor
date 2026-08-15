@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-c1-wait-entry-actionable-dev-y1500-2026-08-15",
+  "date": "2026-08-15",
+  "git_tree_state": "TREE:.tmp/karen-final-integration/ git:74183b2",
+  "trading_brain_baseline": "baseline-v2",
+  "candidate_version": "c1_wait_entry_actionable",
+  "single_change": "entryStatus WAIT no longer blocks directional LONG/SHORT (EXTENDED still waits)",
+  "dataset_version": "archive-carve-v1",
+  "split": "DEV",
+  "timestamp_manifest": "nq-history-archive-dev-overcaution-candidates-latest.json#Y1500-even-c10-DEV-smoke:false",
+  "evaluation_cadence": 10,
+  "number_of_days": null,
+  "evaluation_points": 1500,
+  "actionable_episodes": null,
+  "pit_violations": 0,
+  "dq_exclusions": 0,
+  "stance_counts": {
+    "LONG": 560,
+    "SHORT": 587,
+    "WAIT": 114,
+    "NO_TRADE": 239
+  },
+  "metrics": {
+    "mfeMedian": 11.75,
+    "maeMedian": 10.75,
+    "targetBeforeInvalidationRate": 0.5812743823146944,
+    "proxyRMean": 0.3144628251110639,
+    "opportunitiesPerDay": null
+  },
+  "hypothesis": "Binary relaxation of entryStatus WAIT→actionable (one knob) reduces structural overcaution vs frozen baseline-v2 without spam or expectancy collapse.",
+  "result": "DECISION=REJECT for promotion of binary c1; RESEARCH_MORE only for refined successor c4_shadow_quality_gated_wait on DEV. DEV Y=1500 paired: WAIT 1188→114 ACT 73→1147 WAIT→ACT 1074 T-before 21.4%→58.1% proxyR −0.330→0.314 PIT=0. Gate 10 FAIL (ACT rate ~76.5% ≫ 20%). Programme VAL one-shot (Y=500): structural lift T-before 32.5%→50.2% but mean proxyR −0.561→−1.053 (quality FAIL) → back to DEV; no second VAL; no promote. VAL not registered as promote path (VALIDATION_REQUIRES_PROMOTE). Smoke RESEARCH_MORE (exp-c1-wait-entry-actionable-dev-protocol-2026-08-15) superseded.",
+  "decision": "reject",
+  "notes": "EDGE_CLAIM NONE. HOLDOUT SEALED/PROTECTED. Production ALS remains none. READY_FOR_ADAM N. Do not promote or implement binary WAIT-gate removal. ONE_NEXT=c4_shadow_quality_gated_wait. Sibling candidates: c2 worse (ACT down); c3 null (=none). Source JSON smoke:false at 2026-08-15T20:40:12.230Z.",
+  "reproducibility_hash": "991f7d82f502558ac199a9c554c1eb749739fb2249cf1e4cdd3a086101706261",
+  "promote_from_experiment_id": null
+}

@@ -2,6 +2,15 @@
  * Desk Copilot voice — Whisper + noise-gated VAD (works with background noise).
  */
 (function () {
+  const VOICE_REV = "1.4.118";
+  if (window.__dcVoiceRev === VOICE_REV && window.DeskCopilotVoice) return;
+  try {
+    window.DeskCopilotVoice?.stopVoiceSession?.();
+  } catch {
+    /* ignore */
+  }
+  window.__dcVoiceRev = VOICE_REV;
+
   const SpeechRecognition =
     typeof window !== "undefined" &&
     (window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -13,14 +22,14 @@
       navigator.language) ||
     "en-US";
 
-  const SILENCE_MS = 1300;
-  const MIN_SPEECH_MS = 320;
+  const SILENCE_MS = 700;
+  const MIN_SPEECH_MS = 160;
   const MAX_UTTERANCE_MS = 45000;
   const VAD_INTERVAL_MS = 60;
-  const VOLUME_THRESHOLD = 0.007;
+  const VOLUME_THRESHOLD = 0.0032;
   const BARGE_IN_THRESHOLD = 0.022;
   const NOISE_CALIBRATION_SAMPLES = 55;
-  const SPEECH_FRAMES_REQUIRED = 3;
+  const SPEECH_FRAMES_REQUIRED = 2;
 
   const COMMANDS = [
     {
@@ -68,6 +77,21 @@
     [/\bgive me a reed\b/gi, "give me a read"],
   ];
 
+  function shouldRetrySwWake(message, attempt) {
+    const Conn = window.DeskCopilotConnection;
+    const kind = Conn?.classifyExtensionMessagingFailure
+      ? Conn.classifyExtensionMessagingFailure(message)
+      : /receiving end|could not establish connection/i.test(String(message || ""))
+        ? "receiving_end"
+        : null;
+    const max = Conn?.SW_WAKE_MAX_RETRIES || 4;
+    return kind === "receiving_end" && (Conn?.shouldRetryReceivingEnd?.(attempt, max) ?? attempt < max);
+  }
+
+  function swWakeDelayMs(attempt) {
+    return window.DeskCopilotConnection?.computeSwWakeBackoffMs?.(attempt) ?? Math.min(2400, 300 * Math.pow(2, Math.max(0, attempt - 1)));
+  }
+
   let micStream = null;
   let audioContext = null;
   let analyser = null;
@@ -100,7 +124,7 @@
   let recognitionPaused = false;
   let recognitionRestartTimer = null;
   let sttMode = SpeechRecognition ? "native" : "whisper";
-  let noiseFloor = 0.004;
+  let noiseFloor = 0.0025;
   let noiseSamples = [];
   let vadCalibrated = false;
   let speechFrames = 0;
@@ -170,7 +194,7 @@
   }
 
   function realtimeOwnsStt() {
-    return engineMode === "realtime" || Boolean(window.DeskCopilotRealtime?.isActive?.());
+    return engineMode === "realtime" && Boolean(window.DeskCopilotRealtime?.isActive?.());
   }
 
   function stopCascadeStt() {
@@ -385,7 +409,7 @@
     noiseSamples = [];
     vadCalibrated = false;
     speechFrames = 0;
-    noiseFloor = 0.004;
+    noiseFloor = 0.0025;
 
     vadTimer = setInterval(() => {
       if (realtimeOwnsStt() || !listening || transcribing) return;
@@ -396,7 +420,7 @@
         if (noiseSamples.length >= NOISE_CALIBRATION_SAMPLES) {
           const sorted = [...noiseSamples].sort((a, b) => a - b);
           const median = sorted[Math.floor(sorted.length / 2)] || 0;
-          noiseFloor = Math.max(0.004, median * 3.2);
+          noiseFloor = Math.max(0.0025, median * 2.4);
           vadCalibrated = true;
         }
       }
@@ -651,17 +675,25 @@
 
   function transcribeViaBackground(base64, mimeType) {
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage(
-        { type: "TRANSCRIBE", audioBase64: base64, mimeType: cleanMime(mimeType) },
-        (res) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message || "Extension error"));
-            return;
+      const attempt = (n) => {
+        chrome.runtime.sendMessage(
+          { type: "TRANSCRIBE", audioBase64: base64, mimeType: cleanMime(mimeType) },
+          (res) => {
+            if (chrome.runtime.lastError) {
+              const m = chrome.runtime.lastError.message || "Extension error";
+              if (shouldRetrySwWake(m, n + 1)) {
+                setTimeout(() => attempt(n + 1), swWakeDelayMs(n + 1));
+                return;
+              }
+              reject(new Error(m));
+              return;
+            }
+            if (res?.error) reject(new Error(res.error));
+            else resolve(res?.text || "");
           }
-          if (res?.error) reject(new Error(res.error));
-          else resolve(res?.text || "");
-        }
-      );
+        );
+      };
+      attempt(0);
     });
   }
 
@@ -855,15 +887,23 @@
 
   function bgSend(msg, timeoutMs = 60000) {
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("Timed out")), timeoutMs);
-      chrome.runtime.sendMessage(msg, (res) => {
-        clearTimeout(timer);
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message || "Extension error"));
-          return;
-        }
-        resolve(res);
-      });
+      const attempt = (n) => {
+        const timer = setTimeout(() => reject(new Error("Timed out")), timeoutMs);
+        chrome.runtime.sendMessage(msg, (res) => {
+          clearTimeout(timer);
+          if (chrome.runtime.lastError) {
+            const m = chrome.runtime.lastError.message || "Extension error";
+            if (shouldRetrySwWake(m, n + 1)) {
+              setTimeout(() => attempt(n + 1), swWakeDelayMs(n + 1));
+              return;
+            }
+            reject(new Error(m));
+            return;
+          }
+          resolve(res);
+        });
+      };
+      attempt(0);
     });
   }
 
@@ -992,11 +1032,13 @@
     const browserRate =
       typeof opts.browserRate === "number"
         ? opts.browserRate
-        : typeof speed === "number" && speed < 0.9
-          ? 0.88
-          : line.length >= 120
-            ? 0.9
-            : undefined;
+        : typeof speed === "number" && speed < 0.95
+          ? 1.0
+          : typeof speed === "number"
+            ? Math.min(1.12, speed + 0.03)
+            : line.length >= 120
+              ? 1.05
+              : 1.08;
 
     setSpeaking(true);
     pauseNativeStt();
@@ -1059,14 +1101,21 @@
         reject(new Error("Desk timed out — try again"));
       }, 90000);
 
-      chrome.runtime.sendMessage(
-        { type: "CHAT", ...payload, voiceInput: true },
-        (res) => {
-          clearTimeout(timeout);
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message || "Extension error"));
-            return;
-          }
+      const sendChat = (n) => {
+        chrome.runtime.sendMessage(
+          { type: "CHAT", ...payload, voiceInput: true },
+          (res) => {
+            if (chrome.runtime.lastError) {
+              const m = chrome.runtime.lastError.message || "Extension error";
+              if (shouldRetrySwWake(m, n + 1)) {
+                setTimeout(() => sendChat(n + 1), swWakeDelayMs(n + 1));
+                return;
+              }
+              clearTimeout(timeout);
+              reject(new Error(m));
+              return;
+            }
+            clearTimeout(timeout);
           if (res?.error) {
             reject(new Error(res.error));
             return;
@@ -1082,6 +1131,8 @@
           resolve({ reply: (res?.reply || "").trim() });
         }
       );
+      };
+      sendChat(0);
     });
   }
 
@@ -1317,10 +1368,8 @@
         typeof browserOpts.rate === "number"
           ? browserOpts.rate
           : browserOpts.chuckle
-            ? 1.02
-            : line.length >= 120
-              ? 0.9
-              : 1;
+            ? 1.08
+            : 1.08;
       u.pitch = browserOpts.chuckle ? 1.06 : 1;
       u.lang = VOICE_LANG;
       u.onstart = () => {
@@ -1599,7 +1648,7 @@
     }
 
     const speed =
-      typeof opts?.speed === "number" ? opts.speed : 0.92;
+      typeof opts?.speed === "number" ? opts.speed : 1.05;
     void speakTextOnce(line, gen, speed, instructions, {
       ttsPrefetch: opts?.ttsPrefetch,
       browserRate: opts?.browserRate,
@@ -1622,9 +1671,13 @@
 
   async function startCascadeVoice() {
     window.DeskCopilotRealtime?.suspend?.();
-    engineMode = "cascade";
     const ok = await startListening();
-    if (ok) onStatus?.(CASCADE_STATUS, null);
+    if (ok) {
+      engineMode = "cascade";
+      onStatus?.(CASCADE_STATUS, null);
+    } else if (engineMode === "cascade") {
+      engineMode = "off";
+    }
     return ok;
   }
 
@@ -1860,7 +1913,10 @@
     },
     supported,
     isListening() {
-      return listening || window.DeskCopilotRealtime?.isActive?.();
+      return (
+        listening ||
+        (engineMode === "realtime" && Boolean(window.DeskCopilotRealtime?.isActive?.()))
+      );
     },
     getEchoGuardUntil() {
       return echoGuardUntil;

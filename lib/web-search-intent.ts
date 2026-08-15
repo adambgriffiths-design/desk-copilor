@@ -50,9 +50,13 @@ function normalizeWebSearchText(text: string): string {
 export function isIdentityQuestion(text: string): boolean {
   const q = normalizeWebSearchText(text);
   if (!q) return false;
+  if (/\bwhat are you (seeing|looking|thinking|watching|reading|picking up)\b/.test(q)) return false;
+  if (/\bwhat are you\b/.test(q) && /\b(on the chart|in the market|right now)\b/.test(q)) return false;
 
   if (/\b(tell me about yourself|introduce yourself|describe yourself)\b/.test(q)) return true;
-  if (/\b(who are you|what are you)\b/.test(q)) return true;
+  if (/^(who are you|what are you)[.?!]*$/.test(q)) return true;
+  if (/\bwho are you\b/.test(q)) return true;
+  if (/\bwhat are you\b/.test(q) && !/\b(seeing|looking|thinking|watching|reading)\b/.test(q)) return true;
   if (/\bwhat('s| is) your (name|role|job|purpose)\b/.test(q)) return true;
   if (/\bwhat should i call you\b/.test(q)) return true;
   if (/\bwhat do i call you\b/.test(q)) return true;
@@ -87,9 +91,18 @@ export function isKarenPreferenceQuestion(text: string): boolean {
   if (/\bwhat('s| is) your (favorite|favourite)\b/.test(q)) return true;
   if (/\bdo you (like|prefer|enjoy|love|hate)\b/.test(q)) return true;
   if (/\bwould you (like|prefer|rather)\b/.test(q)) return true;
-  if (/\bwhat('s| is) your (opinion|take|view|thought)\b/.test(q)) return true;
+  if (/\bwhat('s| is) your (opinion|take|view|thought)\b/.test(q)) {
+    if (/\b(chart|market|setup|trade|bias|structure|this|here|mnq|nasdaq|read)\b/.test(q)) return false;
+    if (/your (take|read|view)\s*$/.test(q)) return false;
+    return true;
+  }
   if (/\bwhat do you think (about|of)\b/.test(q)) return true;
-  if (/\bwhat would you (order|get|pick|choose|eat|drink|watch|listen)\b/.test(q)) return true;
+  if (/\bwhat would you (order|get|pick|choose|eat|drink|listen)\b/.test(q)) return true;
+  if (/\bwhat would you watch\b/.test(q)) {
+    if (/\b(next|for|here|now|chart|market|level|liquidity|invalidat)\b/.test(q)) return false;
+    if (/^what would you watch\??$/.test(q)) return false;
+    return true;
+  }
 
   return false;
 }
@@ -218,10 +231,13 @@ export function needsWebSearch(text: string): boolean {
   }
 
   if (
-    /\b(news about|news on|what happened|what's happening|latest on|update on|going on in|headlines)\b/.test(
+    /\b(news about|news on|what happened|latest on|update on|going on in|headlines)\b/.test(
       q
     )
   ) {
+    return true;
+  }
+  if (/\bwhat(?:'s| is) happening\b/.test(q) && /\b(news|headline|election|weather)\b/.test(q)) {
     return true;
   }
 

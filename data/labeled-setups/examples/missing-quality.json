@@ -1,0 +1,26 @@
+{
+  "id": "missing-quality",
+  "ctx": {},
+  "state": {},
+  "label": {
+    "id": "missing-quality",
+    "timestamp": "2026-08-12T14:30:00Z",
+    "market_state_snapshot": "replay-fixtures/missing-quality",
+    "expected_observation": {
+      "liquidity_swept": false,
+      "fvg_status": "unknown",
+      "displacement": "unknown",
+      "market_structure": "unknown",
+      "tradeable_bias": "unknown",
+      "data_quality": "missing",
+      "session": "unknown"
+    },
+    "adam_verdict": "NO_TRADE",
+    "would_take": false,
+    "grade": "no_trade",
+    "why_taken": "Would not take — chart export failed, no observable facts to apply framework",
+    "why_rejected_alternatives": "Cannot consider long or short — all observation fields unknown due to missing data",
+    "fvg_validity": "absent",
+    "notes": "Obvious no_trade — data failure"
+  }
+}

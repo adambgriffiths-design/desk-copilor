@@ -1,0 +1,66 @@
+{
+  "concept_id": "open_bell_patience",
+  "name": "Opening bell patience / first couple minutes",
+  "aliases": ["give the opening bell a chance", "first couple minutes at the open"],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "open_bell_patience__uwFJ0t7SAOU__220",
+      "definition_text": "Always have to give that first couple minutes at the opening bell at 9:30 New York time — does it want to retrace?",
+      "definition_mode": "quote",
+      "conditions": [
+        "9:30 NY open",
+        "Allow first couple minutes before judging retrace behavior"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "9:30–~9:32+ ET",
+      "variations_note": "Patience / do-not-rush rule; related but not identical to FPFVG wait language.",
+      "confidence": "quoted",
+      "cue_start": "00:03:40.949",
+      "cue_end": "00:03:47.949",
+      "timestamp_sec": 220.949,
+      "source": {
+        "video_id": "uwFJ0t7SAOU",
+        "title": "ICT Gems — Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uwFJ0t7SAOU",
+        "transcript_path": "tmp/ict-transcripts/org-gaps.uwFJ0t7SAOU.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "open_bell_patience__eft9_3ekDCY__634",
+      "definition_text": "This is something that tells you to wait — give the opening bell a chance, and then wait for first presented fair value gap.",
+      "definition_mode": "quote",
+      "conditions": [
+        "Early open chop / range sharing context",
+        "Then wait for FPFVG (or wait till 10:00 if no gap)"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY open",
+      "variations_note": "Combines patience with FPFVG gating — also cited under first_presented_fvg.",
+      "confidence": "quoted",
+      "cue_start": "00:10:30.190",
+      "cue_end": "00:10:36.630",
+      "timestamp_sec": 630.19,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "Session time context / ICT session hints",
+    "related_karen_evidence_or_gate": "Prompt hint open-bell-patience in ICT_STAT_RULES",
+    "overlap_vs_baseline_v2": "Hint text only",
+    "gap_vs_baseline_v2": "No hard gate suppressing decisions in first 1–2 minutes in baseline-v2",
+    "hypothesis_id": "H_ICT_OPEN_BELL_PATIENCE",
+    "status": "CATALOGUED",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Low priority; logging/UX hint candidate only."
+  },
+  "extraction_notes": null
+}

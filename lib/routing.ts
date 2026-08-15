@@ -17,7 +17,8 @@
 
 import { isChartReadCommand } from "@/lib/chart-read-intent";
 import { isChartStatusQuestion, prefersRichTradingAnswer } from "@/lib/chart-question-intent";
-import { isClearlyTrading, isNonTradingConversation } from "@/lib/casual-chat-intent";
+import { isClearlyTrading, isGeneralConversation, isNonTradingConversation } from "@/lib/casual-chat-intent";
+import { isBareAnaphoraFollowUp, isStandaloneGeneralTurn } from "@/lib/conversational-intent";
 import { pendingNeedsLiveWebSearch, resolveSearchQuestion } from "@/lib/pending-request";
 import {
   isPersonaQuestion,
@@ -27,16 +28,51 @@ import {
   resolveWebSearchQuestion,
   wantsLiveWebData as rawWantsLiveWebData,
 } from "@/lib/web-search-intent";
+import { isMentorMarketTurn, type MentorIntentContext } from "@/lib/mentor-intent";
+import { lastTurnWasGeneralCategory } from "@/lib/turn-category";
 
 export const LIVE_DATA_FALLBACK =
   "Couldn't pull live data just now — give it another try in a moment.";
 
 export type HistoryMsg = { role: string; content: string };
 
+/** Exact conversational reads — TEXT DecisionEnvelope, never screenshot/live-verdict. */
+function isTextMarketReadPhrase(text: string): boolean {
+  const q = text
+    .trim()
+    .toLowerCase()
+    .replace(/[.!?]+$/g, "");
+  if (!q) return false;
+  if (
+    /^(?:get the read|give me (?:a |the )?read|give me (?:a |the )?(?:market |chart )?read|market read)$/.test(
+      q
+    )
+  ) {
+    return true;
+  }
+  if (/\bgive me (?:a |the )?(?:new |fresh |updated )?(?:market |chart )?read\b/.test(q)) {
+    return true;
+  }
+  return false;
+}
+
 /** Rich GPT trading stream — analytical asks only; simple chart-status ticks stay on JSON snapshot. */
-export function mustUseTradingStream(text: string): boolean {
+export function mustUseTradingStream(text: string, ctx?: MentorIntentContext): boolean {
   const q = text.trim();
   if (!q) return false;
+  if (isBareAnaphoraFollowUp(q) && lastTurnWasGeneralCategory(ctx?.lastTurnCategory)) return false;
+  // Belt-and-suspenders: never treat "get the read" / "Give me the read" as non-stream.
+  if (isTextMarketReadPhrase(q)) return true;
+  if (isMentorMarketTurn(q, ctx)) return true;
+  // Standalone general / casual knowledge must not enter the DecisionEnvelope stream
+  // (prefersRichTradingAnswer historically matched bare "why"/"explain").
+  // Keep clearly-trading phrases (e.g. "explain the bias") on the trading path.
+  if (
+    !isClearlyTrading(q) &&
+    (isStandaloneGeneralTurn(q) || isGeneralConversation(q))
+  ) {
+    return false;
+  }
   if (prefersRichTradingAnswer(q)) return true;
   if (isChartStatusQuestion(q)) return false;
   return isClearlyTrading(q);

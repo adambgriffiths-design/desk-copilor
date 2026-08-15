@@ -14,10 +14,10 @@ export function shouldPauseMicForReply(text: string, opts: PauseMicOpts = {}): b
 /** Echo-suppression tail from when Karen *finishes* speaking (not when she starts). */
 export function echoSuppressTailMs(text: string): number {
   const len = String(text || "").trim().length;
-  if (len <= 48) return 500;
-  if (len <= 120) return 900;
-  if (len <= 280) return 1500;
-  return 2400;
+  if (len <= 48) return 350;
+  if (len <= 120) return 700;
+  if (len <= 280) return 1100;
+  return 1800;
 }
 
 /** Short affirmations / follow-ups that must never be treated as STT dedup refinements. */
@@ -81,19 +81,37 @@ export function shouldDedupeSttTranscript(input: SttDedupInput): boolean {
 export const MIC_IDLE_UNPAUSE_MS = 350;
 
 /** Merge window for split utterances — tighter so rapid separate replies stay distinct. */
-export const UTTERANCE_MERGE_MS = 1400;
+export const UTTERANCE_MERGE_MS = 1100;
 
 /** Wait for late STT finals before delivering a turn — lower = faster handoff. */
-export const TRANSCRIPT_SETTLE_MS = 200;
+export const TRANSCRIPT_SETTLE_MS = 100;
 
-/** Server VAD silence before end-of-utterance — 500ms balances speed vs natural pauses. */
+/** Server VAD silence before end-of-utterance. 500ms cuts less mid-pause than 400; still under 900. */
 export const VAD_SILENCE_MS = 500;
+
+/**
+ * Server VAD energy threshold (0–1, higher = deafer).
+ * 0.34 (v1.4.106) missed quiet/natural desk speech. 0.22 still ignores TV hiss.
+ */
+export const VAD_THRESHOLD = 0.22;
+
+/** Audio kept before speech_started so the first syllable is not cut. */
+export const VAD_PREFIX_PADDING_MS = 450;
+
+/** Fallback local VAD — discard bursts shorter than this (not OpenAI server_vad). */
+export const VAD_MIN_SPEECH_MS = 160;
+
+/** ScriptProcessor buffer — 2048 ~40–85ms vs 4096 ~85–170ms. */
+export const SCRIPT_PROCESSOR_BUFFER = 2048;
 
 /** Max reply length for low-latency browser TTS (no API round-trip). */
 export const INSTANT_VOICE_MAX_LEN = 520;
 
-/** Prefer browser TTS first for very short replies — target ~200ms time-to-first-audio. */
-export const BROWSER_TTS_FIRST_MAX_LEN = 100;
+/** Prefer browser TTS first for short replies — target ~200ms time-to-first-audio. */
+export const BROWSER_TTS_FIRST_MAX_LEN = 140;
+
+/** Default OpenAI TTS speed — brisk desk, not chipmunk. */
+export const DESK_TTS_SPEED = 1.05;
 
 export type InstantVoiceOpts = {
   instant?: boolean;

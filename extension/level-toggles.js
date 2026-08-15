@@ -46,7 +46,7 @@
     {
       key: "showRehRel",
       label: "Relative Equal Highs · Lows",
-      teach: "Relative equal highs and lows — clustered swing liquidity pools (pre-market + session).",
+      teach: "Confirmed swing liquidity pools — one cluster per relative-equal level, tracked until swept or invalidated.",
       defaultOn: true,
     },
   ];
@@ -100,8 +100,8 @@
       const id = String(l.id || "");
       const price = Number(l.price);
       if (!Number.isFinite(price)) return true;
-      if (id.startsWith("reh")) return price >= currentPrice + REH_REL_PRICE_EPS;
-      if (id.startsWith("rel")) return price <= currentPrice - REH_REL_PRICE_EPS;
+      if (id.startsWith("reh") || id.startsWith("eqh")) return price >= currentPrice + REH_REL_PRICE_EPS;
+      if (id.startsWith("rel") || id.startsWith("eql")) return price <= currentPrice - REH_REL_PRICE_EPS;
       return true;
     });
   }

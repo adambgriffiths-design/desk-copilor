@@ -1,4 +1,4 @@
-/** Mic pause + echo tail tuning — mirrored from lib/voice-quick-reply.ts */
+/** Mic pause + echo tail tuning — mirrored from lib/voice-quick-reply.ts + voice-speak-sync.ts */
 (function () {
   function shouldPauseMicForReply(text, opts) {
     opts = opts || {};
@@ -11,10 +11,10 @@
 
   function echoSuppressTailMs(text) {
     const len = String(text || "").trim().length;
-    if (len <= 48) return 500;
-    if (len <= 120) return 900;
-    if (len <= 280) return 1500;
-    return 2400;
+    if (len <= 48) return 350;
+    if (len <= 120) return 700;
+    if (len <= 280) return 1100;
+    return 1800;
   }
 
   function isQuickAffirmation(norm) {
@@ -61,11 +61,16 @@
   }
 
   const MIC_IDLE_UNPAUSE_MS = 350;
-  const UTTERANCE_MERGE_MS = 1400;
-  const TRANSCRIPT_SETTLE_MS = 200;
+  const UTTERANCE_MERGE_MS = 1100;
+  const TRANSCRIPT_SETTLE_MS = 100;
   const VAD_SILENCE_MS = 500;
+  const VAD_THRESHOLD = 0.22;
+  const VAD_PREFIX_PADDING_MS = 450;
+  const VAD_MIN_SPEECH_MS = 160;
+  const SCRIPT_PROCESSOR_BUFFER = 2048;
   const INSTANT_VOICE_MAX_LEN = 520;
-  const BROWSER_TTS_FIRST_MAX_LEN = 100;
+  const BROWSER_TTS_FIRST_MAX_LEN = 140;
+  const DESK_TTS_SPEED = 1.05;
 
   function prefersInstantVoice(text, opts) {
     opts = opts || {};
@@ -82,15 +87,34 @@
     return String(text || "").trim().length <= BROWSER_TTS_FIRST_MAX_LEN;
   }
 
-  /** First complete sentence (min 20 chars) — early TTS while stream continues. */
   function extractFirstCompleteSentence(text) {
     const raw = String(text || "").trim();
     if (!raw) return "";
-    const m = raw.match(/^(.{20,}?[.!?])(?:\s|$)/);
+    const m = raw.match(/^(.{16,}?[.!?])(?:\s|$)/);
     if (m) return m[1].trim();
     const idx = raw.search(/[.!?]/);
-    if (idx >= 19) return raw.slice(0, idx + 1).trim();
+    if (idx >= 15) return raw.slice(0, idx + 1).trim();
     return "";
+  }
+
+  function capSpokenVoice(text, opts) {
+    const raw = String(text || "").trim();
+    if (!raw) return "";
+    opts = opts || {};
+    const maxSentences = opts.maxSentences != null ? opts.maxSentences : 2;
+    const maxChars = opts.maxChars != null ? opts.maxChars : 320;
+    const sentences = raw.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [raw];
+    let out = "";
+    let count = 0;
+    for (let i = 0; i < sentences.length; i++) {
+      const next = out ? `${out} ${sentences[i].trim()}` : sentences[i].trim();
+      if (count >= maxSentences) break;
+      if (count >= 1 && next.length > maxChars) break;
+      out = next;
+      count += 1;
+      if (out.length >= maxChars) break;
+    }
+    return out;
   }
 
   window.DeskCopilotVoiceQuickReply = {
@@ -104,8 +128,14 @@
     UTTERANCE_MERGE_MS,
     TRANSCRIPT_SETTLE_MS,
     VAD_SILENCE_MS,
+    VAD_THRESHOLD,
+    VAD_PREFIX_PADDING_MS,
+    VAD_MIN_SPEECH_MS,
+    SCRIPT_PROCESSOR_BUFFER,
     INSTANT_VOICE_MAX_LEN,
     BROWSER_TTS_FIRST_MAX_LEN,
+    DESK_TTS_SPEED,
     extractFirstCompleteSentence,
+    capSpokenVoice,
   };
 })();

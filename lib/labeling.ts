@@ -9,8 +9,13 @@ export type FvgValidityLabel = "valid" | "present_not_tradeable" | "invalid" | "
 export type ExpectedObservation = {
   liquidity_swept?: boolean;
   fvg_status?: string;
+  fvg_direction?: string;
   displacement?: string;
   market_structure?: string;
+  mss_direction?: string;
+  reh_above?: boolean;
+  reh_level?: number | null;
+  rel_below?: boolean;
   htf_bias_aligned?: boolean;
   tradeable_bias?: string;
   data_quality?: string;
@@ -49,6 +54,7 @@ export type SetupFixture = {
 };
 
 const EXAMPLES_DIR = path.join(process.cwd(), "data", "labeled-setups", "examples");
+const CHART_PROOF_DIR = path.join(process.cwd(), "data", "labeled-setups", "chart-proof");
 
 export function getExpectedObservation(label: LabeledSetup): ExpectedObservation {
   return label.expected_observation ?? label.observation ?? {};
@@ -86,7 +92,14 @@ export function validateLabeledSetup(label: unknown): string[] {
 }
 
 export function loadSetupFixture(filename: string): SetupFixture {
-  const filePath = path.join(EXAMPLES_DIR, filename);
+  const candidates = [
+    path.join(EXAMPLES_DIR, filename),
+    path.join(CHART_PROOF_DIR, filename),
+  ];
+  const filePath = candidates.find((p) => fs.existsSync(p));
+  if (!filePath) {
+    throw new Error(`labeled fixture not found: ${filename}`);
+  }
   const raw = JSON.parse(fs.readFileSync(filePath, "utf8")) as SetupFixture;
   const labelErrors = validateLabeledSetup(raw.label);
   if (labelErrors.length) {
@@ -98,6 +111,12 @@ export function loadSetupFixture(filename: string): SetupFixture {
 export function listSetupFixtures(): string[] {
   if (!fs.existsSync(EXAMPLES_DIR)) return [];
   return fs.readdirSync(EXAMPLES_DIR).filter((f) => f.endsWith(".json"));
+}
+
+/** Observation chart-proof labels (separate from decision-replay examples). */
+export function listChartProofFixtures(): string[] {
+  if (!fs.existsSync(CHART_PROOF_DIR)) return [];
+  return fs.readdirSync(CHART_PROOF_DIR).filter((f) => f.endsWith(".json"));
 }
 
 export function saveLabeledSetup(label: LabeledSetup): string {

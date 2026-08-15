@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://desk-copilot.local/research/ict-knowledge/schema.json",
+  "title": "ICT Knowledge Catalogue Schema",
+  "description": "Research-only catalogue of ICT concepts extracted from public video transcripts. NOT production trading logic. Conflicting definitions MUST remain separate (versioned occurrences). baseline-v2 is UNCHANGED.",
+  "type": "object",
+  "required": ["schema_version", "project_type", "baseline_v2", "concepts", "sources"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "project_type": { "type": "string", "const": "research_knowledge_extraction" },
+    "baseline_v2": { "type": "string", "const": "UNCHANGED" },
+    "production_logic": { "type": "string", "const": "NOT_IN_PRODUCTION" },
+    "concepts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/concept" }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sourceVideo" }
+    }
+  },
+  "$defs": {
+    "confidence": {
+      "type": "string",
+      "enum": ["quoted", "paraphrased", "incomplete_transcript", "missing_transcript"]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "CATALOGUED",
+        "NEEDS_TRANSCRIPT",
+        "CONFLICTING_SOURCES",
+        "CANDIDATE_FOR_DEV_LATER"
+      ]
+    },
+    "definitionOccurrence": {
+      "type": "object",
+      "required": ["occurrence_id", "definition_text", "confidence", "source"],
+      "properties": {
+        "occurrence_id": {
+          "type": "string",
+          "description": "Stable id for this specific statement; do not merge with conflicting occurrences."
+        },
+        "definition_text": { "type": "string" },
+        "definition_mode": {
+          "type": "string",
+          "enum": ["quote", "close_paraphrase"],
+          "description": "quote = near-verbatim from transcript; close_paraphrase = lightly cleaned with same meaning"
+        },
+        "conditions": { "type": "array", "items": { "type": "string" } },
+        "invalidation": { "type": "array", "items": { "type": "string" } },
+        "timeframe_session_context": { "type": "string" },
+        "variations_note": {
+          "type": "string",
+          "description": "How this occurrence differs from other occurrences of the same concept_id — do not collapse."
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "cue_start": { "type": ["string", "null"], "description": "VTT cue start HH:MM:SS.mmm if available" },
+        "cue_end": { "type": ["string", "null"] },
+        "timestamp_sec": { "type": ["number", "null"] },
+        "source": { "$ref": "#/$defs/sourceRef" }
+      },
+      "additionalProperties": false
+    },
+    "sourceRef": {
+      "type": "object",
+      "required": ["video_id", "title"],
+      "properties": {
+        "video_id": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "transcript_path": { "type": "string" },
+        "transcript_status": {
+          "type": "string",
+          "enum": ["AVAILABLE", "MISSING_TRANSCRIPT", "PARTIAL", "UNKNOWN"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "karenHypothesisMap": {
+      "type": "object",
+      "properties": {
+        "related_karen_observation": { "type": "string" },
+        "related_karen_evidence_or_gate": { "type": "string" },
+        "overlap_vs_baseline_v2": { "type": "string" },
+        "gap_vs_baseline_v2": { "type": "string" },
+        "hypothesis_id": {
+          "type": "string",
+          "description": "For later DEV single-change testing only"
+        },
+        "status": { "$ref": "#/$defs/status" },
+        "wiring": {
+          "type": "string",
+          "const": "NOT_IN_PRODUCTION"
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "concept": {
+      "type": "object",
+      "required": ["concept_id", "name", "definitions", "status", "wiring"],
+      "properties": {
+        "concept_id": { "type": "string" },
+        "name": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "definitions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/definitionOccurrence" },
+          "description": "One row per source occurrence; keep conflicts as separate occurrences."
+        },
+        "status": { "$ref": "#/$defs/status" },
+        "wiring": { "type": "string", "const": "NOT_IN_PRODUCTION" },
+        "karen_map": { "$ref": "#/$defs/karenHypothesisMap" },
+        "extraction_notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "sourceVideo": {
+      "type": "object",
+      "required": ["video_id", "title", "transcript_status"],
+      "properties": {
+        "video_id": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "channel": { "type": "string" },
+        "transcript_path": { "type": ["string", "null"] },
+        "transcript_status": {
+          "type": "string",
+          "enum": ["AVAILABLE", "MISSING_TRANSCRIPT", "PARTIAL", "INVENTORIED_ONLY"]
+        },
+        "processed": { "type": "boolean" },
+        "processed_at": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

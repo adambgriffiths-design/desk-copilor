@@ -7,7 +7,6 @@ import {
   extractConversationContext,
 } from "@/lib/conversational-query";
 import { needsScopedChartAnswer } from "@/lib/chart-read-intent";
-import { isNonTradingConversation } from "@/lib/casual-chat-intent";
 import { detectTeachingConcept } from "@/lib/ict-teaching";
 import {
   extractLocationFromQuestion,
@@ -20,21 +19,24 @@ import {
   resolveWeatherLocation,
 } from "@/lib/weather-location";
 import { needsWebSearch, resolveWebSearchQuestion } from "@/lib/web-search-intent";
+import {
+  isBareMentorFollowUp,
+  isInvalidationConditionQuestion,
+  isInvalidationStatusQuestion,
+  isMentorMarketTurn,
+} from "@/lib/mentor-intent";
+import { isLinguisticMarketFollowUp, isStandaloneGeneralTurn, isBareAnaphoraFollowUp } from "@/lib/conversational-intent";
+import { repairConversationalStt } from "@/lib/conversational-normalize";
+import { mentorContextFromMessages } from "@/lib/mentor-intent";
+import { lastTurnWasGeneralCategory } from "@/lib/turn-category";
 
-function isFollowUpWhyQuestion(question: string): boolean {
-  const q = question.trim().toLowerCase();
-  if (/^(why|how come|explain that|what does that mean|why though)\??$/.test(q)) return true;
-  return /\bwhy\b/.test(q) && q.length < 40 && !/\b(why not short|why long|why short|why buy|why sell)\b/.test(q);
+function isFollowUpWhyQuestion(question: string, messages?: HistoryMsg[]): boolean {
+  const mentorCtx = messages?.length ? mentorContextFromMessages(messages) : undefined;
+  return isLinguisticMarketFollowUp(question, mentorCtx);
 }
 
 function isFollowUpInvalidationQuestion(question: string): boolean {
-  const q = question.trim().toLowerCase();
-  return (
-    /\b(has that|has it|was that|is that|did that|still valid|been invalidated|invalidate|invalidated yet|still hold|still good)\b/.test(
-      q
-    ) ||
-    (/^(still|valid)\??$/.test(q) && q.length < 20)
-  );
+  return isInvalidationStatusQuestion(question);
 }
 
 export type TurnKind = "NEW_REQUEST" | "FOLLOW_UP" | "CLARIFICATION" | "CONFIRMATION";
@@ -224,6 +226,19 @@ export function inferPendingRequest(
     };
   }
 
+  if (
+    /\b(right now i(?:'m| am) seeing|i(?:'m| am) waiting because|what would change my mind|here(?:'s| is) what i(?:'d| would) watch|i(?:'ll| will) walk the live chart)\b/i.test(
+      assistant
+    )
+  ) {
+    return {
+      intent: "MARKET_INTEL",
+      originalRequest: priorQuestion,
+      entities: conversationCtx?.lastTopic ? { lastTopic: conversationCtx.lastTopic } : {},
+      requestId: "market-intel",
+    };
+  }
+
   if (conversationCtx?.lastFactIds?.length || conversationCtx?.lastTopic) {
     return {
       intent: "MARKET_INTEL",
@@ -243,10 +258,12 @@ export function classifyTurn(
   messages?: HistoryMsg[],
   ctx?: ConversationContext
 ): TurnKind {
-  const q = text.trim();
+  const q = repairConversationalStt(text.trim());
   if (!q) return "NEW_REQUEST";
   const conversationCtx = ctx ?? (messages?.length ? extractConversationContext(messages) : undefined);
   const pending = inferPendingRequest(messages, conversationCtx);
+
+  if (isStandaloneGeneralTurn(q)) return "NEW_REQUEST";
 
   if (CONFIRMATION.test(q)) return pending ? "CONFIRMATION" : "NEW_REQUEST";
 
@@ -263,8 +280,33 @@ export function classifyTurn(
   }
 
   if (pending?.intent === "MARKET_INTEL" || pending?.intent === "VERDICT_EXPLAIN") {
-    if (isFollowUpInvalidationQuestion(q) || isFollowUpWhyQuestion(q)) return "FOLLOW_UP";
+    if (isFollowUpInvalidationQuestion(q) || isFollowUpWhyQuestion(q, messages)) return "FOLLOW_UP";
+    if (isInvalidationConditionQuestion(q) || isBareMentorFollowUp(q)) return "FOLLOW_UP";
     if (/\bwhat about\b/i.test(q) && pending.entities.lastTopic) return "FOLLOW_UP";
+    if (isMentorMarketTurn(q, conversationCtx)) return "FOLLOW_UP";
+  }
+
+  if (
+    isBareMentorFollowUp(q) ||
+    isInvalidationConditionQuestion(q) ||
+    /\bbut (?:that|this|those) (?:high|lows?)\b/i.test(q)
+  ) {
+    const mentorCtx = messages?.length ? mentorContextFromMessages(messages) : undefined;
+    if (lastTurnWasGeneralCategory(mentorCtx?.lastTurnCategory)) return "NEW_REQUEST";
+    if (isBareAnaphoraFollowUp(q) && lastTurnWasGeneralCategory(mentorCtx?.lastTurnCategory)) {
+      return "NEW_REQUEST";
+    }
+    if (
+      conversationCtx?.lastFactIds?.length ||
+      conversationCtx?.lastTopic ||
+      isMentorMarketTurn(q, {
+        lastAssistant: lastAssistant(messages),
+        lastFactIds: conversationCtx?.lastFactIds,
+        lastTopic: conversationCtx?.lastTopic,
+      })
+    ) {
+      return "FOLLOW_UP";
+    }
   }
 
   if (pending?.intent === "TEACHING" && CHART_SHOW_FOLLOWUP.test(q)) {
@@ -273,17 +315,6 @@ export function classifyTurn(
 
   if (needsWebSearch(q) || isWeatherDataQuestion(q) || needsScopedChartAnswer(q)) {
     return "NEW_REQUEST";
-  }
-
-  if (pending && isNonTradingConversation(q) && q.length < 64) {
-    if (
-      pending.intent === "CURRENT_EXTERNAL" &&
-      pending.missingParam === "location" &&
-      isWeatherClarificationTurn(q)
-    ) {
-      return "CLARIFICATION";
-    }
-    if (pending.intent !== "CURRENT_EXTERNAL") return "FOLLOW_UP";
   }
 
   return "NEW_REQUEST";
@@ -357,9 +388,19 @@ export function shouldDeferCasualRoute(
   messages?: HistoryMsg[],
   ctx?: ConversationContext
 ): boolean {
+  if (isStandaloneGeneralTurn(text)) return false;
   const conversationCtx = ctx ?? (messages?.length ? extractConversationContext(messages) : undefined);
+  const mentorCtx = messages?.length ? mentorContextFromMessages(messages) : undefined;
+  if (isBareAnaphoraFollowUp(text) && lastTurnWasGeneralCategory(mentorCtx?.lastTurnCategory)) {
+    return false;
+  }
   const pending = inferPendingRequest(messages, conversationCtx);
-  if (!pending) return false;
+  if (!pending) {
+    return (
+      (isBareMentorFollowUp(text) || isInvalidationConditionQuestion(text)) &&
+      isMentorMarketTurn(text, conversationCtx)
+    );
+  }
   const kind = classifyTurn(text, messages, conversationCtx);
   if (kind === "CLARIFICATION" && pending.intent === "CURRENT_EXTERNAL") return true;
   if (kind === "FOLLOW_UP") {
@@ -367,7 +408,13 @@ export function shouldDeferCasualRoute(
     if (pending.intent === "MARKET_INTEL" || pending.intent === "VERDICT_EXPLAIN") return true;
     if (pending.intent === "TEACHING" && CHART_SHOW_FOLLOWUP.test(text)) return true;
   }
-  if (isFollowUpWhyQuestion(text) && pending.intent === "VERDICT_EXPLAIN") return true;
+  if (isFollowUpWhyQuestion(text, messages) && pending.intent === "VERDICT_EXPLAIN") return true;
+  if (
+    isMentorMarketTurn(text, conversationCtx) &&
+    (isBareMentorFollowUp(text) || isInvalidationConditionQuestion(text))
+  ) {
+    return true;
+  }
   return false;
 }
 

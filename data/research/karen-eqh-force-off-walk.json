@@ -1,0 +1,12 @@
+{
+  "when": "2026-08-14T19:18:46.977Z",
+  "start": 500,
+  "n": 40,
+  "reuse": 0,
+  "rebuild": 40,
+  "mismatches": 0,
+  "reuseEqhMedMs": null,
+  "rebuildEqhMedMs": 228.99339999999938,
+  "reuseBarMedMs": null,
+  "rebuildBarMedMs": 1729.0429000000076
+}

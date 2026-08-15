@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "mode": "autonomous",
+  "terminateRunningRequested": false,
+  "updatedAt": "2026-08-14T23:59:41.051Z",
+  "lastIntervention": {
+    "command": "RESUME",
+    "at": "2026-08-14T23:59:41.050Z",
+    "reason": "human resume"
+  }
+}

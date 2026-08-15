@@ -180,15 +180,41 @@ export function remainderToSpeak(target: string, spoken: string): string {
   return "";
 }
 
-const FIRST_SENTENCE_MIN = 20;
+const FIRST_SENTENCE_MIN = 16;
 
-/** First complete sentence (min 20 chars) — for early TTS while SSE continues. */
+/** First complete sentence — for early TTS while SSE continues. */
 export function extractFirstCompleteSentence(text: string): string {
   const raw = String(text || "").trim();
   if (!raw) return "";
-  const m = raw.match(/^(.{20,}?[.!?])(?:\s|$)/);
+  const m = raw.match(/^(.{16,}?[.!?])(?:\s|$)/);
   if (m) return m[1].trim();
   const idx = raw.search(/[.!?]/);
   if (idx >= FIRST_SENTENCE_MIN - 1) return raw.slice(0, idx + 1).trim();
   return "";
+}
+
+export const VOICE_SPOKEN_MAX_SENTENCES = 2;
+export const VOICE_SPOKEN_MAX_CHARS = 320;
+
+/** Cap spoken TTS to one idea. Panel/chat can stay longer. */
+export function capSpokenVoice(
+  text: string,
+  opts?: { maxSentences?: number; maxChars?: number }
+): string {
+  const raw = String(text || "").trim();
+  if (!raw) return "";
+  const maxSentences = opts?.maxSentences ?? VOICE_SPOKEN_MAX_SENTENCES;
+  const maxChars = opts?.maxChars ?? VOICE_SPOKEN_MAX_CHARS;
+  const sentences = raw.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [raw];
+  let out = "";
+  let count = 0;
+  for (const s of sentences) {
+    const next = out ? `${out} ${s.trim()}` : s.trim();
+    if (count >= maxSentences) break;
+    if (count >= 1 && next.length > maxChars) break;
+    out = next;
+    count += 1;
+    if (out.length >= maxChars) break;
+  }
+  return out;
 }

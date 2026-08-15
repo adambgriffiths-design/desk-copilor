@@ -270,6 +270,91 @@ export function detectFirstPresentedFvgs(
   return { nyOpening, postFhdr, activeSession };
 }
 
+/** Refresh filled / inverted on an already-identified first-presented FVG (formation unchanged). */
+export function refreshFirstPresentedFvg(
+  m1: Bar[],
+  prev: FirstPresentedFvgResult
+): FirstPresentedFvgResult {
+  const lo = Math.min(prev.fvg.top, prev.fvg.bottom);
+  const hi = Math.max(prev.fvg.top, prev.fvg.bottom);
+  let formedIndex = -1;
+  if (prev.fvg.startTime != null) {
+    const ts = prev.fvg.startTime;
+    formedIndex = m1.findIndex((b) => Math.floor(b.time.getTime() / 1000) === ts);
+    if (formedIndex < 0) {
+      formedIndex = m1.findIndex((b) => Math.floor(b.time.getTime() / 1000) >= ts);
+    }
+  }
+  const fvg = { ...prev.fvg, inverted: isFvgInverted(m1, prev.fvg, formedIndex >= 0 ? formedIndex : undefined) };
+  return {
+    ...prev,
+    fvg,
+    filled: formedIndex >= 0 ? isGapFilled(m1, formedIndex, lo, hi) : prev.filled,
+  };
+}
+
+/**
+ * Incremental first-presented FVG: reuse formations already found for the same EST date + session;
+ * only re-scan variants that are still null. Detectors unchanged when they run.
+ */
+export function detectFirstPresentedFvgsIncremental(
+  m1: Bar[],
+  asOf: Date,
+  activeSessionId: SessionId,
+  prev:
+    | {
+        dateKey: string;
+        sessionId: SessionId;
+        result: {
+          nyOpening: FirstPresentedFvgResult | null;
+          postFhdr: FirstPresentedFvgResult | null;
+          activeSession: FirstPresentedFvgResult | null;
+        };
+      }
+    | null
+    | undefined
+): {
+  nyOpening: FirstPresentedFvgResult | null;
+  postFhdr: FirstPresentedFvgResult | null;
+  activeSession: FirstPresentedFvgResult | null;
+  reused: { nyOpening: boolean; postFhdr: boolean; activeSession: boolean };
+} {
+  const dateKey = getEstDateKey(asOf);
+  const canReuseMeta = !!prev && prev.dateKey === dateKey && prev.sessionId === activeSessionId;
+
+  const reused = { nyOpening: false, postFhdr: false, activeSession: false };
+
+  let nyOpening: FirstPresentedFvgResult | null;
+  if (canReuseMeta && prev!.result.nyOpening) {
+    nyOpening = refreshFirstPresentedFvg(m1, prev!.result.nyOpening);
+    reused.nyOpening = true;
+  } else {
+    nyOpening = detectNyOpeningFirstPresentedFvg(m1, dateKey);
+  }
+
+  let postFhdr: FirstPresentedFvgResult | null;
+  if (canReuseMeta && prev!.result.postFhdr) {
+    postFhdr = refreshFirstPresentedFvg(m1, prev!.result.postFhdr);
+    reused.postFhdr = true;
+  } else {
+    postFhdr = detectPostFhdrFirstPresentedFvg(m1, dateKey);
+  }
+
+  let activeSession: FirstPresentedFvgResult | null;
+  if (activeSessionId === "ny_am") {
+    // Same as detectSessionFirstPresentedFvg(ny_am) → detectNyOpeningFirstPresentedFvg
+    activeSession = nyOpening;
+    reused.activeSession = reused.nyOpening;
+  } else if (canReuseMeta && prev!.result.activeSession) {
+    activeSession = refreshFirstPresentedFvg(m1, prev!.result.activeSession);
+    reused.activeSession = true;
+  } else {
+    activeSession = detectSessionFirstPresentedFvg(m1, dateKey, activeSessionId);
+  }
+
+  return { nyOpening, postFhdr, activeSession, reused };
+}
+
 /**
  * ICT inverse FVG (IFVG) heuristic: polarity flips after a **body close** through the gap.
  * Bullish FVG inverted → bodies closed below gap bottom (was support, now resistance).

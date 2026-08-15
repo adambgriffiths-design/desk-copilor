@@ -14,6 +14,10 @@ assert(obs.market_structure === "bullish", "bullish structure detected");
 assert(obs.fvg.status === "present", "FVG present");
 assert(obs.displacement === "present", "displacement present");
 assert(obs.data_quality === "good", "good quality");
+assert(
+  obs.liquidity.levels.some((l) => l.label === "Asia high"),
+  "Asia high is in observation liquidity"
+);
 
 const missing = buildMarketObservation(REPLAY_FIXTURES["missing-quality"].ctx, REPLAY_FIXTURES["missing-quality"].state);
 assert(missing.market_structure === "unknown", "unknown structure when data missing");

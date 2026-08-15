@@ -1,0 +1,247 @@
+{
+  "video_id": "HTQgH11W37o",
+  "path": "data/ict-transcripts/raw/HTQgH11W37o.en.vtt",
+  "cues": 354,
+  "searches": {
+    "liquidity void": [
+      {
+        "t": "00:00:54.229",
+        "sec": 54.229,
+        "snippet": "[00:00:40.320] okay folks welcome back this is teaching [00:00:42.470] okay folks welcome back this is teaching [00:00:44.569] number five of eight for the ICT [00:00:49.430] mentorship content for December 2016. [00:00:51.350] we're going to deal with specifically [00:00:54.229] the reinforcing of liquidity voids and [00:00:58.739] okay a liquidity void is a range in [00:01:01.250] okay a liquidity void is a range in [00:01:02.990] price delivery [00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided"
+      },
+      {
+        "t": "00:00:58.739",
+        "sec": 58.739,
+        "snippet": "[00:00:42.470] okay folks welcome back this is teaching [00:00:44.569] number five of eight for the ICT [00:00:49.430] mentorship content for December 2016. [00:00:51.350] we're going to deal with specifically [00:00:54.229] the reinforcing of liquidity voids and [00:00:58.739] okay a liquidity void is a range in [00:01:01.250] okay a liquidity void is a range in [00:01:02.990] price delivery [00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided [00:01:09.350] ranges or candles"
+      },
+      {
+        "t": "00:01:01.250",
+        "sec": 61.25,
+        "snippet": "[00:00:44.569] number five of eight for the ICT [00:00:49.430] mentorship content for December 2016. [00:00:51.350] we're going to deal with specifically [00:00:54.229] the reinforcing of liquidity voids and [00:00:58.739] okay a liquidity void is a range in [00:01:01.250] okay a liquidity void is a range in [00:01:02.990] price delivery [00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided [00:01:09.350] ranges or candles [00:01:11.450] price typically will want to revisit"
+      },
+      {
+        "t": "00:01:22.789",
+        "sec": 82.789,
+        "snippet": "[00:01:11.450] price typically will want to revisit [00:01:14.270] this porous range or void of contrarian [00:01:14.280] this porous range or void of contrarian liquidity [00:01:17.820] okay we're going to look at an example [00:01:19.250] okay we're going to look at an example [00:01:22.789] of a liquidity void [00:01:25.190] and when prices in a small consolidation [00:01:28.310] or trading range we call this price in [00:01:30.950] balance in other words prices in a point [00:01:33.230] of equilibrium [00:01:35.450] at some point"
+      },
+      {
+        "t": "00:04:26.629",
+        "sec": 266.629,
+        "snippet": "[00:04:16.670] running out buy stops and they can sell [00:04:19.250] to those buy stops but that's not the [00:04:20.509] point of this teaching we're going to [00:04:21.650] specifically deal with the liquidity [00:04:24.110] void alone [00:04:26.629] when we have a liquidity void and it's [00:04:28.670] broken down like this what is it [00:04:30.350] basically the same [00:04:33.110] there's a void of buy side liquidity [00:04:35.810] that means the markets aggressively [00:04:37.490] moved away from that consolidation"
+      },
+      {
+        "t": "00:04:51.890",
+        "sec": 291.89,
+        "snippet": "[00:04:38.810] that's shaded in [00:04:41.030] and because it repriced aggressively [00:04:44.090] lower it was all on South Side liquidity [00:04:46.969] only very little buying took place in [00:04:50.030] that rundown so the nature of a [00:04:51.890] liquidity void is that we'll probably [00:04:54.890] see with a great deal probability [00:04:57.830] I'll move back up into that 104.76 level [00:05:00.710] which would cap or fill in the entire [00:05:02.689] liquidity void that we see in the form [00:05:04.550] of those two big candles that drop down"
+      },
+      {
+        "t": "00:05:02.689",
+        "sec": 302.689,
+        "snippet": "[00:04:50.030] that rundown so the nature of a [00:04:51.890] liquidity void is that we'll probably [00:04:54.890] see with a great deal probability [00:04:57.830] I'll move back up into that 104.76 level [00:05:00.710] which would cap or fill in the entire [00:05:02.689] liquidity void that we see in the form [00:05:04.550] of those two big candles that drop down [00:05:06.409] away from that consolidation but [00:05:08.570] remember it's a void of buy side [00:05:12.290] liquidity that causes downward ranges [00:05:14.749] like this which is what we call a"
+      },
+      {
+        "t": "00:05:16.550",
+        "sec": 316.55,
+        "snippet": "[00:05:04.550] of those two big candles that drop down [00:05:06.409] away from that consolidation but [00:05:08.570] remember it's a void of buy side [00:05:12.290] liquidity that causes downward ranges [00:05:14.749] like this which is what we call a [00:05:16.550] liquidity void in other words we expect [00:05:18.350] price to come back up and trade right [00:05:20.030] back over those same price levels that [00:05:23.570] we see here between 104.76 and 104.50 [00:05:23.580] we see here between 104.76 and 104.50 thereabouts [00:05:31.220] okay let's take a closer look here with"
+      },
+      {
+        "t": "00:06:26.689",
+        "sec": 386.689,
+        "snippet": "[00:06:15.890] what's going to be building up below [00:06:17.570] those lows [00:06:20.330] sell stops so if we anticipate price [00:06:22.610] potentially going up and closing in that [00:06:24.590] range that we've identified here as a [00:06:26.689] liquidity void what we're seeing there [00:06:30.409] is a big single five minute candle [00:06:32.330] that's bearish [00:06:34.730] sometime in the future we expect to see [00:06:36.890] that entire range of that down candle [00:06:39.050] that big long thin candle that we've"
+      },
+      {
+        "t": "00:06:40.969",
+        "sec": 400.969,
+        "snippet": "[00:06:30.409] is a big single five minute candle [00:06:32.330] that's bearish [00:06:34.730] sometime in the future we expect to see [00:06:36.890] that entire range of that down candle [00:06:39.050] that big long thin candle that we've [00:06:40.969] identified here as a liquidity void [00:06:45.230] that will be covered back over at some [00:06:47.870] future time in other words with that [00:06:50.390] range with bullish price action in order [00:06:51.950] there's going to be a bullish candle or [00:06:53.870] bullish price Wing that covers that"
+      },
+      {
+        "t": "00:06:57.950",
+        "sec": 417.95,
+        "snippet": "[00:06:47.870] future time in other words with that [00:06:50.390] range with bullish price action in order [00:06:51.950] there's going to be a bullish candle or [00:06:53.870] bullish price Wing that covers that [00:06:55.850] entire range that's identified here with [00:06:57.950] the liquidity void when it does that [00:07:01.550] price action has been balanced out in [00:07:03.290] other words it's been a complete and [00:07:06.110] uniform delivery of price action [00:07:08.029] it's been offered on the down move and [00:07:11.150] it's been offered on the buy move up"
+      },
+      {
+        "t": "00:07:37.309",
+        "sec": 457.309,
+        "snippet": "[00:07:26.809] doesn't sometimes it'll come right back [00:07:29.330] down run an area of liquidity again that [00:07:31.610] same equal lows and then it runs up and [00:07:33.650] hits it and that last portion noted here [00:07:35.870] you can see where that fills in the [00:07:37.309] liquidity void [00:07:40.790] closing right up on that 104 76 level [00:07:42.529] looking at this price action here you [00:07:45.050] can see there's several trades that you [00:07:46.370] could have taken [00:07:48.469] even on both sides of the marketplace"
+      }
+    ],
+    "void": [
+      {
+        "t": "00:00:54.229",
+        "sec": 54.229,
+        "snippet": "[00:00:40.320] okay folks welcome back this is teaching [00:00:42.470] okay folks welcome back this is teaching [00:00:44.569] number five of eight for the ICT [00:00:49.430] mentorship content for December 2016. [00:00:51.350] we're going to deal with specifically [00:00:54.229] the reinforcing of liquidity voids and [00:00:58.739] okay a liquidity void is a range in [00:01:01.250] okay a liquidity void is a range in [00:01:02.990] price delivery [00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided"
+      },
+      {
+        "t": "00:00:58.739",
+        "sec": 58.739,
+        "snippet": "[00:00:42.470] okay folks welcome back this is teaching [00:00:44.569] number five of eight for the ICT [00:00:49.430] mentorship content for December 2016. [00:00:51.350] we're going to deal with specifically [00:00:54.229] the reinforcing of liquidity voids and [00:00:58.739] okay a liquidity void is a range in [00:01:01.250] okay a liquidity void is a range in [00:01:02.990] price delivery [00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided [00:01:09.350] ranges or candles"
+      },
+      {
+        "t": "00:01:01.250",
+        "sec": 61.25,
+        "snippet": "[00:00:44.569] number five of eight for the ICT [00:00:49.430] mentorship content for December 2016. [00:00:51.350] we're going to deal with specifically [00:00:54.229] the reinforcing of liquidity voids and [00:00:58.739] okay a liquidity void is a range in [00:01:01.250] okay a liquidity void is a range in [00:01:02.990] price delivery [00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided [00:01:09.350] ranges or candles [00:01:11.450] price typically will want to revisit"
+      },
+      {
+        "t": "00:01:14.270",
+        "sec": 74.27,
+        "snippet": "[00:01:02.990] price delivery [00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided [00:01:09.350] ranges or candles [00:01:11.450] price typically will want to revisit [00:01:14.270] this porous range or void of contrarian [00:01:14.280] this porous range or void of contrarian liquidity [00:01:17.820] okay we're going to look at an example [00:01:19.250] okay we're going to look at an example [00:01:22.789] of a liquidity void [00:01:25.190] and when prices in a small consolidation"
+      },
+      {
+        "t": "00:01:14.280",
+        "sec": 74.28,
+        "snippet": "[00:01:04.729] where one side of the market liquidity [00:01:07.789] is shown in wide or long one-sided [00:01:09.350] ranges or candles [00:01:11.450] price typically will want to revisit [00:01:14.270] this porous range or void of contrarian [00:01:14.280] this porous range or void of contrarian liquidity [00:01:17.820] okay we're going to look at an example [00:01:19.250] okay we're going to look at an example [00:01:22.789] of a liquidity void [00:01:25.190] and when prices in a small consolidation [00:01:28.310] or trading range we call this price in"
+      },
+      {
+        "t": "00:01:22.789",
+        "sec": 82.789,
+        "snippet": "[00:01:11.450] price typically will want to revisit [00:01:14.270] this porous range or void of contrarian [00:01:14.280] this porous range or void of contrarian liquidity [00:01:17.820] okay we're going to look at an example [00:01:19.250] okay we're going to look at an example [00:01:22.789] of a liquidity void [00:01:25.190] and when prices in a small consolidation [00:01:28.310] or trading range we call this price in [00:01:30.950] balance in other words prices in a point [00:01:33.230] of equilibrium [00:01:35.450] at some point"
+      },
+      {
+        "t": "00:02:23.449",
+        "sec": 143.449,
+        "snippet": "[00:02:14.089] only two or three candles [00:02:15.770] that moved away from that consolidation [00:02:17.330] that range [00:02:19.550] can stay open for a while [00:02:21.650] there's no specific time limit on how [00:02:23.449] long it's going to take for these voids [00:02:25.369] to close in and that's one of the [00:02:28.430] repeating questions I get a lot is there [00:02:29.630] a way to know how long it's going to [00:02:32.330] take for these to fill in what that void [00:02:35.150] would be in terms of how fast and when"
+      },
+      {
+        "t": "00:02:32.330",
+        "sec": 152.33,
+        "snippet": "[00:02:21.650] there's no specific time limit on how [00:02:23.449] long it's going to take for these voids [00:02:25.369] to close in and that's one of the [00:02:28.430] repeating questions I get a lot is there [00:02:29.630] a way to know how long it's going to [00:02:32.330] take for these to fill in what that void [00:02:35.150] would be in terms of how fast and when [00:02:36.650] can we reasonably expect it to fill [00:02:39.369] that's all going to be [00:02:41.930] germane to what you're seeing in the [00:02:43.729] Market at the time you see the voids"
+      },
+      {
+        "t": "00:02:43.729",
+        "sec": 163.729,
+        "snippet": "[00:02:32.330] take for these to fill in what that void [00:02:35.150] would be in terms of how fast and when [00:02:36.650] can we reasonably expect it to fill [00:02:39.369] that's all going to be [00:02:41.930] germane to what you're seeing in the [00:02:43.729] Market at the time you see the voids [00:02:46.490] they can stay open for months they can [00:02:49.509] stay open just for a brief session [00:02:52.369] intraday and they can close it in [00:02:53.869] it's all going to be relative to what [00:02:59.099] I say void what am I specifically"
+      },
+      {
+        "t": "00:02:59.099",
+        "sec": 179.099,
+        "snippet": "[00:02:43.729] Market at the time you see the voids [00:02:46.490] they can stay open for months they can [00:02:49.509] stay open just for a brief session [00:02:52.369] intraday and they can close it in [00:02:53.869] it's all going to be relative to what [00:02:59.099] I say void what am I specifically [00:03:00.710] I say void what am I specifically [00:03:03.410] looking at and referring to it's this [00:03:05.449] small little area of price action where [00:03:08.630] it was only delivered on the downside we [00:03:11.509] have we have long bodied candles"
+      },
+      {
+        "t": "00:03:00.710",
+        "sec": 180.71,
+        "snippet": "[00:02:46.490] they can stay open for months they can [00:02:49.509] stay open just for a brief session [00:02:52.369] intraday and they can close it in [00:02:53.869] it's all going to be relative to what [00:02:59.099] I say void what am I specifically [00:03:00.710] I say void what am I specifically [00:03:03.410] looking at and referring to it's this [00:03:05.449] small little area of price action where [00:03:08.630] it was only delivered on the downside we [00:03:11.509] have we have long bodied candles [00:03:13.430] where price has only been delivered on"
+      },
+      {
+        "t": "00:03:24.830",
+        "sec": 204.83,
+        "snippet": "[00:03:11.509] have we have long bodied candles [00:03:13.430] where price has only been delivered on [00:03:15.530] the downside and has a small little Gap [00:03:20.509] in between the two biggest Down Candles [00:03:22.970] this is what we framed as a liquidity [00:03:24.830] void now this is a one minute chart [00:03:26.570] because a one minute chart is going to [00:03:27.890] give me the opportunity to show you how [00:03:29.050] there are [00:03:32.509] pockets in these big runs and not this [00:03:34.610] is a big run in terms of how many Pips"
+      }
+    ],
+    "fair value gap": [],
+    "imbalance": [
+      {
+        "t": "00:02:00.050",
+        "sec": 120.05,
+        "snippet": "[00:01:44.330] participation in the form of smart money [00:01:46.190] smart money is the only one that has the [00:01:49.010] deep enough Pockets to cause price to [00:01:52.850] move out of consolidations or move at [00:01:56.090] all really in any significant manner [00:02:00.050] this causes a price imbalance or as we [00:02:04.920] price can stay away from that [00:02:08.570] price can stay away from that [00:02:11.390] drop down aggressively where there was [00:02:14.089] only two or three candles [00:02:15.770] that moved away from that consolidation"
+      }
+    ],
+    "fvg": [],
+    "fill": [
+      {
+        "t": "00:02:32.330",
+        "sec": 152.33,
+        "snippet": "[00:02:21.650] there's no specific time limit on how [00:02:23.449] long it's going to take for these voids [00:02:25.369] to close in and that's one of the [00:02:28.430] repeating questions I get a lot is there [00:02:29.630] a way to know how long it's going to [00:02:32.330] take for these to fill in what that void [00:02:35.150] would be in terms of how fast and when [00:02:36.650] can we reasonably expect it to fill [00:02:39.369] that's all going to be [00:02:41.930] germane to what you're seeing in the [00:02:43.729] Market at the time you see the voids"
+      },
+      {
+        "t": "00:02:36.650",
+        "sec": 156.65,
+        "snippet": "[00:02:25.369] to close in and that's one of the [00:02:28.430] repeating questions I get a lot is there [00:02:29.630] a way to know how long it's going to [00:02:32.330] take for these to fill in what that void [00:02:35.150] would be in terms of how fast and when [00:02:36.650] can we reasonably expect it to fill [00:02:39.369] that's all going to be [00:02:41.930] germane to what you're seeing in the [00:02:43.729] Market at the time you see the voids [00:02:46.490] they can stay open for months they can [00:02:49.509] stay open just for a brief session"
+      },
+      {
+        "t": "00:05:00.710",
+        "sec": 300.71,
+        "snippet": "[00:04:46.969] only very little buying took place in [00:04:50.030] that rundown so the nature of a [00:04:51.890] liquidity void is that we'll probably [00:04:54.890] see with a great deal probability [00:04:57.830] I'll move back up into that 104.76 level [00:05:00.710] which would cap or fill in the entire [00:05:02.689] liquidity void that we see in the form [00:05:04.550] of those two big candles that drop down [00:05:06.409] away from that consolidation but [00:05:08.570] remember it's a void of buy side [00:05:12.290] liquidity that causes downward ranges"
+      },
+      {
+        "t": "00:07:35.870",
+        "sec": 455.87,
+        "snippet": "[00:07:25.010] sometimes it does and then sometimes it [00:07:26.809] doesn't sometimes it'll come right back [00:07:29.330] down run an area of liquidity again that [00:07:31.610] same equal lows and then it runs up and [00:07:33.650] hits it and that last portion noted here [00:07:35.870] you can see where that fills in the [00:07:37.309] liquidity void [00:07:40.790] closing right up on that 104 76 level [00:07:42.529] looking at this price action here you [00:07:45.050] can see there's several trades that you [00:07:46.370] could have taken"
+      },
+      {
+        "t": "00:14:28.610",
+        "sec": 868.61,
+        "snippet": "[00:14:19.490] coming to you in supplementary teachings [00:14:21.110] the last week of December because [00:14:22.910] there's no trading on the week of [00:14:24.230] Christmas while we're doing this [00:14:26.389] mentorship but it will be daily [00:14:28.610] teachings and it'll fill up your PDF [00:14:30.710] file so your PDF file is going to be [00:14:33.110] rich with a lot of content that can't be"
+      }
+    ],
+    "buy side": [
+      {
+        "t": "00:04:33.110",
+        "sec": 273.11,
+        "snippet": "[00:04:21.650] specifically deal with the liquidity [00:04:24.110] void alone [00:04:26.629] when we have a liquidity void and it's [00:04:28.670] broken down like this what is it [00:04:30.350] basically the same [00:04:33.110] there's a void of buy side liquidity [00:04:35.810] that means the markets aggressively [00:04:37.490] moved away from that consolidation [00:04:38.810] that's shaded in [00:04:41.030] and because it repriced aggressively [00:04:44.090] lower it was all on South Side liquidity"
+      },
+      {
+        "t": "00:05:08.570",
+        "sec": 308.57,
+        "snippet": "[00:04:57.830] I'll move back up into that 104.76 level [00:05:00.710] which would cap or fill in the entire [00:05:02.689] liquidity void that we see in the form [00:05:04.550] of those two big candles that drop down [00:05:06.409] away from that consolidation but [00:05:08.570] remember it's a void of buy side [00:05:12.290] liquidity that causes downward ranges [00:05:14.749] like this which is what we call a [00:05:16.550] liquidity void in other words we expect [00:05:18.350] price to come back up and trade right [00:05:20.030] back over those same price levels that"
+      },
+      {
+        "t": "00:05:52.850",
+        "sec": 352.85,
+        "snippet": "[00:05:37.730] consolidation you see this time it's [00:05:39.770] only showing as one big five minute [00:05:44.039] that same area is denoting a liquidity [00:05:47.150] that same area is denoting a liquidity [00:05:50.210] void again it's the absence of buyers or [00:05:52.850] buy side liquidity [00:05:55.010] and they're running lower aggressively [00:05:57.890] repricing so prices jumping down into [00:06:02.689] that 104.40 to 104 30 range before they [00:06:07.199] but pay attention to these lows down [00:06:08.930] but pay attention to these lows down"
+      }
+    ],
+    "sell side": [],
+    "gap": [
+      {
+        "t": "00:03:15.530",
+        "sec": 195.53,
+        "snippet": "[00:03:03.410] looking at and referring to it's this [00:03:05.449] small little area of price action where [00:03:08.630] it was only delivered on the downside we [00:03:11.509] have we have long bodied candles [00:03:13.430] where price has only been delivered on [00:03:15.530] the downside and has a small little Gap [00:03:20.509] in between the two biggest Down Candles [00:03:22.970] this is what we framed as a liquidity [00:03:24.830] void now this is a one minute chart [00:03:26.570] because a one minute chart is going to [00:03:27.890] give me the opportunity to show you how"
+      },
+      {
+        "t": "00:10:30.050",
+        "sec": 630.05,
+        "snippet": "[00:10:16.910] it just pokes its head above the [00:10:20.810] previous time it went above 104.76. but [00:10:22.850] look at the two candles immediately [00:10:26.389] after the run into 104.76 there's two [00:10:28.070] Down Candles one has a little bit longer [00:10:30.050] Wick and then the next candle it gaps [00:10:32.150] down at the opening and creates a [00:10:33.889] bearish candle I want you to look at [00:10:36.110] something specifically in here [00:10:38.630] see that little space right there where [00:10:43.019] this is a gap okay it's a price Gap"
+      },
+      {
+        "t": "00:10:43.019",
+        "sec": 643.019,
+        "snippet": "[00:10:30.050] Wick and then the next candle it gaps [00:10:32.150] down at the opening and creates a [00:10:33.889] bearish candle I want you to look at [00:10:36.110] something specifically in here [00:10:38.630] see that little space right there where [00:10:43.019] this is a gap okay it's a price Gap [00:10:46.910] this is a gap okay it's a price Gap [00:10:48.949] so if price gaps in here how can we use [00:10:50.630] this information we see that the [00:10:52.910] liquidity void has been closed in they [00:10:55.190] made it run one more time in the 104.76"
+      },
+      {
+        "t": "00:10:46.910",
+        "sec": 646.91,
+        "snippet": "[00:10:32.150] down at the opening and creates a [00:10:33.889] bearish candle I want you to look at [00:10:36.110] something specifically in here [00:10:38.630] see that little space right there where [00:10:43.019] this is a gap okay it's a price Gap [00:10:46.910] this is a gap okay it's a price Gap [00:10:48.949] so if price gaps in here how can we use [00:10:50.630] this information we see that the [00:10:52.910] liquidity void has been closed in they [00:10:55.190] made it run one more time in the 104.76 [00:10:58.630] blowing out the the level two times"
+      },
+      {
+        "t": "00:10:48.949",
+        "sec": 648.949,
+        "snippet": "[00:10:33.889] bearish candle I want you to look at [00:10:36.110] something specifically in here [00:10:38.630] see that little space right there where [00:10:43.019] this is a gap okay it's a price Gap [00:10:46.910] this is a gap okay it's a price Gap [00:10:48.949] so if price gaps in here how can we use [00:10:50.630] this information we see that the [00:10:52.910] liquidity void has been closed in they [00:10:55.190] made it run one more time in the 104.76 [00:10:58.630] blowing out the the level two times [00:11:00.590] closing the void"
+      },
+      {
+        "t": "00:11:03.050",
+        "sec": 663.05,
+        "snippet": "[00:10:50.630] this information we see that the [00:10:52.910] liquidity void has been closed in they [00:10:55.190] made it run one more time in the 104.76 [00:10:58.630] blowing out the the level two times [00:11:00.590] closing the void [00:11:03.050] and if we know that they gapped down or [00:11:04.550] made that liquidity void away from that [00:11:06.310] consolidation around that [00:11:08.630] 10480 institutional level that's what [00:11:10.790] it's moving away from it trades back up [00:11:10.800] it's moving away from it trades back up into"
+      },
+      {
+        "t": "00:12:05.630",
+        "sec": 725.63,
+        "snippet": "[00:11:53.630] natural position there [00:11:55.730] then price trades one more time up in [00:11:59.630] that 104.75 level 104.76 on the 19th of [00:12:01.490] December and then we see price [00:12:04.190] immediately two bearish candles but one [00:12:05.630] gaps down a little bit what is it [00:12:06.769] showing you there [00:12:09.050] again an aggressive move that it wants [00:12:11.030] to go lower but now it's giving you a [00:12:12.410] golden opportunity this is where we're [00:12:13.670] going to talk about gaps a little bit"
+      },
+      {
+        "t": "00:12:13.670",
+        "sec": 733.67,
+        "snippet": "[00:12:05.630] gaps down a little bit what is it [00:12:06.769] showing you there [00:12:09.050] again an aggressive move that it wants [00:12:11.030] to go lower but now it's giving you a [00:12:12.410] golden opportunity this is where we're [00:12:13.670] going to talk about gaps a little bit [00:12:16.430] more liquidity voids our Gap during [00:12:19.210] price Trading [00:12:22.569] where it extends across the uh this [00:12:25.190] distinct range [00:12:27.949] when we see a gap where price has closed"
+      },
+      {
+        "t": "00:12:16.430",
+        "sec": 736.43,
+        "snippet": "[00:12:06.769] showing you there [00:12:09.050] again an aggressive move that it wants [00:12:11.030] to go lower but now it's giving you a [00:12:12.410] golden opportunity this is where we're [00:12:13.670] going to talk about gaps a little bit [00:12:16.430] more liquidity voids our Gap during [00:12:19.210] price Trading [00:12:22.569] where it extends across the uh this [00:12:25.190] distinct range [00:12:27.949] when we see a gap where price has closed [00:12:29.449] from one candle and gaps into another"
+      },
+      {
+        "t": "00:12:27.949",
+        "sec": 747.949,
+        "snippet": "[00:12:13.670] going to talk about gaps a little bit [00:12:16.430] more liquidity voids our Gap during [00:12:19.210] price Trading [00:12:22.569] where it extends across the uh this [00:12:25.190] distinct range [00:12:27.949] when we see a gap where price has closed [00:12:29.449] from one candle and gaps into another [00:12:31.069] opening of another candle and that [00:12:33.170] separation between the two price don't [00:12:35.509] have a closure in other words it doesn't [00:12:38.630] have a range closing that in it creates"
+      },
+      {
+        "t": "00:12:29.449",
+        "sec": 749.449,
+        "snippet": "[00:12:16.430] more liquidity voids our Gap during [00:12:19.210] price Trading [00:12:22.569] where it extends across the uh this [00:12:25.190] distinct range [00:12:27.949] when we see a gap where price has closed [00:12:29.449] from one candle and gaps into another [00:12:31.069] opening of another candle and that [00:12:33.170] separation between the two price don't [00:12:35.509] have a closure in other words it doesn't [00:12:38.630] have a range closing that in it creates [00:12:41.329] a common Gap what can we do with this"
+      },
+      {
+        "t": "00:12:41.329",
+        "sec": 761.329,
+        "snippet": "[00:12:29.449] from one candle and gaps into another [00:12:31.069] opening of another candle and that [00:12:33.170] separation between the two price don't [00:12:35.509] have a closure in other words it doesn't [00:12:38.630] have a range closing that in it creates [00:12:41.329] a common Gap what can we do with this [00:12:44.090] common Gap well we have a inclination [00:12:46.250] that we're going to be moving lower so [00:12:48.050] if we're going to be moving lower and we [00:12:50.090] see a gap here we can put an order in [00:12:52.009] here the cell with a limit order at"
+      }
+    ]
+  }
+}

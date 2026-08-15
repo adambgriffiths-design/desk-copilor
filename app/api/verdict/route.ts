@@ -7,6 +7,7 @@ import { PREDICT_MODE_PROMPT } from "@/lib/predict-prompt";
 import { readAllFeedback, getTrainingExamples } from "@/lib/feedback-store";
 import { formatTrainingExamplesForPrompt } from "@/lib/training-examples";
 import { readLearnedRules, formatLearnedRulesForPrompt } from "@/lib/learned-rules-store";
+import { generateChartAnswer } from "@/lib/verdict-engine";
 
 export const runtime = "nodejs";
 
@@ -29,6 +30,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Chart image required" }, { status: 400 });
   }
 
+  const bytes = await image.arrayBuffer();
+  const base64 = Buffer.from(bytes).toString("base64");
+  const mimeType = image.type || "image/png";
+
+  if (!predictMode) {
+    try {
+      const result = await generateChartAnswer({
+        imageBase64: base64,
+        mimeType,
+        chartTime: chartTime || undefined,
+        question: note || "what do you see on the chart",
+      });
+      return NextResponse.json({
+        verdict: result.verdict,
+        spokenBrief: result.spokenBrief,
+        marketContext: result.marketContext,
+        marketDataWarning: result.marketDataWarning,
+        predictMode: false,
+        deskPipeline: result.deskPipeline,
+        decisionEnvelope: result.deskPipeline?.analysis_contract?.decision || null,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+  }
+
   let marketContextText = "";
   let marketContext: ReturnType<typeof buildMarketContext> | null = null;
   let marketDataWarning = "";
@@ -44,9 +72,6 @@ export async function POST(request: NextRequest) {
         : "Market data unavailable. Proceeding with chart only.";
   }
 
-  const bytes = await image.arrayBuffer();
-  const base64 = Buffer.from(bytes).toString("base64");
-  const mimeType = image.type || "image/png";
   const dataUrl = `data:${mimeType};base64,${base64}`;
 
   const allFeedback = await readAllFeedback();
@@ -58,14 +83,12 @@ export async function POST(request: NextRequest) {
   const userMessage = [
     learnedText,
     trainingText,
-    predictMode && PREDICT_MODE_PROMPT,
+    PREDICT_MODE_PROMPT,
     marketContextText,
     marketDataWarning,
     chartTime && `Chart time (EST): ${chartTime}`,
     note && `Trader note: ${note}`,
-    predictMode
-      ? "You are viewing the LEFT HALF of the chart only. Predict what happens on the hidden right half."
-      : "Analyze this MNQ 1m chart. Use the auto-fetched daily/15m/5m context above for HTF confluence.",
+    "You are viewing the LEFT HALF of the chart only. Predict what happens on the hidden right half.",
   ]
     .filter(Boolean)
     .join("\n\n");

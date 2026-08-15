@@ -1,5 +1,7 @@
-import type { MarketContext } from "./types";
+import type { MarketContext, Bar } from "./types";
 import type { MarketState } from "./market-state";
+import type { ChartCandle } from "./chart-snapshot";
+import { buildStructureFacts } from "./structure";
 
 export function baseCtx(overrides: Partial<MarketContext> = {}): MarketContext {
   return {
@@ -155,9 +157,165 @@ export function baseState(overrides: Partial<MarketState> = {}): MarketState {
     quality: { flag: "good", reasons: [] },
     candleHash: "abc123",
     stateHash: "bullish-wait-001",
+    snapshotId: "ms_bullish-wait-001",
     ...overrides,
   };
 }
+
+
+function mkCandle(t: number, o: number, h: number, l: number, c: number): ChartCandle {
+  return { t, o, h, l, c };
+}
+
+function padQuietCandles(n: number, startPrice: number, t0: number): ChartCandle[] {
+  const bars: ChartCandle[] = [];
+  for (let i = 0; i < n; i++) {
+    const p = startPrice + i * 0.25;
+    bars.push(mkCandle(t0 + i * 60, p, p + 0.5, p - 0.5, p + 0.125));
+  }
+  return bars;
+}
+
+function swingHighCandles(highs: number[], baseT: number): ChartCandle[] {
+  const bars: ChartCandle[] = [];
+  let t = baseT;
+  for (const peak of highs) {
+    bars.push(mkCandle(t, peak - 10, peak - 3, peak - 12, peak - 8));
+    t += 60;
+    bars.push(mkCandle(t, peak - 8, peak, peak - 10, peak - 4));
+    t += 60;
+    bars.push(mkCandle(t, peak - 4, peak - 3, peak - 12, peak - 9));
+    t += 60;
+  }
+  const last = highs[highs.length - 1];
+  bars.push(mkCandle(t, last - 20, last - 18, last - 22, last - 20));
+  return bars;
+}
+
+/** ≥20 candles; wing-2 swing high @ 21005; close 21007 for bullish MSS + FVG present. */
+export function chartProofMssCandles(): ChartCandle[] {
+  const t0 = 1_700_000_000;
+  const bars = padQuietCandles(16, 20970, t0);
+  let t = t0 + 16 * 60;
+  bars.push(mkCandle(t, 20995, 20998, 20993, 20996)); t += 60;
+  bars.push(mkCandle(t, 20996, 21000, 20994, 20998)); t += 60;
+  bars.push(mkCandle(t, 20998, 21005, 20997, 21002)); t += 60;
+  bars.push(mkCandle(t, 21002, 21003, 20996, 20998)); t += 60;
+  bars.push(mkCandle(t, 20998, 21000, 20994, 20996)); t += 60;
+  bars.push(mkCandle(t, 20996, 21010, 20995, 21007)); t += 60;
+  bars.push(mkCandle(t, 21007, 21009, 21005, 21007));
+  return bars;
+}
+
+/** REH pool 29887 / 29886.25 above price 29807.25. */
+export function chartProofRehCandles(): ChartCandle[] {
+  const t0 = 1_700_100_000;
+  const pad = padQuietCandles(14, 29780, t0);
+  const highs = swingHighCandles([29887.0, 29886.25], t0 + 14 * 60);
+  const merged = [...pad, ...highs];
+  const last = merged.at(-1)!;
+  merged.push(mkCandle(last.t + 60, 29850, 29855, 29800, 29807.25));
+  return merged;
+}
+
+/** Bullish unfilled FVG 21000–21005; no MSS. */
+export function chartProofFvgCandles(): ChartCandle[] {
+  const t0 = 1_700_200_000;
+  const bars = padQuietCandles(16, 20970, t0);
+  let t = t0 + 16 * 60;
+  bars.push(mkCandle(t, 20998, 21000, 20996, 20999)); t += 60;
+  bars.push(mkCandle(t, 20999, 21008, 20998, 21006)); t += 60;
+  bars.push(mkCandle(t, 21006, 21012, 21005, 21010)); t += 60;
+  bars.push(mkCandle(t, 21010, 21020, 21008, 21015));
+  return bars;
+}
+
+function chartProofBaseState(
+  candles: ChartCandle[],
+  lastPrice: number,
+  stateHash: string,
+): MarketState {
+  return baseState({
+    stateHash,
+    lastPrice,
+    candles,
+    fvg: [],
+    structure: { bias: "neutral", tradeableBias: "neutral" },
+    levels: {
+      pdh: lastPrice + 100,
+      pdl: lastPrice - 100,
+      pdc: lastPrice,
+      nearestSupport: lastPrice - 50,
+      nearestResistance: lastPrice + 50,
+    },
+  });
+}
+
+function chartCandlesToBars(candles: ChartCandle[]): Bar[] {
+  return candles.map((c) => ({
+    time: new Date(c.t * 1000),
+    open: c.o,
+    high: c.h,
+    low: c.l,
+    close: c.c,
+  }));
+}
+
+/**
+ * Rebuild structureFacts (and safe PD liquidity levels) from OHLC candles.
+ * Used by observation chart-proof harness so detection is proven from price action.
+ */
+export function rebuildCtxFromCandles(
+  _fixtureId: string,
+  fixture: { ctx: MarketContext; state: MarketState },
+): MarketContext {
+  const candles = fixture.state.candles;
+  const bars = chartCandlesToBars(candles);
+  const price = fixture.state.lastPrice;
+  const levels = [
+    { id: "pdh", label: "PDH", price: price + 100 },
+    { id: "pdl", label: "PDL", price: price - 100 },
+    { id: "pdc", label: "PDC", price },
+  ];
+  const asOf = bars.at(-1)?.time ?? new Date();
+  const sessionId = fixture.ctx.activeSession?.id ?? "ny_am";
+  const facts = buildStructureFacts(bars, levels, asOf, sessionId);
+  return {
+    ...fixture.ctx,
+    daily: {
+      ...fixture.ctx.daily,
+      previousDayHigh: price + 100,
+      previousDayLow: price - 100,
+      currentDayHigh: candles.length ? Math.max(...candles.map((c) => c.h)) : price,
+      currentDayLow: candles.length ? Math.min(...candles.map((c) => c.l)) : price,
+      lastClose: price,
+      equilibrium: price,
+    },
+    htfPdArrays: {
+      ...fixture.ctx.htfPdArrays,
+      levels,
+      previousDay: {
+        high: price + 100,
+        low: price - 100,
+        close: price,
+        open: price - 20,
+        equilibrium: price,
+      },
+    },
+    structureFacts: facts,
+  };
+}
+
+const emptyStructurePlaceholder = {
+  mss: null,
+  liquiditySweeps: [],
+  relativeEqualPools: [],
+  m1UnfilledFvgs: [],
+  m1InvertedFvgs: [],
+  fhdr: null,
+  firstPresentedFvg: { nyOpening: null, postFhdr: null, activeSession: null },
+  summary: "placeholder — rebuilt from OHLC in proof harness",
+} as const;
 
 export const REPLAY_FIXTURES: Record<string, { ctx: MarketContext; state: MarketState }> = {
   "ny-open-long-a-plus": { ctx: baseCtx(), state: baseState({ stateHash: "ny-open-long-001" }) },
@@ -251,5 +409,35 @@ export const REPLAY_FIXTURES: Record<string, { ctx: MarketContext; state: Market
       },
     }),
     state: baseState({ stateHash: "similar-skip-001" }),
+  },
+
+  "chart-proof-mss-bullish": {
+    ctx: baseCtx({
+      biasStack: {
+        daily: "neutral",
+        m15: "neutral",
+        m5: "neutral",
+        biasConflict: false,
+        alignedCount: 0,
+        dominantBias: "neutral",
+        tradeableBias: "neutral",
+        summary: "Neutral — MSS drives structure field",
+        conflictPairs: [],
+      },
+      structureFacts: { ...emptyStructurePlaceholder },
+    }),
+    state: chartProofBaseState(chartProofMssCandles(), 21007, "chart-proof-mss-001"),
+  },
+  "chart-proof-reh-above": {
+    ctx: baseCtx({
+      structureFacts: { ...emptyStructurePlaceholder },
+    }),
+    state: chartProofBaseState(chartProofRehCandles(), 29807.25, "chart-proof-reh-001"),
+  },
+  "chart-proof-fvg-present": {
+    ctx: baseCtx({
+      structureFacts: { ...emptyStructurePlaceholder },
+    }),
+    state: chartProofBaseState(chartProofFvgCandles(), 21015, "chart-proof-fvg-001"),
   },
 };

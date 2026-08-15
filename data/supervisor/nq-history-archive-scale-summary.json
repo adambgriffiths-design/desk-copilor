@@ -1,0 +1,67 @@
+{
+  "EDGE_CLAIM": "NONE",
+  "at": "2026-08-15T15:48:35Z",
+  "status": "READY_FOR_ADAM_REVIEW",
+  "inventory_live": {
+    "tradingDays_rawDirs": 750,
+    "tradingDays_utcBarDates": 739,
+    "span": "2023-10-02 → 2026-08-14",
+    "barCount_latest": 950405
+  },
+  "carve_v1": {
+    "DEVELOPMENT": "2023-10-02 → 2025-05-31 (X=429)",
+    "VALIDATION": "2025-06-01 → 2025-12-31 (X=152)",
+    "UNTOUCHED_HOLDOUT": "2026-01-01 → 2026-08-14 (X=158, sealed)"
+  },
+  "primary_dv": {
+    "label": "12mo window limit1500 cadence15 baseline-v2",
+    "X": 258,
+    "Y": 1500,
+    "Z": 255,
+    "LONG": 120,
+    "SHORT": 140,
+    "WAIT": 1032,
+    "NO_TRADE": 208,
+    "PIT": 0
+  },
+  "carve_even_span_dv": {
+    "DEVELOPMENT": { "X": 429, "Y": 500, "Z": 26, "L_S_W_NT": "14/12/404/70", "PIT": 0 },
+    "VALIDATION": { "X": 152, "Y": 500, "Z": 70, "L_S_W_NT": "47/26/363/64", "PIT": 0 },
+    "UNTOUCHED_HOLDOUT": { "X": 158, "Y": 500, "Z": 79, "L_S_W_NT": "48/39/347/66", "PIT": 0, "note": "measurement only — not for tuning" }
+  },
+  "dev_dense_even_span_dv": {
+    "label": "DEVELOPMENT-only even cadence10 limit1500",
+    "X": 429,
+    "Y": 1500,
+    "Z": 80,
+    "LONG": 48,
+    "SHORT": 36,
+    "WAIT": 1168,
+    "NO_TRADE": 248,
+    "PIT": 0,
+    "report": "acquisition/reports/nq-history-archive-carve-even-span-dev-dense-c10-y1500-latest.json"
+  },
+  "fullspan_even_chunked": {
+    "chunks": 6,
+    "X": 739,
+    "Y": 1500,
+    "Z": 129,
+    "LONG": 67,
+    "SHORT": 68,
+    "WAIT": 1156,
+    "NO_TRADE": 209,
+    "PIT": 0
+  },
+  "baselines": {
+    "v1": "FROZEN",
+    "v2": "FROZEN",
+    "v3": "CANDIDATE — micro-fixture FIX proven; 214 Δ0; NOT_PROMOTED",
+    "v4": "CANDIDATE — empty-session path triggered (context); DV Δ0 on micro + 214; NOT_PROMOTED"
+  },
+  "micro_fixtures": {
+    "report": "data/karen-decision-validation/micro-fixtures/reports/micro-fixtures-v3-v4-latest.json",
+    "v3": "FIX_PROVEN_ON_MICROFIXTURE",
+    "v4": "PATH_TRIGGERED_DELTA0"
+  },
+  "next_experiment": "Holdout expectancy ONLY after Adam unlock; no holdout densify for edge; no v3/v4 promotion without Adam"
+}

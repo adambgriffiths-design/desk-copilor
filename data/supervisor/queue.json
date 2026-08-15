@@ -1,0 +1,1429 @@
+{
+  "maxSize": 50,
+  "tasks": [
+    {
+      "id": "pilot-diag-research-replay",
+      "createdAt": "2026-08-13T14:00:00.000Z",
+      "prompt": "READ-ONLY: Run npm run test:research-replay and report pass/fail counts. Do not modify code. STOP after report.",
+      "reason": "clean pilot backlog (diag-research-replay)",
+      "priority": 10,
+      "status": "completed",
+      "title": "Run research replay diagnostics",
+      "category": "diagnostic",
+      "verifyScript": "test:research-replay",
+      "allowedPaths": [],
+      "confidence": 0.95,
+      "completedAt": "2026-08-13T14:21:09.227Z"
+    },
+    {
+      "id": "pilot-audit-supervisor-health",
+      "createdAt": "2026-08-13T14:00:00.001Z",
+      "prompt": "READ-ONLY: Inspect lib/supervisor/ and data/supervisor/. No code changes unless test failure. STOP.",
+      "reason": "clean pilot backlog (audit-supervisor-health)",
+      "priority": 20,
+      "status": "completed",
+      "title": "Supervisor self-health audit",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/",
+        "data/supervisor/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-13T14:21:29.893Z"
+    },
+    {
+      "id": "pilot-research-replay-record-check",
+      "createdAt": "2026-08-13T14:00:00.002Z",
+      "prompt": "READ-ONLY: Run npm run test:research-replay-record. Report only. STOP.",
+      "reason": "clean pilot backlog (research-replay-record-check)",
+      "priority": 30,
+      "status": "completed",
+      "title": "Verify replay record CLI",
+      "category": "diagnostic",
+      "verifyScript": "test:research-replay-record",
+      "allowedPaths": [],
+      "confidence": 0.85,
+      "completedAt": "2026-08-13T14:27:23.016Z"
+    },
+    {
+      "id": "pilot-docs-supervisor-readme",
+      "createdAt": "2026-08-13T14:00:00.003Z",
+      "prompt": "Update data/supervisor/README.md with detection limitations. Only touch that file. STOP.",
+      "reason": "clean pilot backlog (docs-supervisor-readme)",
+      "priority": 40,
+      "status": "completed",
+      "title": "Document supervisor limitations",
+      "category": "docs",
+      "allowedPaths": [
+        "data/supervisor/README.md"
+      ],
+      "confidence": 0.8,
+      "completedAt": "2026-08-13T14:28:56.120Z"
+    },
+    {
+      "id": "research-nq-replay-ny-open",
+      "createdAt": "2026-08-13T14:38:00.000Z",
+      "prompt": "READ-ONLY: Run research replay on nq-aug12-2026-cme at 2026-08-12T14:30:00.000Z. Compare to stored record. Report only. STOP.",
+      "reason": "Karen research — validate real-data replay at NY open",
+      "priority": 10,
+      "status": "completed",
+      "title": "NQ replay NY open validation",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "data/research/",
+        "lib/research/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-13T14:50:00.000Z"
+    },
+    {
+      "id": "research-nq-replay-session-end",
+      "createdAt": "2026-08-13T14:38:00.001Z",
+      "prompt": "READ-ONLY: Run research replay on nq-aug12-2026-cme at 2026-08-12T20:59:00.000Z. Report Karen verdict and structure. STOP.",
+      "reason": "Karen research — session end regime check",
+      "priority": 15,
+      "status": "completed",
+      "title": "NQ replay session end",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "data/research/",
+        "lib/research/"
+      ],
+      "confidence": 0.85,
+      "completedAt": "2026-08-13T14:50:00.001Z"
+    },
+    {
+      "id": "research-nq-session-boundary-gap",
+      "createdAt": "2026-08-13T14:55:00.000Z",
+      "prompt": "READ-ONLY: Analyze SESSION_BOUNDARY_GAP on nq-aug12-2026-cme validation. Data vs strategy issue. STOP.",
+      "reason": "Karen research — CME gap classification",
+      "priority": 20,
+      "status": "completed",
+      "title": "CME session boundary gap analysis",
+      "category": "audit",
+      "allowedPaths": [
+        "data/research/",
+        "lib/research/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-13T14:58:00.000Z"
+    },
+    {
+      "id": "research-nq-baseline-ny-oos",
+      "createdAt": "2026-08-13T14:55:00.001Z",
+      "prompt": "READ-ONLY: Run npm run research:baseline -- --dataset nq-aug12-2026-cme --test-start 2026-08-12T14:30:00.000Z. Report setups, look-ahead, reproducibility. STOP.",
+      "reason": "Karen research — honest baseline on real NQ",
+      "priority": 25,
+      "status": "failed",
+      "title": "NQ baseline backtest (NY OOS)",
+      "category": "experiment",
+      "allowedPaths": [
+        "data/research/",
+        "lib/research/"
+      ],
+      "confidence": 0.8,
+      "startedAt": "2026-08-13T14:55:07.023Z",
+      "failedAt": "2026-08-13T15:39:01.522Z",
+      "errorMessage": "killed: timeout after ~44 min (terminal 492141), no report — deferred pending chunked execution"
+    },
+    {
+      "id": "research-baseline-runtime-bottleneck",
+      "createdAt": "2026-08-13T14:00:00.000Z",
+      "prompt": "Profile synthetic baseline phases, prove reuse equivalence, run test suite, defer NQ until chunked tooling.",
+      "reason": "Research tooling — baseline runtime bottleneck",
+      "priority": 5,
+      "status": "completed",
+      "title": "Baseline runtime bottleneck investigation",
+      "category": "experiment",
+      "allowedPaths": [
+        "lib/research/",
+        "scripts/",
+        "data/research/",
+        "data/supervisor/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-13T16:15:00.000Z"
+    },
+    {
+      "id": "research-synthetic-vs-replay-setups",
+      "createdAt": "2026-08-13T16:15:00.000Z",
+      "prompt": "Why does synthetic baseline produce 0 setups while replay produces LONG/SHORT? Investigate entry gates vs replay path.",
+      "reason": "Falsification — baseline vs replay setup mismatch",
+      "priority": 30,
+      "status": "completed",
+      "title": "Falsify: synthetic baseline 0 setups vs replay LONG/SHORT",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/research/",
+        "data/research/",
+        "scripts/"
+      ],
+      "confidence": 0.85,
+      "completedAt": "2026-08-13T17:25:00.000Z"
+    },
+    {
+      "id": "research-baseline-chunked-execution",
+      "createdAt": "2026-08-13T16:15:00.001Z",
+      "prompt": "Design chunked/checkpoint baseline execution for NQ (1381 bars). Per-phase progress, resume, equivalence. Do NOT run full NQ baseline.",
+      "reason": "Research tooling — NQ baseline impractical without chunking",
+      "priority": 35,
+      "status": "completed",
+      "title": "Design chunked/checkpoint baseline execution for NQ",
+      "category": "experiment",
+      "allowedPaths": [
+        "lib/research/",
+        "scripts/",
+        "data/research/"
+      ],
+      "confidence": 0.8,
+      "completedAt": "2026-08-13T17:38:17.545Z"
+    },
+    {
+      "id": "research-karen-edge-validation-v2",
+      "createdAt": "2026-08-13T19:30:00.000Z",
+      "prompt": "READ-ONLY edge study: Run Phase 1 baseline on nq-aug12-2026-cme with --incremental --chunk-size 100. TRAIN/TEST --test-start 2026-08-12T14:30:00.000Z. Report setups, poison/repro. Compare pipeline vs deterministic replay — label paths separately. STOP.",
+      "reason": "Historical data-quality fix complete — honest edge measurement now possible",
+      "priority": 28,
+      "status": "completed",
+      "title": "Karen edge validation v2 (post data-quality fix)",
+      "category": "experiment",
+      "allowedPaths": [
+        "lib/research/",
+        "scripts/",
+        "data/research/",
+        "data/supervisor/"
+      ],
+      "confidence": 0.85,
+      "completedAt": "2026-08-13T19:45:00.000Z"
+    },
+    {
+      "id": "research-nq-baseline-incremental-pilot",
+      "createdAt": "2026-08-13T17:40:00.000Z",
+      "prompt": "Run NQ baseline with --incremental --chunk-size 100 on nq-aug12-2026-cme. Resume if checkpoint exists. Report chunk progress, fingerprint, poison/repro. Do NOT run duplicate baseline.",
+      "reason": "Validate incremental runner on NQ-scale dataset",
+      "priority": 40,
+      "status": "completed",
+      "title": "NQ incremental baseline pilot (100-bar chunks)",
+      "category": "experiment",
+      "allowedPaths": [
+        "lib/research/",
+        "scripts/",
+        "data/research/"
+      ],
+      "confidence": 0.75,
+      "completedAt": "2026-08-13T19:40:00.000Z"
+    },
+    {
+      "id": "live-pilot-queue-authoritative",
+      "createdAt": "2026-08-13T14:25:38.924Z",
+      "prompt": "LIVE PILOT: Tasks are seeded in queue.json only. This sentinel prevents DEFAULT_BACKLOG fallback. Do not dispatch.",
+      "reason": "backlog seed (live-pilot-queue-authoritative)",
+      "priority": 999,
+      "status": "blocked",
+      "title": "Pilot queue authoritative",
+      "category": "audit",
+      "allowedPaths": [
+        "data/supervisor/"
+      ],
+      "confidence": 0.1,
+      "errorMessage": "quality_gate:missing_objective"
+    },
+    {
+      "id": "research-yahoo-screening-pilot",
+      "createdAt": "2026-08-14T08:45:50.010Z",
+      "prompt": "Research-only follow-up to research-yahoo-vs-tickstream: use loadDatasetFromYahoo + compare-sources to screen 60d HTF bias/MSS on Yahoo vs TickStream overlap windows. Document divergence rate. Do NOT replace TickStream validation or run full NQ baseline.",
+      "reason": "backlog seed (research-yahoo-screening-pilot)",
+      "priority": 28,
+      "status": "completed",
+      "title": "Yahoo HTF screening pilot (daily/15m bias scan)",
+      "category": "experiment",
+      "verifyScript": "test:research-yahoo-vs-tickstream",
+      "allowedPaths": [
+        "lib/research/",
+        "scripts/test-research*",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.7,
+      "completedAt": "2026-08-14T09:17:01.898Z"
+    },
+    {
+      "id": "research-nq-load-week-tickstream",
+      "createdAt": "2026-08-14T08:45:50.015Z",
+      "prompt": "Load 1 week NQ CME data via existing tooling. Run: npm run research:dataset -- --symbol NQ --start 2026-08-05T22:00:00Z --end 2026-08-12T22:00:00Z --fixture-id nq-week-aug05-aug12-2026-cme. Validate integrity. Preview checkpoint plan: npx tsx scripts/research-mentor-checkpoint-plan.ts --dataset nq-week-aug05-aug12-2026-cme. Do NOT run full baseline or duplicate Aug 12 mentor eval. Report: data/supervisor/results/research-nq-load-week-tickstream.md. STOP if TICKSTREAM_API_KEY missing.",
+      "reason": "backlog seed (research-nq-load-week-tickstream)",
+      "priority": 32,
+      "status": "failed",
+      "title": "Load 1 week NQ TickStream (Aug 5–12 2026)",
+      "category": "experiment",
+      "verifyScript": "test:research-dataset",
+      "allowedPaths": [
+        "lib/research/",
+        "scripts/",
+        "data/research/",
+        "data/research-fixtures/",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.85,
+      "completedAt": "2026-08-14T09:29:37.877Z",
+      "errorMessage": "\\bfailed\\b"
+    },
+    {
+      "id": "fix-build-1786699777978",
+      "createdAt": "2026-08-14T09:29:38.002Z",
+      "prompt": "Run npm run build, capture TypeScript errors. Only fix errors in lib/research/ or lib/supervisor/. STOP after report.",
+      "reason": "Generated after research-nq-load-week-tickstream — Build failed after task completion",
+      "priority": 5,
+      "status": "blocked",
+      "title": "Fix build failure",
+      "category": "build-fix",
+      "allowedPaths": [
+        "data/supervisor/",
+        "lib/research/",
+        "scripts/test-research-yahoo-vs-tickstream.ts/",
+        "lib/supervisor/",
+        "scripts/research-eqh-eql-importance-diagnostic.ts/"
+      ],
+      "confidence": 0.65,
+      "errorMessage": "task_running_timeout"
+    },
+    {
+      "id": "docs-supervisor-enqueue-runbook",
+      "createdAt": "2026-08-14T19:57:33.446Z",
+      "prompt": "DOCS: Update data/supervisor/README.md with a short runbook: (1) enqueue via npm run supervisor:control -- priority OR queue.json create as pending; (2) backlog.json seeds only on empty startup and is not selection authority; (3) orphan inbox JSON without matching queue pending must be archived; (4) live autonomous: npm run supervisor -- --live --autonomous --max-iterations N (default N=5; raise N to drain queue; no daemon — --watch is one-shot); (5) stop via npm run supervisor:control -- stop|pause. Do NOT change code beyond README. Write confirmation to data/supervisor/results/docs-supervisor-enqueue-runbook.md. STOP.",
+      "reason": "Priority: operator runbook so OUT user can keep supervisor alive safely",
+      "priority": 10,
+      "status": "failed",
+      "title": "Document safe enqueue + live autonomous flags",
+      "category": "docs",
+      "allowedPaths": [
+        "data/supervisor/README.md",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-14T20:16:10.438Z",
+      "errorMessage": "# docs-supervisor-enqueue-runbook"
+    },
+    {
+      "id": "diag-research-replay-smoke",
+      "createdAt": "2026-08-14T19:57:33.448Z",
+      "prompt": "READ-ONLY DIAGNOSTIC: Run npm run test:research-replay once. Report pass/fail counts only. Do NOT modify code. Do NOT run historical baseline or week experiments. Write report to data/supervisor/results/diag-research-replay-smoke.md. STOP.",
+      "reason": "Safe diagnostic aligned with supervisor health; low RAM",
+      "priority": 12,
+      "status": "completed",
+      "title": "Research replay smoke diagnostic",
+      "category": "diagnostic",
+      "verifyScript": "test:research-replay",
+      "allowedPaths": [],
+      "confidence": 0.93,
+      "completedAt": "2026-08-14T20:16:10.448Z"
+    },
+    {
+      "id": "audit-sse-flush-evidence-readonly",
+      "createdAt": "2026-08-14T19:57:33.450Z",
+      "prompt": "READ-ONLY AUDIT (no code edits): From data/research/karen-architecture-roadmap.md and karen-speed-connection-priority-audit.md priorities, check whether data/research/karen-sse-streaming.md exists; summarize karen-sse-streaming-before.json if present; note if lib/sse-trading-flush.ts exists. Report ONLY status/gaps for the single warm-HIT HTTP first-visible proof — do NOT start a second SSE rewrite, do NOT edit app/api/chat/stream/route.ts, do NOT run 5-read marathons, do NOT start extra next-dev, do NOT hit OpenAI storm. Write report to data/supervisor/results/audit-sse-flush-evidence-readonly.md. STOP.",
+      "reason": "Roadmap #1 / speed-audit safest next: measurement status without thrashing RAM",
+      "priority": 14,
+      "status": "blocked",
+      "title": "SSE flush evidence status audit (read-only)",
+      "category": "audit",
+      "allowedPaths": [
+        "data/research/",
+        "data/supervisor/results/",
+        "lib/sse-trading-flush.ts"
+      ],
+      "confidence": 0.88,
+      "errorMessage": "unsafe_task_scope"
+    },
+    {
+      "id": "diag-live-context-reuse-tests",
+      "createdAt": "2026-08-14T19:57:33.452Z",
+      "prompt": "READ-ONLY DIAGNOSTIC: Run npm run test:live-context-reuse if present (else report missing script). Capture pass/fail. Do NOT modify lib/ or app/. Do NOT launch next-dev. Write report to data/supervisor/results/diag-live-context-reuse-tests.md. STOP.",
+      "reason": "Speed/reuse track: verify landed reuse still green without cold structure rewrite",
+      "priority": 16,
+      "status": "failed",
+      "title": "Live context reuse test suite smoke",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "data/supervisor/results/",
+        "scripts/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-14T20:17:24.270Z",
+      "errorMessage": "\\bfailed\\b; exception"
+    },
+    {
+      "id": "audit-local-process-pressure-readonly",
+      "createdAt": "2026-08-14T19:57:33.453Z",
+      "prompt": "READ-ONLY OPS AUDIT: List desk-copilot related node/next processes (PIDs, approx WS memory, command line snippets) and whether :3000 has a single next-dev. Note leftover research profilers if any. Do NOT kill Karen :3000, Cursor, or Chrome. Do NOT start extra next-dev. Do NOT run historical research experiments. Write report to data/supervisor/results/audit-local-process-pressure-readonly.md. STOP.",
+      "reason": "Speed-connection P1 ops: inventory only to avoid 8GB thrash",
+      "priority": 18,
+      "status": "failed",
+      "title": "Local process/RAM pressure inventory",
+      "category": "audit",
+      "allowedPaths": [
+        "data/supervisor/results/",
+        "data/research/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-14T20:19:18.442Z",
+      "errorMessage": "# audit-local-process-pressure-readonly"
+    },
+    {
+      "id": "audit-supervisor-pickup-signal",
+      "createdAt": "2026-08-14T19:57:50.981Z",
+      "prompt": "READ-ONLY AUDIT: Inspect lib/supervisor/live-pickup.ts and pickup.ts. Confirm when pending-pickup.json is written/cleared vs queue pending. Report how orphan inbox JSON can show pending while queue has 0 pending. Recommend archive-only cleanup. Do NOT unblock blocked tasks. Do NOT edit trading routes. Write report to data/supervisor/results/audit-supervisor-pickup-signal.md. STOP.",
+      "reason": "Operator clarity: pickup signal vs queue authority after orphan cleanup",
+      "priority": 9,
+      "status": "failed",
+      "title": "Audit pending-pickup signal refresh",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/",
+        "data/supervisor/"
+      ],
+      "confidence": 0.91,
+      "completedAt": "2026-08-14T20:14:58.424Z",
+      "errorMessage": "\\bfailed\\b"
+    },
+    {
+      "id": "diag-supervisor-selftest-smoke",
+      "createdAt": "2026-08-14T20:20:17.562Z",
+      "prompt": "READ-ONLY DIAGNOSTIC: Run npm run test:supervisor once. Report pass or fail counts only. Do NOT modify code. Do NOT run historical research. Write report to data/supervisor/results/diag-supervisor-selftest-smoke.md. Avoid the word fail in prose if tests pass — say PASS counts. STOP.",
+      "reason": "Keep autonomous busy with safe supervisor self-check",
+      "priority": 11,
+      "status": "failed",
+      "title": "Run supervisor unit smoke tests",
+      "category": "diagnostic",
+      "verifyScript": "test:supervisor",
+      "allowedPaths": [
+        "lib/supervisor/",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.92,
+      "completedAt": "2026-08-14T20:21:44.086Z",
+      "errorMessage": "\\berror\\b; \\bfailed\\b"
+    },
+    {
+      "id": "diag-supervisor-pickup-tests",
+      "createdAt": "2026-08-14T20:20:17.565Z",
+      "prompt": "READ-ONLY DIAGNOSTIC: Run npm run test:supervisor-pickup once. Report PASS counts. Do NOT modify code. Write report to data/supervisor/results/diag-supervisor-pickup-tests.md. STOP.",
+      "reason": "Safe pickup path verification",
+      "priority": 13,
+      "status": "failed",
+      "title": "Run supervisor pickup tests",
+      "category": "diagnostic",
+      "verifyScript": "test:supervisor-pickup",
+      "allowedPaths": [
+        "lib/supervisor/",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.92,
+      "completedAt": "2026-08-14T21:10:38.624Z",
+      "errorMessage": "\\bfailed\\b; exception"
+    },
+    {
+      "id": "audit-supervisor-memory-notes",
+      "createdAt": "2026-08-14T20:20:17.567Z",
+      "prompt": "READ-ONLY AUDIT: Summarize data/supervisor/memory.json projectState notes and consecutiveBuildFailures. Recommend whether to reset consecutiveBuildFailures before next live run. Do NOT unblock blocked queue tasks. Write report to data/supervisor/results/audit-supervisor-memory-notes.md. STOP.",
+      "reason": "Ops clarity after repeated_build_failures stop",
+      "priority": 15,
+      "status": "failed",
+      "title": "Audit supervisor memory.json notes",
+      "category": "audit",
+      "allowedPaths": [
+        "data/supervisor/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-14T21:10:57.103Z",
+      "errorMessage": "# audit-supervisor-memory-notes"
+    },
+    {
+      "id": "docs-supervisor-result-eval-gotcha",
+      "createdAt": "2026-08-14T20:20:17.569Z",
+      "prompt": "DOCS: Append a short note to data/supervisor/README.md under Operator runbook: live evaluator may mark reports FAILED if the markdown contains the word failed (regex). Advise reports to say PASS/incomplete instead when successful. Do NOT change evaluator code. Write confirmation to data/supervisor/results/docs-supervisor-result-eval-gotcha.md. STOP.",
+      "reason": "Prevent thrash from brittle report evaluation",
+      "priority": 17,
+      "status": "failed",
+      "title": "Document result evaluator false-fail gotcha",
+      "category": "docs",
+      "allowedPaths": [
+        "data/supervisor/README.md",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-14T21:11:33.978Z",
+      "errorMessage": "# docs-supervisor-result-eval-gotcha"
+    },
+    {
+      "id": "diag-supervisor-queue-tests",
+      "createdAt": "2026-08-14T21:12:19.732Z",
+      "prompt": "READ-ONLY DIAGNOSTIC: Run npm run test:supervisor-queue once. Report PASS counts only. Do NOT modify code. Write report to data/supervisor/results/diag-supervisor-queue-tests.md. STOP.",
+      "reason": "Keep live autonomous fed with safe supervisor checks",
+      "priority": 12,
+      "status": "failed",
+      "title": "Run supervisor queue tests",
+      "category": "diagnostic",
+      "verifyScript": "test:supervisor-queue",
+      "allowedPaths": [
+        "lib/supervisor/",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.92,
+      "completedAt": "2026-08-14T21:13:35.144Z",
+      "errorMessage": "\\bfailed\\b"
+    },
+    {
+      "id": "diag-supervisor-control-tests",
+      "createdAt": "2026-08-14T21:12:19.735Z",
+      "prompt": "READ-ONLY DIAGNOSTIC: Run npm run test:supervisor-control once. Report PASS counts only. Do NOT modify code. Write report to data/supervisor/results/diag-supervisor-control-tests.md. STOP.",
+      "reason": "Safe control-path smoke while OUT",
+      "priority": 14,
+      "status": "failed",
+      "title": "Run supervisor control tests",
+      "category": "diagnostic",
+      "verifyScript": "test:supervisor-control",
+      "allowedPaths": [
+        "lib/supervisor/",
+        "data/supervisor/results/"
+      ],
+      "confidence": 0.92,
+      "completedAt": "2026-08-14T21:14:46.957Z",
+      "errorMessage": "\\bfailed\\b"
+    },
+    {
+      "id": "audit-supervisor-executions-tail",
+      "createdAt": "2026-08-14T21:12:19.738Z",
+      "prompt": "READ-ONLY AUDIT: Summarize the last 10 lines of data/supervisor/executions.jsonl (timestamp, state, stopReason, task id). Do NOT unblock blocked tasks. Write report to data/supervisor/results/audit-supervisor-executions-tail.md. STOP.",
+      "reason": "Ops visibility after drain/exit cycles",
+      "priority": 16,
+      "status": "failed",
+      "title": "Audit recent supervisor executions tail",
+      "category": "audit",
+      "allowedPaths": [
+        "data/supervisor/"
+      ],
+      "confidence": 0.9,
+      "completedAt": "2026-08-14T21:16:52.158Z",
+      "errorMessage": "# audit-supervisor-executions-tail"
+    },
+    {
+      "id": "queue-1786742825637-aw0x7d",
+      "createdAt": "2026-08-14T21:27:05.637Z",
+      "prompt": "READ-ONLY AUDIT: Report mode, lastIntervention, terminateRunningRequested from data/supervisor/control.json. Do NOT change files. Write data/supervisor/results/audit-supervisor-control-mode.md. STOP.",
+      "reason": "OUT autonomous light queue seed",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit supervisor control.json mode",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T21:29:16.270Z",
+      "errorMessage": "# queue-1786742825637-aw0x7d — Audit supervisor control.json mode"
+    },
+    {
+      "id": "queue-1786742828473-ocsclu",
+      "createdAt": "2026-08-14T21:27:08.473Z",
+      "prompt": "DOCS ONLY: Append a short note to data/supervisor/results/docs-supervisor-pickup-gotchas.md summarizing claim vs pending-pickup stale signal (from README detection limitations 10-11). Do NOT edit README. Create the results file if missing. STOP.",
+      "reason": "OUT autonomous light queue seed",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs supervisor pickup gotchas note",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T21:30:22.607Z",
+      "errorMessage": "# queue-1786742828473-ocsclu — Docs supervisor pickup gotchas note"
+    },
+    {
+      "id": "queue-1786742831535-82o5ry",
+      "createdAt": "2026-08-14T21:27:11.535Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Check whether data/supervisor/pending-pickup.json exists and summarize its contents (task ids only). Do NOT modify queue. Write data/supervisor/results/diag-supervisor-pending-pickup.md. STOP.",
+      "reason": "OUT autonomous light queue seed",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag supervisor pending-pickup presence",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T21:31:46.901Z",
+      "errorMessage": "# queue-1786742831535-82o5ry — Diag supervisor pending-pickup presence"
+    },
+    {
+      "id": "queue-1786742834459-gejbpi",
+      "createdAt": "2026-08-14T21:27:14.459Z",
+      "prompt": "READ-ONLY AUDIT: List filenames in data/supervisor/inbox/ (or note empty). Count claimed/completed/failed suffixes if any. Write data/supervisor/results/audit-supervisor-inbox-empty.md. Do NOT unblock tasks. STOP.",
+      "reason": "OUT autonomous light queue seed",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit supervisor inbox empty state",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T21:44:49.366Z",
+      "errorMessage": "# queue-1786742834459-gejbpi — Audit supervisor inbox empty state"
+    },
+    {
+      "id": "queue-1786742837123-7ok2qu",
+      "createdAt": "2026-08-14T21:27:17.123Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-supervisor-stop-clear-snippet.md with the exact control commands to resume after auto-STOP (pause/stop/resume/status from README). Do NOT edit README.md. STOP.",
+      "reason": "OUT autonomous light queue seed",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs supervisor STOP clear runbook snippet",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T21:48:25.951Z",
+      "errorMessage": "human_cancel: clear stale running before clean LIVE relaunch"
+    },
+    {
+      "id": "queue-1786743721500-jl00wv",
+      "createdAt": "2026-08-14T21:42:01.500Z",
+      "prompt": "READ-ONLY AUDIT: Report mode and lastIntervention from data/supervisor/control.json only. Write data/supervisor/results/audit-supervisor-mode-after-resume.md. Avoid words fail or error in the report body. STOP.",
+      "reason": "OUT light buffer seed",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit supervisor mode after resume",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T21:51:51.692Z",
+      "errorMessage": "# queue-1786743721500-jl00wv — Audit supervisor mode after resume"
+    },
+    {
+      "id": "queue-1786743727203-5mxsg2",
+      "createdAt": "2026-08-14T21:42:07.203Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending tasks in queue via npm run supervisor:control -- status mentally from queue.json pending status rows. Write data/supervisor/results/diag-supervisor-pending-count.md. Avoid words fail or error. STOP.",
+      "reason": "OUT light buffer seed",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag supervisor pending count",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T21:56:20.356Z",
+      "errorMessage": "# queue-1786743727203-5mxsg2 — Diag supervisor pending count"
+    },
+    {
+      "id": "queue-1786744378800-mo1hz4",
+      "createdAt": "2026-08-14T21:52:58.800Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-supervisor-live-wait-note.md noting LIVE waits 120s for results/{id}.md and agents must pickup promptly. Do not edit README. Avoid the substrings fail and error. STOP.",
+      "reason": "OUT keep light queue non-empty",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs supervisor live wait note",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T21:57:28.446Z",
+      "errorMessage": "# queue-1786744378800-mo1hz4 — Docs supervisor live wait note"
+    },
+    {
+      "id": "queue-1786744773168-agudnl",
+      "createdAt": "2026-08-14T21:59:33.168Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode and lastIntervention from data/supervisor/control.json. Write data/supervisor/results/audit-control-mode-snapshot.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT refill light queue after drain",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit control mode snapshot",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:02:37.713Z",
+      "errorMessage": "# queue-1786744773168-agudnl — Audit control mode snapshot"
+    },
+    {
+      "id": "queue-1786744782008-hxhmbb",
+      "createdAt": "2026-08-14T21:59:42.008Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-pickup-complete-path.md with the three npm run supervisor:pickup commands check claim complete. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT refill light queue after drain",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs pickup complete path",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:07:37.868Z",
+      "errorMessage": "# queue-1786744782008-hxhmbb"
+    },
+    {
+      "id": "queue-1786744791558-f1ds12",
+      "createdAt": "2026-08-14T21:59:51.558Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: List pending-looking inbox json basenames under data/supervisor/inbox that are not claimed completed or failed suffixes. Write data/supervisor/results/diag-inbox-pending-filenames.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT refill light queue after drain",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag inbox pending filenames",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:09:41.656Z",
+      "errorMessage": "# queue-1786744791558-f1ds12 — Diag inbox pending filenames"
+    },
+    {
+      "id": "queue-1786745448894-mx7cii",
+      "createdAt": "2026-08-14T22:10:48.894Z",
+      "prompt": "READ-ONLY AUDIT: Report mode and terminateRunningRequested from data/supervisor/control.json. Write data/supervisor/results/audit-control-autonomous-flag.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit control autonomous flag",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:12:57.847Z",
+      "errorMessage": "# queue-1786745448894-mx7cii — Audit control autonomous flag"
+    },
+    {
+      "id": "queue-1786745453421-zj8uau",
+      "createdAt": "2026-08-14T22:10:53.421Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-live-evaluate-build-note.md noting LIVE evaluate runs npm run build after each result. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs LIVE evaluate build note",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:15:33.765Z",
+      "errorMessage": "# queue-1786745453421-zj8uau"
+    },
+    {
+      "id": "queue-1786745458736-38qdyy",
+      "createdAt": "2026-08-14T22:10:58.736Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Say whether data/supervisor/pending-pickup.json is present and quote pendingCount if present. Write data/supervisor/results/diag-pending-pickup-presence.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending-pickup file presence",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:17:11.564Z",
+      "errorMessage": "# queue-1786745458736-38qdyy — Diag pending-pickup file presence"
+    },
+    {
+      "id": "queue-1786745883195-mg7lrm",
+      "createdAt": "2026-08-14T22:18:03.195Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-supervisor-mode-brief.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit supervisor mode brief",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:19:24.909Z",
+      "errorMessage": "# queue-1786745883195-mg7lrm — Audit supervisor mode brief"
+    },
+    {
+      "id": "queue-1786745886286-i5q5nq",
+      "createdAt": "2026-08-14T22:18:06.286Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-pickup-check-command.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs pickup check command",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:25:28.474Z",
+      "errorMessage": "# queue-1786745886286-i5q5nq"
+    },
+    {
+      "id": "queue-1786745889172-eq4624",
+      "createdAt": "2026-08-14T22:18:09.172Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count queue.json tasks with status pending. Write data/supervisor/results/diag-queue-pending-count-brief.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag queue pending count brief",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:27:49.718Z",
+      "errorMessage": "# queue-1786745889172-eq4624 — Diag queue pending count brief"
+    },
+    {
+      "id": "queue-1786746514020-vny8dk",
+      "createdAt": "2026-08-14T22:28:34.020Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-control-mode-now.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit control mode now",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:29:55.878Z",
+      "errorMessage": "# queue-1786746514020-vny8dk — Audit control mode now"
+    },
+    {
+      "id": "queue-1786746517466-e8ms1q",
+      "createdAt": "2026-08-14T22:28:37.466Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-complete-id-flag.md showing npm run supervisor:pickup -- --complete --id TASK. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs complete id flag",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:31:39.380Z",
+      "errorMessage": "# queue-1786746517466-e8ms1q"
+    },
+    {
+      "id": "queue-1786746520159-gcf6y3",
+      "createdAt": "2026-08-14T22:28:40.159Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Quote terminateRunningRequested from data/supervisor/control.json. Write data/supervisor/results/diag-control-terminate-flag.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag control terminate flag",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:35:23.711Z",
+      "errorMessage": "# queue-1786746520159-gcf6y3 — Diag control terminate flag"
+    },
+    {
+      "id": "queue-1786746787532-nush5l",
+      "createdAt": "2026-08-14T22:33:07.532Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-pickup-check-one-liner.md with one line: npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs pickup check one-liner",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T22:42:51.844Z",
+      "errorMessage": "human_cancel: clear stuck running after dual cursor_wait_timeout; result already written"
+    },
+    {
+      "id": "queue-1786746796346-h8plzq",
+      "createdAt": "2026-08-14T22:33:16.346Z",
+      "prompt": "READ-ONLY AUDIT: Quote updatedAt from data/supervisor/control.json. Write data/supervisor/results/audit-control-updatedAt.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit control updatedAt",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:45:00.998Z",
+      "errorMessage": "# queue-1786746796346-h8plzq — Audit control updatedAt"
+    },
+    {
+      "id": "queue-1786747399719-hx7iom",
+      "createdAt": "2026-08-14T22:43:19.719Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending tasks in queue.json. Write data/supervisor/results/diag-pending-count-once.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending count once",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:46:02.991Z",
+      "errorMessage": "# queue-1786747399719-hx7iom — Diag pending count once"
+    },
+    {
+      "id": "queue-1786747403367-l4h01a",
+      "createdAt": "2026-08-14T22:43:23.367Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-resume-command-one-liner.md with: npm run supervisor:control -- resume. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs resume command one-liner",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:51:23.841Z",
+      "errorMessage": "# queue-1786747403367-l4h01a"
+    },
+    {
+      "id": "queue-1786747784613-ymf2x8",
+      "createdAt": "2026-08-14T22:49:44.613Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-short.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode short",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:53:06.957Z",
+      "errorMessage": "# queue-1786747784613-ymf2x8 — Audit mode short"
+    },
+    {
+      "id": "queue-1786747788090-nwu92c",
+      "createdAt": "2026-08-14T22:49:48.090Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-short.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending short",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:54:12.670Z",
+      "errorMessage": "# queue-1786747788090-nwu92c — Diag pending short"
+    },
+    {
+      "id": "queue-1786748120210-0csswc",
+      "createdAt": "2026-08-14T22:55:20.210Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-pulse.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode pulse",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:57:25.036Z",
+      "errorMessage": "# queue-1786748120210-0csswc — Audit mode pulse"
+    },
+    {
+      "id": "queue-1786748123028-zabntg",
+      "createdAt": "2026-08-14T22:55:23.028Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-status-command.md with npm run supervisor:control -- status. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs status command",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T22:59:19.670Z",
+      "errorMessage": "# queue-1786748123028-zabntg"
+    },
+    {
+      "id": "queue-1786748126008-vjq52b",
+      "createdAt": "2026-08-14T22:55:26.008Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Quote terminateRunningRequested from data/supervisor/control.json. Write data/supervisor/results/diag-terminate-pulse.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag terminate pulse",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:05:49.856Z",
+      "errorMessage": "human_cancel: clear stuck running after repeated cursor_wait_timeout; result already written"
+    },
+    {
+      "id": "queue-1786748558237-xtf2z2",
+      "createdAt": "2026-08-14T23:02:38.237Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-keep.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode keep",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:07:12.908Z",
+      "errorMessage": "# queue-1786748558237-xtf2z2 — Audit mode keep"
+    },
+    {
+      "id": "queue-1786748561456-2ynhsy",
+      "createdAt": "2026-08-14T23:02:41.456Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-pickup-check-keep.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs pickup check keep",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:10:19.682Z",
+      "errorMessage": "human_cancel: clear post-complete running before relaunch"
+    },
+    {
+      "id": "queue-1786748998392-qqnzgn",
+      "createdAt": "2026-08-14T23:09:58.392Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-again.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode again",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:11:34.455Z",
+      "errorMessage": "# queue-1786748998392-qqnzgn — Audit mode again"
+    },
+    {
+      "id": "queue-1786749000777-2271yw",
+      "createdAt": "2026-08-14T23:10:00.777Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-again.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending again",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:14:24.329Z",
+      "errorMessage": "human_cancel: clear running after complete before relaunch"
+    },
+    {
+      "id": "queue-1786749270093-dfj6ya",
+      "createdAt": "2026-08-14T23:14:30.093Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-hold.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode hold",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:15:46.988Z",
+      "errorMessage": "# queue-1786749270093-dfj6ya — Audit mode hold"
+    },
+    {
+      "id": "queue-1786749272537-7ebduq",
+      "createdAt": "2026-08-14T23:14:32.537Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-resume-hold.md with npm run supervisor:control -- resume. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs resume hold",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:18:38.368Z",
+      "errorMessage": "human_cancel: clear running after complete"
+    },
+    {
+      "id": "queue-1786749523580-imyjrp",
+      "createdAt": "2026-08-14T23:18:43.580Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-stay.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode stay",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:20:33.469Z",
+      "errorMessage": "# queue-1786749523580-imyjrp — Audit mode stay"
+    },
+    {
+      "id": "queue-1786749526429-3aq0np",
+      "createdAt": "2026-08-14T23:18:46.429Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-stay.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending stay",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:21:45.952Z",
+      "errorMessage": "# queue-1786749526429-3aq0np — Diag pending stay"
+    },
+    {
+      "id": "queue-1786749761205-f5deql",
+      "createdAt": "2026-08-14T23:22:41.205Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-go.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode go",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:24:35.471Z",
+      "errorMessage": "# queue-1786749761205-f5deql — Audit mode go"
+    },
+    {
+      "id": "queue-1786749765550-099bfk",
+      "createdAt": "2026-08-14T23:22:45.550Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-check-go.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs check go",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:26:02.413Z",
+      "errorMessage": "# queue-1786749765550-099bfk"
+    },
+    {
+      "id": "queue-1786749768984-pf9uzn",
+      "createdAt": "2026-08-14T23:22:48.984Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-go.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending go",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:28:03.018Z",
+      "errorMessage": "# queue-1786749768984-pf9uzn — Diag pending go"
+    },
+    {
+      "id": "queue-1786750184106-rq5uh9",
+      "createdAt": "2026-08-14T23:29:44.106Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-run.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode run",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:32:09.184Z",
+      "errorMessage": "# queue-1786750184106-rq5uh9 — Audit mode run"
+    },
+    {
+      "id": "queue-1786750190701-cmf5jc",
+      "createdAt": "2026-08-14T23:29:50.702Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-check-run.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs check run",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:34:00.717Z",
+      "errorMessage": "# queue-1786750190701-cmf5jc"
+    },
+    {
+      "id": "queue-1786750196807-it58h5",
+      "createdAt": "2026-08-14T23:29:56.807Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-run.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending run",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:35:37.609Z",
+      "errorMessage": "# queue-1786750196807-it58h5 — Diag pending run"
+    },
+    {
+      "id": "queue-1786750576303-9ie32f",
+      "createdAt": "2026-08-14T23:36:16.303Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-next.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode next",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:37:24.493Z",
+      "errorMessage": "# queue-1786750576303-9ie32f — Audit mode next"
+    },
+    {
+      "id": "queue-1786750579152-7fcj8u",
+      "createdAt": "2026-08-14T23:36:19.152Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-check-next.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs check next",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:38:20.328Z",
+      "errorMessage": "# queue-1786750579152-7fcj8u"
+    },
+    {
+      "id": "queue-1786750581596-fdtgtf",
+      "createdAt": "2026-08-14T23:36:21.596Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-next.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending next",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:39:25.903Z",
+      "errorMessage": "# queue-1786750581596-fdtgtf — Diag pending next"
+    },
+    {
+      "id": "queue-1786750811583-6wo74y",
+      "createdAt": "2026-08-14T23:40:11.583Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-cont.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode cont",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:41:25.932Z",
+      "errorMessage": "# queue-1786750811583-6wo74y — Audit mode cont"
+    },
+    {
+      "id": "queue-1786750814492-f7axmw",
+      "createdAt": "2026-08-14T23:40:14.492Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-check-cont.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs check cont",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:42:34.438Z",
+      "errorMessage": "# queue-1786750814492-f7axmw"
+    },
+    {
+      "id": "queue-1786750817987-nvwmy1",
+      "createdAt": "2026-08-14T23:40:17.987Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-cont.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light refill",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending cont",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:45:14.399Z",
+      "errorMessage": "human_cancel: clear running after complete"
+    },
+    {
+      "id": "queue-1786751118352-p21feb",
+      "createdAt": "2026-08-14T23:45:18.352Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-more.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode more",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:46:11.804Z",
+      "errorMessage": "# queue-1786751118352-p21feb — Audit mode more"
+    },
+    {
+      "id": "queue-1786751119783-f4y0wv",
+      "createdAt": "2026-08-14T23:45:19.783Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-check-more.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs check more",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:48:49.986Z",
+      "errorMessage": "human_cancel: clear running after complete"
+    },
+    {
+      "id": "queue-1786751332770-5k0t06",
+      "createdAt": "2026-08-14T23:48:52.770Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-keep2.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode keep2",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:49:46.457Z",
+      "errorMessage": "# queue-1786751332770-5k0t06 — Audit mode keep2"
+    },
+    {
+      "id": "queue-1786751334342-46zxgx",
+      "createdAt": "2026-08-14T23:48:54.342Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-keep2.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending keep2",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:52:25.342Z",
+      "errorMessage": "human_cancel: clear running after complete"
+    },
+    {
+      "id": "queue-1786751548308-328ngx",
+      "createdAt": "2026-08-14T23:52:28.308Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-hold2.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode hold2",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:53:16.450Z",
+      "errorMessage": "# queue-1786751548308-328ngx — Audit mode hold2"
+    },
+    {
+      "id": "queue-1786751549793-4b2dlb",
+      "createdAt": "2026-08-14T23:52:29.793Z",
+      "prompt": "DOCS ONLY: Write data/supervisor/results/docs-check-hold2.md with npm run supervisor:pickup -- --check. Do not edit README. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Docs check hold2",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-14T23:55:57.914Z",
+      "errorMessage": "human_cancel: clear running after complete"
+    },
+    {
+      "id": "queue-1786751760879-a3z2l0",
+      "createdAt": "2026-08-14T23:56:00.879Z",
+      "prompt": "READ-ONLY AUDIT: Quote mode from data/supervisor/control.json. Write data/supervisor/results/audit-mode-go2.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Audit mode go2",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "completedAt": "2026-08-14T23:56:55.852Z",
+      "errorMessage": "# queue-1786751760879-a3z2l0 — Audit mode go2"
+    },
+    {
+      "id": "queue-1786751762658-wt4n3q",
+      "createdAt": "2026-08-14T23:56:02.658Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending in queue.json. Write data/supervisor/results/diag-pending-go2.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT light buffer",
+      "priority": 0,
+      "status": "failed",
+      "title": "Diag pending go2",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "humanControlled": true,
+      "cancelledByHuman": true,
+      "completedAt": "2026-08-15T00:00:23.036Z",
+      "errorMessage": "human_cancel: cursor_wait_timeout_recovery"
+    },
+    {
+      "id": "queue-1786752038308-w6kon9",
+      "createdAt": "2026-08-15T00:00:38.308Z",
+      "prompt": "AUDIT READ-ONLY: Report control.json mode and lastIntervention. Count queue statuses pending/running/blocked/completed. Write data/supervisor/results/audit-mode-go3.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT autonomy after hold2 timeout",
+      "priority": 0,
+      "status": "blocked",
+      "title": "Audit mode go3",
+      "category": "audit",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "errorMessage": "task_running_timeout"
+    },
+    {
+      "id": "queue-1786752040287-5mzdnc",
+      "createdAt": "2026-08-15T00:00:40.287Z",
+      "prompt": "DOCS READ-ONLY: From data/supervisor/README.md cite how mode and stopReason work. Write data/supervisor/results/docs-go3-readme.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT autonomy light",
+      "priority": 0,
+      "status": "blocked",
+      "title": "Docs go3 README",
+      "category": "docs",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "errorMessage": "task_running_timeout"
+    },
+    {
+      "id": "queue-1786752042132-wv4g33",
+      "createdAt": "2026-08-15T00:00:42.132Z",
+      "prompt": "DIAGNOSTIC READ-ONLY: Count pending and running in queue.json. Write data/supervisor/results/diag-pending-go3.md. Avoid substrings fail and error. STOP.",
+      "reason": "OUT autonomy light",
+      "priority": 0,
+      "status": "blocked",
+      "title": "Diag pending go3",
+      "category": "diagnostic",
+      "allowedPaths": [
+        "lib/supervisor/"
+      ],
+      "errorMessage": "task_running_timeout"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "concept_id": "relative_equal_highs_lows",
+  "name": "Relative equal highs / lows (REH / REL)",
+  "aliases": [
+    "relative equal highs",
+    "relative equal lows",
+    "REH",
+    "REL",
+    "EQH",
+    "EQL"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "reh_rel__2K1IcVvq9z8__475",
+      "definition_text": "When swing highs are real close to one another, that is relative equal highs. Lecture asks how to know a high-probability relative equal high likely to get swept; distinguishes from other highs (filter discussed but partially teased).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Swing highs (or lows) in close proximity",
+        "Used as liquidity objectives likely to be swept / traded through"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Pre-market study windows; 1m/5m/15m scanning",
+      "variations_note": "Definitional proximity idea; probability filter details incomplete in extracted cues \u2014 do not invent filter.",
+      "confidence": "paraphrased",
+      "cue_start": "00:07:44.710",
+      "cue_end": "00:08:13.029",
+      "timestamp_sec": 464.71,
+      "source": {
+        "video_id": "2K1IcVvq9z8",
+        "title": "ICT Gems \u2014 Pre-Market Range",
+        "url": "https://www.youtube.com/watch?v=2K1IcVvq9z8",
+        "transcript_path": "data/ict-transcripts/pilot/premarket-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "reh_rel_bias__2K1IcVvq9z8__1643",
+      "definition_text": "Prior to the pre-market range, look for equal highs or equal lows \u2014 which side has it becomes bias draw. If both relative equal high and relative equal low: wait for the first one to get disrupted, then work to the other \u2014 that is your bias. Whichever side has relative equals (smooth area) will be disrupted.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Scan left of / prior to the 30m pre-market window",
+        "Bias from the side that has relative equals; if both, wait for first disruption"
+      ],
+      "invalidation": [
+        "Ambiguous when both sides present until first disruption occurs"
+      ],
+      "timeframe_session_context": "Pre-market range exercise",
+      "variations_note": "Operational bias rule tied to pre-market range \u2014 keep linked but separate from REH geometry definition.",
+      "confidence": "quoted",
+      "cue_start": "00:27:11.510",
+      "cue_end": "00:28:23.750",
+      "timestamp_sec": 1631.51,
+      "source": {
+        "video_id": "2K1IcVvq9z8",
+        "title": "ICT Gems \u2014 Pre-Market Range",
+        "url": "https://www.youtube.com/watch?v=2K1IcVvq9z8",
+        "transcript_path": "data/ict-transcripts/pilot/premarket-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "eqh_as_buyside_pool_target__Gnw54f9v6SA__733",
+      "definition_text": "Equal highs act as the contrary liquidity pool (buy stops) after sell-side stops below an old low are accumulated \u2014 draw equal highs forward as the opposing pool target.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "After SSL raid / long accumulation below old low"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 04 Liquidity Pools",
+      "variations_note": "Pool-target use of equal highs \u2014 complements pre-market REH bias teaching.",
+      "confidence": "quoted",
+      "cue_start": "00:12:11.930",
+      "cue_end": "00:12:26.090",
+      "timestamp_sec": 731.93,
+      "source": {
+        "video_id": "Gnw54f9v6SA",
+        "title": "ICT Mentorship Core Content - Month 04 - Liquidity Pools",
+        "url": "https://www.youtube.com/watch?v=Gnw54f9v6SA",
+        "transcript_path": "data/ict-transcripts/raw/Gnw54f9v6SA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "relativeEqualPools in structure.ts; EQH/EQL research notes under data/research/",
+    "related_karen_evidence_or_gate": "Liquidity sweep / taken levels; not identical to 'first disrupted side' bias machine",
+    "overlap_vs_baseline_v2": "Relative equal pool detection exists",
+    "gap_vs_baseline_v2": "Pre-market 'first disrupted side sets bias' rule not in baseline-v2 decisioning",
+    "hypothesis_id": "H_ICT_REH_REL_FIRST_DISRUPT_BIAS",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Observation/logging of first-disrupted-side first; no weigher change."
+  },
+  "extraction_notes": "Probability filter for 'high-probability REH' teased but not fully extracted \u2014 mark incomplete rather than invent."
+}

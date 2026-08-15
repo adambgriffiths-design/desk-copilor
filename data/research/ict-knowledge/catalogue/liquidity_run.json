@@ -1,0 +1,73 @@
+{
+  "concept_id": "liquidity_run",
+  "name": "Liquidity run (BSL/SSL stop run)",
+  "aliases": [
+    "liquidity runs",
+    "buy side liquidity run",
+    "sell side liquidity run",
+    "stop run"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "lq_def_open_interest_stops__22XkhpJR5eA__29",
+      "definition_text": "Liquidity refers to how quickly an asset can be bought/sold without dramatically affecting price. ICT interest focuses on where pending orders (buy stops above / sell-side below) reside; swing highs left behind imply buy-stop / buy-side liquidity above; polarity for lows.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [],
+      "invalidation": [],
+      "timeframe_session_context": "Month 1 Core \u2014 Liquidity Runs",
+      "variations_note": "Foundational definition before high/low-resistance variants.",
+      "confidence": "quoted",
+      "cue_start": "00:00:29.519",
+      "cue_end": "00:03:54.550",
+      "timestamp_sec": 29.519,
+      "source": {
+        "video_id": "22XkhpJR5eA",
+        "title": "ICT Mentorship Core Content - Month 1 - Liquidity Runs",
+        "url": "https://www.youtube.com/watch?v=22XkhpJR5eA",
+        "transcript_path": "data/ict-transcripts/raw/22XkhpJR5eA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "hrlr_through_many_levels__22XkhpJR5eA__457",
+      "definition_text": "High resistance liquidity run: market must trade through thick prior highs/lows to reach stop liquidity above an old high (or below an old low) \u2014 least probable condition to seek; prefer not hunting these opportunities.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Many intervening swing highs/lows between price and target stop pool"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 1 Core \u2014 Liquidity Runs",
+      "variations_note": "KEEP SEPARATE from low_resistance_liquidity_run (Month 07).",
+      "confidence": "quoted",
+      "cue_start": "00:07:37.110",
+      "cue_end": "00:08:07.589",
+      "timestamp_sec": 457.11,
+      "source": {
+        "video_id": "22XkhpJR5eA",
+        "title": "ICT Mentorship Core Content - Month 1 - Liquidity Runs",
+        "url": "https://www.youtube.com/watch?v=22XkhpJR5eA",
+        "transcript_path": "data/ict-transcripts/raw/22XkhpJR5eA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "BSL/SSL / sweep / pool objectives",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "May relate to liquidity-swept stance language \u2014 catalogue only",
+    "gap_vs_baseline_v2": "HRLR vs LRLR selection not in production",
+    "hypothesis_id": "H_ICT_LIQUIDITY_RUN",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch5 Month1."
+  },
+  "extraction_notes": "Batch5. HRLR defined here; LRLR is separate concept file from Month07."
+}

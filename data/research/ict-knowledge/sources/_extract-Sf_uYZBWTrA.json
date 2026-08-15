@@ -1,0 +1,173 @@
+{
+  "video_id": "Sf_uYZBWTrA",
+  "path": "data/ict-transcripts/raw/Sf_uYZBWTrA.en.vtt",
+  "cues": 621,
+  "searches": {
+    "dealing_range": [],
+    "org": [
+      {
+        "t": "00:09:39.140",
+        "sec": 579.14,
+        "snippet": "[00:09:32.990] what are we what are we using here I'm [00:09:34.370] going to teach you something in in [00:09:35.570] addition to everything else you've [00:09:39.140] this is the opening range Gap okay and [00:09:42.889] this is the opening range Gap okay and [00:09:45.050] what you're looking at is this candle [00:09:47.630] here is Friday's data and you're going"
+      },
+      {
+        "t": "00:09:42.889",
+        "sec": 582.889,
+        "snippet": "[00:09:34.370] going to teach you something in in [00:09:35.570] addition to everything else you've [00:09:39.140] this is the opening range Gap okay and [00:09:42.889] this is the opening range Gap okay and [00:09:45.050] what you're looking at is this candle [00:09:47.630] here is Friday's data and you're going [00:09:49.250] to be showing this on your trading view"
+      },
+      {
+        "t": "00:10:53.810",
+        "sec": 653.81,
+        "snippet": "[00:10:46.430] the difference between the closing price [00:10:48.530] on Friday and the opening price on the [00:10:50.810] next trading day or Monday [00:10:53.810] that is the opening range Gap [00:10:55.490] this happens to be that it's an opening [00:10:56.990] range Gap lower [00:10:58.670] because we opened lower than where we"
+      },
+      {
+        "t": "00:11:05.090",
+        "sec": 665.09,
+        "snippet": "[00:10:58.670] because we opened lower than where we [00:11:00.769] closed on Friday if we would open higher [00:11:02.030] than where we closed on Friday it would [00:11:05.090] have been opening range Gap higher [00:11:06.889] whenever there's an opening range Gap [00:11:09.650] lower than Friday's close we are opening [00:11:13.009] with a discount opening range Gap if we"
+      },
+      {
+        "t": "00:11:06.889",
+        "sec": 666.889,
+        "snippet": "[00:11:00.769] closed on Friday if we would open higher [00:11:02.030] than where we closed on Friday it would [00:11:05.090] have been opening range Gap higher [00:11:06.889] whenever there's an opening range Gap [00:11:09.650] lower than Friday's close we are opening [00:11:13.009] with a discount opening range Gap if we [00:11:14.750] are opening with a gap that's above"
+      },
+      {
+        "t": "00:11:13.009",
+        "sec": 673.009,
+        "snippet": "[00:11:05.090] have been opening range Gap higher [00:11:06.889] whenever there's an opening range Gap [00:11:09.650] lower than Friday's close we are opening [00:11:13.009] with a discount opening range Gap if we [00:11:14.750] are opening with a gap that's above [00:11:16.610] Friday's close we're opening with an [00:11:19.910] opening range Gap premium"
+      },
+      {
+        "t": "00:11:19.910",
+        "sec": 679.91,
+        "snippet": "[00:11:13.009] with a discount opening range Gap if we [00:11:14.750] are opening with a gap that's above [00:11:16.610] Friday's close we're opening with an [00:11:19.910] opening range Gap premium [00:11:23.389] okay so this two specific levels and the [00:11:24.829] one that makes the middle more [00:11:27.050] consequent encouragement any Gap is"
+      },
+      {
+        "t": "00:15:26.569",
+        "sec": 926.569,
+        "snippet": "[00:15:19.670] below 50 or below this level here there [00:15:22.069] is a gap here [00:15:24.170] so I was looking for it to trade towards [00:15:26.569] the opening range Gap [00:15:28.910] entry into a discount and I just used a [00:15:32.030] imbalance there and worked below the new [00:15:33.949] week opening that below"
+      }
+    ],
+    "opening_range": [
+      {
+        "t": "00:08:56.810",
+        "sec": 536.81,
+        "snippet": "[00:08:45.829] time the price [00:08:49.970] of New York opening price with time one [00:08:52.130] is the Judas swing going to form at 9 30 [00:08:56.810] to 10 o'clock that is your opening range [00:09:01.370] so we're expecting this rally higher to [00:09:03.710] be opposed to the direction we're [00:09:05.630] expecting last Friday"
+      },
+      {
+        "t": "00:09:39.140",
+        "sec": 579.14,
+        "snippet": "[00:09:32.990] what are we what are we using here I'm [00:09:34.370] going to teach you something in in [00:09:35.570] addition to everything else you've [00:09:39.140] this is the opening range Gap okay and [00:09:42.889] this is the opening range Gap okay and [00:09:45.050] what you're looking at is this candle [00:09:47.630] here is Friday's data and you're going"
+      },
+      {
+        "t": "00:09:42.889",
+        "sec": 582.889,
+        "snippet": "[00:09:34.370] going to teach you something in in [00:09:35.570] addition to everything else you've [00:09:39.140] this is the opening range Gap okay and [00:09:42.889] this is the opening range Gap okay and [00:09:45.050] what you're looking at is this candle [00:09:47.630] here is Friday's data and you're going [00:09:49.250] to be showing this on your trading view"
+      },
+      {
+        "t": "00:10:53.810",
+        "sec": 653.81,
+        "snippet": "[00:10:46.430] the difference between the closing price [00:10:48.530] on Friday and the opening price on the [00:10:50.810] next trading day or Monday [00:10:53.810] that is the opening range Gap [00:10:55.490] this happens to be that it's an opening [00:10:56.990] range Gap lower [00:10:58.670] because we opened lower than where we"
+      },
+      {
+        "t": "00:11:05.090",
+        "sec": 665.09,
+        "snippet": "[00:10:58.670] because we opened lower than where we [00:11:00.769] closed on Friday if we would open higher [00:11:02.030] than where we closed on Friday it would [00:11:05.090] have been opening range Gap higher [00:11:06.889] whenever there's an opening range Gap [00:11:09.650] lower than Friday's close we are opening [00:11:13.009] with a discount opening range Gap if we"
+      },
+      {
+        "t": "00:11:06.889",
+        "sec": 666.889,
+        "snippet": "[00:11:00.769] closed on Friday if we would open higher [00:11:02.030] than where we closed on Friday it would [00:11:05.090] have been opening range Gap higher [00:11:06.889] whenever there's an opening range Gap [00:11:09.650] lower than Friday's close we are opening [00:11:13.009] with a discount opening range Gap if we [00:11:14.750] are opening with a gap that's above"
+      },
+      {
+        "t": "00:11:13.009",
+        "sec": 673.009,
+        "snippet": "[00:11:05.090] have been opening range Gap higher [00:11:06.889] whenever there's an opening range Gap [00:11:09.650] lower than Friday's close we are opening [00:11:13.009] with a discount opening range Gap if we [00:11:14.750] are opening with a gap that's above [00:11:16.610] Friday's close we're opening with an [00:11:19.910] opening range Gap premium"
+      },
+      {
+        "t": "00:11:19.910",
+        "sec": 679.91,
+        "snippet": "[00:11:13.009] with a discount opening range Gap if we [00:11:14.750] are opening with a gap that's above [00:11:16.610] Friday's close we're opening with an [00:11:19.910] opening range Gap premium [00:11:23.389] okay so this two specific levels and the [00:11:24.829] one that makes the middle more [00:11:27.050] consequent encouragement any Gap is"
+      }
+    ],
+    "fpfvg": [],
+    "nine31": [],
+    "nine30": [
+      {
+        "t": "00:04:51.650",
+        "sec": 291.65,
+        "snippet": "[00:04:44.749] give [00:04:46.909] and here you see the [00:04:48.650] delivery of price [00:04:51.650] the market rallies at 9 30. [00:04:53.990] trades up to the buy side liquidity pool [00:04:55.850] that I showed you on the 15-minute time [00:04:58.370] frame inside that 15 minute fair value"
+      },
+      {
+        "t": "00:08:25.379",
+        "sec": 505.379,
+        "snippet": "[00:08:20.450] what is that that's the London session [00:08:22.670] South Side liquidity [00:08:25.369] so notice how the market had opened at 9 [00:08:25.379] so notice how the market had opened at 9 30 [00:08:26.689] 30 [00:08:29.570] rallies up sucks everybody in thinking [00:08:31.010] it's going to go higher"
+      },
+      {
+        "t": "00:08:52.130",
+        "sec": 532.13,
+        "snippet": "[00:08:43.730] are going to occur at the price not the [00:08:45.829] time the price [00:08:49.970] of New York opening price with time one [00:08:52.130] is the Judas swing going to form at 9 30 [00:08:56.810] to 10 o'clock that is your opening range [00:09:01.370] so we're expecting this rally higher to [00:09:03.710] be opposed to the direction we're"
+      },
+      {
+        "t": "00:10:29.509",
+        "sec": 629.509,
+        "snippet": "[00:10:23.220] that's what I'm highlighting the closing price [00:10:24.710] price [00:10:26.930] then you're going to wait [00:10:29.509] until 9 30 in the morning New York local [00:10:29.519] until 9 30 in the morning New York local time [00:10:31.009] time [00:10:32.630] when the market starts trading regular"
+      },
+      {
+        "t": "00:10:29.519",
+        "sec": 629.519,
+        "snippet": "[00:10:24.710] price [00:10:26.930] then you're going to wait [00:10:29.509] until 9 30 in the morning New York local [00:10:29.519] until 9 30 in the morning New York local time [00:10:31.009] time [00:10:32.630] when the market starts trading regular [00:10:34.430] trading hours"
+      },
+      {
+        "t": "00:10:42.650",
+        "sec": 642.65,
+        "snippet": "[00:10:32.630] when the market starts trading regular [00:10:34.430] trading hours [00:10:38.509] for Monday that opening price here [00:10:42.650] is it 9 30 a.m Monday June 26 2023 so [00:10:44.930] I'm highlighting the opening price so [00:10:46.430] the difference between the closing price [00:10:48.530] on Friday and the opening price on the"
+      },
+      {
+        "t": "00:12:12.290",
+        "sec": 732.29,
+        "snippet": "[00:12:04.130] and apply it to the one minute chart [00:12:06.470] again here's es one minute chart [00:12:09.650] September 2023 delivery [00:12:12.290] we can see that rally here at 9 30. all [00:12:14.210] of this is a due to swing running out [00:12:16.610] above the buy solid liquidity in the [00:12:18.050] London session"
+      }
+    ],
+    "ce": [
+      {
+        "t": "00:11:30.710",
+        "sec": 690.71,
+        "snippet": "[00:11:24.829] one that makes the middle more [00:11:27.050] consequent encouragement any Gap is [00:11:28.130] always going to be utilized in the [00:11:30.710] midpoint is consequent encouragement any [00:11:31.790] order block [00:11:34.250] whether it be a breaker block whether it [00:11:36.050] be a bullish or bearish order block"
+      },
+      {
+        "t": "00:11:41.690",
+        "sec": 701.69,
+        "snippet": "[00:11:34.250] whether it be a breaker block whether it [00:11:36.050] be a bullish or bearish order block [00:11:38.930] propulsion block every Middle Point or [00:11:41.690] midpoint of it is mean threshold [00:11:44.870] there's two different Viewpoint of a [00:11:49.740] the midpoint of that range would be [00:11:51.590] the midpoint of that range would be"
+      },
+      {
+        "t": "00:11:49.740",
+        "sec": 709.74,
+        "snippet": "[00:11:38.930] propulsion block every Middle Point or [00:11:41.690] midpoint of it is mean threshold [00:11:44.870] there's two different Viewpoint of a [00:11:49.740] the midpoint of that range would be [00:11:51.590] the midpoint of that range would be [00:11:53.329] consequent encroachment any other order [00:11:53.339] consequent encroachment any other order block"
+      },
+      {
+        "t": "00:11:51.590",
+        "sec": 711.59,
+        "snippet": "[00:11:41.690] midpoint of it is mean threshold [00:11:44.870] there's two different Viewpoint of a [00:11:49.740] the midpoint of that range would be [00:11:51.590] the midpoint of that range would be [00:11:53.329] consequent encroachment any other order [00:11:53.339] consequent encroachment any other order block [00:11:54.650] block"
+      },
+      {
+        "t": "00:11:53.329",
+        "sec": 713.329,
+        "snippet": "[00:11:44.870] there's two different Viewpoint of a [00:11:49.740] the midpoint of that range would be [00:11:51.590] the midpoint of that range would be [00:11:53.329] consequent encroachment any other order [00:11:53.339] consequent encroachment any other order block [00:11:54.650] block [00:11:56.630] is going to be mean threshold which is"
+      },
+      {
+        "t": "00:11:53.339",
+        "sec": 713.339,
+        "snippet": "[00:11:49.740] the midpoint of that range would be [00:11:51.590] the midpoint of that range would be [00:11:53.329] consequent encroachment any other order [00:11:53.339] consequent encroachment any other order block [00:11:54.650] block [00:11:56.630] is going to be mean threshold which is [00:11:58.730] 50 of that range"
+      },
+      {
+        "t": "00:13:57.290",
+        "sec": 837.29,
+        "snippet": "[00:13:50.509] measurement that I'm running from this [00:13:52.370] scandal's low to this candle's high and [00:13:55.370] I'm finding half of that or 50 of it so [00:13:57.290] consequent encroachment I place my stop [00:13:59.870] loss just above that [00:14:01.790] why did I do that because we've already [00:14:03.290] proven algorithmically that we're not"
+      },
+      {
+        "t": "00:14:32.090",
+        "sec": 872.09,
+        "snippet": "[00:14:25.490] okay [00:14:27.829] the difference between this high and [00:14:30.530] that low that higher fair value got it's [00:14:32.090] a consequent encroachment my stop loss [00:14:33.949] was just above that you'll see it in the [00:14:35.750] execution okay I promise you you'll see [00:14:37.009] it but I'm going to make sure I'm making"
+      }
+    ]
+  }
+}

@@ -61,6 +61,7 @@ const mkCtx = (lastClose: number): MarketContext =>
       liquiditySweeps: [],
       summary: "",
       relativeEqualPools: [],
+      firstPresentedFvg: { nyOpening: null, postFhdr: null, activeSession: null },
     },
     premiumDiscount: {
       vsCurrentDayRange: "equilibrium",
@@ -148,10 +149,12 @@ console.log("\n=== api data quality with tickstream auth ===");
 
 console.log("\n=== live TickStream fallback (optional) ===");
 
-const apiKey = loadTickstreamApiKey();
-if (!apiKey) {
-  console.log("  SKIP live TickStream — TICKSTREAM_API_KEY not set");
-} else {
+async function maybeRunLiveTickstreamCheck(): Promise<void> {
+  const apiKey = loadTickstreamApiKey();
+  if (!apiKey) {
+    console.log("  SKIP live TickStream — TICKSTREAM_API_KEY not set");
+    return;
+  }
   const auth = await maybeResolveTickstreamFallback({
     chartLastPrice: null,
     chartExportFailed: true,
@@ -176,5 +179,12 @@ if (!apiKey) {
   }
 }
 
-console.log(`\n${passed} passed, ${failed} failed`);
-if (failed > 0) process.exit(1);
+void maybeRunLiveTickstreamCheck()
+  .then(() => {
+    console.log(`\n${passed} passed, ${failed} failed`);
+    if (failed > 0) process.exit(1);
+  })
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });

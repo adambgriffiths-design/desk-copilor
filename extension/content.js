@@ -1,5 +1,5 @@
 (function () {
-  const DC_VERSION = "1.4.73";
+  const DC_VERSION = "1.4.137";
   // #region agent log
   function dbgLog(hypothesisId, location, message, data) {
     const payload = {
@@ -715,6 +715,16 @@
   let contextStripPrice = null;
   let contextStripPriceTs = 0;
   let contextStripPriceSource = null;
+  /** Additive /api/quote market calendar metadata (expectFresh authority). */
+  let quoteMarketMeta = {
+    expectFresh: null,
+    marketState: null,
+    marketReason: null,
+    nextOpenEt: null,
+    lastPrintAgeMs: null,
+  };
+  const TICK_LIVE_MAX_AGE_MS = 2000;
+  const TICK_STALE_MAX_AGE_MS = 60000;
   let backendPriceFallbackInflight = null;
   let contextStripBiasHint = "";
   let contextStripPriceTimer = null;
@@ -900,7 +910,7 @@
     if (
       backendOnline &&
       snap.state === "DEGRADED" &&
-      !hasLocalChartPrice() &&
+      !hasFreshLocalChartPrice(TICK_STALE_MAX_AGE_MS) &&
       Date.now() - lastQuoteFallbackAt > QUOTE_FALLBACK_COOLDOWN_MS
     ) {
       void fetchBackendPriceFallback();
@@ -941,6 +951,7 @@
   function cancelActiveChatStream(reason) {
     if (!activeChatStreamPort) return;
     voiceLog("chat stream cancelled:", reason || "superseded");
+    resetStreamingAssistant();
     try {
       activeChatStreamPort.disconnect();
     } catch {
@@ -1117,24 +1128,39 @@
     const msg = err instanceof Error ? err.message : String(err);
     const m = msg.toLowerCase();
     if (m.includes("timed out") && context === "chart") {
-      return "Chart read timed out after 2 minutes — the Vercel backend may be cold or OpenAI was slow. Click RECONNECT, then try Analyse Market again.";
+      return "Chart read timed out after 2 minutes — hit RECONNECT, then try Analyse Market again.";
     }
     if (m.includes("timed out")) {
-      return `Request timed out: ${msg}. Check RECONNECT — backend may be offline or slow.`;
+      return "That request timed out. Hit RECONNECT and try again — the backend may be cold or slow.";
     }
     if (m.includes("backend offline") || m.includes("fetch failed") || m.includes("network")) {
       return offlineChatMessage();
     }
-    if (m.includes("openai_api_key")) {
-      return "Server missing OPENAI_API_KEY — add it in Vercel env vars and redeploy.";
+    // Never surface infra/config (API keys, Vercel env, Redis, route names) as Karen text.
+    if (
+      m.includes("openai_api_key") ||
+      /missing env|vercel env|redeploy|casual_gate_miss|responsesource|redis/i.test(msg)
+    ) {
+      return "I couldn't complete that explanation just now.";
     }
     if (m.includes("screenshot") || m.includes("activetab")) {
       return "Screenshot blocked — click The Trading Desk icon in the Chrome toolbar once to grant capture permission, then retry.";
     }
     if (m.includes("empty reply")) {
-      return "Desk returned an empty reply — usually a backend or API error. Hit RECONNECT and ask again.";
+      return "I didn't get a usable reply back — hit RECONNECT and ask again.";
     }
-    return msg;
+    if (/not a casual question|casual_gate_miss/i.test(msg)) {
+      return "I didn't catch that cleanly — say it one more time?";
+    }
+    // Never surface raw HTTP/JSON/stacks to chat.
+    if (
+      /[{[]/.test(msg) ||
+      /\b(status|http|error|exception|stack|trace|econn|enotfound|fetch)\b/i.test(msg) ||
+      msg.length > 180
+    ) {
+      return "Something went wrong on the desk side — hit RECONNECT and try that again.";
+    }
+    return "Something went wrong — hit RECONNECT and try that again.";
   }
 
   async function polishVoiceTranscript(raw) {
@@ -2032,6 +2058,28 @@
 
   function enqueueUserMessage(text, opts = {}) {
     const cleaned = sanitizeUserInput(text);
+    const fromComposer = opts.typed === true || opts.source === "composer";
+    // Typed composer: trim → empty reject → otherwise SEND. STT hallucination drops stay voice-only.
+    if (fromComposer) {
+      const t = String(cleaned || "").trim();
+      if (!t) return;
+      if (msgQueue.length && msgQueue[msgQueue.length - 1].text === t) {
+        dbgLog("L", "content.js:enqueueUserMessage", "dup-queue", { text: t.slice(0, 80) });
+        return;
+      }
+      if (!opts.skipBubble) {
+        appendChatBubble("user", t);
+        chatHistory.push({ role: "user", content: t });
+        trimHistory();
+        void window.DeskCopilotMemory?.rememberExchange?.(t, "");
+      }
+      msgQueue.push({ text: t, voice: opts.voice === true });
+      if (msgQueue.length > 1) {
+        setMsg(`Queued (${msgQueue.length})…`, null);
+      }
+      drainQueue();
+      return;
+    }
     if (!cleaned || shouldDropUserInput(text)) {
       // #region agent log
       dbgLog("L", "content.js:enqueueUserMessage", "dropped", {
@@ -2148,10 +2196,31 @@
   }
 
   function localCasualReply(text) {
+    const local = window.DeskCopilotCasual?.localCasualReply?.(text, chatHistory);
+    // Never publish classifier-miss / internal strings as Karen's bubble.
+    if (
+      local &&
+      String(local).trim().length > 4 &&
+      local !== window.DeskCopilotCasual?.CASUAL_LLM_FAILURE_REPLY &&
+      !/^Ha — say more/i.test(local) &&
+      !/not a casual question/i.test(local)
+    ) {
+      return local;
+    }
+    return "";
+  }
+
+  function isInternalLeakText(text) {
+    const t = String(text || "").trim();
+    if (!t) return true;
     return (
-      window.DeskCopilotCasual?.localCasualReply?.(text, chatHistory) ||
-      window.DeskCopilotCasual?.CASUAL_LLM_FAILURE_REPLY ||
-      "I'm having trouble responding right now — try that again."
+      /not a casual question/i.test(t) ||
+      t === window.DeskCopilotCasual?.CASUAL_LLM_FAILURE_REPLY ||
+      /^(GENERAL_CHAT|CURRENT_MARKET_READ|MARKET_LEVEL|DECISION_HISTORY|UNKNOWN|null|undefined)$/i.test(
+        t
+      ) ||
+      /^route:\s*/i.test(t) ||
+      /OPENAI_API_KEY|missing env|vercel env|CASUAL_GATE_MISS|responseSource/i.test(t)
     );
   }
 
@@ -2174,9 +2243,9 @@
 
   function acceptApiCasualReply(apiReply, question) {
     const raw = String(apiReply || "").trim();
-    if (!raw) return null;
+    if (!raw || isInternalLeakText(raw)) return null;
     const stripped = window.DeskCopilotCasual?.stripSteerBack?.(raw) ?? raw;
-    if (!stripped || stripped.length < 4) return null;
+    if (!stripped || stripped.length < 4 || isInternalLeakText(stripped)) return null;
     if (window.DeskCopilotCasual?.isPersonaQuestion?.(question) && window.DeskCopilotCasual?.isTradingRedirect?.(stripped)) {
       return null;
     }
@@ -2190,6 +2259,39 @@
     if (!cleaned) return false;
     if (window.DeskCopilotCasual?.isFarewell?.(cleaned)) return true;
     if (window.DeskCopilotCasual?.isGreeting?.(cleaned)) return true;
+    if (window.DeskCopilotCasual?.isConversationInitiation?.(cleaned) === true) return true;
+    // Jokes — local diversity pool; never health-probe / stream / OpenAI / MarketState.
+    if (window.DeskCopilotCasual?.isJokeRequest?.(cleaned) === true) return true;
+    if (window.DeskCopilotCasual?.isJokeFollowUp?.(cleaned, chatHistory) === true) return true;
+
+    const localUsable = (local) =>
+      Boolean(
+        local &&
+          String(local).trim().length > 4 &&
+          local !== window.DeskCopilotCasual?.CASUAL_LLM_FAILURE_REPLY &&
+          !/^Ha — say more/i.test(local) &&
+          !/say more,?\s*i'?m listening/i.test(local) &&
+          !/not a casual question/i.test(local)
+      );
+
+    // Pronoun / elliptical follow-ups: only instant-local when we can resolve against history.
+    if (window.DeskCopilotCasual?.isAnaphoricOrEllipticalFollowUp?.(cleaned) === true) {
+      const local = window.DeskCopilotCasual?.localCasualReply?.(cleaned, chatHistory);
+      if (localUsable(local)) return true;
+      // Otherwise stream with full history — never hard-fail as standalone persona.
+      return false;
+    }
+    // Identity / preference / statements — only instant when local has a real reply.
+    // Classifier miss must fall through to GENERAL_CHAT stream, never publish failure text.
+    if (
+      (window.DeskCopilotCasual?.isPersonaQuestion?.(cleaned) === true ||
+        window.DeskCopilotCasual?.isCasualMessage?.(cleaned) === true ||
+        /\b(i'?m|im|i am|prefer|hoping|tired|bored|pasta|markets?\s+are)\b/i.test(cleaned)) &&
+      mustUseTradingStream(cleaned) !== true
+    ) {
+      const local = window.DeskCopilotCasual?.localCasualReply?.(cleaned, chatHistory);
+      return localUsable(local);
+    }
     return false;
   }
 
@@ -2349,8 +2451,18 @@
 
   let streamAssistantBubble = null;
 
+  /** Cancel/barge-in: drop partial bubble + matching history before a friendly error. */
   function resetStreamingAssistant() {
-    streamAssistantBubble = null;
+    if (streamAssistantBubble) {
+      try {
+        streamAssistantBubble.remove();
+      } catch {
+        /* ignore */
+      }
+      const last = chatHistory.at(-1);
+      if (last?.role === "assistant") chatHistory.pop();
+      streamAssistantBubble = null;
+    }
   }
 
   function updateStreamingAssistant(text, opts = {}) {
@@ -2658,13 +2770,16 @@
 
     if (!needsSearch && canUseInstantLocal(text)) {
       const local = localCasualReply(text);
-      setMsg("", null);
-      window.DeskCopilotRealtime?.cancelActiveResponse?.();
-      await publishAssistantReply(local, voice, { pauseMic: true, instant: true }, () => {
-        setKarenPhase("listening");
-        suppressAssistantEchoUntil = Date.now() + 6000;
-      });
-      return;
+      if (local && !isInternalLeakText(local)) {
+        setMsg("", null);
+        window.DeskCopilotRealtime?.cancelActiveResponse?.();
+        await publishAssistantReply(local, voice, { pauseMic: true, instant: true }, () => {
+          setKarenPhase("listening");
+          suppressAssistantEchoUntil = Date.now() + 6000;
+        });
+        return;
+      }
+      // Local miss → fall through to GENERAL_CHAT stream (never publish failure text).
     }
 
     const extrasPromise = getTurnExtras();
@@ -3048,6 +3163,21 @@
     if (!t) return false;
     if (typeof prefersRichTradingAnswer === "function" && prefersRichTradingAnswer(t)) return true;
     if (typeof isChartStatusQuestion === "function" && isChartStatusQuestion(t)) return false;
+    // Scoped level/price/status — JSON snapshot on server, not rich GPT stream.
+    const snap =
+      typeof resolveSnapshotIntent === "function"
+        ? resolveSnapshotIntent(t)
+        : typeof classifyChartQuestion === "function"
+          ? classifyChartQuestion(t)
+          : null;
+    if (
+      snap === "level" ||
+      snap === "price" ||
+      snap === "status" ||
+      snap === "first_presented_fvg"
+    ) {
+      return false;
+    }
     if (window.DeskCopilotCasual?.isClearlyTrading?.(t)) return true;
     return false;
   }
@@ -3292,6 +3422,17 @@
           );
           return;
         }
+        const bouncedQ = out.question || text;
+        // Conversational "whats the market read" must not die as CHART_READ_REQUEST_ROUTING.
+        const conversationalMarketRead =
+          /\bwhat(?:'s|s| is) the market read\b/i.test(bouncedQ) ||
+          /\bwhat(?:'s|s| is) the read\b/i.test(bouncedQ) ||
+          /\bgive me (?:a |the )?(?:market |chart )?read\b/i.test(bouncedQ);
+        if (conversationalMarketRead) {
+          if (voice) voiceSpeakAck(karenWorkingAck("chart_read"));
+          kickOffChartRead(bouncedQ, { voice, turnGen });
+          return;
+        }
         if (voice) voiceSpeakAck(karenWorkingAck("chart_read"));
         kickOffChartRead(out.question || text, { voice, turnGen });
         return;
@@ -3400,11 +3541,12 @@
     return source ? String(source).replace(/_/g, " ") : "";
   }
 
-  function noteLivePrice(px, source) {
+  function noteLivePrice(px, source, printTs) {
     if (!Number.isFinite(px)) return;
     const prev = contextStripPrice;
     contextStripPrice = px;
-    contextStripPriceTs = Date.now();
+    const tsNum = Number(printTs);
+    contextStripPriceTs = Number.isFinite(tsNum) && tsNum > 0 ? tsNum : Date.now();
     if (source) contextStripPriceSource = source;
     if (Number.isFinite(prev) && Math.abs(px - prev) >= 0.5) {
       lastMarketSnapshotCache = { key: "", data: null, ts: 0 };
@@ -3416,6 +3558,40 @@
     }
   }
 
+  function applyQuoteMarketMeta(quote) {
+    if (!quote || typeof quote !== "object") return;
+    if (quote.expectFresh != null) quoteMarketMeta.expectFresh = Boolean(quote.expectFresh);
+    if (quote.marketState != null) quoteMarketMeta.marketState = String(quote.marketState);
+    if (quote.marketReason != null) quoteMarketMeta.marketReason = String(quote.marketReason);
+    if (quote.nextOpenEt != null) quoteMarketMeta.nextOpenEt = quote.nextOpenEt;
+    if (quote.lastPrintAgeMs != null && Number.isFinite(Number(quote.lastPrintAgeMs))) {
+      quoteMarketMeta.lastPrintAgeMs = Number(quote.lastPrintAgeMs);
+    }
+  }
+
+  function isTickstreamQuoteSource(source) {
+    return source === "tickstream_live" || source === "tickstream_quote";
+  }
+
+  function quotePrintTs(quote, ageMs) {
+    if (quote?.timestamp != null) {
+      const t =
+        typeof quote.timestamp === "number" ? quote.timestamp : Date.parse(String(quote.timestamp));
+      if (Number.isFinite(t)) return t;
+    }
+    if (Number.isFinite(ageMs)) return Date.now() - ageMs;
+    return null;
+  }
+
+  /** Only when expectFresh + Tickstream ≤60s — never Yahoo-as-LIVE recovery. */
+  function shouldRecoverLastFromBackendQuote(quote, ageMs) {
+    if (quote?.expectFresh !== true) return false;
+    if (!isTickstreamQuoteSource(quote?.source)) return false;
+    if (ageMs == null || !Number.isFinite(ageMs) || ageMs < 0) return false;
+    const maxAge = window.DeskCopilotChartPrice?.LIVE_PRICE_MAX_AGE_MS ?? TICK_STALE_MAX_AGE_MS;
+    return ageMs <= maxAge;
+  }
+
   async function fetchBackendPriceFallback() {
     if (backendPriceFallbackInflight) return backendPriceFallbackInflight;
     if (Date.now() - lastQuoteFallbackAt < QUOTE_FALLBACK_COOLDOWN_MS && Number.isFinite(contextStripPrice)) {
@@ -3425,13 +3601,26 @@
     backendPriceFallbackInflight = (async () => {
       try {
         const local = window.DeskCopilotChartPrice?.readQuoteSync?.();
-        if (local && Number.isFinite(local.value) && local.ageMs < 5000) {
+        if (local && Number.isFinite(local.value) && local.ageMs < TICK_LIVE_MAX_AGE_MS) {
           return local.value;
         }
         const det = detectChartSymbol();
         const quote = await bgSend({ type: "QUOTE", symbol: det.quoteSymbol }, 8000);
+        applyQuoteMarketMeta(quote);
         const qPx = Number(quote?.lastPrice ?? quote?.price);
         if (Number.isFinite(qPx) && qPx >= 20000 && qPx <= 45000) {
+          const ageMs =
+            quote?.lastPrintAgeMs != null && Number.isFinite(Number(quote.lastPrintAgeMs))
+              ? Number(quote.lastPrintAgeMs)
+              : quote?.timestamp != null
+                ? Math.max(
+                    0,
+                    Date.now() -
+                      (typeof quote.timestamp === "number"
+                        ? quote.timestamp
+                        : Date.parse(String(quote.timestamp)))
+                  )
+                : null;
           // #region agent log
           dbgLog("I", "content.js:fetchBackendPriceFallback", "quote-api", {
             lastPrice: qPx,
@@ -3439,11 +3628,34 @@
             symbol: det.root,
             path: "backend",
             quoteSymbol: quote?.symbol || det.quoteSymbol,
+            expectFresh: quote?.expectFresh ?? null,
+            marketState: quote?.marketState ?? null,
+            ageMs,
           });
           // #endregion
-          noteLivePrice(qPx, quote?.source || "desk_backend");
-          updateMarketBarUI();
-          return qPx;
+          const printTs = quotePrintTs(quote, ageMs);
+          if (shouldRecoverLastFromBackendQuote(quote, ageMs)) {
+            noteLivePrice(qPx, quote.source, printTs);
+            updateMarketBarUI({
+              value: qPx,
+              source: quote.source,
+              ageMs,
+              timestamp: printTs || Date.now(),
+            });
+            return qPx;
+          }
+          if (quote?.expectFresh === false) {
+            // Closed/holiday/early-close: keep last print with real age — never LIVE.
+            noteLivePrice(qPx, quote?.source || "desk_backend", printTs);
+            updateMarketBarUI({
+              value: qPx,
+              source: quote?.source || "desk_backend",
+              ageMs,
+              timestamp: printTs || Date.now(),
+            });
+            return qPx;
+          }
+          // Open but not Tickstream-fresh (e.g. Yahoo hours-old): do not paint as live recovery.
         }
       } catch {
         /* try levels */
@@ -3451,7 +3663,13 @@
       try {
         const payload = await bgSend({ type: "LEVELS" }, 20000);
         const px = Number(payload?.lastPrice1m ?? payload?.priceHint?.last);
-        if (Number.isFinite(px) && px >= 20000 && px <= 45000) {
+        if (
+          Number.isFinite(px) &&
+          px >= 20000 &&
+          px <= 45000 &&
+          quoteMarketMeta.expectFresh === true &&
+          !Number.isFinite(contextStripPrice)
+        ) {
           noteLivePrice(px, "desk_backend");
           updateMarketBarUI();
           return px;
@@ -3499,10 +3717,21 @@
     if (document.hidden || !isPanelExpanded()) return;
 
     let px = window.DeskCopilotChartPrice?.readSync?.();
-    if (Number.isFinite(px)) {
-      const q = window.DeskCopilotChartPrice?.readQuoteSync?.();
-      noteLivePrice(px, q?.source || "tradingview_live");
-      updateMarketBarUI();
+    const tvQuote = window.DeskCopilotChartPrice?.readQuoteSync?.();
+    const tvFresh =
+      tvQuote && Number.isFinite(tvQuote.value) && tvQuote.ageMs <= TICK_LIVE_MAX_AGE_MS;
+    if (tvFresh) {
+      noteLivePrice(tvQuote.value, tvQuote.source || "tradingview_live", tvQuote.timestamp);
+      updateMarketBarUI(tvQuote);
+      return;
+    }
+    if (Number.isFinite(px) && tvQuote && tvQuote.ageMs <= TICK_STALE_MAX_AGE_MS) {
+      noteLivePrice(px, tvQuote?.source || "tradingview_live", tvQuote?.timestamp);
+      updateMarketBarUI(tvQuote);
+      // TV present but not LIVE-fresh — attempt open-market Tickstream recovery when due.
+      if (Date.now() - lastQuoteFallbackAt > QUOTE_FALLBACK_COOLDOWN_MS) {
+        void fetchBackendPriceFallback();
+      }
       return;
     }
 
@@ -3516,10 +3745,15 @@
       if (forceBridge) window.DeskCopilotChartPrice?.invalidate?.();
       const payload = await window.DeskCopilotChartPrice?.payload?.();
       px = Number(payload?.chartLastPrice);
-      if (Number.isFinite(px)) noteLivePrice(px, payload?.chartLastPriceSource || "tradingview_live");
-      else if (!Number.isFinite(contextStripPrice)) await fetchBackendPriceFallback();
+      if (Number.isFinite(px)) {
+        noteLivePrice(px, payload?.chartLastPriceSource || "tradingview_live", payload?.chartLastPriceTs);
+      }
+      // Missing or aged TV Last → backend quote (gated inside fallback by expectFresh).
+      if (!Number.isFinite(px) || !tvFresh) {
+        await fetchBackendPriceFallback();
+      }
     } catch {
-      if (!Number.isFinite(contextStripPrice)) await fetchBackendPriceFallback();
+      await fetchBackendPriceFallback();
     } finally {
       contextStripPriceInflight = false;
     }
@@ -3633,12 +3867,28 @@
     const hasPrice = Number.isFinite(px);
     const ui = window.DeskCopilotUI;
     if (!ui?.updateHeaderStatus) return;
+    const closed = Boolean(extra.marketClosed) || quoteMarketMeta.expectFresh === false;
+    const marketStatus = closed
+      ? hasPrice
+        ? "STALE"
+        : "UNAVAILABLE"
+      : extra.tvLive && hasPrice
+        ? "LIVE"
+        : ui.mapConnectionToMarketStatus?.(conn, hasPrice) || "WAITING";
+    // Never promote closed calendar to LIVE via connection mapper.
+    const safeMarket =
+      closed && (marketStatus === "LIVE" || marketStatus === "WAITING")
+        ? hasPrice
+          ? "STALE"
+          : "UNAVAILABLE"
+        : marketStatus;
     ui.updateHeaderStatus({
-      market:
-        extra.tvLive && hasPrice
-          ? "LIVE"
-          : ui.mapConnectionToMarketStatus?.(conn, hasPrice) || "WAITING",
-      data: ui.mapConnectionToDataStatus?.(conn) || "WAITING",
+      market: safeMarket,
+      data: closed
+        ? hasPrice
+          ? "STALE"
+          : "UNAVAILABLE"
+        : ui.mapConnectionToDataStatus?.(conn) || "WAITING",
       karen:
         extra.karen ||
         ui.mapKarenStatus?.(karenUiPhase, {
@@ -3646,7 +3896,13 @@
           speaking: window.DeskCopilotVoice?.isSpeaking?.(),
           degraded: window.DeskCopilotVoice?.getEngineMode?.() === "cascade",
         }),
-      marketTip: conn ? window.DeskCopilotConnection?.formatConnectionStatus?.(conn) : "",
+      marketTip:
+        extra.marketTip ||
+        (closed
+          ? quoteMarketMeta.marketReason || "Market closed"
+          : conn
+            ? window.DeskCopilotConnection?.formatConnectionStatus?.(conn)
+            : ""),
       dataTip: conn ? `Backend ${conn.backendUp ? "up" : "down"} · ${conn.state || "unknown"}` : "",
       karenTip: extra.karenTip || "",
     });
@@ -3670,7 +3926,8 @@
     if (quote?.value != null) {
       const prev = contextStripPrice;
       contextStripPrice = quote.value;
-      contextStripPriceTs = Date.now();
+      if (Number.isFinite(quote.timestamp)) contextStripPriceTs = Number(quote.timestamp);
+      else if (!contextStripPriceTs) contextStripPriceTs = Date.now();
       if (quote.source) contextStripPriceSource = quote.source;
       if (Number.isFinite(prev) && Math.abs(quote.value - prev) >= 0.5) {
         lastMarketSnapshotCache = { key: "", data: null, ts: 0 };
@@ -3692,18 +3949,34 @@
         symbol: det.root,
         path: quote?.source || contextStripPriceSource || "none",
         mode: priceMode,
+        expectFresh: quoteMarketMeta.expectFresh,
+        marketState: quoteMarketMeta.marketState,
       });
     }
     // #endregion
     const priceSourceRaw = quote?.source || contextStripPriceSource || conn?.marketMeta?.source || null;
+    const priceAgeMs =
+      quote?.ageMs != null && Number.isFinite(quote.ageMs)
+        ? quote.ageMs
+        : contextStripPriceTs > 0
+          ? Date.now() - contextStripPriceTs
+          : quoteMarketMeta.lastPrintAgeMs;
+    const expectFresh = quoteMarketMeta.expectFresh;
+    const closedCalendar =
+      expectFresh === false ||
+      quoteMarketMeta.marketState === "MARKET_CLOSED" ||
+      quoteMarketMeta.marketState === "MARKET_HOLIDAY" ||
+      quoteMarketMeta.marketState === "MARKET_EARLY_CLOSE";
+
     const liveQuote =
+      !closedCalendar &&
       priceMode === "tick" &&
       quote &&
       (quote.source === "tradingview_live" ||
         quote.source === "tradingview_quote" ||
         quote.source === "tickstream_live" ||
         quote.source === "tickstream_quote") &&
-      quote.ageMs <= 2000;
+      quote.ageMs <= TICK_LIVE_MAX_AGE_MS;
     const minuteQuote =
       priceMode === "minute" &&
       Number.isFinite(px) &&
@@ -3716,10 +3989,15 @@
       priceSourceRaw === "yahoo_bar_close";
     const hasChartPrice = Number.isFinite(px);
     let dataStatus = "—";
-    if (minuteQuote) {
+    if (closedCalendar) {
+      // Shared closed UX — never LIVE when expectFresh=false.
+      dataStatus = hasChartPrice ? "STALE" : "UNAVAILABLE";
+    } else if (minuteQuote) {
       dataStatus = "DELAYED";
     } else if (liveQuote) {
       dataStatus = "LIVE";
+    } else if (expectFresh === true && priceAgeMs != null && priceAgeMs > TICK_STALE_MAX_AGE_MS) {
+      dataStatus = hasChartPrice ? "UNAVAILABLE" : "UNAVAILABLE";
     } else if (barCloseQuote && hasChartPrice) {
       dataStatus = "STALE";
     } else if (priceSourceRaw === "tv_bar_close" && hasChartPrice) {
@@ -3727,36 +4005,59 @@
     } else if (!conn?.backendUp) {
       dataStatus = hasChartPrice ? "STALE" : "OFFLINE";
     } else if (conn.state === "CONNECTED") {
-      dataStatus = hasChartPrice ? "LIVE" : "WAITING";
+      dataStatus = hasChartPrice ? (liveQuote ? "LIVE" : "STALE") : "WAITING";
     } else if (conn.state === "DEGRADED") {
-      dataStatus = hasChartPrice ? "LIVE" : "STALE";
+      dataStatus = hasChartPrice ? "STALE" : "STALE";
     } else if (conn.state === "RECONNECTING" || conn.state === "CONNECTING") {
-      dataStatus = hasChartPrice ? "LIVE" : "WAITING";
+      dataStatus = hasChartPrice ? "STALE" : "WAITING";
     } else {
-      dataStatus = hasChartPrice ? "LIVE" : conn?.backendUp ? "UNAVAILABLE" : "ERROR";
+      dataStatus = hasChartPrice ? "STALE" : conn?.backendUp ? "UNAVAILABLE" : "ERROR";
     }
-    const priceAgeMs = contextStripPriceTs > 0 ? Date.now() - contextStripPriceTs : null;
+
     const ageMs = liveQuote && priceAgeMs != null ? priceAgeMs : conn?.dataAge ?? priceAgeMs;
-    const updated =
+    const ageLabel =
       ageMs != null
-        ? minuteQuote
-          ? "TV 1m close"
-          : dataStatus === "LIVE"
-            ? `TV Last · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
-            : dataStatus === "STALE"
-              ? `Last print · ${ageMs < 1000 ? `${ageMs}ms` : `${Math.round(ageMs / 1000)}s`} ago`
-              : conn?.state === "DEGRADED"
-                ? `Backend stale · ${Math.round((ageMs || 0) / 1000)}s ago`
-                : contextStripPriceTs > 0
-                  ? `Updated ${new Date(contextStripPriceTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                  : ""
-        : "";
-    const dataSource = minuteQuote
-      ? "TV 1m close"
-      : liveQuote || dataStatus === "LIVE"
-        ? "TV Last"
-        : formatPriceSourceLabel(priceSourceRaw) ||
-          (hasChartPrice ? "TV Last" : conn?.backendUp ? "Awaiting chart price" : "");
+        ? ageMs < 1000
+          ? `${ageMs}ms`
+          : `${Math.round(ageMs / 1000)}s`
+        : null;
+    let updated = "";
+    if (closedCalendar) {
+      const reason =
+        quoteMarketMeta.marketReason ||
+        (quoteMarketMeta.marketState === "MARKET_HOLIDAY"
+          ? "Market holiday"
+          : quoteMarketMeta.marketState === "MARKET_EARLY_CLOSE"
+            ? "Early close"
+            : "Market closed");
+      updated = ageLabel ? `${reason} · last ${ageLabel} ago` : reason;
+    } else if (ageMs != null) {
+      if (minuteQuote) updated = "TV 1m close";
+      else if (dataStatus === "LIVE") updated = `TV Last · ${ageLabel} ago`;
+      else if (expectFresh === true && dataStatus === "UNAVAILABLE")
+        updated = `Market open · feed problem · last ${ageLabel} ago`;
+      else if (expectFresh === true && dataStatus === "STALE")
+        updated = `Market open · data stale · ${ageLabel} ago`;
+      else if (dataStatus === "STALE") updated = `Last print · ${ageLabel} ago`;
+      else if (conn?.state === "DEGRADED") updated = `Backend stale · ${ageLabel} ago`;
+      else if (contextStripPriceTs > 0)
+        updated = `Updated ${new Date(contextStripPriceTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    const dataSource = closedCalendar
+      ? formatPriceSourceLabel(priceSourceRaw) || (hasChartPrice ? "Last print" : "")
+      : minuteQuote
+        ? "TV 1m close"
+        : liveQuote || dataStatus === "LIVE"
+          ? isTickstreamQuoteSource(priceSourceRaw)
+            ? "TickStream"
+            : "TV Last"
+          : formatPriceSourceLabel(priceSourceRaw) ||
+            (hasChartPrice ? "TV Last" : conn?.backendUp ? "Awaiting chart price" : "");
+    const tipClosed = closedCalendar
+      ? `${quoteMarketMeta.marketReason || "Market closed"}${
+          quoteMarketMeta.nextOpenEt ? ` · next open ${quoteMarketMeta.nextOpenEt}` : ""
+        }`
+      : null;
     window.DeskCopilotVerdictUI?.updateMarketBar?.({
       symbol: shortSymbol() || "MNQ",
       price: hasChartPrice ? px : null,
@@ -3766,12 +4067,18 @@
       updatedAt: updated,
       connectionState: conn?.state,
       dataSource,
-      tooltip: conn
-        ? `${window.DeskCopilotConnection?.formatConnectionStatus?.(conn) || conn.state}${hasChartPrice ? "" : " · Click RECONNECT if price stays unavailable"}`
-        : "",
+      tooltip:
+        tipClosed ||
+        (conn
+          ? `${window.DeskCopilotConnection?.formatConnectionStatus?.(conn) || conn.state}${hasChartPrice ? "" : " · Click RECONNECT if price stays unavailable"}`
+          : ""),
     });
     syncPriceModeButton();
-    syncHeaderStatus({ tvLive: Boolean(liveQuote) });
+    syncHeaderStatus({
+      tvLive: Boolean(liveQuote) && !closedCalendar,
+      marketClosed: closedCalendar,
+      marketTip: tipClosed || undefined,
+    });
   }
 
   function updateContextStrip() {
@@ -3961,12 +4268,33 @@
     updateAgentStatus();
   }
 
+  /** Desk ONLINE for UI — same hop helper as connection-state (not raw connState). */
+  function isDeskOnlineNow() {
+    const snap = connectionSnapshot;
+    if (!snap) return false;
+    const fn = window.DeskCopilotConnection?.isDeskOnline;
+    if (typeof fn === "function") {
+      return (
+        fn({
+          backendUp: snap.backendUp,
+          lastSuccessfulRequest: snap.lastSuccessfulRequest,
+          healthDegraded: snap.healthDegraded === true,
+          tickAgeMs: snap.dataAge,
+          hasPrice: snap.dataAge != null || Boolean(snap.marketMeta),
+          retryCount: snap.retryCount,
+        }) === true
+      );
+    }
+    return window.DeskCopilotConnection?.isLiveDataAvailable?.(snap) === true;
+  }
+
   function updateAgentStatus() {
     const btn = document.getElementById("dc-reconnect");
     if (!btn) return;
     const voiceOn = window.DeskCopilotVoice?.isListening?.();
     const agentOn = isAutoVoiceEnabled();
     const connState = connectionSnapshot?.state;
+    const deskOnline = isDeskOnlineNow();
     const statusLine =
       connectionSnapshot && window.DeskCopilotConnection?.formatConnectionStatus
         ? window.DeskCopilotConnection.formatConnectionStatus(connectionSnapshot)
@@ -3975,11 +4303,13 @@
       connState === "RECONNECTING" ||
       connState === "CONNECTING" ||
       (!backendOnline && agentOn);
-    btn.classList.toggle("dc-online", connState === "CONNECTED");
+    const showDegraded =
+      connState === "DEGRADED" || (connState === "CONNECTED" && !deskOnline);
+    btn.classList.toggle("dc-online", deskOnline);
     btn.classList.toggle("dc-reconnecting", reconnecting);
-    btn.classList.toggle("dc-degraded", connState === "DEGRADED");
+    btn.classList.toggle("dc-degraded", showDegraded);
 
-    if (connState === "CONNECTED" && voiceOn && agentOn) {
+    if (deskOnline && voiceOn && agentOn) {
       const mode = window.DeskCopilotVoice?.getEngineMode?.() || "off";
       if (mode === "cascade") {
         btn.textContent = "● AGENT (FALLBACK)";
@@ -3988,10 +4318,10 @@
         btn.textContent = "● KAREN LIVE";
         btn.title = statusLine || "Karen is live — backend + market state fresh";
       }
-    } else if (connState === "CONNECTED") {
+    } else if (deskOnline) {
       btn.textContent = "● LIVE";
       btn.title = statusLine || "Backend + market state connected";
-    } else if (connState === "DEGRADED") {
+    } else if (showDegraded) {
       btn.textContent = "◐ DEGRADED";
       btn.title = statusLine || "Backend up — market state stale";
     } else if (reconnecting) {
@@ -5603,6 +5933,17 @@
     return cap;
   }
 
+  function hasFreshLocalChartPrice(maxAgeMs = TICK_LIVE_MAX_AGE_MS) {
+    const quote = window.DeskCopilotChartPrice?.readQuoteSync?.();
+    if (quote?.value != null && Number.isFinite(Number(quote.value)) && quote.ageMs <= maxAgeMs) {
+      return true;
+    }
+    if (Number.isFinite(contextStripPrice) && contextStripPriceTs > 0) {
+      return Date.now() - contextStripPriceTs <= maxAgeMs;
+    }
+    return false;
+  }
+
   function hasLocalChartPrice() {
     const quote = window.DeskCopilotChartPrice?.readQuoteSync?.();
     if (quote?.value != null && Number.isFinite(Number(quote.value))) return true;
@@ -6062,12 +6403,14 @@
   document.getElementById("dc-chat-send").onclick = () => {
     const input = document.getElementById("dc-chat-input");
     const v = input.value;
+    const trimmed = String(v || "").trim();
+    if (!trimmed) return;
     input.value = "";
-    sendChat(v);
+    sendChat(trimmed, { typed: true, source: "composer" });
   };
 
   document.getElementById("dc-chat-input").onkeydown = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       document.getElementById("dc-chat-send").click();
     }

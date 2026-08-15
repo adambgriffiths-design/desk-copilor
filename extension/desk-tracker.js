@@ -1,7 +1,16 @@
 /**
- * Chart-edge decision tracker rail — no on-candle dot; candle-close confirmed state.
+ * Decision tracker rail — left chrome, off the right-axis Last; candle-close confirmed state.
  */
 (function () {
+  const TRACKER_REV = "1.4.118";
+  if (window.__dcTrackerRev === TRACKER_REV && window.DeskCopilotTracker) return;
+  try {
+    window.DeskCopilotTracker?.stop?.();
+  } catch {
+    /* ignore */
+  }
+  window.__dcTrackerRev = TRACKER_REV;
+
   const RAIL_ID = "dc-tracker-rail";
   const CARD_ID = "dc-tracker-card";
   const TIMELINE_KEY = "dc-decision-timeline";
@@ -15,17 +24,67 @@
   let enabled = true;
 
   function ensureStyles() {
-    if (document.getElementById("dc-tracker-styles")) return;
-    const link = document.createElement("link");
-    link.id = "dc-tracker-styles";
-    link.rel = "stylesheet";
-    link.href = chrome.runtime.getURL("desk-tracker.css");
-    document.head.appendChild(link);
+    const ver = chrome.runtime.getManifest?.()?.version || "1";
+    const href = `${chrome.runtime.getURL("desk-tracker.css")}?v=${encodeURIComponent(ver)}`;
+    let link = document.getElementById("dc-tracker-styles");
+    if (!link) {
+      link = document.createElement("link");
+      link.id = "dc-tracker-styles";
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+    }
+    if (link.getAttribute("href") !== href) link.href = href;
+  }
+
+  const AXIS_GUTTER_PX = 120;
+  let parkBound = false;
+
+  function parkRail() {
+    const rail = document.getElementById(RAIL_ID);
+    if (!rail) return;
+    const panel = document.getElementById("dc-panel");
+    const vw = window.innerWidth || 1200;
+    const vh = window.innerHeight || 800;
+    const railW = 28;
+    const gap = 8;
+    let left = 394;
+    let bottom = 16;
+    if (panel) {
+      const r = panel.getBoundingClientRect();
+      left = Math.round(r.right + gap);
+      bottom = Math.max(8, Math.round(vh - r.bottom));
+      if (left + railW > vw - AXIS_GUTTER_PX) {
+        left = Math.max(8, Math.round(r.left - railW - gap));
+      }
+      if (left + railW > vw - AXIS_GUTTER_PX) {
+        left = 8;
+      }
+    }
+    rail.style.left = `${left}px`;
+    rail.style.right = "auto";
+    rail.style.top = "auto";
+    rail.style.bottom = `${bottom}px`;
+    rail.style.transform = "none";
+  }
+
+  function bindPark() {
+    if (parkBound) return;
+    parkBound = true;
+    window.addEventListener("resize", parkRail);
+    const panel = document.getElementById("dc-panel");
+    if (panel) {
+      const mo = new MutationObserver(parkRail);
+      mo.observe(panel, { attributes: true, attributeFilter: ["style", "class"] });
+    }
   }
 
   function ensureRail() {
-    if (document.getElementById(RAIL_ID)) return;
     ensureStyles();
+    if (document.getElementById(RAIL_ID)) {
+      parkRail();
+      bindPark();
+      return;
+    }
     const rail = document.createElement("div");
     rail.id = RAIL_ID;
     rail.className = "dc-tracker-rail";
@@ -73,6 +132,8 @@
       const idx = Number(e.target.value);
       showTimelineIndex(idx);
     });
+    parkRail();
+    bindPark();
   }
 
   function setLed(color) {

@@ -149,8 +149,8 @@ const CHART_ABBREV: Array<[RegExp, string]> = [
 
 function chartIdKey(id?: string): string {
   const raw = String(id || "");
-  if (/^reh(_|$)/i.test(raw)) return "reh";
-  if (/^rel(_|$)/i.test(raw)) return "rel";
+  if (/^reh(_|$)/i.test(raw) || /^eqh(_|$)/i.test(raw)) return "reh";
+  if (/^rel(_|$)/i.test(raw) || /^eql(_|$)/i.test(raw)) return "rel";
   return raw;
 }
 
@@ -175,8 +175,8 @@ function titleCaseChartLabel(s: string): string {
 /** User-visible chart/overlay level text — full ICT names, never a DC prefix. */
 export function formatChartLevelLabel(label: string, id?: string): string {
   const key = chartIdKey(id);
-  if (key === "reh") return "Relative Equal Highs";
-  if (key === "rel") return "Relative Equal Lows";
+  if (key === "reh" || key === "eqh") return "Relative Equal Highs";
+  if (key === "rel" || key === "eql") return "Relative Equal Lows";
   if (CHART_ID_LABELS[key]) {
     const extra = String(label || "").match(/[·•].+$/);
     return extra ? `${CHART_ID_LABELS[key]} ${extra[0].trim()}` : CHART_ID_LABELS[key];
@@ -186,6 +186,45 @@ export function formatChartLevelLabel(label: string, id?: string): string {
   if (!s) return "";
   for (const [re, rep] of CHART_ABBREV) s = s.replace(re, rep);
   return titleCaseChartLabel(s).replace(/\s{2,}/g, " ").trim();
+}
+
+const OVERLAY_SHORT_ID: Record<string, string> = {
+  asia_high: "Asia High",
+  asia_low: "Asia Low",
+  london_high: "London High",
+  london_low: "London Low",
+  ny_pre_high: "NY Pre High",
+  ny_pre_low: "NY Pre Low",
+  ny_rth_high: "NY RTH High",
+  ny_rth_low: "NY RTH Low",
+  ny_pm_high: "NY PM High",
+  ny_pm_low: "NY PM Low",
+};
+
+const OVERLAY_SHORT_TEXT: Array<[RegExp, string]> = [
+  [/New York Regular Trading Hours High/gi, "NY RTH High"],
+  [/New York Regular Trading Hours Low/gi, "NY RTH Low"],
+  [/New York Pre-Market High/gi, "NY Pre High"],
+  [/New York Pre-Market Low/gi, "NY Pre Low"],
+  [/New York Afternoon Session High/gi, "NY PM High"],
+  [/New York Afternoon Session Low/gi, "NY PM Low"],
+  [/London Session High/gi, "London High"],
+  [/London Session Low/gi, "London Low"],
+  [/Asia Session High/gi, "Asia High"],
+  [/Asia Session Low/gi, "Asia Low"],
+  [/Relative Equal Highs/gi, "REH"],
+  [/Relative Equal Lows/gi, "REL"],
+];
+
+/** Compact overlay/chart chips — one short name per ray, no truncated "New York…". */
+export function formatChartOverlayLabel(label: string, id?: string): string {
+  const key = chartIdKey(id);
+  if (key === "reh" || key === "eqh") return "REH";
+  if (key === "rel" || key === "eql") return "REL";
+  if (OVERLAY_SHORT_ID[key]) return OVERLAY_SHORT_ID[key];
+  let s = formatChartLevelLabel(label, id);
+  for (const [re, rep] of OVERLAY_SHORT_TEXT) s = s.replace(re, rep);
+  return s.replace(/\s{2,}/g, " ").trim();
 }
 
 /** Injected into user-facing LLM prompts — responses must spell out ICT terms. */

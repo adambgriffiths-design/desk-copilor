@@ -1,0 +1,28 @@
+{
+  "id": "bullish-wait",
+  "ctx": {},
+  "state": {},
+  "label": {
+    "id": "bullish-wait",
+    "timestamp": "2026-08-12T14:30:00Z",
+    "market_state_snapshot": "replay-fixtures/bullish-wait",
+    "expected_observation": {
+      "liquidity_swept": true,
+      "fvg_status": "present",
+      "displacement": "present",
+      "market_structure": "bullish",
+      "htf_bias_aligned": true,
+      "tradeable_bias": "bullish",
+      "data_quality": "good",
+      "session": "ny"
+    },
+    "expected_entry_model": "Displacement + FVG retrace entry",
+    "adam_verdict": "WAIT",
+    "would_take": false,
+    "grade": "B",
+    "why_taken": "Sweep + displacement + FVG align with bullish reversal — would lean long on retrace but not market yet",
+    "why_rejected_alternatives": "No short case — HTF bias bullish. Not taking yet — wait for FVG retrace into entry zone",
+    "fvg_validity": "valid",
+    "notes": "Good setup — wait for entry zone"
+  }
+}

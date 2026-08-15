@@ -1,0 +1,2360 @@
+[
+  {
+    "asOf": "2026-08-11T22:00:00.000Z",
+    "label": "Globex open",
+    "barsAvailable": 1,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-11T22:00:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-11T22:00:00.000Z",
+        "open": 29657.75,
+        "high": 29661,
+        "low": 29641,
+        "close": 29647.5
+      }
+    ],
+    "price": 29647.5,
+    "observation": {
+      "data_quality": "missing",
+      "market_structure": "unknown",
+      "session": "unknown",
+      "displacement": "unknown",
+      "displacement_points": null,
+      "htf_bias": {
+        "daily": "unknown",
+        "m15": "unknown",
+        "m5": "unknown",
+        "aligned": "unknown",
+        "tradeable_bias": "unknown"
+      },
+      "fvg": {
+        "status": "unknown",
+        "direction": "unknown"
+      },
+      "liquidity_levels": [],
+      "premium_discount": {
+        "zone": "unknown",
+        "price_location": "unknown"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone"
+      ]
+    },
+    "interpretation": {
+      "long_supported": false,
+      "short_supported": false,
+      "long_reasons": [],
+      "short_reasons": [],
+      "contradictions": [
+        "Market structure unknown — cannot lean directional",
+        "Displacement unknown — cannot confirm impulsive move",
+        "FVG status unknown — cannot scaffold entry from gap",
+        "Data quality missing — observation incomplete"
+      ],
+      "entry_model": null,
+      "reasoning": "From observed facts: Displacement: unknown — insufficient data. FVG status: unknown. No clear lean — Market structure unknown — cannot lean directional; Displacement unknown — cannot confirm impulsive move; FVG status unknown — cannot scaffold entry from gap; Data quality missing — observation incomplete."
+    },
+    "decision": {
+      "verdict": "NO_TRADE",
+      "verdict_reason": "Chart data missing or stale — no call until observation engine has usable MarketState.",
+      "invalidation": null,
+      "entry_zone": null,
+      "target": null
+    },
+    "entryStatus": "ACTIVE",
+    "karen": {
+      "entryIdea": "Wait — no clean entry at cutoff",
+      "invalidation": "Below 29641.0",
+      "target": "Toward 29661.0",
+      "fvgEvidence": "No unfilled 1m FVG at cutoff",
+      "pdEvidence": "vs today range: discount; vs prev day range: equilibrium; vs NDOG: inside (PDH 29647.5 / PDL 29647.5)",
+      "structureEvidence": "Structure: unknown, displacement unknown",
+      "confidence": 30,
+      "candlesUsed": [
+        "2026-08-11T22:00:00.000Z O:29657.75 H:29661 L:29641 C:29647.5"
+      ],
+      "levelsUsed": [
+        "Previous Day High 29647.5",
+        "Previous Day Low 29647.5",
+        "Previous Day Close 29647.5",
+        "Previous Day Open 29647.5"
+      ],
+      "pipelineVerdict": "NO_TRADE",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T02:00:00.000Z",
+    "label": "Overnight mid",
+    "barsAvailable": 241,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T02:00:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T01:56:00.000Z",
+        "open": 29662.5,
+        "high": 29667,
+        "low": 29654,
+        "close": 29655.5
+      },
+      {
+        "time": "2026-08-12T01:57:00.000Z",
+        "open": 29656.25,
+        "high": 29660.5,
+        "low": 29653.25,
+        "close": 29653.5
+      },
+      {
+        "time": "2026-08-12T01:58:00.000Z",
+        "open": 29652.75,
+        "high": 29659.75,
+        "low": 29646.75,
+        "close": 29656.5
+      },
+      {
+        "time": "2026-08-12T01:59:00.000Z",
+        "open": 29657.25,
+        "high": 29659.25,
+        "low": 29655.25,
+        "close": 29658.25
+      },
+      {
+        "time": "2026-08-12T02:00:00.000Z",
+        "open": 29659,
+        "high": 29664.75,
+        "low": 29657.75,
+        "close": 29663.75
+      }
+    ],
+    "price": 29663.75,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bearish",
+      "session": "asia",
+      "displacement": "absent",
+      "displacement_points": null,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "bullish",
+        "m5": "bullish",
+        "aligned": true,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29673.75,
+        "bottom": 29663.5,
+        "direction": "bullish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 29663.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29663.75,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29663.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29683.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29683.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 29683.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: equilibrium; vs NDOG: inside"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": false,
+      "short_supported": false,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Asia high taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Bullish FVG present in observation"
+      ],
+      "short_reasons": [
+        "Observed market structure is bearish"
+      ],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Bearish structure opposes bullish tradeable bias"
+      ],
+      "entry_model": "bearish structure continuation",
+      "reasoning": "This resembles bearish structure continuation because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29663.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29663.75. PDC taken at 29663.75. Asia high taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29683.50. No impulsive displacement detected in lookback. A bullish FVG exists between 29663.50–29673.75. Previous day high 29663.75, previous day low 29663.75. No clear lean — PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Bearish structure opposes bullish tradeable bias."
+    },
+    "decision": {
+      "verdict": "NO_TRADE",
+      "verdict_reason": "No trade — PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Bearish structure opposes bullish tradeable bias",
+      "invalidation": null,
+      "entry_zone": "29663.50–29673.75",
+      "target": 29663.75
+    },
+    "entryStatus": "WAIT",
+    "karen": {
+      "entryIdea": "29663.50–29673.75",
+      "invalidation": "Below 29624.5",
+      "target": "29663.75",
+      "fvgEvidence": "bullish FVG 29663.5–29673.8 (formed 21:44)",
+      "pdEvidence": "vs today range: premium; vs prev day range: equilibrium; vs NDOG: inside (PDH 29663.8 / PDL 29663.8)",
+      "structureEvidence": "Bearish MSS — body close below swing low 29664.50 at 21:59",
+      "confidence": 30,
+      "candlesUsed": [
+        "2026-08-12T01:56:00.000Z O:29662.5 H:29667 L:29654 C:29655.5",
+        "2026-08-12T01:57:00.000Z O:29656.25 H:29660.5 L:29653.25 C:29653.5",
+        "2026-08-12T01:58:00.000Z O:29652.75 H:29659.75 L:29646.75 C:29656.5",
+        "2026-08-12T01:59:00.000Z O:29657.25 H:29659.25 L:29655.25 C:29658.25",
+        "2026-08-12T02:00:00.000Z O:29659 H:29664.75 L:29657.75 C:29663.75"
+      ],
+      "levelsUsed": [
+        "Previous Day High 29663.8",
+        "Previous Day Low 29663.8",
+        "Previous Day Close 29663.8",
+        "Previous Day Open 29663.8"
+      ],
+      "pipelineVerdict": "NO_TRADE",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T06:00:00.000Z",
+    "label": "Early morning",
+    "barsAvailable": 481,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T06:00:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T05:56:00.000Z",
+        "open": 29714.5,
+        "high": 29717.5,
+        "low": 29713,
+        "close": 29715.75
+      },
+      {
+        "time": "2026-08-12T05:57:00.000Z",
+        "open": 29714.75,
+        "high": 29715,
+        "low": 29710.5,
+        "close": 29714
+      },
+      {
+        "time": "2026-08-12T05:58:00.000Z",
+        "open": 29714.75,
+        "high": 29715,
+        "low": 29712.5,
+        "close": 29713.25
+      },
+      {
+        "time": "2026-08-12T05:59:00.000Z",
+        "open": 29712.75,
+        "high": 29717.25,
+        "low": 29712.75,
+        "close": 29717.25
+      },
+      {
+        "time": "2026-08-12T06:00:00.000Z",
+        "open": 29715,
+        "high": 29721.25,
+        "low": 29713.75,
+        "close": 29719.75
+      }
+    ],
+    "price": 29719.75,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bullish",
+      "session": "london",
+      "displacement": "present",
+      "displacement_points": 4.75,
+      "htf_bias": {
+        "daily": "bearish",
+        "m15": "bullish",
+        "m5": "bullish",
+        "aligned": true,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29706.75,
+        "bottom": 29703.5,
+        "direction": "bullish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29721.25,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29713.75,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 29721.25,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29668.25,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: discount; vs NDOG: inside"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "structure.displacement_points",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": false,
+      "short_supported": false,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Bullish FVG present in observation"
+      ],
+      "short_reasons": [],
+      "contradictions": [
+        "Close through a session/PD high is the buy-side raid, not bullish continuation",
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken in London is buy-side liquidity swept — not a reason to recommend bullishness"
+      ],
+      "entry_model": null,
+      "reasoning": "From observed facts: PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 4.75 points. A bullish FVG exists between 29703.50–29706.75. Previous day high 30001.75, previous day low 29624.50. No clear lean — Close through a session/PD high is the buy-side raid, not bullish continuation; PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken in London is buy-side liquidity swept — not a reason to recommend bullishness."
+    },
+    "decision": {
+      "verdict": "WAIT",
+      "verdict_reason": "Stay flat — Asia high taken in London is a buy-side liquidity raid, not a reason to flip bullish. Look for displacement or continuation lower, or wait until one-minute structure confirms. A high being taken is not a long.",
+      "invalidation": null,
+      "entry_zone": "29703.50–29706.75",
+      "target": 29805.75
+    },
+    "entryStatus": "WAIT",
+    "karen": {
+      "entryIdea": "29703.50–29706.75",
+      "invalidation": "Below 29668.3",
+      "target": "29805.75",
+      "fvgEvidence": "bullish FVG 29703.5–29706.8 (formed 01:52)",
+      "pdEvidence": "vs today range: premium; vs prev day range: discount; vs NDOG: inside (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bullish MSS — body close above swing high 29718.00 at 02:00",
+      "confidence": 45,
+      "candlesUsed": [
+        "2026-08-12T05:56:00.000Z O:29714.5 H:29717.5 L:29713 C:29715.75",
+        "2026-08-12T05:57:00.000Z O:29714.75 H:29715 L:29710.5 C:29714",
+        "2026-08-12T05:58:00.000Z O:29714.75 H:29715 L:29712.5 C:29713.25",
+        "2026-08-12T05:59:00.000Z O:29712.75 H:29717.25 L:29712.75 C:29717.25",
+        "2026-08-12T06:00:00.000Z O:29715 H:29721.25 L:29713.75 C:29719.75"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "WAIT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T11:00:00.000Z",
+    "label": "Pre-market",
+    "barsAvailable": 781,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T11:00:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T10:56:00.000Z",
+        "open": 29816.5,
+        "high": 29816.5,
+        "low": 29813.5,
+        "close": 29814.75
+      },
+      {
+        "time": "2026-08-12T10:57:00.000Z",
+        "open": 29814,
+        "high": 29814,
+        "low": 29812,
+        "close": 29814
+      },
+      {
+        "time": "2026-08-12T10:58:00.000Z",
+        "open": 29814.25,
+        "high": 29814.25,
+        "low": 29810.5,
+        "close": 29812
+      },
+      {
+        "time": "2026-08-12T10:59:00.000Z",
+        "open": 29811.5,
+        "high": 29816.5,
+        "low": 29803.25,
+        "close": 29814.5
+      },
+      {
+        "time": "2026-08-12T11:00:00.000Z",
+        "open": 29816,
+        "high": 29831.75,
+        "low": 29814,
+        "close": 29828
+      }
+    ],
+    "price": 29828,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bullish",
+      "session": "ny",
+      "displacement": "present",
+      "displacement_points": 12,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "bullish",
+        "m5": "bullish",
+        "aligned": true,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29835.5,
+        "bottom": 29827.75,
+        "direction": "bullish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 29848.25,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29668.25,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: equilibrium; vs NDOG: premium"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "structure.displacement_points",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": true,
+      "short_supported": false,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Bullish FVG present in observation"
+      ],
+      "short_reasons": [],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)"
+      ],
+      "entry_model": "NY open sweep + displacement + FVG retrace (Adam reversal model)",
+      "reasoning": "This resembles NY open sweep + displacement + FVG retrace (Adam reversal model) because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 12.00 points. A bullish FVG exists between 29827.75–29835.50. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)."
+    },
+    "decision": {
+      "verdict": "WAIT",
+      "verdict_reason": "LONG bias — wait for retrace into 29827.75–29835.50. This resembles NY open sweep + displacement + FVG retrace (Adam reversal model) because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 12.00 points. A bullish FVG exists between 29827.75–29835.50. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation).",
+      "invalidation": null,
+      "entry_zone": "29827.75–29835.50",
+      "target": 30001.75
+    },
+    "entryStatus": "WAIT",
+    "karen": {
+      "entryIdea": "29827.75–29835.50",
+      "invalidation": "Below 29668.3",
+      "target": "30001.75",
+      "fvgEvidence": "bullish FVG 29827.8–29835.5 (formed 06:11)",
+      "pdEvidence": "vs today range: premium; vs prev day range: equilibrium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bullish MSS — body close above swing high 29819.00 at 07:00",
+      "confidence": 45,
+      "candlesUsed": [
+        "2026-08-12T10:56:00.000Z O:29816.5 H:29816.5 L:29813.5 C:29814.75",
+        "2026-08-12T10:57:00.000Z O:29814 H:29814 L:29812 C:29814",
+        "2026-08-12T10:58:00.000Z O:29814.25 H:29814.25 L:29810.5 C:29812",
+        "2026-08-12T10:59:00.000Z O:29811.5 H:29816.5 L:29803.25 C:29814.5",
+        "2026-08-12T11:00:00.000Z O:29816 H:29831.75 L:29814 C:29828"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "WAIT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T13:00:00.000Z",
+    "label": "Pre-NY open",
+    "barsAvailable": 901,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T13:00:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T12:56:00.000Z",
+        "open": 29917.75,
+        "high": 29917.75,
+        "low": 29910.5,
+        "close": 29912.25
+      },
+      {
+        "time": "2026-08-12T12:57:00.000Z",
+        "open": 29912,
+        "high": 29913.75,
+        "low": 29908,
+        "close": 29908.5
+      },
+      {
+        "time": "2026-08-12T12:58:00.000Z",
+        "open": 29908.75,
+        "high": 29917.5,
+        "low": 29907.25,
+        "close": 29914.5
+      },
+      {
+        "time": "2026-08-12T12:59:00.000Z",
+        "open": 29914.75,
+        "high": 29921.75,
+        "low": 29914.75,
+        "close": 29919.25
+      },
+      {
+        "time": "2026-08-12T13:00:00.000Z",
+        "open": 29920,
+        "high": 29930.5,
+        "low": 29918.75,
+        "close": 29920.75
+      }
+    ],
+    "price": 29920.75,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bullish",
+      "session": "ny",
+      "displacement": "present",
+      "displacement_points": 5.75,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "bullish",
+        "m5": "bullish",
+        "aligned": true,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29893.75,
+        "bottom": 29887,
+        "direction": "bullish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 29960,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29668.25,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: premium; vs NDOG: premium"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "structure.displacement_points",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": true,
+      "short_supported": false,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Bullish FVG present in observation"
+      ],
+      "short_reasons": [],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)"
+      ],
+      "entry_model": "NY open sweep + displacement + FVG retrace (Adam reversal model)",
+      "reasoning": "This resembles NY open sweep + displacement + FVG retrace (Adam reversal model) because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 5.75 points. A bullish FVG exists between 29887.00–29893.75. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)."
+    },
+    "decision": {
+      "verdict": "LONG",
+      "verdict_reason": "LONG — provided price retraces into 29887.00–29893.75. Invalidation: 29619.50.",
+      "invalidation": 29619.5,
+      "entry_zone": "29887.00–29893.75",
+      "target": 30001.75
+    },
+    "entryStatus": "ACTIVE",
+    "karen": {
+      "entryIdea": "29887.00–29893.75",
+      "invalidation": "29619.5",
+      "target": "30001.75",
+      "fvgEvidence": "bullish FVG 29887.0–29893.8 (formed 08:39)",
+      "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bullish MSS — body close above swing high 29916.00 at 08:54",
+      "confidence": 65,
+      "candlesUsed": [
+        "2026-08-12T12:56:00.000Z O:29917.75 H:29917.75 L:29910.5 C:29912.25",
+        "2026-08-12T12:57:00.000Z O:29912 H:29913.75 L:29908 C:29908.5",
+        "2026-08-12T12:58:00.000Z O:29908.75 H:29917.5 L:29907.25 C:29914.5",
+        "2026-08-12T12:59:00.000Z O:29914.75 H:29921.75 L:29914.75 C:29919.25",
+        "2026-08-12T13:00:00.000Z O:29920 H:29930.5 L:29918.75 C:29920.75"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "LONG",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T14:30:00.000Z",
+    "label": "NY open",
+    "barsAvailable": 991,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T14:30:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T14:26:00.000Z",
+        "open": 29919.75,
+        "high": 29945.75,
+        "low": 29917,
+        "close": 29941.5
+      },
+      {
+        "time": "2026-08-12T14:27:00.000Z",
+        "open": 29942.25,
+        "high": 29943.5,
+        "low": 29931.25,
+        "close": 29935.25
+      },
+      {
+        "time": "2026-08-12T14:28:00.000Z",
+        "open": 29935.5,
+        "high": 29944,
+        "low": 29921,
+        "close": 29925
+      },
+      {
+        "time": "2026-08-12T14:29:00.000Z",
+        "open": 29923.75,
+        "high": 29927.5,
+        "low": 29904.75,
+        "close": 29916.25
+      },
+      {
+        "time": "2026-08-12T14:30:00.000Z",
+        "open": 29916,
+        "high": 29924.75,
+        "low": 29901.5,
+        "close": 29907.5
+      }
+    ],
+    "price": 29907.5,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bullish",
+      "session": "ny",
+      "displacement": "present",
+      "displacement_points": 21.75,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "bullish",
+        "m5": "bullish",
+        "aligned": true,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29931.25,
+        "bottom": 29927.5,
+        "direction": "bearish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 30001.75,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29847.75,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: premium; vs NDOG: premium"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "structure.displacement_points",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": true,
+      "short_supported": false,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)"
+      ],
+      "short_reasons": [
+        "Bearish FVG present in observation"
+      ],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)"
+      ],
+      "entry_model": "NY open sweep + displacement + FVG retrace (Adam reversal model)",
+      "reasoning": "This resembles NY open sweep + displacement + FVG retrace (Adam reversal model) because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 21.75 points. A bearish FVG exists between 29927.50–29931.25. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)."
+    },
+    "decision": {
+      "verdict": "WAIT",
+      "verdict_reason": "LONG bias — wait for retrace into 29927.50–29931.25. This resembles NY open sweep + displacement + FVG retrace (Adam reversal model) because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 21.75 points. A bearish FVG exists between 29927.50–29931.25. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation).",
+      "invalidation": null,
+      "entry_zone": "29927.50–29931.25",
+      "target": 29992.75
+    },
+    "entryStatus": "WAIT",
+    "karen": {
+      "entryIdea": "29927.50–29931.25",
+      "invalidation": "Below 29847.8",
+      "target": "29992.75",
+      "fvgEvidence": "bearish FVG 29927.5–29931.3 (formed 10:29)",
+      "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bullish MSS — body close above swing high 29918.50 at 10:27",
+      "confidence": 45,
+      "candlesUsed": [
+        "2026-08-12T14:26:00.000Z O:29919.75 H:29945.75 L:29917 C:29941.5",
+        "2026-08-12T14:27:00.000Z O:29942.25 H:29943.5 L:29931.25 C:29935.25",
+        "2026-08-12T14:28:00.000Z O:29935.5 H:29944 L:29921 C:29925",
+        "2026-08-12T14:29:00.000Z O:29923.75 H:29927.5 L:29904.75 C:29916.25",
+        "2026-08-12T14:30:00.000Z O:29916 H:29924.75 L:29901.5 C:29907.5"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "WAIT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T15:30:00.000Z",
+    "label": "Post-open hour",
+    "barsAvailable": 1051,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T15:30:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T15:26:00.000Z",
+        "open": 29848.25,
+        "high": 29857.5,
+        "low": 29845.5,
+        "close": 29854.75
+      },
+      {
+        "time": "2026-08-12T15:27:00.000Z",
+        "open": 29855,
+        "high": 29858.75,
+        "low": 29846.5,
+        "close": 29853
+      },
+      {
+        "time": "2026-08-12T15:28:00.000Z",
+        "open": 29852.75,
+        "high": 29861.25,
+        "low": 29845.5,
+        "close": 29858.5
+      },
+      {
+        "time": "2026-08-12T15:29:00.000Z",
+        "open": 29859,
+        "high": 29874.75,
+        "low": 29852.75,
+        "close": 29874
+      },
+      {
+        "time": "2026-08-12T15:30:00.000Z",
+        "open": 29874.25,
+        "high": 29879,
+        "low": 29859,
+        "close": 29864.25
+      }
+    ],
+    "price": 29864.25,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bearish",
+      "session": "off_hours",
+      "displacement": "present",
+      "displacement_points": 10,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "neutral",
+        "m5": "neutral",
+        "aligned": false,
+        "tradeable_bias": "neutral"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29861.5,
+        "bottom": 29857.5,
+        "direction": "bearish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 30001.75,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29828.25,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "equilibrium",
+        "price_location": "vs today range: equilibrium; vs prev day range: premium; vs NDOG: premium"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "structure.displacement_points",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": false,
+      "short_supported": true,
+      "long_reasons": [
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)"
+      ],
+      "short_reasons": [
+        "Observed market structure is bearish",
+        "Bearish FVG present in observation"
+      ],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Higher timeframe biases not aligned"
+      ],
+      "entry_model": "Displacement + FVG retrace entry",
+      "reasoning": "This resembles Displacement + FVG retrace entry because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 10.00 points. A bearish FVG exists between 29857.50–29861.50. Previous day high 30001.75, previous day low 29624.50. I would consider SHORT because Observed market structure is bearish; Bearish FVG present in observation. I rejected LONG because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation); Higher timeframe biases not aligned."
+    },
+    "decision": {
+      "verdict": "SHORT",
+      "verdict_reason": "SHORT — provided price retraces into 29857.50–29861.50. Invalidation: 30006.75.",
+      "invalidation": 30006.75,
+      "entry_zone": "29857.50–29861.50",
+      "target": null
+    },
+    "entryStatus": null,
+    "karen": {
+      "entryIdea": "29857.50–29861.50",
+      "invalidation": "30006.75",
+      "target": "Toward 30001.8",
+      "fvgEvidence": "bearish FVG 29857.5–29861.5 (formed 11:23)",
+      "pdEvidence": "vs today range: equilibrium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bearish MSS — body close below swing low 29848.75 at 11:25",
+      "confidence": 65,
+      "candlesUsed": [
+        "2026-08-12T15:26:00.000Z O:29848.25 H:29857.5 L:29845.5 C:29854.75",
+        "2026-08-12T15:27:00.000Z O:29855 H:29858.75 L:29846.5 C:29853",
+        "2026-08-12T15:28:00.000Z O:29852.75 H:29861.25 L:29845.5 C:29858.5",
+        "2026-08-12T15:29:00.000Z O:29859 H:29874.75 L:29852.75 C:29874",
+        "2026-08-12T15:30:00.000Z O:29874.25 H:29879 L:29859 C:29864.25"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "SHORT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T16:30:00.000Z",
+    "label": "Mid-morning RTH",
+    "barsAvailable": 1111,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T16:30:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T16:26:00.000Z",
+        "open": 29885.75,
+        "high": 29886,
+        "low": 29878.75,
+        "close": 29878.75
+      },
+      {
+        "time": "2026-08-12T16:27:00.000Z",
+        "open": 29878.75,
+        "high": 29879,
+        "low": 29869.5,
+        "close": 29873.25
+      },
+      {
+        "time": "2026-08-12T16:28:00.000Z",
+        "open": 29874.25,
+        "high": 29878.5,
+        "low": 29872.75,
+        "close": 29875.25
+      },
+      {
+        "time": "2026-08-12T16:29:00.000Z",
+        "open": 29874.5,
+        "high": 29876.25,
+        "low": 29873,
+        "close": 29873.5
+      },
+      {
+        "time": "2026-08-12T16:30:00.000Z",
+        "open": 29874,
+        "high": 29880.5,
+        "low": 29873.5,
+        "close": 29875
+      }
+    ],
+    "price": 29875,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bullish",
+      "session": "off_hours",
+      "displacement": "absent",
+      "displacement_points": null,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "neutral",
+        "m5": "bearish",
+        "aligned": false,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29871,
+        "bottom": 29867.5,
+        "direction": "bullish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 30001.75,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29818.5,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: premium; vs NDOG: premium"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": true,
+      "short_supported": false,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Bullish FVG present in observation"
+      ],
+      "short_reasons": [],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Higher timeframe biases not aligned"
+      ],
+      "entry_model": "bullish structure continuation",
+      "reasoning": "This resembles bullish structure continuation because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. No impulsive displacement detected in lookback. A bullish FVG exists between 29867.50–29871.00. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation); Higher timeframe biases not aligned."
+    },
+    "decision": {
+      "verdict": "WAIT",
+      "verdict_reason": "LONG bias — wait for retrace into 29867.50–29871.00. This resembles bullish structure continuation because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. No impulsive displacement detected in lookback. A bullish FVG exists between 29867.50–29871.00. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation); Higher timeframe biases not aligned.",
+      "invalidation": null,
+      "entry_zone": "29867.50–29871.00",
+      "target": 29992.75
+    },
+    "entryStatus": "WAIT",
+    "karen": {
+      "entryIdea": "29867.50–29871.00",
+      "invalidation": "Below 29818.5",
+      "target": "29992.75",
+      "fvgEvidence": "bullish FVG 29867.5–29871.0 (formed 12:22)",
+      "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bullish MSS — body close above swing high 29877.75 at 12:26",
+      "confidence": 45,
+      "candlesUsed": [
+        "2026-08-12T16:26:00.000Z O:29885.75 H:29886 L:29878.75 C:29878.75",
+        "2026-08-12T16:27:00.000Z O:29878.75 H:29879 L:29869.5 C:29873.25",
+        "2026-08-12T16:28:00.000Z O:29874.25 H:29878.5 L:29872.75 C:29875.25",
+        "2026-08-12T16:29:00.000Z O:29874.5 H:29876.25 L:29873 C:29873.5",
+        "2026-08-12T16:30:00.000Z O:29874 H:29880.5 L:29873.5 C:29875"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "WAIT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T17:30:00.000Z",
+    "label": "Lunch",
+    "barsAvailable": 1171,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T17:30:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T17:26:00.000Z",
+        "open": 29914.75,
+        "high": 29919.25,
+        "low": 29913.75,
+        "close": 29918.75
+      },
+      {
+        "time": "2026-08-12T17:27:00.000Z",
+        "open": 29919.5,
+        "high": 29920,
+        "low": 29914,
+        "close": 29916.25
+      },
+      {
+        "time": "2026-08-12T17:28:00.000Z",
+        "open": 29915.75,
+        "high": 29916,
+        "low": 29908.75,
+        "close": 29910.25
+      },
+      {
+        "time": "2026-08-12T17:29:00.000Z",
+        "open": 29909.5,
+        "high": 29911.25,
+        "low": 29904.75,
+        "close": 29909.25
+      },
+      {
+        "time": "2026-08-12T17:30:00.000Z",
+        "open": 29910,
+        "high": 29911.25,
+        "low": 29901.25,
+        "close": 29906
+      }
+    ],
+    "price": 29906,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bullish",
+      "session": "ny",
+      "displacement": "absent",
+      "displacement_points": null,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "bullish",
+        "m5": "neutral",
+        "aligned": true,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29913.75,
+        "bottom": 29907.25,
+        "direction": "bullish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 30001.75,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29818.5,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: premium; vs NDOG: premium"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": true,
+      "short_supported": false,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Bullish FVG present in observation"
+      ],
+      "short_reasons": [],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)"
+      ],
+      "entry_model": "bullish structure continuation",
+      "reasoning": "This resembles bullish structure continuation because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. No impulsive displacement detected in lookback. A bullish FVG exists between 29907.25–29913.75. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)."
+    },
+    "decision": {
+      "verdict": "WAIT",
+      "verdict_reason": "LONG bias — wait for retrace into 29907.25–29913.75. This resembles bullish structure continuation because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. No impulsive displacement detected in lookback. A bullish FVG exists between 29907.25–29913.75. Previous day high 30001.75, previous day low 29624.50. I would consider LONG because HTF bias bullish (bias_stack.tradeable_bias=bullish); Observed market structure is bullish; PDL taken (sell-side liquidity — raid on lows, not a bearish continuation). I rejected SHORT because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation).",
+      "invalidation": null,
+      "entry_zone": "29907.25–29913.75",
+      "target": 29992.75
+    },
+    "entryStatus": "WAIT",
+    "karen": {
+      "entryIdea": "29907.25–29913.75",
+      "invalidation": "Below 29818.5",
+      "target": "29992.75",
+      "fvgEvidence": "bullish FVG 29907.3–29913.8 (formed 13:26)",
+      "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bullish MSS — body close above swing high 29909.50 at 13:28",
+      "confidence": 45,
+      "candlesUsed": [
+        "2026-08-12T17:26:00.000Z O:29914.75 H:29919.25 L:29913.75 C:29918.75",
+        "2026-08-12T17:27:00.000Z O:29919.5 H:29920 L:29914 C:29916.25",
+        "2026-08-12T17:28:00.000Z O:29915.75 H:29916 L:29908.75 C:29910.25",
+        "2026-08-12T17:29:00.000Z O:29909.5 H:29911.25 L:29904.75 C:29909.25",
+        "2026-08-12T17:30:00.000Z O:29910 H:29911.25 L:29901.25 C:29906"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "WAIT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T19:00:00.000Z",
+    "label": "PM session",
+    "barsAvailable": 1261,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T19:00:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T18:56:00.000Z",
+        "open": 29899.75,
+        "high": 29902.25,
+        "low": 29895.25,
+        "close": 29895.75
+      },
+      {
+        "time": "2026-08-12T18:57:00.000Z",
+        "open": 29895.5,
+        "high": 29896.75,
+        "low": 29885,
+        "close": 29887
+      },
+      {
+        "time": "2026-08-12T18:58:00.000Z",
+        "open": 29887,
+        "high": 29895.5,
+        "low": 29886.75,
+        "close": 29893
+      },
+      {
+        "time": "2026-08-12T18:59:00.000Z",
+        "open": 29893.25,
+        "high": 29897.75,
+        "low": 29889.25,
+        "close": 29889.75
+      },
+      {
+        "time": "2026-08-12T19:00:00.000Z",
+        "open": 29890.25,
+        "high": 29902.75,
+        "low": 29890,
+        "close": 29901
+      }
+    ],
+    "price": 29901,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bearish",
+      "session": "ny",
+      "displacement": "present",
+      "displacement_points": 10.75,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "neutral",
+        "m5": "bullish",
+        "aligned": true,
+        "tradeable_bias": "bullish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29908.75,
+        "bottom": 29902.25,
+        "direction": "bearish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 30001.75,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29818.5,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "premium",
+        "price_location": "vs today range: premium; vs prev day range: premium; vs NDOG: premium"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "structure.displacement_points",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": false,
+      "short_supported": true,
+      "long_reasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)"
+      ],
+      "short_reasons": [
+        "Observed market structure is bearish",
+        "Bearish FVG present in observation"
+      ],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Bearish structure opposes bullish tradeable bias"
+      ],
+      "entry_model": "NY open sweep + displacement + FVG retrace (Adam reversal model)",
+      "reasoning": "This resembles NY open sweep + displacement + FVG retrace (Adam reversal model) because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 10.75 points. A bearish FVG exists between 29902.25–29908.75. Previous day high 30001.75, previous day low 29624.50. I would consider SHORT because Observed market structure is bearish; Bearish FVG present in observation. I rejected LONG because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation); Bearish structure opposes bullish tradeable bias."
+    },
+    "decision": {
+      "verdict": "SHORT",
+      "verdict_reason": "SHORT — provided price retraces into 29902.25–29908.75. Invalidation: 30006.75.",
+      "invalidation": 30006.75,
+      "entry_zone": "29902.25–29908.75",
+      "target": 29992.75
+    },
+    "entryStatus": "ACTIVE",
+    "karen": {
+      "entryIdea": "29902.25–29908.75",
+      "invalidation": "30006.75",
+      "target": "29992.75",
+      "fvgEvidence": "bearish FVG 29902.3–29908.8 (formed 14:56)",
+      "pdEvidence": "vs today range: premium; vs prev day range: premium; vs NDOG: premium (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bearish MSS — body close below swing low 29909.00 at 14:58",
+      "confidence": 65,
+      "candlesUsed": [
+        "2026-08-12T18:56:00.000Z O:29899.75 H:29902.25 L:29895.25 C:29895.75",
+        "2026-08-12T18:57:00.000Z O:29895.5 H:29896.75 L:29885 C:29887",
+        "2026-08-12T18:58:00.000Z O:29887 H:29895.5 L:29886.75 C:29893",
+        "2026-08-12T18:59:00.000Z O:29893.25 H:29897.75 L:29889.25 C:29889.75",
+        "2026-08-12T19:00:00.000Z O:29890.25 H:29902.75 L:29890 C:29901"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "SHORT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T20:59:00.000Z",
+    "label": "Session end",
+    "barsAvailable": 1380,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T20:59:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T20:55:00.000Z",
+        "open": 29814.25,
+        "high": 29815,
+        "low": 29810.25,
+        "close": 29810.25
+      },
+      {
+        "time": "2026-08-12T20:56:00.000Z",
+        "open": 29811.25,
+        "high": 29814,
+        "low": 29811,
+        "close": 29811.75
+      },
+      {
+        "time": "2026-08-12T20:57:00.000Z",
+        "open": 29812,
+        "high": 29812,
+        "low": 29808.25,
+        "close": 29810
+      },
+      {
+        "time": "2026-08-12T20:58:00.000Z",
+        "open": 29809.75,
+        "high": 29811.5,
+        "low": 29808.25,
+        "close": 29809.25
+      },
+      {
+        "time": "2026-08-12T20:59:00.000Z",
+        "open": 29809.5,
+        "high": 29811.5,
+        "low": 29804.5,
+        "close": 29805.75
+      }
+    ],
+    "price": 29805.75,
+    "observation": {
+      "data_quality": "good",
+      "market_structure": "bearish",
+      "session": "off_hours",
+      "displacement": "present",
+      "displacement_points": 3.75,
+      "htf_bias": {
+        "daily": "bullish",
+        "m15": "bearish",
+        "m5": "bearish",
+        "aligned": true,
+        "tradeable_bias": "bearish"
+      },
+      "fvg": {
+        "status": "present",
+        "top": 29819,
+        "bottom": 29815.75,
+        "direction": "bearish"
+      },
+      "liquidity_levels": [
+        {
+          "label": "PDH",
+          "price": 30001.75,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "PDL",
+          "price": 29624.5,
+          "taken": true,
+          "side": "sell_side"
+        },
+        {
+          "label": "PDC",
+          "price": 29805.75,
+          "taken": true
+        },
+        {
+          "label": "Asia high",
+          "price": 29715.5,
+          "taken": true,
+          "side": "buy_side"
+        },
+        {
+          "label": "Asia low",
+          "price": 29624.5,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "London high",
+          "price": 29799.5,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "London low",
+          "price": 29698.25,
+          "taken": false,
+          "side": "sell_side"
+        },
+        {
+          "label": "NY RTH High",
+          "price": 30001.75,
+          "taken": false,
+          "side": "buy_side"
+        },
+        {
+          "label": "NY RTH Low",
+          "price": 29818.5,
+          "taken": false,
+          "side": "sell_side"
+        }
+      ],
+      "premium_discount": {
+        "zone": "equilibrium",
+        "price_location": "vs today range: equilibrium; vs prev day range: equilibrium; vs NDOG: inside"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone",
+        "structure.mss_direction",
+        "structure.mss_level",
+        "structure.fvg.top",
+        "structure.fvg.bottom",
+        "structure.displacement_points",
+        "liquidity.pdh",
+        "liquidity.pdl",
+        "liquidity.pdc",
+        "liquidity.asia_high",
+        "liquidity.asia_low",
+        "liquidity.london_high",
+        "liquidity.london_low",
+        "liquidity.ny_rth_high",
+        "liquidity.ny_rth_low",
+        "gaps.ndog"
+      ]
+    },
+    "interpretation": {
+      "long_supported": false,
+      "short_supported": true,
+      "long_reasons": [
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)"
+      ],
+      "short_reasons": [
+        "HTF bias bearish (bias_stack.tradeable_bias=bearish)",
+        "Observed market structure is bearish",
+        "Bearish FVG present in observation"
+      ],
+      "contradictions": [
+        "PDH taken (buy-side liquidity — raid on highs, not a bullish continuation)",
+        "Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)"
+      ],
+      "entry_model": "Displacement + FVG retrace entry",
+      "reasoning": "This resembles Displacement + FVG retrace entry because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation) at 30001.75. PDL taken (sell-side liquidity — raid on lows, not a bearish continuation) at 29624.50. PDC taken at 29805.75. Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation) at 29715.50. Price displaced by 3.75 points. A bearish FVG exists between 29815.75–29819.00. Previous day high 30001.75, previous day low 29624.50. I would consider SHORT because HTF bias bearish (bias_stack.tradeable_bias=bearish); Observed market structure is bearish; Bearish FVG present in observation. I rejected LONG because PDH taken (buy-side liquidity — raid on highs, not a bullish continuation); Asia high taken (buy-side liquidity — raid on highs, not a bullish continuation)."
+    },
+    "decision": {
+      "verdict": "SHORT",
+      "verdict_reason": "SHORT — provided price retraces into 29815.75–29819.00. Invalidation: 30006.75.",
+      "invalidation": 30006.75,
+      "entry_zone": "29815.75–29819.00",
+      "target": 29624.5
+    },
+    "entryStatus": "ACTIVE",
+    "karen": {
+      "entryIdea": "29815.75–29819.00",
+      "invalidation": "30006.75",
+      "target": "29624.5",
+      "fvgEvidence": "bearish FVG 29815.8–29819.0 (formed 16:54)",
+      "pdEvidence": "vs today range: equilibrium; vs prev day range: equilibrium; vs NDOG: inside (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bearish MSS — body close below swing low 29812.75 at 16:59",
+      "confidence": 65,
+      "candlesUsed": [
+        "2026-08-12T20:55:00.000Z O:29814.25 H:29815 L:29810.25 C:29810.25",
+        "2026-08-12T20:56:00.000Z O:29811.25 H:29814 L:29811 C:29811.75",
+        "2026-08-12T20:57:00.000Z O:29812 H:29812 L:29808.25 C:29810",
+        "2026-08-12T20:58:00.000Z O:29809.75 H:29811.5 L:29808.25 C:29809.25",
+        "2026-08-12T20:59:00.000Z O:29809.5 H:29811.5 L:29804.5 C:29805.75"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "SHORT",
+      "source": "pipeline"
+    }
+  },
+  {
+    "asOf": "2026-08-12T21:45:00.000Z",
+    "label": "Late globex",
+    "barsAvailable": 1380,
+    "candleRange": {
+      "start": "2026-08-11T22:00:00.000Z",
+      "end": "2026-08-12T20:59:00.000Z"
+    },
+    "lastBars": [
+      {
+        "time": "2026-08-12T20:55:00.000Z",
+        "open": 29814.25,
+        "high": 29815,
+        "low": 29810.25,
+        "close": 29810.25
+      },
+      {
+        "time": "2026-08-12T20:56:00.000Z",
+        "open": 29811.25,
+        "high": 29814,
+        "low": 29811,
+        "close": 29811.75
+      },
+      {
+        "time": "2026-08-12T20:57:00.000Z",
+        "open": 29812,
+        "high": 29812,
+        "low": 29808.25,
+        "close": 29810
+      },
+      {
+        "time": "2026-08-12T20:58:00.000Z",
+        "open": 29809.75,
+        "high": 29811.5,
+        "low": 29808.25,
+        "close": 29809.25
+      },
+      {
+        "time": "2026-08-12T20:59:00.000Z",
+        "open": 29809.5,
+        "high": 29811.5,
+        "low": 29804.5,
+        "close": 29805.75
+      }
+    ],
+    "price": 29805.75,
+    "observation": {
+      "data_quality": "stale",
+      "market_structure": "unknown",
+      "session": "unknown",
+      "displacement": "unknown",
+      "displacement_points": null,
+      "htf_bias": {
+        "daily": "unknown",
+        "m15": "unknown",
+        "m5": "unknown",
+        "aligned": "unknown",
+        "tradeable_bias": "unknown"
+      },
+      "fvg": {
+        "status": "unknown",
+        "direction": "unknown"
+      },
+      "liquidity_levels": [],
+      "premium_discount": {
+        "zone": "unknown",
+        "price_location": "unknown"
+      },
+      "reh_rel": {
+        "status": "unknown",
+        "nearest_reh_above": null,
+        "nearest_rel_below": null,
+        "reh_count": 0,
+        "rel_count": 0
+      },
+      "evidence_keys": [
+        "market_state.last_price",
+        "market_state.quality.flag",
+        "bias_stack.daily",
+        "bias_stack.m15",
+        "bias_stack.m5",
+        "bias_stack.tradeable_bias",
+        "premium_discount.vs_current_day_range",
+        "premium_discount.vs_previous_day_range",
+        "structure.displacement",
+        "structure.fvg.status",
+        "active_session.id",
+        "active_session.kill_zone"
+      ]
+    },
+    "interpretation": {
+      "long_supported": false,
+      "short_supported": false,
+      "long_reasons": [],
+      "short_reasons": [],
+      "contradictions": [
+        "Market structure unknown — cannot lean directional",
+        "Displacement unknown — cannot confirm impulsive move",
+        "FVG status unknown — cannot scaffold entry from gap",
+        "Data quality stale — observation incomplete"
+      ],
+      "entry_model": null,
+      "reasoning": "From observed facts: Displacement: unknown — insufficient data. FVG status: unknown. No clear lean — Market structure unknown — cannot lean directional; Displacement unknown — cannot confirm impulsive move; FVG status unknown — cannot scaffold entry from gap; Data quality stale — observation incomplete."
+    },
+    "decision": {
+      "verdict": "NO_TRADE",
+      "verdict_reason": "Chart data missing or stale — no call until observation engine has usable MarketState.",
+      "invalidation": null,
+      "entry_zone": null,
+      "target": null
+    },
+    "entryStatus": "ACTIVE",
+    "karen": {
+      "entryIdea": "Wait — no clean entry at cutoff",
+      "invalidation": "Below 29818.5",
+      "target": "Toward 30001.8",
+      "fvgEvidence": "bearish FVG 29815.8–29819.0 (formed 16:54)",
+      "pdEvidence": "vs today range: equilibrium; vs prev day range: equilibrium; vs NDOG: inside (PDH 30001.8 / PDL 29624.5)",
+      "structureEvidence": "Bearish MSS — body close below swing low 29812.75 at 16:59",
+      "confidence": 30,
+      "candlesUsed": [
+        "2026-08-12T20:55:00.000Z O:29814.25 H:29815 L:29810.25 C:29810.25",
+        "2026-08-12T20:56:00.000Z O:29811.25 H:29814 L:29811 C:29811.75",
+        "2026-08-12T20:57:00.000Z O:29812 H:29812 L:29808.25 C:29810",
+        "2026-08-12T20:58:00.000Z O:29809.75 H:29811.5 L:29808.25 C:29809.25",
+        "2026-08-12T20:59:00.000Z O:29809.5 H:29811.5 L:29804.5 C:29805.75"
+      ],
+      "levelsUsed": [
+        "Previous Day High 30001.8",
+        "Previous Day Low 29624.5",
+        "Previous Day Close 29805.8",
+        "Previous Day Open 29657.8"
+      ],
+      "pipelineVerdict": "NO_TRADE",
+      "source": "pipeline"
+    }
+  }
+]

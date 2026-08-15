@@ -1,0 +1,41 @@
+{
+  "when": "2026-08-14T19:15:03.573Z",
+  "meta": {
+    "idx": 601,
+    "t0": "2026-08-12T08:01:00.000Z",
+    "t1": "2026-08-12T08:02:00.000Z",
+    "m1Prefix": 602,
+    "dataset": "nq-aug12-2026-cme"
+  },
+  "initMs": 8262.0336,
+  "eqhLeaf": {
+    "forceMedianMs": 175.0733999999993,
+    "forceSamples": [
+      243.67720000000008,
+      153.46879999999874,
+      175.0733999999993
+    ],
+    "incrMedianMs": 174.54130000000077,
+    "incrSamples": [
+      174.54130000000077,
+      165.39689999999973,
+      194.46950000000106
+    ],
+    "incrMode": "rebuild",
+    "deltaMs": 0.5320999999985361
+  },
+  "newBarTotals": {
+    "estimatedBeforeMs": 1769.4079999999994,
+    "afterApplyClosedBarMs": 1930.6162999999997,
+    "wallApplyClosedBarMs": 1930.9681999999993,
+    "lastStructureMs": 1594.3346000000001,
+    "lastEqhMs": 334.0577000000012,
+    "eqhRebuildsDelta": 1,
+    "eqhReusedDelta": 0
+  },
+  "parity": {
+    "engineVsForce": true,
+    "incrVsForce": true,
+    "engineFpLen": 359
+  }
+}

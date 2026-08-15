@@ -93,7 +93,11 @@ function isContractYearNoise(n: number): boolean {
 }
 
 export function isLiveTvPriceSource(source: string | null | undefined): boolean {
-  return source === "tradingview_live" || source === "tradingview_quote";
+  return (
+    source === "tradingview_live" ||
+    source === "tradingview_quote" ||
+    source === "tv_1m_close"
+  );
 }
 
 export function isTickstreamLiveSource(source: string | null | undefined): boolean {
@@ -124,7 +128,7 @@ export function resolveAuthoritativePrice(input: LivePriceQuoteInput): Authorita
     const ageMs = Math.max(0, now - ts);
 
     if (source === "price_hint" && ageMs > PRICE_HINT_MAX_AGE_MS) return null;
-    if (source === "tv_bar_close" || source === "tv_1m_close") return null;
+    if (source === "tv_bar_close") return null;
 
     if (isLiveTvPriceSource(source) || isTickstreamLiveSource(source)) {
       if (ageMs > LIVE_PRICE_MAX_AGE_MS) return null;

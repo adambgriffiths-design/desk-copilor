@@ -4,6 +4,8 @@ import type { MarketContext } from "../../types";
 import { ReplayDataCutoff, structureOneLiner } from "./cutoff";
 import { extractFeaturesAtCutoff } from "./features";
 import { buildHtfIndexMaps, sliceBarsThroughIndex } from "./fast-slice";
+import { ResearchContextSession } from "./incremental-context";
+import { resolveResearchReplayMode, type ResearchReplayMode } from "./mode";
 import type { PointInTimeSnapshot, ReplayEngineConfig, ReplayMarketData } from "./types";
 
 type CutoffCacheEntry = { m1: Bar[]; ctx: MarketContext };
@@ -22,8 +24,11 @@ export class ReplayEngine {
   /** Per-run cache — keyed by cursor index; cleared on reset(). */
   private cutoffCache = new Map<number, CutoffCacheEntry>();
   private htfIndexMaps: ReturnType<typeof buildHtfIndexMaps> | null = null;
+  private contextSession: ResearchContextSession | null = null;
+  readonly replayMode: ResearchReplayMode;
 
   constructor(data: ReplayMarketData & { id?: string }, config?: ReplayEngineConfig) {
+    this.replayMode = config?.mode ?? resolveResearchReplayMode();
     this.data = data;
     this.datasetId = data.id ?? "unknown";
     this.symbol = data.symbol;
@@ -65,6 +70,7 @@ export class ReplayEngine {
   reset(): PointInTimeSnapshot {
     this.cutoffCache.clear();
     this.htfIndexMaps = buildHtfIndexMaps(this.data.m1, this.data.m5, this.data.m15);
+    this.contextSession = null;
     this.cursorIndex = this.startIndex;
     return this.snapshot();
   }
@@ -88,7 +94,19 @@ export class ReplayEngine {
     const cutoff = new ReplayDataCutoff(this.data, asOf);
     cutoff.assertNoFutureLeak();
     const m1 = sliceBarsThroughIndex(this.data.m1, idx);
-    const ctx = cutoff.buildContextAtBarIndex(idx, this.htfIndexMaps ?? undefined);
+    const last = this.data.m1[idx]!.close;
+
+    let ctx: MarketContext;
+    if (this.replayMode === "OPTIMIZED") {
+      if (!this.contextSession) {
+        this.contextSession = new ResearchContextSession();
+        this.contextSession.reset(this.data, { warmupBarIndex: this.startIndex });
+      }
+      ctx = this.contextSession.buildAtBarIndex(idx, "OPTIMIZED");
+    } else {
+      ctx = cutoff.buildContextAtBarIndex(idx, this.htfIndexMaps ?? undefined, last);
+    }
+
     const entry: CutoffCacheEntry = { m1, ctx };
     this.cutoffCache.set(idx, entry);
     return entry;
@@ -113,6 +131,10 @@ export class ReplayEngine {
   /** Step backward N candles (default 1). Clamps at start. */
   stepBackward(n = 1): PointInTimeSnapshot {
     this.cursorIndex = Math.max(this.cursorIndex - n, this.startIndex);
+    if (this.replayMode === "OPTIMIZED") {
+      this.cutoffCache.clear();
+      this.contextSession = null;
+    }
     return this.snapshot();
   }
 
@@ -152,6 +174,10 @@ export class ReplayEngine {
     let best = this.startIndex;
     for (let i = this.startIndex; i <= this.endIndex; i++) {
       if (this.data.m1[i]!.time.getTime() <= t) best = i;
+    }
+    if (best < this.cursorIndex && this.replayMode === "OPTIMIZED") {
+      this.cutoffCache.clear();
+      this.contextSession = null;
     }
     this.cursorIndex = best;
     return this.snapshot();

@@ -1,0 +1,28 @@
+{
+  "id": "chart-proof-mss-bullish",
+  "ctx": {},
+  "state": {},
+  "label": {
+    "id": "chart-proof-mss-bullish",
+    "timestamp": "2026-08-13T00:00:00Z",
+    "market_state_snapshot": "replay-fixtures/chart-proof-mss-bullish",
+    "expected_observation": {
+      "market_structure": "bullish",
+      "mss_direction": "bullish",
+      "fvg_status": "present",
+      "displacement": "present",
+      "liquidity_swept": false,
+      "htf_bias_aligned": false,
+      "tradeable_bias": "neutral",
+      "data_quality": "good",
+      "session": "ny"
+    },
+    "adam_verdict": "WAIT",
+    "would_take": false,
+    "grade": "pass",
+    "why_taken": "Chart proof — bullish MSS detected from OHLC body close above swing high",
+    "why_rejected_alternatives": "No trade verdict required — observation proof only",
+    "fvg_validity": "absent",
+    "notes": "Minimal OHLC fixture — MSS present, structure rebuilt from candles"
+  }
+}

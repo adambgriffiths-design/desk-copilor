@@ -1,4 +1,14 @@
 import type { Bar } from "./types";
+import { bumpLiveLatency, noteLiveLatency } from "./live-latency-profile";
+import { patchLiveLatencyTraceMeta } from "./live-latency-trace";
+import { AsyncLocalStorage } from "node:async_hooks";
+import {
+  YAHOO_FETCH_TIMEOUT_MS,
+  MarketDataError,
+  mapFetchAbortToMarketDataError,
+} from "./market-data-errors";
+
+export { YAHOO_FETCH_TIMEOUT_MS } from "./market-data-errors";
 
 const SYMBOL = "MNQ=F";
 const YAHOO_CHART = "https://query1.finance.yahoo.com/v8/finance/chart";
@@ -24,30 +34,132 @@ type YahooChartResponse = {
   };
 };
 
+/** Test seam — restore with `setYahooFetchForTests(null)`. */
+let yahooFetchImpl: typeof fetch = globalThis.fetch.bind(globalThis);
+let yahooTimeoutOverrideMs: number | null = null;
+
+export function setYahooFetchForTests(fn: typeof fetch | null): void {
+  yahooFetchImpl = fn ?? globalThis.fetch.bind(globalThis);
+}
+
+export function setYahooFetchTimeoutForTests(ms: number | null): void {
+  yahooTimeoutOverrideMs = ms;
+}
+
+export type FetchBarsOptions = {
+  /** Override default Yahoo AbortSignal.timeout budget. */
+  timeoutMs?: number;
+  /** Caller-owned signal (combined with timeout via AbortSignal.any when available). */
+  signal?: AbortSignal;
+  fetchFn?: typeof fetch;
+};
+
+function yahooAbortSignal(timeoutMs: number, outer?: AbortSignal): {
+  signal: AbortSignal;
+  cancelTimer: () => void;
+  abort: () => void;
+} {
+  const ac = new AbortController();
+  const timer = setTimeout(() => {
+    ac.abort(
+      new DOMException("The operation was aborted due to timeout", "TimeoutError")
+    );
+  }, timeoutMs);
+  const cancelTimer = () => clearTimeout(timer);
+  const abort = () => {
+    cancelTimer();
+    if (!ac.signal.aborted) {
+      ac.abort(
+        new DOMException("The operation was aborted due to timeout", "TimeoutError")
+      );
+    }
+  };
+  if (!outer) return { signal: ac.signal, cancelTimer, abort };
+  const any = (AbortSignal as typeof AbortSignal & {
+    any?: (signals: AbortSignal[]) => AbortSignal;
+  }).any;
+  if (typeof any === "function") {
+    return { signal: any([ac.signal, outer]), cancelTimer, abort };
+  }
+  return { signal: ac.signal, cancelTimer, abort };
+}
+
+async function yahooFetch(
+  url: string,
+  init: RequestInit & { next?: { revalidate?: number } },
+  opts?: FetchBarsOptions
+): Promise<Response> {
+  const fetchFn = opts?.fetchFn ?? yahooFetchImpl;
+  const timeoutMs = opts?.timeoutMs ?? yahooTimeoutOverrideMs ?? YAHOO_FETCH_TIMEOUT_MS;
+  const { signal, abort } = yahooAbortSignal(timeoutMs, opts?.signal);
+  let raceTimer: ReturnType<typeof setTimeout> | undefined;
+  const fetchPromise = fetchFn(url, { ...init, signal });
+  // Prevent unhandled rejection when the race timer wins first.
+  fetchPromise.catch(() => {});
+  try {
+    return await Promise.race([
+      fetchPromise,
+      new Promise<never>((_, reject) => {
+        raceTimer = setTimeout(() => {
+          reject(
+            new MarketDataError(
+              "MARKET_DATA_TIMEOUT",
+              "MARKET_DATA_TIMEOUT — Yahoo OHLC timed out"
+            )
+          );
+        }, timeoutMs + 25);
+      }),
+    ]);
+  } catch (err) {
+    if (err instanceof MarketDataError) throw err;
+    throw mapFetchAbortToMarketDataError(err, "yahoo");
+  } finally {
+    abort();
+    if (raceTimer) clearTimeout(raceTimer);
+  }
+}
+
 export async function fetchBars(
   interval: "1d" | "15m" | "5m" | "1m",
-  range: string
+  range: string,
+  opts?: FetchBarsOptions
 ): Promise<Bar[]> {
   const url = `${YAHOO_CHART}/${SYMBOL}?interval=${interval}&range=${range}`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "Mozilla/5.0" },
-    next: { revalidate: 60 },
-  });
+  const res = await yahooFetch(
+    url,
+    {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      next: { revalidate: 60 },
+    },
+    opts
+  );
 
   if (!res.ok) {
-    throw new Error(`Yahoo Finance error: ${res.status}`);
+    throw new MarketDataError(
+      "MARKET_DATA_UNAVAILABLE",
+      `MARKET_DATA_UNAVAILABLE — Yahoo Finance error: ${res.status}`
+    );
   }
 
   const data = (await res.json()) as YahooChartResponse;
   const err = data.chart?.error?.description;
-  if (err) throw new Error(err);
+  if (err) {
+    throw new MarketDataError(
+      "MARKET_DATA_UNAVAILABLE",
+      `MARKET_DATA_UNAVAILABLE — ${err}`
+    );
+  }
 
   const result = data.chart?.result?.[0];
   const timestamps = result?.timestamp ?? [];
   const quote = result?.indicators?.quote?.[0];
 
-  if (!quote) throw new Error("No quote data returned");
-
+  if (!quote) {
+    throw new MarketDataError(
+      "MARKET_DATA_UNAVAILABLE",
+      "MARKET_DATA_UNAVAILABLE — No quote data returned"
+    );
+  }
   const bars: Bar[] = [];
   for (let i = 0; i < timestamps.length; i++) {
     const open = quote.open?.[i];
@@ -84,7 +196,7 @@ export async function fetchYahooLastPrice(yahooSymbol: string = SYMBOL): Promise
   try {
     const ticker = yahooSymbol === "NQ=F" ? "NQ=F" : "MNQ=F";
     const url = `${YAHOO_CHART}/${ticker}?interval=1m&range=1d`;
-    const res = await fetch(url, {
+    const res = await yahooFetch(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
       cache: "no-store",
     });
@@ -133,26 +245,87 @@ let marketCache: { data: Awaited<ReturnType<typeof fetchAllTimeframes>>; expires
   null;
 let marketFetchInFlight: Promise<Awaited<ReturnType<typeof fetchAllTimeframes>>> | null = null;
 
-function livePriceDiffersFromCache(chartLastPrice?: number | null): boolean {
-  if (chartLastPrice == null || !marketCache?.data) return false;
-  const m1Last = marketCache.data.m1.at(-1)?.close;
-  if (m1Last == null || !Number.isFinite(m1Last)) return false;
-  return Math.abs(chartLastPrice - m1Last) >= 0.25;
+type YahooRequestPin = {
+  data?: Awaited<ReturnType<typeof fetchAllTimeframes>>;
+  inFlight?: Promise<Awaited<ReturnType<typeof fetchAllTimeframes>>>;
+};
+
+const yahooRequestAls = new AsyncLocalStorage<YahooRequestPin>();
+
+/** Pin Yahoo bars for the rest of one request. Does not extend the 45s cross-request TTL. */
+export function runWithMarketDataRequestScope<T>(fn: () => T): T {
+  const existing = yahooRequestAls.getStore();
+  if (existing) return fn();
+  return yahooRequestAls.run({}, fn);
 }
 
-/** Cached Yahoo fetch — shared across snapshot + verdict within ~45s. */
+export function expireYahooMarketCacheForTests(): void {
+  if (marketCache) marketCache.expires = 0;
+}
+
+export function restoreYahooMarketCacheTtlForTests(ms = MARKET_CACHE_MS): void {
+  if (marketCache) marketCache.expires = Date.now() + ms;
+}
+
+export function resetYahooMarketCacheForTests(): void {
+  marketCache = null;
+  marketFetchInFlight = null;
+}
+
+/** True while a coalesced Yahoo multi-TF fetch is outstanding (tests / diagnostics). */
+export function isYahooMarketFetchInFlightForTests(): boolean {
+  return marketFetchInFlight != null;
+}
+
+/**
+ * Cached Yahoo fetch — shared across snapshot + verdict within ~45s.
+ * Live last price is overlaid by IncrementalMarketEngine onto cached bars.
+ * Do not bust this cache on a 0.25-pt tick (that forced a full 1d/15m/5m/1m
+ * refetch on almost every snapshot/verdict/intelligence call).
+ *
+ * Request pin: once a request has acquired bars, later calls in that same
+ * AsyncLocalStorage scope reuse that object even if the 45s TTL expires mid-request.
+ */
 export async function fetchAllTimeframesCached(
   force = false,
-  chartLastPrice?: number | null
+  _chartLastPrice?: number | null
 ) {
-  const needsForce = force || livePriceDiffersFromCache(chartLastPrice);
+  const pin = yahooRequestAls.getStore();
+  if (pin?.data) {
+    bumpLiveLatency("yahoo_cache_hit");
+    noteLiveLatency("yahoo_cache=request_pin");
+    patchLiveLatencyTraceMeta({ yahooFetched: false });
+    return pin.data;
+  }
+  if (pin?.inFlight) {
+    bumpLiveLatency("yahoo_fetch_coalesced");
+    noteLiveLatency("yahoo_cache=request_coalesced");
+    patchLiveLatencyTraceMeta({ yahooFetched: false });
+    return pin.inFlight;
+  }
+
+  const needsForce = force && !pin?.data;
   const now = Date.now();
   if (!needsForce && marketCache && now < marketCache.expires) {
+    bumpLiveLatency("yahoo_cache_hit");
+    noteLiveLatency("yahoo_cache=hit");
+    patchLiveLatencyTraceMeta({ yahooFetched: false });
+    if (pin) pin.data = marketCache.data;
     return marketCache.data;
   }
   if (!needsForce && marketFetchInFlight) {
-    return marketFetchInFlight;
+    bumpLiveLatency("yahoo_fetch_coalesced");
+    noteLiveLatency("yahoo_cache=coalesced");
+    patchLiveLatencyTraceMeta({ yahooFetched: false });
+    if (pin) pin.inFlight = marketFetchInFlight;
+    return marketFetchInFlight.then((data) => {
+      if (pin) pin.data = data;
+      return data;
+    });
   }
+  bumpLiveLatency("yahoo_fetch");
+  noteLiveLatency("yahoo_cache=miss");
+  patchLiveLatencyTraceMeta({ yahooFetched: true });
 
   if (needsForce) {
     marketCache = null;
@@ -163,13 +336,19 @@ export async function fetchAllTimeframesCached(
     .then((data) => {
       marketCache = { data, expires: Date.now() + MARKET_CACHE_MS };
       marketFetchInFlight = null;
+      if (pin) {
+        pin.data = data;
+        pin.inFlight = undefined;
+      }
       return data;
     })
     .catch((err) => {
       marketFetchInFlight = null;
+      if (pin) pin.inFlight = undefined;
       throw err;
     });
 
+  if (pin) pin.inFlight = marketFetchInFlight;
   return marketFetchInFlight;
 }
 
@@ -219,6 +398,59 @@ export function getEstMinutes(date: Date): number {
 export function getEstDateKey(date: Date): string {
   return date.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 }
+
+/** CME Globex session date: bars at/after 6:00 PM ET belong to the next session day. */
+export function cmeSessionDateKey(ts: number): string {
+  const d = new Date(ts * 1000);
+  const minutes = getEstMinutes(d);
+  const key = getEstDateKey(d);
+  if (minutes >= 18 * 60) {
+    const next = new Date(d.getTime() + 86_400_000);
+    return getEstDateKey(next);
+  }
+  return key;
+}
+
+export function cmeSessionDateKeyFromDate(date: Date): string {
+  return cmeSessionDateKey(Math.floor(date.getTime() / 1000));
+}
+
+export function priorCmeSessionKey(m1: Bar[], currentKey: string): string | null {
+  const keys = [...new Set(m1.map((b) => cmeSessionDateKeyFromDate(b.time)))].sort();
+  const earlier = keys.filter((k) => k < currentKey);
+  return earlier.at(-1) ?? null;
+}
+
+export function barsInCmeSession(m1: Bar[], sessionKey: string): Bar[] {
+  return m1.filter((b) => cmeSessionDateKeyFromDate(b.time) === sessionKey);
+}
+
+/**
+ * Aggregate a CME Globex session from 1m bars.
+ * Close = last 1m bar close of the session (typically ~16:59 ET before the 17:00 halt) —
+ * NOT Yahoo daily settlement, NOT RTH 16:15.
+ * `time` is the session open (first bar) for backward compatibility.
+ */
+export function aggregateSessionBar(bars: Bar[]): Bar | undefined {
+  if (!bars.length) return undefined;
+  const sorted = [...bars].sort((a, b) => a.time.getTime() - b.time.getTime());
+  return {
+    time: sorted[0].time,
+    open: sorted[0].open,
+    high: Math.max(...sorted.map((b) => b.high)),
+    low: Math.min(...sorted.map((b) => b.low)),
+    close: sorted.at(-1)!.close,
+  };
+}
+
+/** Last 1m bar of a Globex session — source candle for PDC when using cme_session_1m. */
+export function sessionCloseBar(bars: Bar[]): Bar | undefined {
+  if (!bars.length) return undefined;
+  const sorted = [...bars].sort((a, b) => a.time.getTime() - b.time.getTime());
+  return sorted.at(-1);
+}
+
+export type PdhSource = "cme_session_1m" | "yahoo_daily_fallback";
 
 /** Calendar days between two EST date keys. */
 export function estDayGapDays(a: Date, b: Date): number {
@@ -420,14 +652,16 @@ export function resolvePdLevelAnchorTimes(
     hasNdog: boolean;
   }
 ): Record<string, number> {
-  const todayKey = getEstDateKey(new Date(input.fetchedAt));
-  const priorKey = priorEstDateKey(m1, todayKey);
+  const asOf = new Date(input.fetchedAt);
+  const currentKey = cmeSessionDateKeyFromDate(asOf);
+  const priorKey = priorCmeSessionKey(m1, currentKey);
   const anchors: Record<string, number> = {};
 
   if (priorKey) {
-    const pdhBar = findDayExtremeBar(m1, priorKey, "high");
-    const pdlBar = findDayExtremeBar(m1, priorKey, "low");
-    const pdcBar = findBarClosestTo(m1, RTH_CLOSE_MIN, priorKey);
+    const prevBars = barsInCmeSession(m1, priorKey);
+    const pdhBar = findExtremeBarInWindow(prevBars, "high");
+    const pdlBar = findExtremeBarInWindow(prevBars, "low");
+    const pdcBar = prevBars.length ? prevBars[prevBars.length - 1]! : null;
     if (pdhBar) anchors.pdh = barTimeSec(pdhBar);
     if (pdlBar) anchors.pdl = barTimeSec(pdlBar);
     if (pdcBar) {
@@ -436,7 +670,8 @@ export function resolvePdLevelAnchorTimes(
     }
   }
 
-  const openBar = findBarClosestTo(m1, RTH_OPEN_MIN, todayKey);
+  const sessionBars = barsInCmeSession(m1, currentKey);
+  const openBar = sessionBars[0] ?? findBarClosestTo(m1, RTH_OPEN_MIN, getEstDateKey(asOf));
   const gapComplete =
     input.orgFormedAt ?? (openBar ? barTimeSec(openBar) : undefined);
   if (openBar) {

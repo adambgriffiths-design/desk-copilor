@@ -3,8 +3,10 @@
  * Daily/weekly boundaries reuse CME session calendar from lib/market-data.ts.
  */
 
-import { cmeWeekSundayKey, getEstDateKey, getEstMinutes } from "../market-data";
+import { cmeWeekSundayKey, cmeSessionDateKey } from "../market-data";
 import type { MinuteBar } from "./aggregate";
+
+export { cmeSessionDateKey };
 
 export type HtfBar = {
   /** Bucket start, Unix seconds UTC. */
@@ -44,18 +46,6 @@ function newHtfBar(bucketTs: number, bar: MinuteBar, tradeCount: number): HtfBar
     volume: bar.volume,
     tradeCount,
   };
-}
-
-/** CME Globex session date: bars at/after 6:00 PM ET belong to the next session day. */
-export function cmeSessionDateKey(ts: number): string {
-  const d = new Date(ts * 1000);
-  const minutes = getEstMinutes(d);
-  const key = getEstDateKey(d);
-  if (minutes >= 18 * 60) {
-    const next = new Date(d.getTime() + 86_400_000);
-    return getEstDateKey(next);
-  }
-  return key;
 }
 
 function bucketFixed(bar: MinuteBar, seconds: number): number {

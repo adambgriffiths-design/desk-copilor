@@ -381,7 +381,7 @@
     "pdl": 24900
   },
   "marketStructure": {
-    "summary": "No recent 1m MSS; 10 liquidity sweep(s) detected; No unfilled 1m FVGs in lookback; No NY opening first presented 1m FVG yet; No relative equal high/low pools in scope",
+    "summary": "No recent 1m MSS; 1 liquidity sweep(s) detected; No unfilled 1m FVGs in lookback; No NY opening first presented 1m FVG yet; No relative equal high/low pools in scope",
     "structureSummary": "Bias: bearish | MSS: none | FVGs: 0 | PD: premium",
     "bias": "bearish",
     "mss": null,

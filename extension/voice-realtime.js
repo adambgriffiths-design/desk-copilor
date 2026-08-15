@@ -2,6 +2,15 @@
  * OpenAI Realtime voice — hands-free speech-to-speech (GA API).
  */
 (function () {
+  const RT_REV = "1.4.118";
+  if (window.__dcRealtimeRev === RT_REV && window.DeskCopilotRealtime) return;
+  try {
+    window.DeskCopilotRealtime?.stop?.();
+  } catch {
+    /* ignore */
+  }
+  window.__dcRealtimeRev = RT_REV;
+
   const TARGET_RATE = 24000;
   const RECONNECT_BASE_MS = 1500;
   const RECONNECT_MAX_MS = 30000;
@@ -65,15 +74,30 @@
 
   function bgSend(msg, timeoutMs = 20000) {
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("Timed out")), timeoutMs);
-      chrome.runtime.sendMessage(msg, (res) => {
-        clearTimeout(timer);
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message || "Extension error"));
-          return;
-        }
-        resolve(res);
-      });
+      const attempt = (n) => {
+        const timer = setTimeout(() => reject(new Error("Timed out")), timeoutMs);
+        chrome.runtime.sendMessage(msg, (res) => {
+          clearTimeout(timer);
+          if (chrome.runtime.lastError) {
+            const m = chrome.runtime.lastError.message || "Extension error";
+            const Conn = window.DeskCopilotConnection;
+            const kind = Conn?.classifyExtensionMessagingFailure
+              ? Conn.classifyExtensionMessagingFailure(m)
+              : /receiving end|could not establish connection/i.test(m)
+                ? "receiving_end"
+                : null;
+            const max = Conn?.SW_WAKE_MAX_RETRIES || 4;
+            if (kind === "receiving_end" && (Conn?.shouldRetryReceivingEnd?.(n + 1, max) ?? n + 1 < max)) {
+              setTimeout(() => attempt(n + 1), Conn?.computeSwWakeBackoffMs?.(n + 1) ?? 300);
+              return;
+            }
+            reject(new Error(m));
+            return;
+          }
+          resolve(res);
+        });
+      };
+      attempt(0);
     });
   }
 
@@ -459,7 +483,11 @@
     await ensureMic();
     captureCtx = new AudioContext();
     captureSource = captureCtx.createMediaStreamSource(micStream);
-    captureNode = captureCtx.createScriptProcessor(4096, 1, 1);
+    captureNode = captureCtx.createScriptProcessor(
+      window.DeskCopilotVoiceQuickReply?.SCRIPT_PROCESSOR_BUFFER ?? 2048,
+      1,
+      1
+    );
     const inputRate = captureCtx.sampleRate;
 
     captureNode.onaudioprocess = (e) => {
@@ -549,7 +577,7 @@
   let utteranceCarry = "";
   let lastSpeechStoppedAt = 0;
   const WHISPER_STT_PROMPT =
-    "British English. MNQ Nasdaq futures ICT trading previous day high previous day low fair value gap chart read entry target bias verdict. Places: Telford Shropshire England UK weather temperature.";
+    "British English. MNQ Nasdaq futures ICT trading previous day high previous day low equal highs equal lows fair value gap chart read entry target bias verdict liquidity. Phrases: what are you seeing what will you do what's your call calculate. Places: Telford Shropshire England UK weather temperature.";
 
   const TRANSCRIPT_SETTLE_MS =
     window.DeskCopilotVoiceQuickReply?.TRANSCRIPT_SETTLE_MS ?? 200;
@@ -559,10 +587,12 @@
   const MIC_IDLE_UNPAUSE_MS =
     window.DeskCopilotVoiceQuickReply?.MIC_IDLE_UNPAUSE_MS ?? 500;
   const LISTEN_WATCHDOG_MS = 4000;
-  const VAD_THRESHOLD = 0.38;
+  const VAD_THRESHOLD =
+    window.DeskCopilotVoiceQuickReply?.VAD_THRESHOLD ?? 0.22;
   const VAD_SILENCE_MS =
     window.DeskCopilotVoiceQuickReply?.VAD_SILENCE_MS ?? 500;
-  const VAD_PREFIX_PADDING_MS = 400;
+  const VAD_PREFIX_PADDING_MS =
+    window.DeskCopilotVoiceQuickReply?.VAD_PREFIX_PADDING_MS ?? 450;
 
   function sttTranscriptsRelated(a, b) {
     const x = String(a || "").trim().toLowerCase();
@@ -954,6 +984,12 @@
     const planned = opts.planned === true || plannedReconnect;
     connectInFlight = (async () => {
       try {
+        if (wsIsLive()) {
+          active = true;
+          return true;
+        }
+        if (ws) cleanupSocket();
+
         if (!sessionKey || Date.now() > sessionExpires - 30000) {
           await fetchSession(window.__dcSymbol?.() || "MNQ1!");
         }
@@ -1062,6 +1098,7 @@
 
   function suspend() {
     plannedReconnect = false;
+    wantActive = false;
     active = false;
     turnMode = "trading";
     stopListenWatchdog();

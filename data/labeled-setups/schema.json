@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Adam Labeled Setup",
+  "description": "Historical ICT setup label. Include diverse examples: A+ winners, obvious no_trade, and similar-but-skip — NOT only best setups. Adam to refine scoring methodology in Phase 2.",
+  "type": "object",
+  "required": [
+    "id",
+    "timestamp",
+    "market_state_snapshot",
+    "expected_observation",
+    "adam_verdict",
+    "would_take",
+    "grade",
+    "why_taken",
+    "why_rejected_alternatives",
+    "fvg_validity",
+    "notes"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "market_state_snapshot": {
+      "type": "string",
+      "description": "Path to MarketState fixture or replay-fixtures/{id}"
+    },
+    "expected_observation": {
+      "type": "object",
+      "description": "What happened — used for Replay Report 1 and chart proof (npm run test:observation-proof).",
+      "properties": {
+        "liquidity_swept": { "type": "boolean" },
+        "fvg_status": { "type": "string" },
+        "fvg_direction": { "type": "string" },
+        "displacement": { "type": "string" },
+        "market_structure": { "type": "string" },
+        "mss_direction": { "enum": ["bullish", "bearish", "none"] },
+        "reh_above": { "type": "boolean" },
+        "reh_level": { "type": ["number", "null"] },
+        "rel_below": { "type": "boolean" },
+        "htf_bias_aligned": { "type": "boolean" },
+        "tradeable_bias": { "type": "string" },
+        "data_quality": { "type": "string" },
+        "session": { "type": "string" },
+        "order_block": { "type": "string" }
+      }
+    },
+    "expected_entry_model": {
+      "type": "string",
+      "description": "Optional — Replay Report 2. Adam to refine."
+    },
+    "expected_invalidation": {
+      "type": "number",
+      "description": "Optional — Replay Report 3 price check. Adam to refine tolerance."
+    },
+    "expected_target": {
+      "type": "number",
+      "description": "Optional — Replay Report 3 price check."
+    },
+    "adam_verdict": {
+      "enum": ["LONG", "SHORT", "WAIT", "NO_TRADE"]
+    },
+    "would_take": { "type": "boolean" },
+    "grade": {
+      "enum": ["A+", "A", "B", "C", "pass", "no_trade"]
+    },
+    "why_taken": {
+      "type": "string",
+      "description": "Required — why Adam would take or lean. Replay Report 2."
+    },
+    "why_rejected_alternatives": {
+      "type": "string",
+      "description": "Required — why opposite case rejected. Replay Report 2."
+    },
+    "fvg_validity": {
+      "enum": ["valid", "present_not_tradeable", "invalid", "absent"]
+    },
+    "similar_but_skip": { "type": "boolean" },
+    "notes": { "type": "string" }
+  }
+}

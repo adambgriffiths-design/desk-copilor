@@ -1,0 +1,360 @@
+{
+  "video_id": "vqtA1S9JH34",
+  "path": "data/ict-transcripts/raw/vqtA1S9JH34.en.vtt",
+  "cues": 701,
+  "searches": {
+    "open float": [
+      {
+        "t": "00:01:03.709",
+        "sec": 63.709,
+        "snippet": "[00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or [00:01:03.709] four months the large funds open float [00:01:06.350] the liquidity that's above old highs or [00:01:08.870] below old lows that will be generally [00:01:11.929] targeted every quarter [00:01:13.730] how do we go about identifying which [00:01:15.530] ones that we should be focusing on right"
+      },
+      {
+        "t": "00:01:22.680",
+        "sec": 82.68,
+        "snippet": "[00:01:08.870] below old lows that will be generally [00:01:11.929] targeted every quarter [00:01:13.730] how do we go about identifying which [00:01:15.530] ones that we should be focusing on right [00:01:18.289] now we have to incorporate a technique [00:01:22.680] now open float is simply just taking the [00:01:25.010] now open float is simply just taking the [00:01:26.929] last three months [00:01:30.590] or taking the last month and a half to [00:01:33.429] the next month and a half in the future [00:01:35.510] encapsulating that time"
+      },
+      {
+        "t": "00:01:25.010",
+        "sec": 85.01,
+        "snippet": "[00:01:11.929] targeted every quarter [00:01:13.730] how do we go about identifying which [00:01:15.530] ones that we should be focusing on right [00:01:18.289] now we have to incorporate a technique [00:01:22.680] now open float is simply just taking the [00:01:25.010] now open float is simply just taking the [00:01:26.929] last three months [00:01:30.590] or taking the last month and a half to [00:01:33.429] the next month and a half in the future [00:01:35.510] encapsulating that time [00:01:39.540] three months of data"
+      },
+      {
+        "t": "00:02:42.710",
+        "sec": 162.71,
+        "snippet": "[00:02:27.770] of that range [00:02:29.809] and what's the high and low the range 60 [00:02:32.690] days out from August 1st [00:02:35.630] when you have that range 60 days look [00:02:40.130] back in 60 days cast forward that is [00:02:42.710] open float you want to find the highest [00:02:45.170] high and the lowest low in between those [00:02:49.379] on a near-term basis you can look back [00:02:52.309] on a near-term basis you can look back [00:02:56.570] and see what the last 60 days trading [00:02:59.630] days range was high and low in this case"
+      },
+      {
+        "t": "00:06:17.629",
+        "sec": 377.629,
+        "snippet": "[00:06:03.110] highest high and lowest low buy stocks [00:06:04.850] would be above that high [00:06:10.080] in LTC 60 days cast forward from the [00:06:12.830] in LTC 60 days cast forward from the [00:06:15.529] first of August would give us the [00:06:17.629] boundary point at which open float ends [00:06:21.230] in terms of time not in terms of price [00:06:23.090] but in terms of time so we are [00:06:25.550] bracketing the market if you will 60 [00:06:28.129] days forward in time [00:06:31.129] and we're looking at back in the past 60"
+      },
+      {
+        "t": "00:06:37.969",
+        "sec": 397.969,
+        "snippet": "[00:06:23.090] but in terms of time so we are [00:06:25.550] bracketing the market if you will 60 [00:06:28.129] days forward in time [00:06:31.129] and we're looking at back in the past 60 [00:06:34.309] days so we have 120 trading days [00:06:37.969] of what would be called open float [00:06:39.409] we're looking for the highest high and [00:06:41.450] the lowest low in that range but every [00:06:43.070] 20 days [00:06:45.409] there's a high and a low form now you're [00:06:47.270] about to experience a growth spurt one"
+      },
+      {
+        "t": "00:11:25.490",
+        "sec": 685.49,
+        "snippet": "[00:11:10.550] portion of September then there's a [00:11:11.930] rejection that trades higher so we had [00:11:13.910] one attempt here to clear out the sell [00:11:17.220] moving forward delineating our [00:11:21.170] moving forward delineating our [00:11:25.490] open float range for November 2016. you [00:11:27.710] can see the look back period [00:11:30.769] 60 trading days maximum 40 trading days [00:11:32.870] and 20 trading days the highest high and [00:11:35.449] the lowest low formed in the last 20 and [00:11:38.579] the lowest lowest seen here"
+      },
+      {
+        "t": "00:15:13.670",
+        "sec": 913.67,
+        "snippet": "[00:15:01.189] frame that going forward whereas the [00:15:03.110] next 20 days high and low whereas the [00:15:05.509] next 20 days high and low keep going out [00:15:08.030] but looking back in the last 60 days and [00:15:10.910] looking forward into the future 60 days [00:15:13.670] gives us the range for open float the [00:15:15.350] highest high and the lowest low in that [00:15:19.250] range of 120 days that's what the large [00:15:22.269] fund macro is in other words we're there [00:15:25.310] aiming for the large fund buy stops or [00:15:27.650] sell stops they're going to be derived"
+      },
+      {
+        "t": "00:23:21.770",
+        "sec": 1401.77,
+        "snippet": "[00:23:13.669] from one specific level that could be [00:23:15.470] easily derived by looking at the [00:23:17.090] evidences that we've shown here in this [00:23:17.100] evidences that we've shown here in this teaching [00:23:19.010] teaching [00:23:21.770] using open float [00:23:24.830] casting forward 60 days casting forward [00:23:27.890] 40 days casting forward 20 days notice [00:23:30.710] also every 20 trading days [00:23:33.169] the high and the low becomes very [00:23:35.149] obvious you can start circling these as"
+      },
+      {
+        "t": "00:26:51.649",
+        "sec": 1611.649,
+        "snippet": "[00:26:38.269] of trading days and I'll say that again [00:26:41.090] the next near-term move is going to run [00:26:44.090] on the near-term buy stops or sell stops [00:26:46.669] that means the last 20 days range what's [00:26:47.870] the highest high and the lowest low [00:26:51.649] that's the near term open float [00:26:53.810] the short-term open float is what's the [00:26:55.070] highest high and the lowest loan will [00:26:56.750] last 40 trading days [00:26:59.090] and the intermediate term open float is [00:27:00.470] going to be the highest high and lowest"
+      },
+      {
+        "t": "00:26:53.810",
+        "sec": 1613.81,
+        "snippet": "[00:26:41.090] the next near-term move is going to run [00:26:44.090] on the near-term buy stops or sell stops [00:26:46.669] that means the last 20 days range what's [00:26:47.870] the highest high and the lowest low [00:26:51.649] that's the near term open float [00:26:53.810] the short-term open float is what's the [00:26:55.070] highest high and the lowest loan will [00:26:56.750] last 40 trading days [00:26:59.090] and the intermediate term open float is [00:27:00.470] going to be the highest high and lowest [00:27:02.990] low in the last 60 days"
+      },
+      {
+        "t": "00:26:59.090",
+        "sec": 1619.09,
+        "snippet": "[00:26:47.870] the highest high and the lowest low [00:26:51.649] that's the near term open float [00:26:53.810] the short-term open float is what's the [00:26:55.070] highest high and the lowest loan will [00:26:56.750] last 40 trading days [00:26:59.090] and the intermediate term open float is [00:27:00.470] going to be the highest high and lowest [00:27:02.990] low in the last 60 days [00:27:04.909] knowing where you are in that range and [00:27:06.169] what side of the marketplace keeps [00:27:08.210] getting taken out will give you Clues as"
+      }
+    ],
+    "liquidity pool": [
+      {
+        "t": "00:00:47.930",
+        "sec": 47.93,
+        "snippet": "[00:00:34.700] CAD pair daily chart [00:00:38.750] CAD pair daily chart [00:00:40.850] when we're looking at price [00:00:43.310] what we like to do is identify on a [00:00:45.530] higher time frame where are the [00:00:47.930] liquidity pools for the large funds [00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or"
+      },
+      {
+        "t": "00:00:49.850",
+        "sec": 49.85,
+        "snippet": "[00:00:38.750] CAD pair daily chart [00:00:40.850] when we're looking at price [00:00:43.310] what we like to do is identify on a [00:00:45.530] higher time frame where are the [00:00:47.930] liquidity pools for the large funds [00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or [00:01:03.709] four months the large funds open float"
+      },
+      {
+        "t": "00:01:53.749",
+        "sec": 113.749,
+        "snippet": "[00:01:42.289] three months of data [00:01:44.149] and by doing that what I'll do is give [00:01:46.190] you a range to look for the highest high [00:01:48.350] and the lowest low on the daily chart [00:01:51.649] which will lead you to where the large [00:01:53.749] funds liquidity pools are above and [00:01:56.389] below the market price [00:01:57.830] for example let's assume for a moment [00:01:59.450] it's August 1st [00:02:03.410] and we can look back and see where the [00:02:05.330] highest high was in the last 60 days"
+      },
+      {
+        "t": "00:05:55.430",
+        "sec": 355.43,
+        "snippet": "[00:05:40.550] easy and helpful for you for intraday [00:05:44.150] scalps and day trading [00:05:47.570] when we look out 40 days [00:05:50.570] it gives us a little bit more of a [00:05:53.450] short-term basis for defining the [00:05:55.430] liquidity pools on the daily chart [00:05:58.310] looking for the last High and the last [00:06:01.189] low in the last 40 days that made the [00:06:03.110] highest high and lowest low buy stocks [00:06:04.850] would be above that high [00:06:10.080] in LTC 60 days cast forward from the"
+      },
+      {
+        "t": "00:14:47.870",
+        "sec": 887.87,
+        "snippet": "[00:14:36.470] that large traders in the form of a fund [00:14:38.569] Trader they have their buy stops above [00:14:40.430] these levels and they have their sell [00:14:42.230] stops below these levels [00:14:45.590] every 20 trading days there's going to [00:14:47.870] be a new liquidity pool formed [00:14:50.030] it's going to be on the buy side and on [00:14:52.129] the sell side you just have to identify [00:14:55.250] where those ranges are in respective [00:14:57.350] terms to where the most obvious swing [00:14:59.449] high and swing low is formed and then"
+      },
+      {
+        "t": "00:22:18.770",
+        "sec": 1338.77,
+        "snippet": "[00:22:05.390] it runs out the sell stops below the [00:22:09.169] 7380 level with an old low remember we [00:22:10.669] look back in [00:22:13.490] higher time frame institution order flow [00:22:15.289] reference points [00:22:18.770] liquidity pools water blocks fair value [00:22:21.049] gaps equilibrium [00:22:23.270] all those price points we used and [00:22:25.669] learned in September we look for those [00:22:27.890] in our higher time frame charts [00:22:29.690] we're seeing a liquidity pool in the"
+      },
+      {
+        "t": "00:22:29.690",
+        "sec": 1349.69,
+        "snippet": "[00:22:18.770] liquidity pools water blocks fair value [00:22:21.049] gaps equilibrium [00:22:23.270] all those price points we used and [00:22:25.669] learned in September we look for those [00:22:27.890] in our higher time frame charts [00:22:29.690] we're seeing a liquidity pool in the [00:22:31.190] form of a cell stop [00:22:34.370] resting around 73.80 they make that run [00:22:37.130] and on low open interest at a support [00:22:38.630] level they are indicating that it's [00:22:40.850] going to go up higher if the Futures"
+      }
+    ],
+    "liquidity": [
+      {
+        "t": "00:00:47.930",
+        "sec": 47.93,
+        "snippet": "[00:00:34.700] CAD pair daily chart [00:00:38.750] CAD pair daily chart [00:00:40.850] when we're looking at price [00:00:43.310] what we like to do is identify on a [00:00:45.530] higher time frame where are the [00:00:47.930] liquidity pools for the large funds [00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or"
+      },
+      {
+        "t": "00:00:49.850",
+        "sec": 49.85,
+        "snippet": "[00:00:38.750] CAD pair daily chart [00:00:40.850] when we're looking at price [00:00:43.310] what we like to do is identify on a [00:00:45.530] higher time frame where are the [00:00:47.930] liquidity pools for the large funds [00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or [00:01:03.709] four months the large funds open float"
+      },
+      {
+        "t": "00:01:06.350",
+        "sec": 66.35,
+        "snippet": "[00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or [00:01:03.709] four months the large funds open float [00:01:06.350] the liquidity that's above old highs or [00:01:08.870] below old lows that will be generally [00:01:11.929] targeted every quarter [00:01:13.730] how do we go about identifying which [00:01:15.530] ones that we should be focusing on right [00:01:18.289] now we have to incorporate a technique"
+      },
+      {
+        "t": "00:01:53.749",
+        "sec": 113.749,
+        "snippet": "[00:01:42.289] three months of data [00:01:44.149] and by doing that what I'll do is give [00:01:46.190] you a range to look for the highest high [00:01:48.350] and the lowest low on the daily chart [00:01:51.649] which will lead you to where the large [00:01:53.749] funds liquidity pools are above and [00:01:56.389] below the market price [00:01:57.830] for example let's assume for a moment [00:01:59.450] it's August 1st [00:02:03.410] and we can look back and see where the [00:02:05.330] highest high was in the last 60 days"
+      },
+      {
+        "t": "00:05:25.670",
+        "sec": 325.67,
+        "snippet": "[00:05:11.629] for looking at August 1st 2016 [00:05:14.870] we can cast forward 20 trading days and [00:05:17.590] expect a range of high and low to form [00:05:20.990] noting what that high and low is on that [00:05:23.270] particular range will give us the [00:05:25.670] liquidity pulls that are on a near-term [00:05:28.249] basis the easiest ones from the market [00:05:32.880] when we're looking at short-term trades [00:05:34.969] when we're looking at short-term trades [00:05:37.310] and day trades that range is going to be [00:05:40.550] easy and helpful for you for intraday"
+      },
+      {
+        "t": "00:05:55.430",
+        "sec": 355.43,
+        "snippet": "[00:05:40.550] easy and helpful for you for intraday [00:05:44.150] scalps and day trading [00:05:47.570] when we look out 40 days [00:05:50.570] it gives us a little bit more of a [00:05:53.450] short-term basis for defining the [00:05:55.430] liquidity pools on the daily chart [00:05:58.310] looking for the last High and the last [00:06:01.189] low in the last 40 days that made the [00:06:03.110] highest high and lowest low buy stocks [00:06:04.850] would be above that high [00:06:10.080] in LTC 60 days cast forward from the"
+      },
+      {
+        "t": "00:09:26.150",
+        "sec": 566.15,
+        "snippet": "[00:09:16.310] rarely do the buy stops keep getting hit [00:09:17.990] that tells us what for institution order [00:09:19.910] flow it tells us that the institutional [00:09:22.430] overflow is bearish so therefore the [00:09:23.810] banks are making a move on the large [00:09:26.150] funds liquidity below the lows or [00:09:28.070] running their sell stops [00:09:30.230] okay moving forward one month this is [00:09:32.870] September 2016. [00:09:35.269] the same thing is done here we've [00:09:38.210] identified where the ranges in terms of"
+      },
+      {
+        "t": "00:13:22.490",
+        "sec": 802.49,
+        "snippet": "[00:13:11.150] level and [00:13:14.449] we can look forward in time for a new [00:13:16.790] price like that retrace higher and then [00:13:18.170] see if they want to take it lower [00:13:20.389] because it's all indicating that they [00:13:22.490] want to take out the sell side liquidity [00:13:22.500] want to take out the sell side liquidity now [00:13:24.530] now [00:13:26.810] okay let's take a look at the dollar CAD [00:13:29.389] pair this is the daily chart and let's [00:13:32.030] apply some of these ideas on the daily"
+      },
+      {
+        "t": "00:13:22.500",
+        "sec": 802.5,
+        "snippet": "[00:13:14.449] we can look forward in time for a new [00:13:16.790] price like that retrace higher and then [00:13:18.170] see if they want to take it lower [00:13:20.389] because it's all indicating that they [00:13:22.490] want to take out the sell side liquidity [00:13:22.500] want to take out the sell side liquidity now [00:13:24.530] now [00:13:26.810] okay let's take a look at the dollar CAD [00:13:29.389] pair this is the daily chart and let's [00:13:32.030] apply some of these ideas on the daily [00:13:32.040] apply some of these ideas on the daily chart"
+      },
+      {
+        "t": "00:14:26.269",
+        "sec": 866.269,
+        "snippet": "[00:14:15.170] and we have a low down here with the [00:14:17.329] bodies of the candles [00:14:19.069] sales thoughts will be rested just below [00:14:21.829] that and we can see the market does in [00:14:23.810] fact sweep down there and take the sell [00:14:26.269] side liquidity out [00:14:29.389] so what makes these false breaks and and [00:14:32.030] false breaks higher and lower so [00:14:33.829] lucrative is the fact that we understand [00:14:36.470] that large traders in the form of a fund [00:14:38.569] Trader they have their buy stops above"
+      },
+      {
+        "t": "00:14:47.870",
+        "sec": 887.87,
+        "snippet": "[00:14:36.470] that large traders in the form of a fund [00:14:38.569] Trader they have their buy stops above [00:14:40.430] these levels and they have their sell [00:14:42.230] stops below these levels [00:14:45.590] every 20 trading days there's going to [00:14:47.870] be a new liquidity pool formed [00:14:50.030] it's going to be on the buy side and on [00:14:52.129] the sell side you just have to identify [00:14:55.250] where those ranges are in respective [00:14:57.350] terms to where the most obvious swing [00:14:59.449] high and swing low is formed and then"
+      },
+      {
+        "t": "00:21:04.909",
+        "sec": 1264.909,
+        "snippet": "[00:20:56.330] move that you're expecting if open [00:20:58.010] interest is declining what they're [00:21:00.529] saying to us is they are not willing to [00:21:00.539] saying to us is they are not willing to be [00:21:01.430] be [00:21:04.909] offering sell side liquidity to buyers [00:21:07.010] they don't want that so they're scaring [00:21:08.750] those individuals by dropping the market [00:21:10.549] really quickly and open interest [00:21:13.669] declines rapidly open interest only [00:21:15.529] declines as an Evidence"
+      }
+    ],
+    "buy side": [
+      {
+        "t": "00:14:50.030",
+        "sec": 890.03,
+        "snippet": "[00:14:38.569] Trader they have their buy stops above [00:14:40.430] these levels and they have their sell [00:14:42.230] stops below these levels [00:14:45.590] every 20 trading days there's going to [00:14:47.870] be a new liquidity pool formed [00:14:50.030] it's going to be on the buy side and on [00:14:52.129] the sell side you just have to identify [00:14:55.250] where those ranges are in respective [00:14:57.350] terms to where the most obvious swing [00:14:59.449] high and swing low is formed and then [00:15:01.189] frame that going forward whereas the"
+      }
+    ],
+    "sell side": [
+      {
+        "t": "00:13:22.490",
+        "sec": 802.49,
+        "snippet": "[00:13:11.150] level and [00:13:14.449] we can look forward in time for a new [00:13:16.790] price like that retrace higher and then [00:13:18.170] see if they want to take it lower [00:13:20.389] because it's all indicating that they [00:13:22.490] want to take out the sell side liquidity [00:13:22.500] want to take out the sell side liquidity now [00:13:24.530] now [00:13:26.810] okay let's take a look at the dollar CAD [00:13:29.389] pair this is the daily chart and let's [00:13:32.030] apply some of these ideas on the daily"
+      },
+      {
+        "t": "00:13:22.500",
+        "sec": 802.5,
+        "snippet": "[00:13:14.449] we can look forward in time for a new [00:13:16.790] price like that retrace higher and then [00:13:18.170] see if they want to take it lower [00:13:20.389] because it's all indicating that they [00:13:22.490] want to take out the sell side liquidity [00:13:22.500] want to take out the sell side liquidity now [00:13:24.530] now [00:13:26.810] okay let's take a look at the dollar CAD [00:13:29.389] pair this is the daily chart and let's [00:13:32.030] apply some of these ideas on the daily [00:13:32.040] apply some of these ideas on the daily chart"
+      },
+      {
+        "t": "00:14:52.129",
+        "sec": 892.129,
+        "snippet": "[00:14:40.430] these levels and they have their sell [00:14:42.230] stops below these levels [00:14:45.590] every 20 trading days there's going to [00:14:47.870] be a new liquidity pool formed [00:14:50.030] it's going to be on the buy side and on [00:14:52.129] the sell side you just have to identify [00:14:55.250] where those ranges are in respective [00:14:57.350] terms to where the most obvious swing [00:14:59.449] high and swing low is formed and then [00:15:01.189] frame that going forward whereas the [00:15:03.110] next 20 days high and low whereas the"
+      },
+      {
+        "t": "00:21:04.909",
+        "sec": 1264.909,
+        "snippet": "[00:20:56.330] move that you're expecting if open [00:20:58.010] interest is declining what they're [00:21:00.529] saying to us is they are not willing to [00:21:00.539] saying to us is they are not willing to be [00:21:01.430] be [00:21:04.909] offering sell side liquidity to buyers [00:21:07.010] they don't want that so they're scaring [00:21:08.750] those individuals by dropping the market [00:21:10.549] really quickly and open interest [00:21:13.669] declines rapidly open interest only [00:21:15.529] declines as an Evidence"
+      }
+    ],
+    "float": [
+      {
+        "t": "00:01:03.709",
+        "sec": 63.709,
+        "snippet": "[00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or [00:01:03.709] four months the large funds open float [00:01:06.350] the liquidity that's above old highs or [00:01:08.870] below old lows that will be generally [00:01:11.929] targeted every quarter [00:01:13.730] how do we go about identifying which [00:01:15.530] ones that we should be focusing on right"
+      },
+      {
+        "t": "00:01:22.680",
+        "sec": 82.68,
+        "snippet": "[00:01:08.870] below old lows that will be generally [00:01:11.929] targeted every quarter [00:01:13.730] how do we go about identifying which [00:01:15.530] ones that we should be focusing on right [00:01:18.289] now we have to incorporate a technique [00:01:22.680] now open float is simply just taking the [00:01:25.010] now open float is simply just taking the [00:01:26.929] last three months [00:01:30.590] or taking the last month and a half to [00:01:33.429] the next month and a half in the future [00:01:35.510] encapsulating that time"
+      },
+      {
+        "t": "00:01:25.010",
+        "sec": 85.01,
+        "snippet": "[00:01:11.929] targeted every quarter [00:01:13.730] how do we go about identifying which [00:01:15.530] ones that we should be focusing on right [00:01:18.289] now we have to incorporate a technique [00:01:22.680] now open float is simply just taking the [00:01:25.010] now open float is simply just taking the [00:01:26.929] last three months [00:01:30.590] or taking the last month and a half to [00:01:33.429] the next month and a half in the future [00:01:35.510] encapsulating that time [00:01:39.540] three months of data"
+      },
+      {
+        "t": "00:02:42.710",
+        "sec": 162.71,
+        "snippet": "[00:02:27.770] of that range [00:02:29.809] and what's the high and low the range 60 [00:02:32.690] days out from August 1st [00:02:35.630] when you have that range 60 days look [00:02:40.130] back in 60 days cast forward that is [00:02:42.710] open float you want to find the highest [00:02:45.170] high and the lowest low in between those [00:02:49.379] on a near-term basis you can look back [00:02:52.309] on a near-term basis you can look back [00:02:56.570] and see what the last 60 days trading [00:02:59.630] days range was high and low in this case"
+      },
+      {
+        "t": "00:06:17.629",
+        "sec": 377.629,
+        "snippet": "[00:06:03.110] highest high and lowest low buy stocks [00:06:04.850] would be above that high [00:06:10.080] in LTC 60 days cast forward from the [00:06:12.830] in LTC 60 days cast forward from the [00:06:15.529] first of August would give us the [00:06:17.629] boundary point at which open float ends [00:06:21.230] in terms of time not in terms of price [00:06:23.090] but in terms of time so we are [00:06:25.550] bracketing the market if you will 60 [00:06:28.129] days forward in time [00:06:31.129] and we're looking at back in the past 60"
+      },
+      {
+        "t": "00:06:37.969",
+        "sec": 397.969,
+        "snippet": "[00:06:23.090] but in terms of time so we are [00:06:25.550] bracketing the market if you will 60 [00:06:28.129] days forward in time [00:06:31.129] and we're looking at back in the past 60 [00:06:34.309] days so we have 120 trading days [00:06:37.969] of what would be called open float [00:06:39.409] we're looking for the highest high and [00:06:41.450] the lowest low in that range but every [00:06:43.070] 20 days [00:06:45.409] there's a high and a low form now you're [00:06:47.270] about to experience a growth spurt one"
+      },
+      {
+        "t": "00:10:38.690",
+        "sec": 638.69,
+        "snippet": "[00:10:25.620] the highest high in the last 60 trading [00:10:28.250] the highest high in the last 60 trading [00:10:31.190] days prior to October 1st 2016 is this [00:10:34.250] High here and the lowest low in our look [00:10:36.350] back period of 60 days is here so open [00:10:38.690] float on a large fund level are [00:10:40.490] referenced by these two price points the [00:10:42.650] higher it's where the buy stops are and [00:10:44.630] the lowers where the sell stops are [00:10:48.050] so they're looking for the buy stops [00:10:49.370] above the marketplace and they keep"
+      },
+      {
+        "t": "00:11:25.490",
+        "sec": 685.49,
+        "snippet": "[00:11:10.550] portion of September then there's a [00:11:11.930] rejection that trades higher so we had [00:11:13.910] one attempt here to clear out the sell [00:11:17.220] moving forward delineating our [00:11:21.170] moving forward delineating our [00:11:25.490] open float range for November 2016. you [00:11:27.710] can see the look back period [00:11:30.769] 60 trading days maximum 40 trading days [00:11:32.870] and 20 trading days the highest high and [00:11:35.449] the lowest low formed in the last 20 and [00:11:38.579] the lowest lowest seen here"
+      },
+      {
+        "t": "00:15:13.670",
+        "sec": 913.67,
+        "snippet": "[00:15:01.189] frame that going forward whereas the [00:15:03.110] next 20 days high and low whereas the [00:15:05.509] next 20 days high and low keep going out [00:15:08.030] but looking back in the last 60 days and [00:15:10.910] looking forward into the future 60 days [00:15:13.670] gives us the range for open float the [00:15:15.350] highest high and the lowest low in that [00:15:19.250] range of 120 days that's what the large [00:15:22.269] fund macro is in other words we're there [00:15:25.310] aiming for the large fund buy stops or [00:15:27.650] sell stops they're going to be derived"
+      },
+      {
+        "t": "00:23:21.770",
+        "sec": 1401.77,
+        "snippet": "[00:23:13.669] from one specific level that could be [00:23:15.470] easily derived by looking at the [00:23:17.090] evidences that we've shown here in this [00:23:17.100] evidences that we've shown here in this teaching [00:23:19.010] teaching [00:23:21.770] using open float [00:23:24.830] casting forward 60 days casting forward [00:23:27.890] 40 days casting forward 20 days notice [00:23:30.710] also every 20 trading days [00:23:33.169] the high and the low becomes very [00:23:35.149] obvious you can start circling these as"
+      },
+      {
+        "t": "00:26:51.649",
+        "sec": 1611.649,
+        "snippet": "[00:26:38.269] of trading days and I'll say that again [00:26:41.090] the next near-term move is going to run [00:26:44.090] on the near-term buy stops or sell stops [00:26:46.669] that means the last 20 days range what's [00:26:47.870] the highest high and the lowest low [00:26:51.649] that's the near term open float [00:26:53.810] the short-term open float is what's the [00:26:55.070] highest high and the lowest loan will [00:26:56.750] last 40 trading days [00:26:59.090] and the intermediate term open float is [00:27:00.470] going to be the highest high and lowest"
+      },
+      {
+        "t": "00:26:53.810",
+        "sec": 1613.81,
+        "snippet": "[00:26:41.090] the next near-term move is going to run [00:26:44.090] on the near-term buy stops or sell stops [00:26:46.669] that means the last 20 days range what's [00:26:47.870] the highest high and the lowest low [00:26:51.649] that's the near term open float [00:26:53.810] the short-term open float is what's the [00:26:55.070] highest high and the lowest loan will [00:26:56.750] last 40 trading days [00:26:59.090] and the intermediate term open float is [00:27:00.470] going to be the highest high and lowest [00:27:02.990] low in the last 60 days"
+      }
+    ],
+    "equal high": [],
+    "equal low": [],
+    "stop": [
+      {
+        "t": "00:03:28.550",
+        "sec": 208.55,
+        "snippet": "[00:03:12.770] forward those levels we can see that [00:03:16.970] eventually during the month of September [00:03:19.729] those highs that were formed in the [00:03:23.089] latter portion of July 2016 they were in [00:03:25.610] fact rated [00:03:28.550] so the market was drawn to the buy stops [00:03:34.680] extending it out so that we have 60 days [00:03:38.089] extending it out so that we have 60 days [00:03:41.149] look back and then 60 days cast forward [00:03:45.659] with the low end seen here [00:03:50.159] in the high end seen here"
+      },
+      {
+        "t": "00:04:01.430",
+        "sec": 241.43,
+        "snippet": "[00:03:45.659] with the low end seen here [00:03:50.159] in the high end seen here [00:03:54.180] you can see the market did in fact [00:03:55.729] you can see the market did in fact [00:03:58.309] eventually still dry forward reaching [00:04:01.430] for the buy stops above [00:04:07.560] so if we're looking at the market like [00:04:09.350] so if we're looking at the market like [00:04:13.190] this we can also identify where [00:04:16.490] significant short term and intermediate [00:04:18.289] term highs and lows are"
+      },
+      {
+        "t": "00:04:41.629",
+        "sec": 281.629,
+        "snippet": "[00:04:28.850] because no one can accurately depict the [00:04:31.430] future and forecast the future we have [00:04:33.469] ideal times to look for in terms of [00:04:35.930] intervals 20 40 and 60 days intervals [00:04:39.050] looking back for the most obvious buy [00:04:41.629] stops and sell stops [00:04:43.790] don't just look for the highest high in [00:04:45.350] the last 60 days and the lowest low in [00:04:48.170] the last 60 days behind us or in the [00:04:50.330] look back phase what we're doing is [00:04:52.909] we're looking for where's the near-term"
+      },
+      {
+        "t": "00:08:49.190",
+        "sec": 529.19,
+        "snippet": "[00:08:37.430] can encapsulate where the next high and [00:08:40.130] the next low is on price [00:08:42.409] and where the highest and lowest low on [00:08:44.750] each 20-day interval going forward and [00:08:47.150] looking back you'll know where device [00:08:49.190] thoughts and sell stops are so that we [00:08:51.410] can take respective trades based on that [00:08:53.930] also if you notice that the buy stops [00:08:56.990] keep getting hit and rarely do the sell [00:08:59.449] stops keep getting hit by default it [00:09:01.070] teaches you to institutional order flow"
+      },
+      {
+        "t": "00:08:53.930",
+        "sec": 533.93,
+        "snippet": "[00:08:42.409] and where the highest and lowest low on [00:08:44.750] each 20-day interval going forward and [00:08:47.150] looking back you'll know where device [00:08:49.190] thoughts and sell stops are so that we [00:08:51.410] can take respective trades based on that [00:08:53.930] also if you notice that the buy stops [00:08:56.990] keep getting hit and rarely do the sell [00:08:59.449] stops keep getting hit by default it [00:09:01.070] teaches you to institutional order flow [00:09:01.970] is what [00:09:04.370] bullish it's looking for higher prices"
+      },
+      {
+        "t": "00:08:59.449",
+        "sec": 539.449,
+        "snippet": "[00:08:47.150] looking back you'll know where device [00:08:49.190] thoughts and sell stops are so that we [00:08:51.410] can take respective trades based on that [00:08:53.930] also if you notice that the buy stops [00:08:56.990] keep getting hit and rarely do the sell [00:08:59.449] stops keep getting hit by default it [00:09:01.070] teaches you to institutional order flow [00:09:01.970] is what [00:09:04.370] bullish it's looking for higher prices [00:09:07.490] it keeps drawing on the buy stops above [00:09:09.590] the marketplace"
+      },
+      {
+        "t": "00:09:07.490",
+        "sec": 547.49,
+        "snippet": "[00:08:56.990] keep getting hit and rarely do the sell [00:08:59.449] stops keep getting hit by default it [00:09:01.070] teaches you to institutional order flow [00:09:01.970] is what [00:09:04.370] bullish it's looking for higher prices [00:09:07.490] it keeps drawing on the buy stops above [00:09:09.590] the marketplace [00:09:11.750] and conversely if we notice that the [00:09:13.670] cell stops keep getting ran out and very [00:09:16.310] rarely do the buy stops keep getting hit [00:09:17.990] that tells us what for institution order"
+      },
+      {
+        "t": "00:09:13.670",
+        "sec": 553.67,
+        "snippet": "[00:09:01.970] is what [00:09:04.370] bullish it's looking for higher prices [00:09:07.490] it keeps drawing on the buy stops above [00:09:09.590] the marketplace [00:09:11.750] and conversely if we notice that the [00:09:13.670] cell stops keep getting ran out and very [00:09:16.310] rarely do the buy stops keep getting hit [00:09:17.990] that tells us what for institution order [00:09:19.910] flow it tells us that the institutional [00:09:22.430] overflow is bearish so therefore the [00:09:23.810] banks are making a move on the large"
+      },
+      {
+        "t": "00:09:16.310",
+        "sec": 556.31,
+        "snippet": "[00:09:04.370] bullish it's looking for higher prices [00:09:07.490] it keeps drawing on the buy stops above [00:09:09.590] the marketplace [00:09:11.750] and conversely if we notice that the [00:09:13.670] cell stops keep getting ran out and very [00:09:16.310] rarely do the buy stops keep getting hit [00:09:17.990] that tells us what for institution order [00:09:19.910] flow it tells us that the institutional [00:09:22.430] overflow is bearish so therefore the [00:09:23.810] banks are making a move on the large [00:09:26.150] funds liquidity below the lows or"
+      },
+      {
+        "t": "00:09:28.070",
+        "sec": 568.07,
+        "snippet": "[00:09:17.990] that tells us what for institution order [00:09:19.910] flow it tells us that the institutional [00:09:22.430] overflow is bearish so therefore the [00:09:23.810] banks are making a move on the large [00:09:26.150] funds liquidity below the lows or [00:09:28.070] running their sell stops [00:09:30.230] okay moving forward one month this is [00:09:32.870] September 2016. [00:09:35.269] the same thing is done here we've [00:09:38.210] identified where the ranges in terms of [00:09:40.070] the look back 60 trading days from the"
+      },
+      {
+        "t": "00:10:03.949",
+        "sec": 603.949,
+        "snippet": "[00:09:51.350] prior to September 1st [00:09:53.930] and that's this one here [00:09:55.550] and the highest high [00:09:58.370] in the last 60 days is here [00:10:01.610] and again we can keep noticing that the [00:10:03.949] buy stops above old highs keep getting [00:10:05.870] taken out you can see that high is [00:10:13.200] moving forward we have [00:10:15.350] moving forward we have [00:10:17.870] October 2016. [00:10:19.850] look back period of 60 days and cast"
+      },
+      {
+        "t": "00:10:42.650",
+        "sec": 642.65,
+        "snippet": "[00:10:31.190] days prior to October 1st 2016 is this [00:10:34.250] High here and the lowest low in our look [00:10:36.350] back period of 60 days is here so open [00:10:38.690] float on a large fund level are [00:10:40.490] referenced by these two price points the [00:10:42.650] higher it's where the buy stops are and [00:10:44.630] the lowers where the sell stops are [00:10:48.050] so they're looking for the buy stops [00:10:49.370] above the marketplace and they keep [00:10:52.069] taking those buy stops out notice also [00:10:53.870] in the first 20 trading days to the"
+      }
+    ],
+    "pool": [
+      {
+        "t": "00:00:47.930",
+        "sec": 47.93,
+        "snippet": "[00:00:34.700] CAD pair daily chart [00:00:38.750] CAD pair daily chart [00:00:40.850] when we're looking at price [00:00:43.310] what we like to do is identify on a [00:00:45.530] higher time frame where are the [00:00:47.930] liquidity pools for the large funds [00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or"
+      },
+      {
+        "t": "00:00:49.850",
+        "sec": 49.85,
+        "snippet": "[00:00:38.750] CAD pair daily chart [00:00:40.850] when we're looking at price [00:00:43.310] what we like to do is identify on a [00:00:45.530] higher time frame where are the [00:00:47.930] liquidity pools for the large funds [00:00:49.850] because the liquidity pools for the [00:00:52.490] large funds is largely where markets [00:00:54.410] will want to reach for apart from [00:00:57.650] long-term fundamentals on a intermediate [00:00:59.569] term basis that means about three or [00:01:03.709] four months the large funds open float"
+      },
+      {
+        "t": "00:01:53.749",
+        "sec": 113.749,
+        "snippet": "[00:01:42.289] three months of data [00:01:44.149] and by doing that what I'll do is give [00:01:46.190] you a range to look for the highest high [00:01:48.350] and the lowest low on the daily chart [00:01:51.649] which will lead you to where the large [00:01:53.749] funds liquidity pools are above and [00:01:56.389] below the market price [00:01:57.830] for example let's assume for a moment [00:01:59.450] it's August 1st [00:02:03.410] and we can look back and see where the [00:02:05.330] highest high was in the last 60 days"
+      },
+      {
+        "t": "00:05:55.430",
+        "sec": 355.43,
+        "snippet": "[00:05:40.550] easy and helpful for you for intraday [00:05:44.150] scalps and day trading [00:05:47.570] when we look out 40 days [00:05:50.570] it gives us a little bit more of a [00:05:53.450] short-term basis for defining the [00:05:55.430] liquidity pools on the daily chart [00:05:58.310] looking for the last High and the last [00:06:01.189] low in the last 40 days that made the [00:06:03.110] highest high and lowest low buy stocks [00:06:04.850] would be above that high [00:06:10.080] in LTC 60 days cast forward from the"
+      },
+      {
+        "t": "00:14:47.870",
+        "sec": 887.87,
+        "snippet": "[00:14:36.470] that large traders in the form of a fund [00:14:38.569] Trader they have their buy stops above [00:14:40.430] these levels and they have their sell [00:14:42.230] stops below these levels [00:14:45.590] every 20 trading days there's going to [00:14:47.870] be a new liquidity pool formed [00:14:50.030] it's going to be on the buy side and on [00:14:52.129] the sell side you just have to identify [00:14:55.250] where those ranges are in respective [00:14:57.350] terms to where the most obvious swing [00:14:59.449] high and swing low is formed and then"
+      },
+      {
+        "t": "00:22:18.770",
+        "sec": 1338.77,
+        "snippet": "[00:22:05.390] it runs out the sell stops below the [00:22:09.169] 7380 level with an old low remember we [00:22:10.669] look back in [00:22:13.490] higher time frame institution order flow [00:22:15.289] reference points [00:22:18.770] liquidity pools water blocks fair value [00:22:21.049] gaps equilibrium [00:22:23.270] all those price points we used and [00:22:25.669] learned in September we look for those [00:22:27.890] in our higher time frame charts [00:22:29.690] we're seeing a liquidity pool in the"
+      },
+      {
+        "t": "00:22:29.690",
+        "sec": 1349.69,
+        "snippet": "[00:22:18.770] liquidity pools water blocks fair value [00:22:21.049] gaps equilibrium [00:22:23.270] all those price points we used and [00:22:25.669] learned in September we look for those [00:22:27.890] in our higher time frame charts [00:22:29.690] we're seeing a liquidity pool in the [00:22:31.190] form of a cell stop [00:22:34.370] resting around 73.80 they make that run [00:22:37.130] and on low open interest at a support [00:22:38.630] level they are indicating that it's [00:22:40.850] going to go up higher if the Futures"
+      }
+    ]
+  }
+}

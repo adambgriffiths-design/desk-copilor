@@ -65,7 +65,7 @@ export async function runDeskTracker(input: TrackerInput): Promise<DeskTrackerSt
   const intel = await buildDeskMarketIntelligence({
     chartSnapshot: input.chartSnapshot ?? null,
     chartLastPrice: input.chartLastPrice,
-    forceFresh: input.candleClosed === true || input.chartLastPrice != null,
+    forceFresh: input.candleClosed === true,
   });
 
   const livePrice = input.chartLastPrice ?? intel.state.lastPrice;

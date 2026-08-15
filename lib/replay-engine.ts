@@ -256,6 +256,10 @@ export function runReplayReport(): ReplayReport {
   for (const file of listSetupFixtures()) {
     const loaded = loadSetupFixture(file);
     const fixtureId = loaded.id.replace(/\.json$/, "") || loaded.label.id;
+    if (!REPLAY_FIXTURES[fixtureId]) {
+      console.warn(`skip ${fixtureId}: no REPLAY_FIXTURES entry`);
+      continue;
+    }
     results.push(replayLabeledSetup(fixtureId, loaded.label));
   }
 

@@ -1,0 +1,181 @@
+﻿{
+  "cues": 3032,
+  "hits": 25,
+  "results": [
+    {
+      "index": 0,
+      "start": "00:00:43.640",
+      "startSec": 43.64,
+      "text": "Good morning, folks. Happy Thursday.",
+      "snippet": "[00:00:43.640] Good morning, folks. Happy Thursday. [00:00:46.310] Good morning, folks. Happy Thursday. [00:00:46.320] Good morning, folks. Happy Thursday. [00:00:48.070] It is a good morning."
+    },
+    {
+      "index": 1,
+      "start": "00:00:46.310",
+      "startSec": 46.31,
+      "text": "Good morning, folks. Happy Thursday.",
+      "snippet": "[00:00:43.640] Good morning, folks. Happy Thursday. [00:00:46.310] Good morning, folks. Happy Thursday. [00:00:46.320] Good morning, folks. Happy Thursday. [00:00:48.070] It is a good morning. [00:00:48.080] It is a good morning."
+    },
+    {
+      "index": 2,
+      "start": "00:00:46.320",
+      "startSec": 46.32,
+      "text": "Good morning, folks. Happy Thursday.",
+      "snippet": "[00:00:43.640] Good morning, folks. Happy Thursday. [00:00:46.310] Good morning, folks. Happy Thursday. [00:00:46.320] Good morning, folks. Happy Thursday. [00:00:48.070] It is a good morning. [00:00:48.080] It is a good morning. [00:00:49.470] So, we got a little bit of a"
+    },
+    {
+      "index": 3,
+      "start": "00:00:48.070",
+      "startSec": 48.07,
+      "text": "It is a good morning.",
+      "snippet": "[00:00:43.640] Good morning, folks. Happy Thursday. [00:00:46.310] Good morning, folks. Happy Thursday. [00:00:46.320] Good morning, folks. Happy Thursday. [00:00:48.070] It is a good morning. [00:00:48.080] It is a good morning. [00:00:49.470] So, we got a little bit of a [00:00:49.480] So, we got a little bit of a"
+    },
+    {
+      "index": 4,
+      "start": "00:00:48.080",
+      "startSec": 48.08,
+      "text": "It is a good morning.",
+      "snippet": "[00:00:46.310] Good morning, folks. Happy Thursday. [00:00:46.320] Good morning, folks. Happy Thursday. [00:00:48.070] It is a good morning. [00:00:48.080] It is a good morning. [00:00:49.470] So, we got a little bit of a [00:00:49.480] So, we got a little bit of a [00:00:51.510] sloppy range in here."
+    },
+    {
+      "index": 31,
+      "start": "00:01:24.990",
+      "startSec": 84.99,
+      "text": "fair value gap if it would have came out",
+      "snippet": "[00:01:21.400] multiple attempts to go higher in here. [00:01:23.510] And I liked the idea of this inversion [00:01:23.520] And I liked the idea of this inversion [00:01:24.990] fair value gap if it would have came out [00:01:25.000] fair value gap if it would have came out [00:01:26.190] of it like it did here and then [00:01:26.200] of it like it did here and then"
+    },
+    {
+      "index": 32,
+      "start": "00:01:25.000",
+      "startSec": 85,
+      "text": "fair value gap if it would have came out",
+      "snippet": "[00:01:23.510] And I liked the idea of this inversion [00:01:23.520] And I liked the idea of this inversion [00:01:24.990] fair value gap if it would have came out [00:01:25.000] fair value gap if it would have came out [00:01:26.190] of it like it did here and then [00:01:26.200] of it like it did here and then [00:01:28.350] respected the lower half"
+    },
+    {
+      "index": 59,
+      "start": "00:01:53.590",
+      "startSec": 113.59,
+      "text": "might do it this morning.",
+      "snippet": "[00:01:50.080] And then we had uh this low, which I [00:01:51.990] thought we could have hit that. We still [00:01:52.000] thought we could have hit that. We still [00:01:53.590] might do it this morning. [00:01:53.600] might do it this morning. [00:01:56.430] Um we're opening up with a premium gap. [00:01:56.440] Um we're opening up with a premium gap."
+    },
+    {
+      "index": 60,
+      "start": "00:01:53.600",
+      "startSec": 113.6,
+      "text": "might do it this morning.",
+      "snippet": "[00:01:51.990] thought we could have hit that. We still [00:01:52.000] thought we could have hit that. We still [00:01:53.590] might do it this morning. [00:01:53.600] might do it this morning. [00:01:56.430] Um we're opening up with a premium gap. [00:01:56.440] Um we're opening up with a premium gap. [00:01:58.110] So, I think that's the liquidity if we"
+    },
+    {
+      "index": 67,
+      "start": "00:02:01.470",
+      "startSec": 121.47,
+      "text": "in uh opening range, the first 30",
+      "snippet": "[00:01:58.120] So, I think that's the liquidity if we [00:01:59.670] go lower [00:01:59.680] go lower [00:02:01.470] in uh opening range, the first 30 [00:02:01.480] in uh opening range, the first 30 [00:02:02.870] minutes of trading between 9:30 and [00:02:02.880] minutes of trading between 9:30 and 10:00."
+    },
+    {
+      "index": 68,
+      "start": "00:02:01.480",
+      "startSec": 121.48,
+      "text": "in uh opening range, the first 30",
+      "snippet": "[00:01:59.670] go lower [00:01:59.680] go lower [00:02:01.470] in uh opening range, the first 30 [00:02:01.480] in uh opening range, the first 30 [00:02:02.870] minutes of trading between 9:30 and [00:02:02.880] minutes of trading between 9:30 and 10:00. [00:02:04.710] 10:00."
+    },
+    {
+      "index": 79,
+      "start": "00:02:11.830",
+      "startSec": 131.83,
+      "text": "bullish fair value gap.",
+      "snippet": "[00:02:08.679] strong and then we just used it now as a potential [00:02:09.910] potential [00:02:09.920] potential [00:02:11.830] bullish fair value gap. [00:02:11.840] bullish fair value gap. [00:02:14.470] And this one here [00:02:14.480] And this one here"
+    },
+    {
+      "index": 80,
+      "start": "00:02:11.840",
+      "startSec": 131.84,
+      "text": "bullish fair value gap.",
+      "snippet": "[00:02:09.910] potential [00:02:09.920] potential [00:02:11.830] bullish fair value gap. [00:02:11.840] bullish fair value gap. [00:02:14.470] And this one here [00:02:14.480] And this one here [00:02:17.030] since it's a down close candle, if we"
+    },
+    {
+      "index": 116,
+      "start": "00:02:50.110",
+      "startSec": 170.11,
+      "text": "opening range gap low.",
+      "snippet": "[00:02:46.800] If we scroll down a little bit, you'll [00:02:48.150] see this is regular trading hours [00:02:48.160] see this is regular trading hours [00:02:50.110] opening range gap low. [00:02:50.120] opening range gap low. [00:02:51.830] And we we arrive at that is I'm [00:02:51.840] And we we arrive at that is I'm"
+    },
+    {
+      "index": 117,
+      "start": "00:02:50.120",
+      "startSec": 170.12,
+      "text": "opening range gap low.",
+      "snippet": "[00:02:48.150] see this is regular trading hours [00:02:48.160] see this is regular trading hours [00:02:50.110] opening range gap low. [00:02:50.120] opening range gap low. [00:02:51.830] And we we arrive at that is I'm [00:02:51.840] And we we arrive at that is I'm [00:02:54.350] assuming, I mean, obviously"
+    },
+    {
+      "index": 138,
+      "start": "00:03:14.430",
+      "startSec": 194.43,
+      "text": "That's the settlement price.",
+      "snippet": "[00:03:09.600] regular trading hours [00:03:12.150] This is 4:14 p.m. [00:03:12.160] This is 4:14 p.m. [00:03:14.430] That's the settlement price. [00:03:14.440] That's the settlement price. [00:03:16.510] Okay, so since we're we're trading at a [00:03:16.520] Okay, so since we're we're trading at a"
+    },
+    {
+      "index": 139,
+      "start": "00:03:14.440",
+      "startSec": 194.44,
+      "text": "That's the settlement price.",
+      "snippet": "[00:03:12.150] This is 4:14 p.m. [00:03:12.160] This is 4:14 p.m. [00:03:14.430] That's the settlement price. [00:03:14.440] That's the settlement price. [00:03:16.510] Okay, so since we're we're trading at a [00:03:16.520] Okay, so since we're we're trading at a [00:03:17.750] higher price"
+    },
+    {
+      "index": 163,
+      "start": "00:03:49.790",
+      "startSec": 229.79,
+      "text": "morning's stream and let me recap what",
+      "snippet": "[00:03:45.520] Okay, so the the premise for this [00:03:47.390] Okay, so the the premise for this [00:03:47.400] Okay, so the the premise for this [00:03:49.790] morning's stream and let me recap what [00:03:49.800] morning's stream and let me recap what [00:03:51.950] yesterday's was. Yesterday was a [00:03:51.960] yesterday's was. Yesterday was a"
+    },
+    {
+      "index": 164,
+      "start": "00:03:49.800",
+      "startSec": 229.8,
+      "text": "morning's stream and let me recap what",
+      "snippet": "[00:03:47.390] Okay, so the the premise for this [00:03:47.400] Okay, so the the premise for this [00:03:49.790] morning's stream and let me recap what [00:03:49.800] morning's stream and let me recap what [00:03:51.950] yesterday's was. Yesterday was a [00:03:51.960] yesterday's was. Yesterday was a [00:03:54.630] pantomime of someone that's brand new"
+    },
+    {
+      "index": 248,
+      "start": "00:05:44.710",
+      "startSec": 344.71,
+      "text": "trade back down to consequent",
+      "snippet": "[00:05:40.920] probabilities are always that we will [00:05:42.750] probabilities are always that we will [00:05:42.760] probabilities are always that we will [00:05:44.710] trade back down to consequent [00:05:44.720] trade back down to consequent [00:05:45.790] encroachment of the regular trading [00:05:45.800] encroachment of the regular trading"
+    },
+    {
+      "index": 249,
+      "start": "00:05:44.720",
+      "startSec": 344.72,
+      "text": "trade back down to consequent",
+      "snippet": "[00:05:42.750] probabilities are always that we will [00:05:42.760] probabilities are always that we will [00:05:44.710] trade back down to consequent [00:05:44.720] trade back down to consequent [00:05:45.790] encroachment of the regular trading [00:05:45.800] encroachment of the regular trading [00:05:47.870] hours opening range gap. So, as we"
+    },
+    {
+      "index": 252,
+      "start": "00:05:47.870",
+      "startSec": 347.87,
+      "text": "hours opening range gap. So, as we",
+      "snippet": "[00:05:44.720] trade back down to consequent [00:05:45.790] encroachment of the regular trading [00:05:45.800] encroachment of the regular trading [00:05:47.870] hours opening range gap. So, as we [00:05:47.880] hours opening range gap. So, as we approach [00:05:50.110] approach [00:05:50.120] approach"
+    },
+    {
+      "index": 253,
+      "start": "00:05:47.880",
+      "startSec": 347.88,
+      "text": "hours opening range gap. So, as we approach",
+      "snippet": "[00:05:45.790] encroachment of the regular trading [00:05:45.800] encroachment of the regular trading [00:05:47.870] hours opening range gap. So, as we [00:05:47.880] hours opening range gap. So, as we approach [00:05:50.110] approach [00:05:50.120] approach [00:05:51.910] the first"
+    },
+    {
+      "index": 268,
+      "start": "00:06:06.470",
+      "startSec": 366.47,
+      "text": "settlement on regular trading hours,",
+      "snippet": "[00:06:02.560] where we may open up and where the [00:06:05.030] actual return to previous day's [00:06:05.040] actual return to previous day's [00:06:06.470] settlement on regular trading hours, [00:06:06.480] settlement on regular trading hours, [00:06:07.910] which is this [00:06:07.920] which is this"
+    },
+    {
+      "index": 269,
+      "start": "00:06:06.480",
+      "startSec": 366.48,
+      "text": "settlement on regular trading hours,",
+      "snippet": "[00:06:05.030] actual return to previous day's [00:06:05.040] actual return to previous day's [00:06:06.470] settlement on regular trading hours, [00:06:06.480] settlement on regular trading hours, [00:06:07.910] which is this [00:06:07.920] which is this [00:06:10.230] low, okay? This line here."
+    }
+  ]
+}

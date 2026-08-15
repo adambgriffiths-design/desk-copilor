@@ -1,0 +1,279 @@
+{
+  "video_id": "-DMKLrUJvfg",
+  "path": "data/ict-transcripts/raw/-DMKLrUJvfg.en.vtt",
+  "cues": 377,
+  "searches": {
+    "first presented": [
+      {
+        "t": "00:00:03.510",
+        "sec": 3.51,
+        "snippet": "[00:00:00.160] in this video we're going to be covering [00:00:01.470] in this video we're going to be covering [00:00:03.510] ict's first presented fair value Gap [00:00:05.110] model I'm going to dive into the rules [00:00:07.269] that ICT uses for this model how you [00:00:09.190] could set your clock to this model and [00:00:10.870] then also the time frames to look for [00:00:12.870] this model on now the first thing that"
+      },
+      {
+        "t": "00:08:20.350",
+        "sec": 500.35,
+        "snippet": "[00:08:11.710] inversion fair value Gap this one could [00:08:13.390] also be used right here so let's do a [00:08:14.749] quick recap real quick because I know we [00:08:16.710] just talked about a lot between 9:30 [00:08:18.749] a.m. to 10:00 a.m. New York time we're [00:08:20.350] looking for the first presented fair [00:08:22.270] value Gap it can be used in both [00:08:23.869] directions meaning it can be used as a [00:08:25.869] fair value gap or an inversion fair [00:08:28.149] value gap or even a reclaimed fair value [00:08:29.950] Gap the candle number two two of the"
+      }
+    ],
+    "fair value gap": [
+      {
+        "t": "00:00:03.510",
+        "sec": 3.51,
+        "snippet": "[00:00:00.160] in this video we're going to be covering [00:00:01.470] in this video we're going to be covering [00:00:03.510] ict's first presented fair value Gap [00:00:05.110] model I'm going to dive into the rules [00:00:07.269] that ICT uses for this model how you [00:00:09.190] could set your clock to this model and [00:00:10.870] then also the time frames to look for [00:00:12.870] this model on now the first thing that"
+      },
+      {
+        "t": "00:00:21.390",
+        "sec": 21.39,
+        "snippet": "[00:00:10.870] then also the time frames to look for [00:00:12.870] this model on now the first thing that [00:00:14.789] we need to identify for this model is [00:00:17.070] the opening range which is between 9:30 [00:00:19.470] a.m. to 10:00 a.m. New York time we're [00:00:21.390] looking for the first fair value Gap [00:00:23.790] within that interval of time and there's [00:00:25.230] multiple ways that you could use this [00:00:27.269] fair value Gap it's not just as simple [00:00:29.390] as trading their return back into it [00:00:31.070] there's multip ways you could use it in"
+      },
+      {
+        "t": "00:00:27.269",
+        "sec": 27.269,
+        "snippet": "[00:00:17.070] the opening range which is between 9:30 [00:00:19.470] a.m. to 10:00 a.m. New York time we're [00:00:21.390] looking for the first fair value Gap [00:00:23.790] within that interval of time and there's [00:00:25.230] multiple ways that you could use this [00:00:27.269] fair value Gap it's not just as simple [00:00:29.390] as trading their return back into it [00:00:31.070] there's multip ways you could use it in [00:00:33.229] both directions so the first rule is [00:00:35.270] that the fair value Gap cannot form on [00:00:37.549] the 9:30 a.m. candle so if this is a"
+      },
+      {
+        "t": "00:00:35.270",
+        "sec": 35.27,
+        "snippet": "[00:00:25.230] multiple ways that you could use this [00:00:27.269] fair value Gap it's not just as simple [00:00:29.390] as trading their return back into it [00:00:31.070] there's multip ways you could use it in [00:00:33.229] both directions so the first rule is [00:00:35.270] that the fair value Gap cannot form on [00:00:37.549] the 9:30 a.m. candle so if this is a [00:00:39.709] bearish fair value Gap right here candle [00:00:42.990] number two cannot form on 930 it has to [00:00:46.229] start at 931 at the earliest so the [00:00:47.549] earliest that we're looking for a fair"
+      },
+      {
+        "t": "00:00:39.709",
+        "sec": 39.709,
+        "snippet": "[00:00:29.390] as trading their return back into it [00:00:31.070] there's multip ways you could use it in [00:00:33.229] both directions so the first rule is [00:00:35.270] that the fair value Gap cannot form on [00:00:37.549] the 9:30 a.m. candle so if this is a [00:00:39.709] bearish fair value Gap right here candle [00:00:42.990] number two cannot form on 930 it has to [00:00:46.229] start at 931 at the earliest so the [00:00:47.549] earliest that we're looking for a fair [00:00:49.670] value Gap to form within that interval [00:00:52.110] of 9:30 a.m. to 10:00 a.m. is on the"
+      },
+      {
+        "t": "00:00:58.549",
+        "sec": 58.549,
+        "snippet": "[00:00:47.549] earliest that we're looking for a fair [00:00:49.670] value Gap to form within that interval [00:00:52.110] of 9:30 a.m. to 10:00 a.m. is on the [00:00:54.150] 9:31 candle you might be a little bit [00:00:55.750] confused right now think of it like a [00:00:58.549] fair value Gap is three candles this is [00:01:00.709] candle number one this is candle number [00:01:03.110] two this is candle number three candle [00:01:06.270] number two cannot be at 9:30 the [00:01:08.710] earliest that candle number two can be [00:01:11.390] is at 931 just like in this example so"
+      },
+      {
+        "t": "00:01:13.030",
+        "sec": 73.03,
+        "snippet": "[00:01:00.709] candle number one this is candle number [00:01:03.110] two this is candle number three candle [00:01:06.270] number two cannot be at 9:30 the [00:01:08.710] earliest that candle number two can be [00:01:11.390] is at 931 just like in this example so [00:01:13.030] see this bullish fair value Gap right [00:01:15.749] here this is candle number one at 9:30 [00:01:17.990] the buy side and balance sells side and [00:01:21.550] efficiency gets created on 931 [00:01:24.950] 932 does not overlap 930 is high so it [00:01:28.109] creates this bullish fair value Gap 931"
+      },
+      {
+        "t": "00:01:28.109",
+        "sec": 88.109,
+        "snippet": "[00:01:13.030] see this bullish fair value Gap right [00:01:15.749] here this is candle number one at 9:30 [00:01:17.990] the buy side and balance sells side and [00:01:21.550] efficiency gets created on 931 [00:01:24.950] 932 does not overlap 930 is high so it [00:01:28.109] creates this bullish fair value Gap 931 [00:01:30.590] is the earliest where this imbalance [00:01:32.069] part of the three candle pattern the [00:01:35.030] fair value Gap can get created so just [00:01:36.830] note that candle number two of a fair [00:01:39.670] value Gap cannot form on the 9:30 a"
+      },
+      {
+        "t": "00:01:35.030",
+        "sec": 95.03,
+        "snippet": "[00:01:21.550] efficiency gets created on 931 [00:01:24.950] 932 does not overlap 930 is high so it [00:01:28.109] creates this bullish fair value Gap 931 [00:01:30.590] is the earliest where this imbalance [00:01:32.069] part of the three candle pattern the [00:01:35.030] fair value Gap can get created so just [00:01:36.830] note that candle number two of a fair [00:01:39.670] value Gap cannot form on the 9:30 a [00:01:41.510] candle like it does here so that first [00:01:43.230] presentation fair value Gap that forms [00:01:45.709] between 9:30 to 10:00 we want to mark"
+      },
+      {
+        "t": "00:01:43.230",
+        "sec": 103.23,
+        "snippet": "[00:01:32.069] part of the three candle pattern the [00:01:35.030] fair value Gap can get created so just [00:01:36.830] note that candle number two of a fair [00:01:39.670] value Gap cannot form on the 9:30 a [00:01:41.510] candle like it does here so that first [00:01:43.230] presentation fair value Gap that forms [00:01:45.709] between 9:30 to 10:00 we want to mark [00:01:47.350] that out and we want to extend it to [00:01:50.230] 3:45 p.m. New York local time so once [00:01:51.830] you can Mark out a fair value Gap that [00:01:54.190] forms within that opening range from 930"
+      },
+      {
+        "t": "00:01:51.830",
+        "sec": 111.83,
+        "snippet": "[00:01:41.510] candle like it does here so that first [00:01:43.230] presentation fair value Gap that forms [00:01:45.709] between 9:30 to 10:00 we want to mark [00:01:47.350] that out and we want to extend it to [00:01:50.230] 3:45 p.m. New York local time so once [00:01:51.830] you can Mark out a fair value Gap that [00:01:54.190] forms within that opening range from 930 [00:01:56.270] to 10:00 and make sure that the canle [00:01:59.109] number two forms at 9:31 at the earliest [00:02:01.630] like we have right here here ICT teaches [00:02:04.550] to extend that to 3:45 p.m. New York"
+      },
+      {
+        "t": "00:02:51.509",
+        "sec": 171.509,
+        "snippet": "[00:02:43.030] the underlying narrative is that smart [00:02:44.710] money's getting short up here and [00:02:46.030] they're going to take it to the opposing [00:02:47.750] sell side liquidity so you need an [00:02:49.790] underlying narrative why to trade off of [00:02:51.509] that first presentation fair value Gap [00:02:53.309] it cannot just be a loan but if you [00:02:55.030] incorporate a bias and other time [00:02:58.030] elements it can get very very precise [00:02:59.509] right now I'm going to go into how to [00:03:00.830] come up with with a bias using the"
+      },
+      {
+        "t": "00:05:05.710",
+        "sec": 305.71,
+        "snippet": "[00:04:54.670] there's a 70% chance between 930 to [00:04:56.590] 10:00 a.m. that it's going to return to [00:04:59.150] the midpoint of that opening range Gap [00:05:01.230] go to hist Channel he talks about this [00:05:03.749] so it's not a 70% strike rate with the [00:05:05.710] first presentation fair value Gap what [00:05:06.950] he's talking about here is that there's [00:05:10.390] a 70% chance that if we open up higher [00:05:12.110] than the previous day settlement that [00:05:13.710] within the first 30 minutes it's at [00:05:15.310] least going to return to the midpoint of"
+      },
+      {
+        "t": "00:05:41.590",
+        "sec": 341.59,
+        "snippet": "[00:05:32.350] consolidation so once it takes out the [00:05:34.029] buy side it's likely to move kind of [00:05:35.830] back to the middle of that consolidation [00:05:38.309] that it's in so once we combine these [00:05:39.990] other factors then this first [00:05:41.590] presentation fair value Gap becomes [00:05:44.150] clear so if we go back to here on [00:05:46.629] electronic trading hours when it creates [00:05:49.189] that bullish fair value Gap why would we [00:05:51.909] trade it in the direction higher if it [00:05:54.430] was a premium opening range Gap so it's"
+      },
+      {
+        "t": "00:05:49.189",
+        "sec": 349.189,
+        "snippet": "[00:05:38.309] that it's in so once we combine these [00:05:39.990] other factors then this first [00:05:41.590] presentation fair value Gap becomes [00:05:44.150] clear so if we go back to here on [00:05:46.629] electronic trading hours when it creates [00:05:49.189] that bullish fair value Gap why would we [00:05:51.909] trade it in the direction higher if it [00:05:54.430] was a premium opening range Gap so it's [00:05:55.909] already likely to return back to the [00:05:58.510] midpoint which is right here okay it [00:06:00.550] took out buy side liquidity"
+      }
+    ],
+    "9:30": [
+      {
+        "t": "00:00:17.070",
+        "sec": 17.07,
+        "snippet": "[00:00:07.269] that ICT uses for this model how you [00:00:09.190] could set your clock to this model and [00:00:10.870] then also the time frames to look for [00:00:12.870] this model on now the first thing that [00:00:14.789] we need to identify for this model is [00:00:17.070] the opening range which is between 9:30 [00:00:19.470] a.m. to 10:00 a.m. New York time we're [00:00:21.390] looking for the first fair value Gap [00:00:23.790] within that interval of time and there's [00:00:25.230] multiple ways that you could use this [00:00:27.269] fair value Gap it's not just as simple"
+      },
+      {
+        "t": "00:00:37.549",
+        "sec": 37.549,
+        "snippet": "[00:00:27.269] fair value Gap it's not just as simple [00:00:29.390] as trading their return back into it [00:00:31.070] there's multip ways you could use it in [00:00:33.229] both directions so the first rule is [00:00:35.270] that the fair value Gap cannot form on [00:00:37.549] the 9:30 a.m. candle so if this is a [00:00:39.709] bearish fair value Gap right here candle [00:00:42.990] number two cannot form on 930 it has to [00:00:46.229] start at 931 at the earliest so the [00:00:47.549] earliest that we're looking for a fair [00:00:49.670] value Gap to form within that interval"
+      },
+      {
+        "t": "00:00:52.110",
+        "sec": 52.11,
+        "snippet": "[00:00:39.709] bearish fair value Gap right here candle [00:00:42.990] number two cannot form on 930 it has to [00:00:46.229] start at 931 at the earliest so the [00:00:47.549] earliest that we're looking for a fair [00:00:49.670] value Gap to form within that interval [00:00:52.110] of 9:30 a.m. to 10:00 a.m. is on the [00:00:54.150] 9:31 candle you might be a little bit [00:00:55.750] confused right now think of it like a [00:00:58.549] fair value Gap is three candles this is [00:01:00.709] candle number one this is candle number [00:01:03.110] two this is candle number three candle"
+      },
+      {
+        "t": "00:01:06.270",
+        "sec": 66.27,
+        "snippet": "[00:00:54.150] 9:31 candle you might be a little bit [00:00:55.750] confused right now think of it like a [00:00:58.549] fair value Gap is three candles this is [00:01:00.709] candle number one this is candle number [00:01:03.110] two this is candle number three candle [00:01:06.270] number two cannot be at 9:30 the [00:01:08.710] earliest that candle number two can be [00:01:11.390] is at 931 just like in this example so [00:01:13.030] see this bullish fair value Gap right [00:01:15.749] here this is candle number one at 9:30 [00:01:17.990] the buy side and balance sells side and"
+      },
+      {
+        "t": "00:01:15.749",
+        "sec": 75.749,
+        "snippet": "[00:01:03.110] two this is candle number three candle [00:01:06.270] number two cannot be at 9:30 the [00:01:08.710] earliest that candle number two can be [00:01:11.390] is at 931 just like in this example so [00:01:13.030] see this bullish fair value Gap right [00:01:15.749] here this is candle number one at 9:30 [00:01:17.990] the buy side and balance sells side and [00:01:21.550] efficiency gets created on 931 [00:01:24.950] 932 does not overlap 930 is high so it [00:01:28.109] creates this bullish fair value Gap 931 [00:01:30.590] is the earliest where this imbalance"
+      },
+      {
+        "t": "00:01:39.670",
+        "sec": 99.67,
+        "snippet": "[00:01:28.109] creates this bullish fair value Gap 931 [00:01:30.590] is the earliest where this imbalance [00:01:32.069] part of the three candle pattern the [00:01:35.030] fair value Gap can get created so just [00:01:36.830] note that candle number two of a fair [00:01:39.670] value Gap cannot form on the 9:30 a [00:01:41.510] candle like it does here so that first [00:01:43.230] presentation fair value Gap that forms [00:01:45.709] between 9:30 to 10:00 we want to mark [00:01:47.350] that out and we want to extend it to [00:01:50.230] 3:45 p.m. New York local time so once"
+      },
+      {
+        "t": "00:01:45.709",
+        "sec": 105.709,
+        "snippet": "[00:01:35.030] fair value Gap can get created so just [00:01:36.830] note that candle number two of a fair [00:01:39.670] value Gap cannot form on the 9:30 a [00:01:41.510] candle like it does here so that first [00:01:43.230] presentation fair value Gap that forms [00:01:45.709] between 9:30 to 10:00 we want to mark [00:01:47.350] that out and we want to extend it to [00:01:50.230] 3:45 p.m. New York local time so once [00:01:51.830] you can Mark out a fair value Gap that [00:01:54.190] forms within that opening range from 930 [00:01:56.270] to 10:00 and make sure that the canle"
+      },
+      {
+        "t": "00:03:12.190",
+        "sec": 192.19,
+        "snippet": "[00:03:00.830] come up with with a bias using the [00:03:02.790] opening range Gap this is another [00:03:04.949] concept that ICT taught the opening [00:03:06.830] range Gap this is different from the [00:03:08.869] opening range the opening range is from [00:03:12.190] 9:30 to 10: a.m. the opening range Gap [00:03:14.869] is from the previous day's 4:14 p.m. to [00:03:17.229] the next day's 9:30 a.m. so I'm going to [00:03:18.589] show you guys what that looks like you [00:03:20.390] need to go on regular trading hours for [00:03:22.190] this so look in my bottom right hand"
+      },
+      {
+        "t": "00:03:17.229",
+        "sec": 197.229,
+        "snippet": "[00:03:04.949] concept that ICT taught the opening [00:03:06.830] range Gap this is different from the [00:03:08.869] opening range the opening range is from [00:03:12.190] 9:30 to 10: a.m. the opening range Gap [00:03:14.869] is from the previous day's 4:14 p.m. to [00:03:17.229] the next day's 9:30 a.m. so I'm going to [00:03:18.589] show you guys what that looks like you [00:03:20.390] need to go on regular trading hours for [00:03:22.190] this so look in my bottom right hand [00:03:24.830] corner see the eth this is electronic [00:03:26.830] trading hours you want to switch that to"
+      },
+      {
+        "t": "00:03:40.869",
+        "sec": 220.869,
+        "snippet": "[00:03:29.910] regular trading hours now what I see [00:03:31.910] taught is when we have a premium Gap in [00:03:34.589] the AM session what's a premium Gap well [00:03:36.789] when we're on regular trading hours if [00:03:38.309] you go on the one minute chart you could [00:03:40.869] see at 9:30 a.m. if you look back one [00:03:42.869] candle this is the previous day's [00:03:46.589] settlement at 4:14 p.m. if you draw a [00:03:49.070] Fibonacci on that from the closing price [00:03:52.670] of that up to the open of the 930 amp [00:03:54.470] candle so all we're doing is the closing"
+      },
+      {
+        "t": "00:04:04.949",
+        "sec": 244.949,
+        "snippet": "[00:03:52.670] of that up to the open of the 930 amp [00:03:54.470] candle so all we're doing is the closing [00:03:56.110] price from the previous day settlement [00:03:58.589] at 4:14 p.m. on the regular trading [00:04:01.429] hours and we're drawing that FIB up to [00:04:04.949] the open at 9:30 a.m. right here is the [00:04:07.110] midpoint of that so this is the midpoint [00:04:09.149] of the opening range Gap so see how I [00:04:11.670] have the 0.5 and then this is just the [00:04:14.550] one and the zero we need to focus on [00:04:16.830] this midpoint of this opening range Gap"
+      },
+      {
+        "t": "00:04:42.350",
+        "sec": 282.35,
+        "snippet": "[00:04:32.070] back to the midpoint of this opening [00:04:33.550] range Gap so I know that sounds like a [00:04:35.230] mouthful but I'm going to simplify it [00:04:37.390] right now draw two vertical lines on [00:04:38.950] your chart from [00:04:42.350] 9:30 and then to 10:00 what he's [00:04:44.070] teaching here is that when we have a [00:04:46.990] premium Gap and we Mark out the midpoint [00:04:49.230] of that premium just means it gapped up [00:04:50.990] when we Mark out the midpoint of that [00:04:54.670] there's a 70% chance between 930 to"
+      },
+      {
+        "t": "00:08:16.710",
+        "sec": 496.71,
+        "snippet": "[00:08:07.469] trade okay and I put my stop above this [00:08:09.589] swing high before it traded into the [00:08:11.710] inversion fair value Gap this one could [00:08:13.390] also be used right here so let's do a [00:08:14.749] quick recap real quick because I know we [00:08:16.710] just talked about a lot between 9:30 [00:08:18.749] a.m. to 10:00 a.m. New York time we're [00:08:20.350] looking for the first presented fair [00:08:22.270] value Gap it can be used in both [00:08:23.869] directions meaning it can be used as a [00:08:25.869] fair value gap or an inversion fair"
+      },
+      {
+        "t": "00:08:32.350",
+        "sec": 512.35,
+        "snippet": "[00:08:22.270] value Gap it can be used in both [00:08:23.869] directions meaning it can be used as a [00:08:25.869] fair value gap or an inversion fair [00:08:28.149] value gap or even a reclaimed fair value [00:08:29.950] Gap the candle number two two of the [00:08:32.350] fair value Gap cannot form on the 9:30 [00:08:34.949] a.m. candle the 931 is the earliest that [00:08:37.589] it can possibly form also you need to [00:08:39.230] have a bias so there needs to be a [00:08:41.190] reason to Target higher prices there [00:08:42.790] needs to be a reason to Target lower"
+      },
+      {
+        "t": "00:10:14.470",
+        "sec": 614.47,
+        "snippet": "[00:10:03.790] and a bias behind why price should go [00:10:05.550] where and then we can apply the entry [00:10:07.470] model after that so when we come back [00:10:09.630] over here remember the example that we [00:10:11.590] just talked about how this fair value [00:10:14.470] yet formed at 9:30 so we can't use that [00:10:16.470] so we're looking for the next fair value [00:10:20.470] Gap within that 930 to 10:00 range well [00:10:21.949] the first one that presents itself is [00:10:23.949] right here this is 943 we're going to [00:10:27.230] mark this out okay price leaves it open"
+      }
+    ],
+    "9:31": [
+      {
+        "t": "00:00:54.150",
+        "sec": 54.15,
+        "snippet": "[00:00:42.990] number two cannot form on 930 it has to [00:00:46.229] start at 931 at the earliest so the [00:00:47.549] earliest that we're looking for a fair [00:00:49.670] value Gap to form within that interval [00:00:52.110] of 9:30 a.m. to 10:00 a.m. is on the [00:00:54.150] 9:31 candle you might be a little bit [00:00:55.750] confused right now think of it like a [00:00:58.549] fair value Gap is three candles this is [00:01:00.709] candle number one this is candle number [00:01:03.110] two this is candle number three candle [00:01:06.270] number two cannot be at 9:30 the"
+      },
+      {
+        "t": "00:01:59.109",
+        "sec": 119.109,
+        "snippet": "[00:01:47.350] that out and we want to extend it to [00:01:50.230] 3:45 p.m. New York local time so once [00:01:51.830] you can Mark out a fair value Gap that [00:01:54.190] forms within that opening range from 930 [00:01:56.270] to 10:00 and make sure that the canle [00:01:59.109] number two forms at 9:31 at the earliest [00:02:01.630] like we have right here here ICT teaches [00:02:04.550] to extend that to 3:45 p.m. New York [00:02:06.429] time if it's not in a trending [00:02:07.870] environment where it's moving up and [00:02:10.630] down he talks about it can be used"
+      }
+    ],
+    "middle candle": [],
+    "middle of the": [],
+    "1 minute": [],
+    "one minute": [
+      {
+        "t": "00:03:38.309",
+        "sec": 218.309,
+        "snippet": "[00:03:26.830] trading hours you want to switch that to [00:03:29.910] regular trading hours now what I see [00:03:31.910] taught is when we have a premium Gap in [00:03:34.589] the AM session what's a premium Gap well [00:03:36.789] when we're on regular trading hours if [00:03:38.309] you go on the one minute chart you could [00:03:40.869] see at 9:30 a.m. if you look back one [00:03:42.869] candle this is the previous day's [00:03:46.589] settlement at 4:14 p.m. if you draw a [00:03:49.070] Fibonacci on that from the closing price [00:03:52.670] of that up to the open of the 930 amp"
+      }
+    ],
+    "dealing range": [],
+    "displacement": [],
+    "beyond": [],
+    "opening range": [
+      {
+        "t": "00:00:17.070",
+        "sec": 17.07,
+        "snippet": "[00:00:07.269] that ICT uses for this model how you [00:00:09.190] could set your clock to this model and [00:00:10.870] then also the time frames to look for [00:00:12.870] this model on now the first thing that [00:00:14.789] we need to identify for this model is [00:00:17.070] the opening range which is between 9:30 [00:00:19.470] a.m. to 10:00 a.m. New York time we're [00:00:21.390] looking for the first fair value Gap [00:00:23.790] within that interval of time and there's [00:00:25.230] multiple ways that you could use this [00:00:27.269] fair value Gap it's not just as simple"
+      },
+      {
+        "t": "00:01:54.190",
+        "sec": 114.19,
+        "snippet": "[00:01:43.230] presentation fair value Gap that forms [00:01:45.709] between 9:30 to 10:00 we want to mark [00:01:47.350] that out and we want to extend it to [00:01:50.230] 3:45 p.m. New York local time so once [00:01:51.830] you can Mark out a fair value Gap that [00:01:54.190] forms within that opening range from 930 [00:01:56.270] to 10:00 and make sure that the canle [00:01:59.109] number two forms at 9:31 at the earliest [00:02:01.630] like we have right here here ICT teaches [00:02:04.550] to extend that to 3:45 p.m. New York [00:02:06.429] time if it's not in a trending"
+      },
+      {
+        "t": "00:03:02.790",
+        "sec": 182.79,
+        "snippet": "[00:02:53.309] it cannot just be a loan but if you [00:02:55.030] incorporate a bias and other time [00:02:58.030] elements it can get very very precise [00:02:59.509] right now I'm going to go into how to [00:03:00.830] come up with with a bias using the [00:03:02.790] opening range Gap this is another [00:03:04.949] concept that ICT taught the opening [00:03:06.830] range Gap this is different from the [00:03:08.869] opening range the opening range is from [00:03:12.190] 9:30 to 10: a.m. the opening range Gap [00:03:14.869] is from the previous day's 4:14 p.m. to"
+      },
+      {
+        "t": "00:03:08.869",
+        "sec": 188.869,
+        "snippet": "[00:02:59.509] right now I'm going to go into how to [00:03:00.830] come up with with a bias using the [00:03:02.790] opening range Gap this is another [00:03:04.949] concept that ICT taught the opening [00:03:06.830] range Gap this is different from the [00:03:08.869] opening range the opening range is from [00:03:12.190] 9:30 to 10: a.m. the opening range Gap [00:03:14.869] is from the previous day's 4:14 p.m. to [00:03:17.229] the next day's 9:30 a.m. so I'm going to [00:03:18.589] show you guys what that looks like you [00:03:20.390] need to go on regular trading hours for"
+      },
+      {
+        "t": "00:03:12.190",
+        "sec": 192.19,
+        "snippet": "[00:03:00.830] come up with with a bias using the [00:03:02.790] opening range Gap this is another [00:03:04.949] concept that ICT taught the opening [00:03:06.830] range Gap this is different from the [00:03:08.869] opening range the opening range is from [00:03:12.190] 9:30 to 10: a.m. the opening range Gap [00:03:14.869] is from the previous day's 4:14 p.m. to [00:03:17.229] the next day's 9:30 a.m. so I'm going to [00:03:18.589] show you guys what that looks like you [00:03:20.390] need to go on regular trading hours for [00:03:22.190] this so look in my bottom right hand"
+      },
+      {
+        "t": "00:04:09.149",
+        "sec": 249.149,
+        "snippet": "[00:03:56.110] price from the previous day settlement [00:03:58.589] at 4:14 p.m. on the regular trading [00:04:01.429] hours and we're drawing that FIB up to [00:04:04.949] the open at 9:30 a.m. right here is the [00:04:07.110] midpoint of that so this is the midpoint [00:04:09.149] of the opening range Gap so see how I [00:04:11.670] have the 0.5 and then this is just the [00:04:14.550] one and the zero we need to focus on [00:04:16.830] this midpoint of this opening range Gap [00:04:19.390] because what ICT teaches is that if it's [00:04:22.550] a premium Gap meaning 930 opens up"
+      },
+      {
+        "t": "00:04:16.830",
+        "sec": 256.83,
+        "snippet": "[00:04:04.949] the open at 9:30 a.m. right here is the [00:04:07.110] midpoint of that so this is the midpoint [00:04:09.149] of the opening range Gap so see how I [00:04:11.670] have the 0.5 and then this is just the [00:04:14.550] one and the zero we need to focus on [00:04:16.830] this midpoint of this opening range Gap [00:04:19.390] because what ICT teaches is that if it's [00:04:22.550] a premium Gap meaning 930 opens up [00:04:24.469] higher than the previous day settlement [00:04:28.030] down here there's a 70% chance within [00:04:30.230] the opening range for price to to return"
+      },
+      {
+        "t": "00:04:30.230",
+        "sec": 270.23,
+        "snippet": "[00:04:16.830] this midpoint of this opening range Gap [00:04:19.390] because what ICT teaches is that if it's [00:04:22.550] a premium Gap meaning 930 opens up [00:04:24.469] higher than the previous day settlement [00:04:28.030] down here there's a 70% chance within [00:04:30.230] the opening range for price to to return [00:04:32.070] back to the midpoint of this opening [00:04:33.550] range Gap so I know that sounds like a [00:04:35.230] mouthful but I'm going to simplify it [00:04:37.390] right now draw two vertical lines on [00:04:38.950] your chart from"
+      },
+      {
+        "t": "00:04:59.150",
+        "sec": 299.15,
+        "snippet": "[00:04:46.990] premium Gap and we Mark out the midpoint [00:04:49.230] of that premium just means it gapped up [00:04:50.990] when we Mark out the midpoint of that [00:04:54.670] there's a 70% chance between 930 to [00:04:56.590] 10:00 a.m. that it's going to return to [00:04:59.150] the midpoint of that opening range Gap [00:05:01.230] go to hist Channel he talks about this [00:05:03.749] so it's not a 70% strike rate with the [00:05:05.710] first presentation fair value Gap what [00:05:06.950] he's talking about here is that there's [00:05:10.390] a 70% chance that if we open up higher"
+      },
+      {
+        "t": "00:05:28.150",
+        "sec": 328.15,
+        "snippet": "[00:05:17.670] that so we could use that for a bias [00:05:19.950] right there are other other elements [00:05:21.710] that we can consider like the fact that [00:05:23.550] it opened up higher took out the buy [00:05:25.870] side liquidity right and we also have [00:05:28.150] the opening range Gap here and on the [00:05:30.189] higher time frame it's in this [00:05:32.350] consolidation so once it takes out the [00:05:34.029] buy side it's likely to move kind of [00:05:35.830] back to the middle of that consolidation [00:05:38.309] that it's in so once we combine these"
+      },
+      {
+        "t": "00:05:54.430",
+        "sec": 354.43,
+        "snippet": "[00:05:41.590] presentation fair value Gap becomes [00:05:44.150] clear so if we go back to here on [00:05:46.629] electronic trading hours when it creates [00:05:49.189] that bullish fair value Gap why would we [00:05:51.909] trade it in the direction higher if it [00:05:54.430] was a premium opening range Gap so it's [00:05:55.909] already likely to return back to the [00:05:58.510] midpoint which is right here okay it [00:06:00.550] took out buy side liquidity [00:06:02.469] that's two and it's in a consolidation [00:06:04.350] so it's likely to once it takes out"
+      },
+      {
+        "t": "00:09:23.670",
+        "sec": 563.67,
+        "snippet": "[00:09:11.389] presented fair value Gap as an inversion [00:09:13.870] to draw us towards where the draw on [00:09:16.750] liquidity is that's how you would apply [00:09:18.509] this first presentation fair value Gap [00:09:20.829] not just randomly seeing it within that [00:09:23.670] opening range and longing it right here [00:09:25.310] so that has to be a context behind it [00:09:26.910] and if we're not in a trending [00:09:28.430] environment where price is just [00:09:29.990] constantly ripping High and it is in [00:09:32.550] these consolidations it can be referred"
+      }
+    ],
+    "three candle": [
+      {
+        "t": "00:00:58.549",
+        "sec": 58.549,
+        "snippet": "[00:00:47.549] earliest that we're looking for a fair [00:00:49.670] value Gap to form within that interval [00:00:52.110] of 9:30 a.m. to 10:00 a.m. is on the [00:00:54.150] 9:31 candle you might be a little bit [00:00:55.750] confused right now think of it like a [00:00:58.549] fair value Gap is three candles this is [00:01:00.709] candle number one this is candle number [00:01:03.110] two this is candle number three candle [00:01:06.270] number two cannot be at 9:30 the [00:01:08.710] earliest that candle number two can be [00:01:11.390] is at 931 just like in this example so"
+      },
+      {
+        "t": "00:01:03.110",
+        "sec": 63.11,
+        "snippet": "[00:00:52.110] of 9:30 a.m. to 10:00 a.m. is on the [00:00:54.150] 9:31 candle you might be a little bit [00:00:55.750] confused right now think of it like a [00:00:58.549] fair value Gap is three candles this is [00:01:00.709] candle number one this is candle number [00:01:03.110] two this is candle number three candle [00:01:06.270] number two cannot be at 9:30 the [00:01:08.710] earliest that candle number two can be [00:01:11.390] is at 931 just like in this example so [00:01:13.030] see this bullish fair value Gap right [00:01:15.749] here this is candle number one at 9:30"
+      },
+      {
+        "t": "00:01:32.069",
+        "sec": 92.069,
+        "snippet": "[00:01:17.990] the buy side and balance sells side and [00:01:21.550] efficiency gets created on 931 [00:01:24.950] 932 does not overlap 930 is high so it [00:01:28.109] creates this bullish fair value Gap 931 [00:01:30.590] is the earliest where this imbalance [00:01:32.069] part of the three candle pattern the [00:01:35.030] fair value Gap can get created so just [00:01:36.830] note that candle number two of a fair [00:01:39.670] value Gap cannot form on the 9:30 a [00:01:41.510] candle like it does here so that first [00:01:43.230] presentation fair value Gap that forms"
+      }
+    ],
+    "inverted": [],
+    "body close": []
+  }
+}

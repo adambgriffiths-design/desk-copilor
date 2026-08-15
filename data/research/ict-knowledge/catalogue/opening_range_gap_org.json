@@ -1,0 +1,409 @@
+{
+  "concept_id": "opening_range_gap_org",
+  "name": "Opening range gap (ORG / RTH ORG)",
+  "aliases": [
+    "ORG",
+    "RTHORG",
+    "regular trading hours opening range gap",
+    "premium gap",
+    "discount gap"
+  ],
+  "status": "CONFLICTING_SOURCES",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "org__eft9_3ekDCY__189",
+      "definition_text": "Regular trading hours settlement cited at 4:14 p.m.; opening range gap framed from that settlement vs 9:30 open (RTHORG high/low labels depending on whether open is above/below settlement).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Uses RTH settlement (lecture: 4:14 p.m.) as anchor",
+        "Gap exists when 9:30 open differs from prior RTH settlement"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Prior RTH settlement \u2192 NY 9:30 open",
+      "variations_note": "Settlement clock 4:14 in lecture; Karen desk notes sometimes use 4:15 \u2014 keep as source variation, do not silently rewrite.",
+      "confidence": "quoted",
+      "cue_start": "00:03:12.150",
+      "cue_end": "00:03:32.670",
+      "timestamp_sec": 192.15,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "org_premium_short_lean__eft9_3ekDCY__3321",
+      "definition_text": "After seeing ORG deliver more times than not toward half gap / CE: student perspective shifts to only look for shorts in premium gaps in the first 30 minutes of trading; aim for half gap; best-case 3/4 gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Premium gap at open",
+        "First 30 minutes of trading"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "9:30\u201310:00; premium ORG",
+      "variations_note": "Directional lean for premium gaps \u2014 keep separate from discount-gap willingness language in uwFJ0t7SAOU.",
+      "confidence": "quoted",
+      "cue_start": "00:55:03.470",
+      "cue_end": "00:55:32.030",
+      "timestamp_sec": 3303.47,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "org_discount_willingness__uwFJ0t7SAOU__117",
+      "definition_text": "Inside the first 30 minutes on a gap down: measure willingness for price to get back to previous session close; if no immediate dire need to reprice back up, that means extremely bearish \u2014 then turn attention to deeper discount objectives on 15-minute / hourly / daily.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Gap-down open",
+        "First 30 minutes"
+      ],
+      "invalidation": [
+        "No willingness to reprice toward previous session close \u2192 extremely bearish framing (failure of immediate fill attempt)"
+      ],
+      "timeframe_session_context": "9:30\u201310:00; discount/gap-down case",
+      "variations_note": "Complementary to premium-gap short lean; opposite gap polarity. Keep as separate occurrence.",
+      "confidence": "quoted",
+      "cue_start": "00:01:54.870",
+      "cue_end": "00:02:19.670",
+      "timestamp_sec": 114.87,
+      "source": {
+        "video_id": "uwFJ0t7SAOU",
+        "title": "ICT Gems \u2014 Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uwFJ0t7SAOU",
+        "transcript_path": "tmp/ict-transcripts/org-gaps.uwFJ0t7SAOU.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "org_fpvg_crosslink__pM8oWrcIJqU__1487",
+      "definition_text": "In the 2025 ORG lecture series, ICT cross-links Opening Range Gaps teaching with the morning first-presented FVG rule (since 9:31; cannot be the gap if it forms on the 9:30 candle) while walking live ORG / NFP examples.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "ORG lecture context with RTH open examples",
+        "Cross-reference to FPFVG morning rule (see first_presented_fvg occurrence fpfvg_931_not_930_candle__pM8oWrcIJqU__1487)"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY AM; ORG + FPFVG taught together in same lecture",
+      "variations_note": "Not a full ORG geometry definition \u2014 catalogue cross-link only. Primary FPFVG clock rule lives under first_presented_fvg.",
+      "confidence": "quoted",
+      "cue_start": "00:24:44.510",
+      "cue_end": "00:25:10.710",
+      "timestamp_sec": 1484.51,
+      "source": {
+        "video_id": "pM8oWrcIJqU",
+        "title": "2025 Lecture Series - SMC Trading Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=pM8oWrcIJqU",
+        "transcript_path": "data/ict-transcripts/raw/pM8oWrcIJqU.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_neq_ndog_rth_chart__uIvlS330qrA__59",
+      "definition_text": "Students confuse new day opening gap (NDOG) with opening range gap (ORG). Chart must show regular trading hours (RTH), not electronic trading hours (ETH), with New York timezone \u2014 RTH toggle typically shown as RTH/ETH in the lower-right corner.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Chart in RTH mode",
+        "Timezone New York / Eastern",
+        "Distinguish ORG from NDOG"
+      ],
+      "invalidation": [
+        "ETH chart mode shows NDOG/NWOG constructs instead of ORG"
+      ],
+      "timeframe_session_context": "RTH chart setup before measuring ORG",
+      "variations_note": "Definitional disambiguation ORG \u2260 NDOG; keep separate from settlement geometry rows.",
+      "confidence": "quoted",
+      "cue_start": "00:00:59.630",
+      "cue_end": "00:01:43.310",
+      "timestamp_sec": 59.63,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_settlement_414_to_930_premium__uIvlS330qrA__168",
+      "definition_text": "On RTH chart, ORG is the difference between previous-day regular trading hours settlement at 4:14 p.m. and the first opening price at 9:30 Eastern (New York local). Opening higher than prior RTH settlement is classified as a premium opening range gap. If the ORG is 120 handles or larger, price could leave the gap unfilled.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "RTH chart",
+        "Prior day settlement at 4:14 p.m. ET",
+        "Next session 9:30 open",
+        "Open above settlement \u2192 premium ORG"
+      ],
+      "invalidation": [
+        "Large ORG (\u2265~120 handles): may leave gap unfilled (does not fully return to prior settlement)"
+      ],
+      "timeframe_session_context": "Prior RTH 4:14 settlement \u2192 NY 9:30 open",
+      "variations_note": "Official 4:14 settlement clock (reinforces eft9). KEEP SEPARATE from large-gap unfilled rule vs ~70% CE-fill language in consequent_encroachment_half_gap.",
+      "confidence": "quoted",
+      "cue_start": "00:02:48.350",
+      "cue_end": "00:03:31.710",
+      "timestamp_sec": 168.35,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_fib_414_to_930_quadrants__uIvlS330qrA__215",
+      "definition_text": "For a premium ORG: take Fibonacci, anchor to previous RTH settlement at 4:14 on a 1-minute chart, drag to next trading day 9:30 Eastern opening price (RTH toggled) to obtain quadrant levels used for ORG analysis.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Premium ORG",
+        "1-minute RTH chart",
+        "Fib from 4:14 settlement \u2192 9:30 open"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "1m RTH; settlement\u2192open Fib grading",
+      "variations_note": "Operational geometry for quadrant/CE levels; complements V5 octant/quadrant grading occurrence.",
+      "confidence": "quoted",
+      "cue_start": "00:03:35.229",
+      "cue_end": "00:04:01.069",
+      "timestamp_sec": 215.229,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_large_gap_120_upper_quadrant__uIvlS330qrA__235",
+      "definition_text": "With a large gap (couple hundred handles / ~120 handles ballpark): rules employed say it will probably keep going in the direction of an extreme gap; if it ever trades below that low (settlement side), usually it stops around the upper quadrant \u2014 25% of the opening range gap is usually what is traded there. Gap may stay unfilled (not return all the way to previous day settlement) though it may fill at a later time.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Large/extreme ORG (~120+ handles)",
+        "Premium gap example"
+      ],
+      "invalidation": [
+        "May not trade even to upper quadrant; full fill may be deferred beyond the day"
+      ],
+      "timeframe_session_context": "Large premium ORG; first reaction often limited to upper quadrant / 25%",
+      "variations_note": "CONFLICT FACTOR vs ~70% CE attempt claims \u2014 large-gap may leave unfilled / only reach 25%. Do not merge with CE 70% rows.",
+      "confidence": "quoted",
+      "cue_start": "00:04:22.550",
+      "cue_end": "00:05:39.390",
+      "timestamp_sec": 262.55,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_rth_only_eth_ndog_nwog__uIvlS330qrA__419",
+      "definition_text": "Opening range gap is defined by regular trading hours only. Whatever trades between 6:00 p.m. and 9:30 is shown in electronic hours and is not needed for ORG. ETH shows new day opening gaps and/or new week opening gaps; RTH denotes what the opening range gap will be if there is a gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "ORG measured on RTH only",
+        "ETH path 18:00\u201309:30 excluded from ORG"
+      ],
+      "invalidation": [
+        "Using ETH chart for ORG measurement \u2192 wrong construct (NDOG/NWOG)"
+      ],
+      "timeframe_session_context": "RTH vs ETH session modes",
+      "variations_note": "Reinforces org_neq_ndog; kept separate as explicit RTH-only definition + ETH NDOG/NWOG mapping.",
+      "confidence": "quoted",
+      "cue_start": "00:06:33.150",
+      "cue_end": "00:07:41.550",
+      "timestamp_sec": 393.15,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_friday_414_to_monday_930__Sf_uYZBWTrA__629",
+      "definition_text": "On 1-minute RTH chart: hover Friday last candle \u2014 shows 4:14 p.m. close; wait until 9:30 New York local Monday RTH open; the difference between Friday closing price and Monday opening price is the opening range gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "RTH not ETH",
+        "Friday 4:14 close",
+        "Monday 9:30 open"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Weekend/Friday\u2192Monday RTH ORG example (Jun 2023)",
+      "variations_note": "Same 4:14\u21929:30 geometry as uIvl/eft9; weekend framing explicit. KEEP SEPARATE from same-video Judas 9:30\u201310:00 opening range (time window \u2260 gap).",
+      "confidence": "quoted",
+      "cue_start": "00:10:09.650",
+      "cue_end": "00:10:53.810",
+      "timestamp_sec": 609.65,
+      "source": {
+        "video_id": "Sf_uYZBWTrA",
+        "title": "2023 ICT Mentorship - Opening Range Gap Repricing Macro",
+        "url": "https://www.youtube.com/watch?v=Sf_uYZBWTrA",
+        "transcript_path": "data/ict-transcripts/raw/Sf_uYZBWTrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_discount_premium_polarity__Sf_uYZBWTrA__665",
+      "definition_text": "Opening range gap lower (open below Friday close) = discount opening range gap. Opening range gap higher (open above Friday close) = opening range gap premium.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Compare 9:30 open to prior RTH close/settlement"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "ORG polarity at RTH open",
+      "variations_note": "Polarity labels; keep separate from premium-short-lean / discount-willingness behavioral rows.",
+      "confidence": "quoted",
+      "cue_start": "00:10:55.490",
+      "cue_end": "00:11:19.910",
+      "timestamp_sec": 655.49,
+      "source": {
+        "video_id": "Sf_uYZBWTrA",
+        "title": "2023 ICT Mentorship - Opening Range Gap Repricing Macro",
+        "url": "https://www.youtube.com/watch?v=Sf_uYZBWTrA",
+        "transcript_path": "data/ict-transcripts/raw/Sf_uYZBWTrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_two_refs_930_open_to_last_print__V5crdCw0AsY__320",
+      "definition_text": "For RTH ORG: the open on the 9:30 candlestick to the last/final print showing on the RTH chart are the only two reference points really needed (CME website alternatives acknowledged but not required).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "RTH chart",
+        "Two anchors: 9:30 open and prior session final/last print"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "RTH ORG measurement anchors",
+      "variations_note": "Pairs with explicit 4:14 last-print labeling in same lecture; keep as two-point rule separate from Fib grading steps.",
+      "confidence": "quoted",
+      "cue_start": "00:05:20.510",
+      "cue_end": "00:05:35.070",
+      "timestamp_sec": 320.51,
+      "source": {
+        "video_id": "V5crdCw0AsY",
+        "title": "Chain Of Custody Of Price With RTH ORG",
+        "url": "https://www.youtube.com/watch?v=V5crdCw0AsY",
+        "transcript_path": "data/ict-transcripts/raw/V5crdCw0AsY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_high_930_low_friday_414__V5crdCw0AsY__368",
+      "definition_text": "In the Monday discount-gap example: highest point of the RTH opening range gap is the 9:30 opening price; lowest point is the last print for Friday at 4:14 p.m. Eastern (low of the RTH ORG / settlement side).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Discount ORG (open below prior settlement)",
+        "High = 9:30 open",
+        "Low = Friday 4:14 last print"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Monday RTH ORG after Friday settlement",
+      "variations_note": "Geometry polarity for discount gap (high=open, low=settlement). Premium case in uIvl inverts labels (open above settlement). Do not merge premium/discount high-low labeling.",
+      "confidence": "quoted",
+      "cue_start": "00:06:08.150",
+      "cue_end": "00:06:56.990",
+      "timestamp_sec": 368.15,
+      "source": {
+        "video_id": "V5crdCw0AsY",
+        "title": "Chain Of Custody Of Price With RTH ORG",
+        "url": "https://www.youtube.com/watch?v=V5crdCw0AsY",
+        "transcript_path": "data/ict-transcripts/raw/V5crdCw0AsY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_grade_octant_quadrant_pd__V5crdCw0AsY__450",
+      "definition_text": "Use the RTH opening range gap concept by grading it, then look for key PD arrays that form on the octant and the quadrant levels.",
+      "definition_mode": "quote",
+      "conditions": [
+        "ORG graded (Fib/octant/quadrant)",
+        "PD arrays aligning to those levels"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "RTH ORG graded levels as delivery map",
+      "variations_note": "Adds octant language alongside quadrants; complements uIvl Fib quadrant setup.",
+      "confidence": "quoted",
+      "cue_start": "00:07:28.630",
+      "cue_end": "00:07:35.790",
+      "timestamp_sec": 448.63,
+      "source": {
+        "video_id": "V5crdCw0AsY",
+        "title": "Chain Of Custody Of Price With RTH ORG",
+        "url": "https://www.youtube.com/watch?v=V5crdCw0AsY",
+        "transcript_path": "data/ict-transcripts/raw/V5crdCw0AsY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "org_discount_gap_direction_lean__tbEzAhdv_Ak__334",
+      "definition_text": "Live commentary: since we gap lower with a discount gap we are likely to see a trade lower; also notes open traded up to about a quarter (lower quadrant of the gap) in the example.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Discount ORG (gap lower)"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Live RTH ORG review / futures commentary",
+      "variations_note": "Behavioral lean for discount gaps (continue lower) \u2014 KEEP SEPARATE from uwFJ0t7SAOU willingness-to-reprice-up framing and from premium-short-lean rows.",
+      "confidence": "quoted",
+      "cue_start": "00:05:24.480",
+      "cue_end": "00:05:38.990",
+      "timestamp_sec": 324.48,
+      "source": {
+        "video_id": "tbEzAhdv_Ak",
+        "title": "ICT 2026 Futures Review & RTH ORG Commentary",
+        "url": "https://www.youtube.com/watch?v=tbEzAhdv_Ak",
+        "transcript_path": "data/ict-transcripts/raw/tbEzAhdv_Ak.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "Gap / PD settlement levels; prompt rules in ICT_STAT_RULES (org-*) \u2014 prompt layer only",
+    "related_karen_evidence_or_gate": "Not a baseline-v2 weigher input as ORG CE probability",
+    "overlap_vs_baseline_v2": "Settlement/gap language exists in teaching prompts",
+    "gap_vs_baseline_v2": "ORG geometry + premium/discount first-30m lean not frozen into baseline-v2 observation/weights",
+    "hypothesis_id": "H_ICT_ORG_GEOMETRY",
+    "status": "CONFLICTING_SOURCES",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch3 deep-dive: official geometry 4:14\u21929:30 + premium/discount polarity + Fib/octant/quadrant grading now catalogued from uIvl/Sf/V5. Conflicts kept separate: (1) large \u2265~120h may leave unfilled / stop at 25% vs ~70% CE claims; (2) discount continue-lower lean (tbEz) vs willingness-to-reprice-up (uwFJ); (3) ORG \u2260 NDOG/ETH; OR Judas 9:30\u201310 \u2260 ORG. Still NOT_IN_PRODUCTION."
+  },
+  "extraction_notes": "Batch3 (zero downloads): mined uIvlS330qrA, Sf_uYZBWTrA, V5crdCw0AsY; light add from tbEzAhdv_Ak. UPKUqW_eaas has ambient ORG mention only \u2014 no definitional citation added. Geometry consistent across official sources at 4:14 settlement; behavioral fill/direction claims conflict \u2014 kept as separate occurrences."
+}

@@ -130,9 +130,11 @@
           interpretEnd != null && m.transcript_handoff != null
             ? Math.round(interpretEnd - m.transcript_handoff)
             : span("transcript_handoff", "turn_process"),
+        intent: span("turn_process", "intent") ?? span("intent", "reasoning_start"),
+        market_state: span("intent", "reasoning_start"),
         backend_stream:
-          streamStart != null && m.turn_process != null
-            ? Math.round(streamStart - m.turn_process)
+          streamStart != null && (m.reasoning_start ?? m.turn_process) != null
+            ? Math.round(streamStart - (m.reasoning_start ?? m.turn_process))
             : span("turn_process", "first_sse_token"),
         tts:
           timeToFirstAudio != null && (m.tts_start ?? streamStart) != null

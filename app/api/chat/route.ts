@@ -3,12 +3,14 @@ import { generateChatReply, tryCasualChatReply, type ChatMessage } from "@/lib/c
 import { needsFullChartRead } from "@/lib/chart-read-intent";
 import { classifyChartQuestion, isSnapshotIntent, prefersRichTradingAnswer } from "@/lib/chart-question-intent";
 import { interpretVoiceInput, needsVoiceInterpret } from "@/lib/voice-interpret";
-import { isNonTradingConversation, isClearlyTrading } from "@/lib/casual-chat-intent";
+import { isNonTradingConversation, isClearlyTrading, isGeneralConversation } from "@/lib/casual-chat-intent";
+import { isStandaloneGeneralTurn } from "@/lib/conversational-intent";
 import { parseChartPriceInput } from "@/lib/chart-live-price";
 import { normalizeMemory } from "@/lib/desk-memory";
 import { mustUseTradingStream, shouldUseLiveWebSearch } from "@/lib/routing";
 import { needsWebSearch, resolveWebSearchQuestion } from "@/lib/web-search-intent";
 import { normalizeWeatherStt } from "@/lib/weather-stt";
+import { repairConversationalStt } from "@/lib/conversational-normalize";
 
 export const runtime = "nodejs";
 
@@ -79,14 +81,18 @@ export async function POST(request: NextRequest) {
         ? { messages }
         : await withVoiceInterpretation(messages, body.voiceInput === true, body.voiceSttClean === true);
 
-    const lastUser = normalizeWeatherStt(
-      [...working].reverse().find((m) => m.role === "user")?.content ?? ""
+    const lastUser = repairConversationalStt(
+      normalizeWeatherStt(
+        [...working].reverse().find((m) => m.role === "user")?.content ?? ""
+      )
     );
     tradingStream = tradingStream || mustUseTradingStream(lastUser);
 
     const isCasual =
       !tradingStream &&
       (body.casualOnly === true ||
+        isGeneralConversation(lastUser) ||
+        isStandaloneGeneralTurn(lastUser) ||
         (!isClearlyTrading(lastUserRaw) && isNonTradingConversation(lastUserRaw)));
     const lastAssistant =
       [...working].reverse().find((m) => m.role === "assistant")?.content ?? "";
@@ -96,9 +102,13 @@ export async function POST(request: NextRequest) {
       .join(" ");
     if (
       !isCasual &&
+      !tradingStream &&
+      !isGeneralConversation(lastUser) &&
+      !isStandaloneGeneralTurn(lastUser) &&
       needsFullChartRead(lastUser, { lastAssistant }) &&
       !isNonTradingConversation(lastUser)
     ) {
+      console.log(`[chat] bounce needsChartRead`, lastUser.slice(0, 80));
       return NextResponse.json(
         { needsChartRead: true, reply: "", question: lastUser, understoodAs, raw },
         { headers: cors }

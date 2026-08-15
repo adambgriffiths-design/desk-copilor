@@ -242,9 +242,9 @@ async function main() {
       evidence: [
         casualHa.detail,
         chains.ok ? "test-conversation-chains (42): pass" : "test-conversation-chains: fail",
-        'extension/casual-chat.js still defines CLARIFY_MORE_REPLY = "Ha — say more"',
+        "extension/casual-chat.js no longer emits Ha — say more",
       ],
-      notes: "TS blocks Ha for general; extension bundle may still emit in edge paths",
+      notes: "Ha filler removed; unresolved chit-chat stays on-thread",
     },
     {
       id: 9,

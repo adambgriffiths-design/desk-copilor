@@ -1,0 +1,99 @@
+{
+  "concept_id": "liquidity_pool",
+  "name": "Liquidity pool (stops at old highs/lows)",
+  "aliases": [
+    "liquidity pools",
+    "buyside liquidity pool",
+    "sellside liquidity pool"
+  ],
+  "status": "CATALOGUED",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "pool_open_interest_at_levels__Gnw54f9v6SA__46",
+      "definition_text": "Liquidity is the open interest of buyers and sellers and can be further defined by those entities at or near specific price levels; lecture reinforces liquidity pools and when to anticipate raids.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [],
+      "invalidation": [],
+      "timeframe_session_context": "Month 04 Core \u2014 Liquidity Pools",
+      "variations_note": "General pool definition \u2014 distinct from open_float_liquidity lookback method.",
+      "confidence": "quoted",
+      "cue_start": "00:00:46.490",
+      "cue_end": "00:01:01.250",
+      "timestamp_sec": 46.49,
+      "source": {
+        "video_id": "Gnw54f9v6SA",
+        "title": "ICT Mentorship Core Content - Month 04 - Liquidity Pools",
+        "url": "https://www.youtube.com/watch?v=Gnw54f9v6SA",
+        "transcript_path": "data/ict-transcripts/raw/Gnw54f9v6SA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ssl_pool_below_old_low__Gnw54f9v6SA__554",
+      "definition_text": "Sellside liquidity pool: a low under current price typically holds trailed sell stops for longs and breakout-short sell stops; validation when price violates the low and those stops become market sells (injecting sell-side liquidity).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Old/recent low below market",
+        "Stop clusters expected under that low"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 04 Core \u2014 Liquidity Pools",
+      "variations_note": "Auto-captions say 'ghoulish'/'cell' for sellside \u2014 paraphrased carefully.",
+      "confidence": "quoted",
+      "cue_start": "00:09:12.170",
+      "cue_end": "00:09:50.269",
+      "timestamp_sec": 552.17,
+      "source": {
+        "video_id": "Gnw54f9v6SA",
+        "title": "ICT Mentorship Core Content - Month 04 - Liquidity Pools",
+        "url": "https://www.youtube.com/watch?v=Gnw54f9v6SA",
+        "transcript_path": "data/ict-transcripts/raw/Gnw54f9v6SA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "eqh_contrary_pool_after_ssl__Gnw54f9v6SA__733",
+      "definition_text": "After raiding sell stops below an old low (accumulating longs), look to offset above old highs / equal highs where buy-stop liquidity rests (contrary pool).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "SSL raid already occurred",
+        "Equal/old highs as opposing pool"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Month 04 Core \u2014 Liquidity Pools",
+      "variations_note": "Links equal highs to buy-side pool targets \u2014 complements REH/REL catalogue.",
+      "confidence": "quoted",
+      "cue_start": "00:12:08.930",
+      "cue_end": "00:12:44.750",
+      "timestamp_sec": 728.93,
+      "source": {
+        "video_id": "Gnw54f9v6SA",
+        "title": "ICT Mentorship Core Content - Month 04 - Liquidity Pools",
+        "url": "https://www.youtube.com/watch?v=Gnw54f9v6SA",
+        "transcript_path": "data/ict-transcripts/raw/Gnw54f9v6SA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "relativeEqualPools / BSL-SSL objectives",
+    "related_karen_evidence_or_gate": "none wired",
+    "overlap_vs_baseline_v2": "Pool raid language may overlap liquidity-swept \u2014 do not wire",
+    "gap_vs_baseline_v2": "Raid timing filters not catalogued here",
+    "hypothesis_id": "H_ICT_LIQUIDITY_POOL",
+    "status": "CANDIDATE_FOR_DEV_LATER",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch5 Month04."
+  },
+  "extraction_notes": "Batch5."
+}

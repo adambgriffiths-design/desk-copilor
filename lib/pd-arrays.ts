@@ -303,6 +303,14 @@ export function formatPdArrayBriefCompact(ctx: MarketContext): string {
     "### PD arrays (compact — cite nearest support/resistance only in brief)",
     `Last price: ${price.toFixed(2)}`,
     `Bias: ${direction.bias} — ${direction.summary}`,
+    `PDC ${pd.previousDay.close.toFixed(2)} (${
+      ctx.daily.pdhSource === "cme_session_1m" ? "CME Globex last 1m" : "yahoo_daily_fallback"
+    }${
+      ctx.daily.yahooDailyClose != null &&
+      Math.abs(ctx.daily.yahooDailyClose - pd.previousDay.close) >= 0.25
+        ? `; Yahoo settlement ${ctx.daily.yahooDailyClose.toFixed(2)} ignored`
+        : ""
+    })`,
     support ? `Nearest support: ${support.label} @ ${support.price.toFixed(2)}` : "",
     resistance ? `Nearest resistance: ${resistance.label} @ ${resistance.price.toFixed(2)}` : "",
     topLevels ? `Nearby levels: ${topLevels}` : "",
@@ -335,6 +343,18 @@ export function formatPdArrayBrief(ctx: MarketContext): string {
     `Last price: ${price.toFixed(2)}`,
     `PD-array bias: ${direction.bias} — ${direction.summary}`,
     `Premium/discount: ${ctx.premiumDiscount.summary}`,
+    ctx.daily.pdhSource === "cme_session_1m"
+      ? `PDC provenance: CME Globex prior-session last 1m close @ ${pd.previousDay.close.toFixed(2)}${
+          ctx.daily.pdcFormedAt
+            ? ` (${new Date(ctx.daily.pdcFormedAt * 1000).toISOString()})`
+            : ""
+        }${
+          ctx.daily.yahooDailyClose != null &&
+          Math.abs(ctx.daily.yahooDailyClose - pd.previousDay.close) >= 0.25
+            ? ` — Yahoo calendar/settlement close ${ctx.daily.yahooDailyClose.toFixed(2)} ignored`
+            : ""
+        }`
+      : `PDC provenance: yahoo_daily_fallback @ ${pd.previousDay.close.toFixed(2)} (not Globex last-trade)`,
     support
       ? `Nearest support (draw-toward from above): ${support.label} @ ${support.price.toFixed(2)}`
       : "Nearest support: none below in PD set",

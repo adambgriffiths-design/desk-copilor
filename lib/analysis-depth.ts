@@ -11,6 +11,8 @@ import { isClearlyTrading, isNonTradingConversation } from "./casual-chat-intent
 import { detectTeachingConcept } from "./ict-teaching";
 import { needsMarketIntelligenceAnswer } from "./conversational-query";
 import { isPersonaQuestion } from "./web-search-intent";
+import { isMentorMarketTurn, teachingLengthFor } from "./mentor-intent";
+import { isStandaloneGeneralTurn } from "./conversational-intent";
 
 export type AnalysisDepth = "GENERAL_QUESTION" | "FAST_FACT" | "DEEP_ANALYSIS";
 
@@ -30,7 +32,11 @@ export function classifyAnalysisDepth(input: AnalysisDepthInput): AnalysisDepth 
   const ctx = { lastAssistant: input.lastAssistant };
 
   if (detectTeachingConcept(q)) return "GENERAL_QUESTION";
-  if (isPersonaQuestion(q)) return "GENERAL_QUESTION";
+  if (isStandaloneGeneralTurn(q)) return "GENERAL_QUESTION";
+  if (isPersonaQuestion(q) && !isMentorMarketTurn(q, ctx)) return "GENERAL_QUESTION";
+  if (isMentorMarketTurn(q, ctx)) {
+    return teachingLengthFor(q) === "SHORT" ? "FAST_FACT" : "DEEP_ANALYSIS";
+  }
   if (isNonTradingConversation(q) && !isClearlyTrading(q) && !prefersRichTradingAnswer(q)) {
     return "GENERAL_QUESTION";
   }

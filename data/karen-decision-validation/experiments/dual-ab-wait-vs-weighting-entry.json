@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp-dual-ab-wait-vs-weighting-2026-08-15",
+  "date": "2026-08-15",
+  "git_tree_state": "TREE:.tmp/karen-final-integration/ git:74183b2",
+  "trading_brain_baseline": "baseline-v2",
+  "candidate_version": "measure-dual-ab-wait-vs-weighting-v0",
+  "single_change": "measure-only dual diagnostic ranking ENTRY_STATUS_FORCE_WAIT vs evidence weighting/conflict from existing DEV artifacts (no engine change)",
+  "dataset_version": "archive-carve-v1",
+  "split": "DEV",
+  "timestamp_manifest": "dual-audit-Y1500+wait-taxonomy-8d+overcaution-smokeY48+era-split:artifacts-only",
+  "evaluation_cadence": 10,
+  "number_of_days": 429,
+  "evaluation_points": 1500,
+  "actionable_episodes": 71,
+  "pit_violations": 0,
+  "dq_exclusions": 2,
+  "stance_counts": {
+    "LONG": 39,
+    "SHORT": 32,
+    "WAIT": 1188,
+    "NO_TRADE": 239
+  },
+  "metrics": {
+    "mfeMedian": 12,
+    "maeMedian": 9.5,
+    "targetBeforeInvalidationRate": 0.1951219512195122,
+    "proxyRMean": -0.32987342208222037,
+    "opportunitiesPerDay": null
+  },
+  "hypothesis": "ENTRY_STATUS_FORCE_WAIT explains more WAIT mass and smoke unlock than evidence weighting/conflict; first single-change DEV candidate should target the FORCE_WAIT hop (not weight retune).",
+  "result": "RANK1=ENTRY_STATUS_FORCE_WAIT (~90% WAIT primary). RANK2=weighting/conflict (BOTH_SIDES~10%; c2 ACTDelta=0). SUPERSEDED: binary c1_wait_entry_actionable REJECT after Y=1500+VAL (Gate10 + VAL proxyR). ONE_NEXT=c4_shadow_quality_gated_wait RESEARCH_MORE. READY_TO_IMPLEMENT=N. Do not implement binary c1.",
+  "decision": "research",
+  "notes": "EDGE_CLAIM NONE. HOLDOUT SEALED. No tune / no VAL re-run / no production implement. Y=1500 smoke:false + VAL ingested; binary c1 archived reject. See karen-next-single-change-dev-candidate.md + karen-dev-candidate-c1-protocol-decision.md.",
+  "reproducibility_hash": "e432a3bc936d3a8bea7b8be22703460fa2ea56729c87b244cc1be1915b7c2719",
+  "promote_from_experiment_id": null,
+  "registered_at": "2026-08-15T21:45:00.000Z"
+}

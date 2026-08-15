@@ -1,0 +1,28 @@
+{
+  "id": "bearish-wait",
+  "ctx": {},
+  "state": {},
+  "label": {
+    "id": "bearish-wait",
+    "timestamp": "2026-08-12T14:30:00Z",
+    "market_state_snapshot": "replay-fixtures/bearish-wait",
+    "expected_observation": {
+      "liquidity_swept": true,
+      "fvg_status": "present",
+      "displacement": "present",
+      "market_structure": "bearish",
+      "htf_bias_aligned": true,
+      "tradeable_bias": "bearish",
+      "data_quality": "good",
+      "session": "ny"
+    },
+    "expected_entry_model": "bearish structure continuation",
+    "adam_verdict": "WAIT",
+    "would_take": false,
+    "grade": "B",
+    "why_taken": "Bearish alignment with MSS and bearish FVG — would consider short on retrace to gap",
+    "why_rejected_alternatives": "No long case — HTF bearish, bearish MSS active. Wait for entry not market.",
+    "fvg_validity": "valid",
+    "notes": "Bearish mirror of bullish wait"
+  }
+}

@@ -4,6 +4,11 @@ import {
 } from "@/lib/voice-instructions";
 import { realtimeVoiceForPreference } from "@/lib/voice-options";
 import { formatVoiceDeskContext } from "@/lib/voice-desk-context";
+import {
+  VAD_PREFIX_PADDING_MS,
+  VAD_SILENCE_MS,
+  VAD_THRESHOLD,
+} from "@/lib/voice-quick-reply";
 
 export const runtime = "nodejs";
 
@@ -16,7 +21,7 @@ const cors = {
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || "gpt-realtime";
 
 const WHISPER_STT_PROMPT =
-  "MNQ Nasdaq futures ICT trading previous day high previous day low fair value gap chart read entry target bias verdict";
+  "MNQ Nasdaq futures ICT trading previous day high previous day low equal highs equal lows fair value gap chart read entry target bias verdict liquidity what are you seeing what will you do what's your call";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: cors });
@@ -72,9 +77,9 @@ export async function POST(request: NextRequest) {
                 type: "server_vad",
                 create_response: false,
                 interrupt_response: true,
-                silence_duration_ms: 1000,
-                threshold: 0.4,
-                prefix_padding_ms: 400,
+                silence_duration_ms: VAD_SILENCE_MS,
+                threshold: VAD_THRESHOLD,
+                prefix_padding_ms: VAD_PREFIX_PADDING_MS,
               },
             },
             output: {

@@ -1,0 +1,127 @@
+{
+  "concept_id": "opening_range_index_futures_1h",
+  "name": "Opening range \u2014 index futures 1-hour (Month 10 Core)",
+  "aliases": [
+    "spoos opening range",
+    "index futures opening range",
+    "ES opening range 9:30-10:30"
+  ],
+  "status": "CONFLICTING_SOURCES",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "or_index_1h_930_1030__ORbtHOUzAIM__194",
+      "definition_text": "Spoos (S&P) opening range concept: opening range is seen from 9:30 a.m. New York time and ends at 10:30 a.m. New York time \u2014 an opening range of one hour.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Index futures / spoos context",
+        "NY local clock",
+        "1-hour window 9:30\u201310:30"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY RTH; Month 10 Core Content index OR = 9:30\u201310:30 (1h)",
+      "variations_note": "CONFLICT vs modern official 30m NY OR (9:30\u201310:00) in Zm9/Z0VY/eft9/uwFJ. Same clock as FHDR (9:30\u201310:30) but labeled opening range here \u2014 KEEP SEPARATE from first_hour_dealing_range and opening_range_ny_30m.",
+      "confidence": "quoted",
+      "cue_start": "00:03:07.319",
+      "cue_end": "00:03:24.530",
+      "timestamp_sec": 187.319,
+      "source": {
+        "video_id": "ORbtHOUzAIM",
+        "title": "ICT Mentorship Core Content - Month 10 - Index Futures - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=ORbtHOUzAIM",
+        "transcript_path": "data/ict-transcripts/raw/ORbtHOUzAIM.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "or_index_hod_lod_stop_or_fvg__ORbtHOUzAIM__202",
+      "definition_text": "Narrow focus to the opening range between 9:30 a.m. to 10:30 a.m., which tends to create the spoos market high or low of the day \u2014 it can be a run on stops or fair value setup.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Index OR window 9:30\u201310:30",
+        "HOD/LOD tendency framing"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY AM first hour labeled as OR",
+      "variations_note": "Behavioral use of 1h index OR (HOD/LOD / stop-run / FVG) \u2014 not a geometry rewrite of ORG.",
+      "confidence": "quoted",
+      "cue_start": "00:03:22.369",
+      "cue_end": "00:03:30.949",
+      "timestamp_sec": 202.369,
+      "source": {
+        "video_id": "ORbtHOUzAIM",
+        "title": "ICT Mentorship Core Content - Month 10 - Index Futures - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=ORbtHOUzAIM",
+        "transcript_path": "data/ict-transcripts/raw/ORbtHOUzAIM.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "or_index_vol_surge_930_1000__ORbtHOUzAIM__162",
+      "definition_text": "Highest volume for S&P trading is seen between 9:30 a.m. and 10:00 a.m. New York time \u2014 only a 30-minute span where that surge of highest volume generally kicks off at the opening.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "S&P / spoos volume profile",
+        "Peak-volume surge window 9:30\u201310:00 inside/alongside the 1h OR teaching"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "NY open volume surge (30m) distinct from 1h OR delineation",
+      "variations_note": "Internal nuance in same lecture: volume-surge clock = 30m (9:30\u201310:00) while OR delineation = 1h (9:30\u201310:30). Do not collapse into opening_range_ny_30m without noting Month 10 still draws OR as 1h.",
+      "confidence": "quoted",
+      "cue_start": "00:02:39.229",
+      "cue_end": "00:02:51.290",
+      "timestamp_sec": 159.229,
+      "source": {
+        "video_id": "ORbtHOUzAIM",
+        "title": "ICT Mentorship Core Content - Month 10 - Index Futures - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=ORbtHOUzAIM",
+        "transcript_path": "data/ict-transcripts/raw/ORbtHOUzAIM.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "or_index_central_vs_ny_clock__ORbtHOUzAIM__222",
+      "definition_text": "BarChart.com charts shown in Central Time (one hour earlier): highlighted 8:30\u20139:30 Central equals 9:30\u201310:30 New York / East Coast time for the opening-range window.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Chart timezone may be Central",
+        "Convert +1h to New York local for OR window"
+      ],
+      "invalidation": [
+        "Reading Central labels as NY times mis-draws the OR window"
+      ],
+      "timeframe_session_context": "Chart-platform timezone hygiene for Month 10 index OR",
+      "variations_note": "Operational clock-mapping only; not a third OR length.",
+      "confidence": "quoted",
+      "cue_start": "00:03:42.649",
+      "cue_end": "00:04:00.410",
+      "timestamp_sec": 222.649,
+      "source": {
+        "video_id": "ORbtHOUzAIM",
+        "title": "ICT Mentorship Core Content - Month 10 - Index Futures - Basics & Opening Range Concept",
+        "url": "https://www.youtube.com/watch?v=ORbtHOUzAIM",
+        "transcript_path": "data/ict-transcripts/raw/ORbtHOUzAIM.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "structureFacts.fhdr uses 9:30\u201310:30; no separate 'Month 10 1h OR' object",
+    "related_karen_evidence_or_gate": "n/a",
+    "overlap_vs_baseline_v2": "Clock coincides with FHDR window already computed",
+    "gap_vs_baseline_v2": "Month 10 labels this window opening range (not FHDR); conflicts with later 30m OR lore",
+    "hypothesis_id": "H_ICT_OR_INDEX_1H_MONTH10",
+    "status": "CONFLICTING_SOURCES",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Do not wire. Prefer disambiguation: FHDR vs Month10-1h-OR vs modern-30m-OR before any observation rename."
+  },
+  "extraction_notes": "Batch4 zero-download mine of ORbtHOUzAIM. Primary conflict is 1h index OR vs later official 30m algorithmic OR; secondary naming overlap with FHDR same clock."
+}

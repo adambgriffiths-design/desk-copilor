@@ -31,6 +31,7 @@ type SystemHealthReport = {
 const GOLDEN_TESTS: Array<{ name: string; script: string; priority: "P0" | "P1" | "P2" }> = [
   { name: "routing-golden", script: "test:routing", priority: "P0" },
   { name: "conversation-chains", script: "test:conversation-chains", priority: "P0" },
+  { name: "karen-intent-routing", script: "test:karen-intent-routing", priority: "P0" },
   { name: "observation-engine", script: "test:observation", priority: "P0" },
   { name: "reh-rel", script: "test:reh-rel", priority: "P1" },
   { name: "chart-snapshot", script: "test:chart-snapshot", priority: "P0" },

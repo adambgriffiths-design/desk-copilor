@@ -1,0 +1,30 @@
+{
+  "id": "ny-open-long-a-plus",
+  "ctx": {},
+  "state": {},
+  "label": {
+    "id": "ny-open-long-a-plus",
+    "timestamp": "2026-08-12T14:30:00Z",
+    "market_state_snapshot": "replay-fixtures/ny-open-long-a-plus",
+    "expected_observation": {
+      "liquidity_swept": true,
+      "fvg_status": "present",
+      "displacement": "present",
+      "market_structure": "bullish",
+      "htf_bias_aligned": true,
+      "tradeable_bias": "bullish",
+      "data_quality": "good",
+      "session": "ny"
+    },
+    "expected_entry_model": "NY open sweep + displacement + FVG retrace",
+    "expected_invalidation": 24795,
+    "expected_target": 25200,
+    "adam_verdict": "LONG",
+    "would_take": true,
+    "grade": "A+",
+    "why_taken": "Sweep + displacement + FVG align with NY open reversal model — would take long on retrace into gap",
+    "why_rejected_alternatives": "No short case — HTF bias bullish, bearish MSS absent, no bearish FVG",
+    "fvg_validity": "valid",
+    "notes": "Obvious A+ winner — Adam would take"
+  }
+}

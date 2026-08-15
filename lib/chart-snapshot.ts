@@ -182,15 +182,18 @@ export function classifyExportQuality(input: {
   exportPartial?: boolean;
 }): ChartQuality {
   const reasons = [...new Set(input.reasons)];
+  const yahooFallback =
+    input.source === "yahoo_fallback" || reasons.includes("yahoo_fallback_used");
+  if (input.candleCount < MIN_CANDLES_FOR_STRUCTURED) return "missing";
+  if (yahooFallback) return "degraded";
   const exportFailed =
     input.source === "none" ||
     input.reason === "widget_not_found" ||
     input.reason === "export_not_ready" ||
     input.reason === "timeout" ||
-    reasons.includes("export_failed");
-  if (exportFailed || input.candleCount < MIN_CANDLES_FOR_STRUCTURED || reasons.includes("insufficient_candles")) {
-    return "missing";
-  }
+    reasons.includes("export_failed") ||
+    reasons.includes("insufficient_candles");
+  if (exportFailed) return "missing";
   if (reasons.includes("stale_last_bar")) return "stale";
   if (input.exportPartial || reasons.includes("export_partial_failure") || reasons.includes("missing_ohlc_fields")) {
     return "partial";
@@ -411,7 +414,10 @@ export function scoreChartQuality(
   const tfSec = timeframeSec(snap.timeframe);
 
   if (snap.source === "yahoo_fallback") reasons.push("yahoo_fallback_used");
-  if (snap.source === "none" || snap.reason === "widget_not_found" || snap.reason === "timeout") {
+  if (
+    snap.source !== "yahoo_fallback" &&
+    (snap.source === "none" || snap.reason === "widget_not_found" || snap.reason === "timeout")
+  ) {
     reasons.push("export_failed");
   }
   if (candleCount < MIN_CANDLES_FOR_STRUCTURED) reasons.push("insufficient_candles");
@@ -449,17 +455,16 @@ export function scoreChartQuality(
   let lastBarAgeSec: number | undefined;
   if (lastBarTime != null) {
     lastBarAgeSec = Math.max(0, nowSec - lastBarTime);
-    if (lastBarAgeSec > STALE_BAR_SEC) reasons.push("stale_last_bar");
+    if (lastBarAgeSec > STALE_BAR_SEC && snap.source !== "yahoo_fallback") {
+      reasons.push("stale_last_bar");
+    }
   }
 
   let quality: ChartQuality = "good";
-  if (
-    candleCount < MIN_CANDLES_FOR_STRUCTURED ||
-    snap.source === "none" ||
-    snap.source === "yahoo_fallback" ||
-    reasons.includes("export_failed")
-  ) {
+  if (candleCount < MIN_CANDLES_FOR_STRUCTURED || reasons.includes("export_failed")) {
     quality = "missing";
+  } else if (snap.source === "yahoo_fallback" || reasons.includes("yahoo_fallback_used")) {
+    quality = "degraded";
   } else if (reasons.includes("stale_last_bar")) {
     quality = "stale";
   } else if (
@@ -493,6 +498,73 @@ export function scoreChartQuality(
 export function isChartQualityUsable(meta: ChartQualityMeta | undefined): boolean {
   if (!meta) return false;
   return meta.quality === "good" || meta.quality === "degraded" || meta.quality === "partial";
+}
+
+export type ChartBarLike = {
+  time: Date | number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+};
+
+/** Convert Yahoo / TickStream OHLC bars into TV snapshot candles. */
+export function barsToChartCandles(bars: ChartBarLike[], maxBars = 120): ChartCandle[] {
+  const limit = Math.max(20, Math.min(maxBars, 240));
+  const slice = bars.slice(-limit);
+  const out: ChartCandle[] = [];
+  for (const b of slice) {
+    const t =
+      b.time instanceof Date ? Math.floor(b.time.getTime() / 1000) : normalizeUnixSec(b.time);
+    const c = Number(b.close);
+    if (t == null || t < 1_000_000_000 || t > 4_000_000_000 || !Number.isFinite(c)) continue;
+    out.push({
+      t,
+      o: Number.isFinite(Number(b.open)) ? Number(b.open) : c,
+      h: Number.isFinite(Number(b.high)) ? Number(b.high) : c,
+      l: Number.isFinite(Number(b.low)) ? Number(b.low) : c,
+      c,
+    });
+  }
+  out.sort((a, b) => a.t - b.t);
+  return out;
+}
+
+/**
+ * When TradingView OHLC export is empty, fill candles from Yahoo 1m (or other bar source).
+ * Live Last still comes from the chart; this only restores structure bars.
+ */
+export function hydrateChartSnapshotFromBars(
+  snap: ChartSnapshotPayload | null | undefined,
+  bars: ChartBarLike[],
+  opts?: { lastPrice?: number | null; maxBars?: number }
+): ChartSnapshotPayload | null {
+  if (snap && snap.candles.length >= MIN_CANDLES_FOR_STRUCTURED && isChartQualityUsable(snap.qualityMeta)) {
+    return snap;
+  }
+  const candles = barsToChartCandles(bars, opts?.maxBars ?? 120);
+  if (candles.length < MIN_CANDLES_FOR_STRUCTURED) return snap ?? null;
+  const lastPrice =
+    opts?.lastPrice != null && Number.isFinite(Number(opts.lastPrice))
+      ? Number(opts.lastPrice)
+      : snap?.lastPrice ?? candles[candles.length - 1]?.c ?? null;
+  const hydrated: ChartSnapshotPayload = {
+    ok: true,
+    symbol: snap?.symbol,
+    timeframe: snap?.timeframe || "1",
+    visibleRange: snap?.visibleRange,
+    lastPrice,
+    candles,
+    drawings: snap?.drawings ?? [],
+    source: "yahoo_fallback",
+    exportedAt: snap?.exportedAt ?? new Date().toISOString(),
+    sync: snap?.sync,
+  };
+  const qualityMeta = scoreChartQuality(hydrated);
+  hydrated.qualityMeta = qualityMeta;
+  hydrated.quality = qualityMeta.quality;
+  hydrated.ok = isChartQualityUsable(qualityMeta) && candles.length >= MIN_CANDLES_FOR_STRUCTURED;
+  return hydrated;
 }
 
 export function parseChartSnapshotInput(value: unknown): ChartSnapshotPayload | null {

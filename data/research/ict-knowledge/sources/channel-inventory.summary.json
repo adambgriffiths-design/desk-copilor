@@ -1,0 +1,39 @@
+{
+  "inventoried_at": "2026-08-15",
+  "tabs": {
+    "videos": 722,
+    "streams": 165,
+    "shorts": 6,
+    "unique_ids": 893
+  },
+  "coverage": {
+    "official_channel_unique_ids": 893,
+    "off_channel_seed_added": 3,
+    "total_rows_in_inventory": 896,
+    "local_transcripts_available": 16,
+    "caption_status_unprobed": 879,
+    "known_missing_transcript": 1,
+    "caption_unavailable": 0,
+    "claim_full_channel_caption_complete": false,
+    "claim_full_channel_metadata_complete": "PARTIAL — videos+streams+shorts tabs via yt-dlp --flat-playlist; YouTube may paginate/omit; lives found under streams",
+    "approx_channel_metadata_coverage_pct": "UNKNOWN exact denominator; this pass listed videos=722 streams=165 shorts=6 unique≈computed — treat as best-effort flat crawl, not audited 100%"
+  },
+  "available_ids": [
+    "-DMKLrUJvfg",
+    "2K1IcVvq9z8",
+    "6DuByzKLDsc",
+    "CGbSpa_9Z9Y",
+    "eft9_3ekDCY",
+    "ORbtHOUzAIM",
+    "pM8oWrcIJqU",
+    "s-iqN0h2Fgg",
+    "Sf_uYZBWTrA",
+    "tbEzAhdv_Ak",
+    "uIvlS330qrA",
+    "UPKUqW_eaas",
+    "uwFJ0t7SAOU",
+    "V5crdCw0AsY",
+    "Z0VYZoaTIKE",
+    "Zm9Q0NDRxoY"
+  ]
+}

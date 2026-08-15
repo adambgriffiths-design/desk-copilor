@@ -5,6 +5,13 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import {
+  TICKSTREAM_QUOTE_TIMEOUT_MS,
+  MarketDataError,
+  mapFetchAbortToMarketDataError,
+} from "../market-data-errors";
+
+export { TICKSTREAM_QUOTE_TIMEOUT_MS } from "../market-data-errors";
 
 const DEFAULT_API = "https://api.tick-stream.xyz/v1";
 
@@ -69,6 +76,9 @@ export type FetchTickstreamQuoteOptions = {
   baseUrl?: string;
   fetchFn?: typeof fetch;
   nowSec?: () => number;
+  /** Override default AbortSignal.timeout budget (ms). */
+  timeoutMs?: number;
+  signal?: AbortSignal;
 };
 
 export function normalizeQuoteResponse(
@@ -121,10 +131,54 @@ export async function fetchTickstreamQuote(
   const symbol = (opts.symbol ?? "MNQ").toUpperCase();
   const fetchFn = opts.fetchFn ?? fetch;
   const url = `${baseUrl}/quote?symbol=${encodeURIComponent(symbol)}`;
+  const timeoutMs = opts.timeoutMs ?? TICKSTREAM_QUOTE_TIMEOUT_MS;
+  const ac = new AbortController();
+  const timer = setTimeout(() => {
+    ac.abort(
+      new DOMException("The operation was aborted due to timeout", "TimeoutError")
+    );
+  }, timeoutMs);
+  const any = (AbortSignal as typeof AbortSignal & {
+    any?: (signals: AbortSignal[]) => AbortSignal;
+  }).any;
+  const signal =
+    opts.signal && typeof any === "function"
+      ? any([ac.signal, opts.signal])
+      : ac.signal;
 
-  const res = await fetchFn(url, {
+  let res: Response;
+  let raceTimer: ReturnType<typeof setTimeout> | undefined;
+  const fetchPromise = fetchFn(url, {
     headers: { Authorization: `Bearer ${opts.apiKey}` },
+    signal,
   });
+  fetchPromise.catch(() => {});
+  try {
+    res = await Promise.race([
+      fetchPromise,
+      new Promise<never>((_, reject) => {
+        raceTimer = setTimeout(() => {
+          reject(
+            new MarketDataError(
+              "MARKET_DATA_TIMEOUT",
+              "MARKET_DATA_TIMEOUT — Tickstream quote timed out"
+            )
+          );
+        }, timeoutMs + 25);
+      }),
+    ]);
+  } catch (err) {
+    if (err instanceof MarketDataError) throw err;
+    throw mapFetchAbortToMarketDataError(err, "tickstream");
+  } finally {
+    clearTimeout(timer);
+    if (!ac.signal.aborted) {
+      ac.abort(
+        new DOMException("The operation was aborted due to timeout", "TimeoutError")
+      );
+    }
+    if (raceTimer) clearTimeout(raceTimer);
+  }
 
   if (!res.ok) {
     let body: unknown;

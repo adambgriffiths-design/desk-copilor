@@ -1,0 +1,297 @@
+{
+  "concept_id": "consequent_encroachment_half_gap",
+  "name": "Consequent encroachment / half gap (ORG)",
+  "aliases": [
+    "CE",
+    "half gap",
+    "midpoint of opening range gap",
+    "50% ORG"
+  ],
+  "status": "CONFLICTING_SOURCES",
+  "wiring": "NOT_IN_PRODUCTION",
+  "definitions": [
+    {
+      "occurrence_id": "ce_half_gap_70__eft9_3ekDCY__370",
+      "definition_text": "Probabilities framed as always trading back down to consequent encroachment of the RTH opening range gap; also stated: half of the gap that forms at opening bell at 9:30 \u2014 if there is one \u2014 chances are 70% of the time it makes an attempt to trade to half gap. It doesn't have to trade to half gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "ORG exists at 9:30",
+        "Attempt toward half gap / CE (not necessarily full fill)"
+      ],
+      "invalidation": [
+        "Explicit: does not have to reach half gap"
+      ],
+      "timeframe_session_context": "Around 9:30 open / first 30 minutes emphasis elsewhere in same lecture",
+      "variations_note": "Same video repeats ~70% CE/half-gap likelihood near 55:03 \u2014 keep as reinforcing occurrence rather than merging stats.",
+      "confidence": "quoted",
+      "cue_start": "00:05:40.920",
+      "cue_end": "00:13:20.750",
+      "timestamp_sec": 340.92,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "ce_half_gap_70__eft9_3ekDCY__3303",
+      "definition_text": "Opening range gap: 70% likelihood is going to go to half gap or consequent encroachment.",
+      "definition_mode": "quote",
+      "conditions": [
+        "ORG present"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "ORG discussion / first 30 minutes drills framing",
+      "variations_note": "Same lecture restatement of 70% CE/half-gap claim \u2014 retained separately for citation fidelity.",
+      "confidence": "quoted",
+      "cue_start": "00:55:03.470",
+      "cue_end": "00:55:08.710",
+      "timestamp_sec": 3303.47,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "ce_half_gap_70__6DuByzKLDsc__2329",
+      "definition_text": "Between 9:31 and 10:00 Eastern, always anticipate the likelihood \u2014 70% likelihood \u2014 that it's going to try to get to the midpoint of that opening range gap.",
+      "definition_mode": "quote",
+      "conditions": [
+        "9:31\u201310:00 ET",
+        "ORG present"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "9:31\u201310:00 ET (slightly narrower than 9:30 start)",
+      "variations_note": "KEEP SEPARATE: window starts at 9:31 here vs 9:30 in other occurrences \u2014 do not collapse clocks.",
+      "confidence": "quoted",
+      "cue_start": "00:38:41.670",
+      "cue_end": "00:38:49.920",
+      "timestamp_sec": 2321.67,
+      "source": {
+        "video_id": "6DuByzKLDsc",
+        "title": "ICT 1st Hour Dealing Range",
+        "url": "https://www.youtube.com/watch?v=6DuByzKLDsc",
+        "transcript_path": "data/ict-transcripts/pilot/dealing-range.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "ce_gap_ladder__eft9_3ekDCY__3330",
+      "definition_text": "In premium gaps, first 30 minutes: aim for the half gap; best-case scenario would be 3/4 gap.",
+      "definition_mode": "quote",
+      "conditions": [
+        "Premium gap",
+        "First 30 minutes"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "First 30 minutes",
+      "variations_note": "Ladder beyond CE (3/4) \u2014 separate from the 70% CE attempt claim.",
+      "confidence": "quoted",
+      "cue_start": "00:55:27.349",
+      "cue_end": "00:55:32.030",
+      "timestamp_sec": 3327.349,
+      "source": {
+        "video_id": "eft9_3ekDCY",
+        "title": "ICT 2026 Entries & Drills Part 2",
+        "url": "https://www.youtube.com/watch?v=eft9_3ekDCY",
+        "transcript_path": "tmp/ict-transcripts/entries-drills.eft9_3ekDCY.en.vtt",
+        "transcript_status": "AVAILABLE"
+      }
+    },
+    {
+      "occurrence_id": "ce_minimum_midgap_after_buyside__uIvlS330qrA__657",
+      "definition_text": "After running buy side (e.g. overnight/London high or REH between 6:00\u20139:30), look for price to trade back down into minimum consequent encroachment \u2014 the middle of the gap. Whether to seek complete gap closure depends on bullish/bearish stance or if just trading inside a range. Premium-gap rules reverse for a discount ORG.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "ORG present",
+        "Initial buy-side run then seek CE mid-gap",
+        "Complete fill optional / bias-dependent"
+      ],
+      "invalidation": [
+        "Complete gap closure not required \u2014 minimum objective is CE"
+      ],
+      "timeframe_session_context": "Post-open delivery into ORG mid-gap; 2025 model framing",
+      "variations_note": "Minimum CE objective without 70% frequency claim \u2014 KEEP SEPARATE from eft9/6Du 70% rows.",
+      "confidence": "quoted",
+      "cue_start": "00:10:51.990",
+      "cue_end": "00:11:37.310",
+      "timestamp_sec": 651.99,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ce_quadrant_ladder_to_full_fill__uIvlS330qrA__889",
+      "definition_text": "Example path through previous day premium ORG: breaks lower \u2192 upper quadrant \u2192 consequent encroachment \u2192 lower quadrant \u2192 complete closure of the previous day premium opening range gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Prior-day premium ORG levels still relevant",
+        "Graded quadrants + CE"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Multi-day ORG level reuse (Jan 2025 example)",
+      "variations_note": "Ladder sequence (UQ\u2192CE\u2192LQ\u2192full fill) \u2014 separate from 3/4-gap premium first-30m ladder in eft9.",
+      "confidence": "quoted",
+      "cue_start": "00:14:45.710",
+      "cue_end": "00:15:02.790",
+      "timestamp_sec": 885.71,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ce_midgap_bodies_respect__uIvlS330qrA__1023",
+      "definition_text": "On premium ORG (Fib from 4:14 close up to 9:30 open): as market sells off, consequent encroachment / mid-gap offers shorting opportunity; bodies shown respecting the midpoint, then lower quadrant / low of gap.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Premium ORG graded",
+        "CE = mid-gap"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Intraday delivery into graded premium ORG",
+      "variations_note": "CE as actionable mid-gap with body respect \u2014 no frequency % here.",
+      "confidence": "quoted",
+      "cue_start": "00:16:50.910",
+      "cue_end": "00:17:39.549",
+      "timestamp_sec": 1010.91,
+      "source": {
+        "video_id": "uIvlS330qrA",
+        "title": "2025 Lecture Series - SMC Opening Range Gaps",
+        "url": "https://www.youtube.com/watch?v=uIvlS330qrA",
+        "transcript_path": "data/ict-transcripts/raw/uIvlS330qrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ce_gap_midpoint_vs_ob_mean_threshold__Sf_uYZBWTrA__683",
+      "definition_text": "For any gap (including ORG): the midpoint is consequent encroachment. For order blocks / breaker / propulsion blocks, the midpoint is mean threshold (50% of that range) \u2014 two different viewpoints of a midpoint (gap/wick \u2192 CE; other order block \u2192 mean threshold).",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Gap or wick \u2192 CE at midpoint",
+        "Order block family \u2192 mean threshold at midpoint"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "General PD-array midpoint taxonomy adjacent to ORG definition",
+      "variations_note": "KEEP SEPARATE from ORG-only CE rows; also ASR auto-caption says encouragement \u2014 meaning is encroachment.",
+      "confidence": "quoted",
+      "cue_start": "00:11:23.389",
+      "cue_end": "00:11:58.730",
+      "timestamp_sec": 683.389,
+      "source": {
+        "video_id": "Sf_uYZBWTrA",
+        "title": "2023 ICT Mentorship - Opening Range Gap Repricing Macro",
+        "url": "https://www.youtube.com/watch?v=Sf_uYZBWTrA",
+        "transcript_path": "data/ict-transcripts/raw/Sf_uYZBWTrA.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ce_rth_org_midpoint_fvg_touch__V5crdCw0AsY__738",
+      "definition_text": "Intraday gap/inefficiency forms touching the midpoint or consequent encroachment of the regular trading hours opening range gap; FVG on lower quadrant also shown; later SIBI goes up to CE and stops with bodies staying below it.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "RTH ORG graded",
+        "PD array / FVG aligning to ORG CE or quadrant"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Chain-of-custody delivery on Monday RTH ORG levels",
+      "variations_note": "CE as magnet/alignment for other inefficiencies \u2014 not a 70% frequency claim.",
+      "confidence": "quoted",
+      "cue_start": "00:12:12.990",
+      "cue_end": "00:13:41.430",
+      "timestamp_sec": 732.99,
+      "source": {
+        "video_id": "V5crdCw0AsY",
+        "title": "Chain Of Custody Of Price With RTH ORG",
+        "url": "https://www.youtube.com/watch?v=V5crdCw0AsY",
+        "transcript_path": "data/ict-transcripts/raw/V5crdCw0AsY.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ce_prior_day_org_octant__tbEzAhdv_Ak__378",
+      "definition_text": "Live: consequent encroachment of yesterday's RTH opening range gap highlighted; price traded to an octant, then into the lower quadrant of yesterday's RTH ORG.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "Prior-day RTH ORG still mapped",
+        "CE + octant + lower quadrant"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "Multi-day ORG level reuse in live review",
+      "variations_note": "Prior-day ORG CE as active level \u2014 separate from same-day first-30m 70% CE window claims.",
+      "confidence": "quoted",
+      "cue_start": "00:06:17.440",
+      "cue_end": "00:06:53.390",
+      "timestamp_sec": 377.44,
+      "source": {
+        "video_id": "tbEzAhdv_Ak",
+        "title": "ICT 2026 Futures Review & RTH ORG Commentary",
+        "url": "https://www.youtube.com/watch?v=tbEzAhdv_Ak",
+        "transcript_path": "data/ict-transcripts/raw/tbEzAhdv_Ak.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "provenance": "OFFICIAL_ICT"
+      }
+    },
+    {
+      "occurrence_id": "ce_of_ifvg_equals_org_high__tbEzAhdv_Ak__551",
+      "definition_text": "Consequent encroachment as half of an inversion fair value gap; in the live example that CE also equals Friday RTH opening range gap high \u2014 used as body-respect / entry weight reference.",
+      "definition_mode": "close_paraphrase",
+      "conditions": [
+        "IFVG present",
+        "ORG levels also on chart"
+      ],
+      "invalidation": [],
+      "timeframe_session_context": "2026 Futures Review & RTH ORG Commentary (light re-pass)",
+      "variations_note": "IFVG-CE overlapping ORG high \u2014 keep separate from ORG-only CE geometry.",
+      "confidence": "quoted",
+      "cue_start": "00:09:11.310",
+      "cue_end": "00:09:20.670",
+      "timestamp_sec": 551.31,
+      "source": {
+        "video_id": "tbEzAhdv_Ak",
+        "title": "ICT 2026 Futures Review & RTH ORG Commentary \\ April 29, 2026",
+        "url": "https://www.youtube.com/watch?v=tbEzAhdv_Ak",
+        "transcript_path": "data/ict-transcripts/raw/tbEzAhdv_Ak.en.vtt",
+        "transcript_status": "AVAILABLE",
+        "channel": "The Inner Circle Trader",
+        "channel_id": "UCtjxa77NqamhVC8atV85Rog",
+        "provenance": "OFFICIAL_ICT"
+      }
+    }
+  ],
+  "karen_map": {
+    "related_karen_observation": "ICT_STAT_RULES org-half-gap-70pct / org-quadrants (prompt knowledge)",
+    "related_karen_evidence_or_gate": "Not baseline-v2 gate",
+    "overlap_vs_baseline_v2": "Prompt text already cites ~70% CE attempt",
+    "gap_vs_baseline_v2": "Not measured as observation fact; 9:30 vs 9:31 window conflict unresolved",
+    "hypothesis_id": "H_ICT_ORG_CE_70_WINDOW",
+    "status": "CONFLICTING_SOURCES",
+    "wiring": "NOT_IN_PRODUCTION",
+    "notes": "Batch3: CE defined as ORG mid-gap / minimum objective (uIvl) + quadrant ladder + gap-vs-OB midpoint taxonomy (Sf). Still CONFLICTING: 9:30 vs 9:31 70% windows; large-gap may-not-fill vs 70% CE; minimum-CE-without-% vs frequency claims. Offline study only \u2014 NOT_IN_PRODUCTION."
+  },
+  "extraction_notes": "Conflicting clock starts (9:30 vs 9:31) intentionally preserved. Batch3 adds non-frequency CE geometry from official ORG lectures; do not collapse with 70% rows."
+}

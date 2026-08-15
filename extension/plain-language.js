@@ -148,8 +148,8 @@
 
   function chartIdKey(id) {
     const raw = String(id || "");
-    if (/^reh(_|$)/i.test(raw)) return "reh";
-    if (/^rel(_|$)/i.test(raw)) return "rel";
+    if (/^reh(_|$)/i.test(raw) || /^eqh(_|$)/i.test(raw)) return "reh";
+    if (/^rel(_|$)/i.test(raw) || /^eql(_|$)/i.test(raw)) return "rel";
     return raw;
   }
 
@@ -186,5 +186,46 @@
     return titleCaseChartLabel(s).replace(/\s{2,}/g, " ").trim();
   }
 
-  window.DeskCopilotPlainLanguage = { expandTradingAbbreviations, formatChartLevelLabel };
+  const OVERLAY_SHORT_ID = {
+    asia_high: "Asia High",
+    asia_low: "Asia Low",
+    london_high: "London High",
+    london_low: "London Low",
+    ny_pre_high: "NY Pre High",
+    ny_pre_low: "NY Pre Low",
+    ny_rth_high: "NY RTH High",
+    ny_rth_low: "NY RTH Low",
+    ny_pm_high: "NY PM High",
+    ny_pm_low: "NY PM Low",
+  };
+  const OVERLAY_SHORT_TEXT = [
+    [/New York Regular Trading Hours High/gi, "NY RTH High"],
+    [/New York Regular Trading Hours Low/gi, "NY RTH Low"],
+    [/New York Pre-Market High/gi, "NY Pre High"],
+    [/New York Pre-Market Low/gi, "NY Pre Low"],
+    [/New York Afternoon Session High/gi, "NY PM High"],
+    [/New York Afternoon Session Low/gi, "NY PM Low"],
+    [/London Session High/gi, "London High"],
+    [/London Session Low/gi, "London Low"],
+    [/Asia Session High/gi, "Asia High"],
+    [/Asia Session Low/gi, "Asia Low"],
+    [/Relative Equal Highs/gi, "REH"],
+    [/Relative Equal Lows/gi, "REL"],
+  ];
+
+  function formatChartOverlayLabel(label, id) {
+    const key = chartIdKey(id);
+    if (key === "reh") return "REH";
+    if (key === "rel") return "REL";
+    if (OVERLAY_SHORT_ID[key]) return OVERLAY_SHORT_ID[key];
+    let s = formatChartLevelLabel(label, id);
+    for (const [re, rep] of OVERLAY_SHORT_TEXT) s = s.replace(re, rep);
+    return s.replace(/\s{2,}/g, " ").trim();
+  }
+
+  window.DeskCopilotPlainLanguage = {
+    expandTradingAbbreviations,
+    formatChartLevelLabel,
+    formatChartOverlayLabel,
+  };
 })();

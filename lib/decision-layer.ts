@@ -6,6 +6,7 @@ import type {
 } from "./desk-schema";
 import type { MarketContext } from "./types";
 import { getExecutionScaffold } from "./execution-plan";
+import { sessionLiquidityStayFlatReason, shouldBlockLongFromSessionLiquidity } from "./session-liquidity";
 
 function entryZoneFromObservation(obs: ReadonlyMarketObservation): string | null {
   if (obs.fvg.status === "present" && obs.fvg.top != null && obs.fvg.bottom != null) {
@@ -89,6 +90,11 @@ export function buildTradingDecision(
   } else if (interp.long_case.supported && interp.short_case.supported) {
     verdict = "WAIT";
     verdict_reason = `Conflicting cases — wait for clarity. ${interp.contradictions.join("; ")}`;
+  } else if (shouldBlockLongFromSessionLiquidity(obs)) {
+    verdict = "WAIT";
+    verdict_reason =
+      sessionLiquidityStayFlatReason(obs) ||
+      "Stay flat — buy-side liquidity taken is not a bullish continuation.";
   } else {
     verdict = "NO_TRADE";
     verdict_reason = `No trade — ${interp.contradictions.join("; ") || "insufficient confluence from observed facts"}`;

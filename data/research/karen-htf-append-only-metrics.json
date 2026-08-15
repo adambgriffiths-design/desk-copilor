@@ -1,0 +1,76 @@
+{
+  "metrics": {
+    "m5_after_ms": 2685.2,
+    "m5_before_ms": 11315.3,
+    "m5_fullRebuilds_after": 0,
+    "m5_fullRebuilds_before": 1,
+    "m15_after_ms": 1069.4,
+    "m15_before_ms": 11074.7,
+    "m15_fullRebuilds_after": 0,
+    "m15_fullRebuilds_before": 1,
+    "session_fullRebuilds_delta": 1,
+    "daily_fullRebuilds_delta": 1,
+    "market_context_leaf_ms": 11884.1,
+    "new_bar_request_after_ms": 2685.2,
+    "new_bar_request_before_ms": 11315.3,
+    "parity_pass": true,
+    "passed": 10,
+    "failed": 0
+  },
+  "results": [
+    {
+      "id": "A.sequential_m5_append",
+      "pass": true,
+      "detail": "htf=true structure=true eqh=true vsFullCtx=true decision=true fullRebuildsΔ=0 optMs=2685 curInitMs=7729 m5 100→101 m15 34→34 daily 1→1"
+    },
+    {
+      "id": "B.sequential_m15_append",
+      "pass": true,
+      "detail": "htf=true structure=true eqh=true vsFullCtx=true decision=true fullRebuildsΔ=0 optMs=1069 curInitMs=13216 m5 102→103 m15 34→35 daily 1→1"
+    },
+    {
+      "id": "C.repeated_same_bar",
+      "pass": true,
+      "detail": "stable=true fullRebuildsΔ=0"
+    },
+    {
+      "id": "D.skipped_bar",
+      "pass": true,
+      "detail": "parity=true fullRebuildsΔ=1"
+    },
+    {
+      "id": "E.out_of_order_seek",
+      "pass": true,
+      "detail": "parity=true fullRebuildsΔ=1 (expect ≥1)"
+    },
+    {
+      "id": "F.session_boundary",
+      "pass": true,
+      "detail": "htf=true structure=true eqh=true vsFullCtx=true decision=true fullRebuildsΔ=1 optMs=13032 curInitMs=9213 m5 108→109 m15 36→37 daily 1→1 sessionFullRebuildsΔ=1"
+    },
+    {
+      "id": "G.daily_boundary",
+      "pass": true,
+      "detail": "fullRebuildsΔ=1 (expect ≥1) parity=true"
+    },
+    {
+      "id": "H.cold_initialization",
+      "pass": true,
+      "detail": "fullRebuilds=1 parity=true"
+    },
+    {
+      "id": "I.historical_seek_firstMatch_fail",
+      "pass": true,
+      "detail": "fullRebuildsΔ=1 (expect ≥1)"
+    },
+    {
+      "id": "J.missing_incomplete_m5",
+      "pass": true,
+      "detail": "fullRebuildsΔ=1 parity=true"
+    }
+  ],
+  "m5Idx": 500,
+  "m15Idx": 510,
+  "dailyIdx": 1380,
+  "sessionIdx": 540
+}

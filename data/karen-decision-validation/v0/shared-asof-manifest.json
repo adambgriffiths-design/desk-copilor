@@ -1,0 +1,26 @@
+{
+  "manifestVersion": "shared-asof-manifest-v1",
+  "id": "shared-asof-canonical-v0",
+  "instrument": "MNQ1!",
+  "description": "Pointer + contract: Baseline v0 and Baseline v1 MUST evaluate identical asOf timestamps from the canonical evaluation-timestamps-v0.json (development split for default compare).",
+  "canonicalManifestPath": "data/karen-decision-validation/evaluation-timestamps-v0.json",
+  "reservedForBaselines": ["baseline-v0", "baseline-v1"],
+  "defaultFixturePath": "data/karen-decision-validation/v0/fixtures/mnq-week-chronological-dev-v0.json",
+  "defaultSplit": "development",
+  "smokeFixturePath": "data/karen-decision-validation/v0/fixtures/tiny-chronological.json",
+  "smokeAsOfCheckpoints": [
+    "2026-08-12T13:40:00.000Z",
+    "2026-08-12T13:45:00.000Z",
+    "2026-08-12T13:53:00.000Z"
+  ],
+  "notes": [
+    "Canonical large MNQ list lives in evaluation-timestamps-v0.json (do not rewrite timestamps).",
+    "This file documents the shared contract and smoke subset.",
+    "v0 must use the same canonical manifest for fair v0 vs v1 delta."
+  ],
+  "largeMnqChronological": {
+    "status": "READY",
+    "sourceDatasetId": "nq-week-aug05-aug12-2026-cme",
+    "fixture": "mnq-week-chronological-dev-v0"
+  }
+}

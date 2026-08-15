@@ -1,0 +1,344 @@
+{
+  "schema": "fvg-golden-v1",
+  "notes": {
+    "intraday_min_gap": "3 points (MIN_GAP_POINTS in lib/gap-zones.ts)",
+    "daily_min_gap": "none — any wick gap qualifies",
+    "mitigation": "isGapFilled: full traverse OR >=50% overlap on subsequent bars",
+    "invalidation": "isFvgInverted: body close below bullish gap bottom or above bearish gap top"
+  },
+  "fixtures": [
+    {
+      "id": "1m-bull-basic",
+      "kind": "intraday_1m",
+      "description": "Clear 5pt bullish FVG, unfilled",
+      "bars": [
+        { "t": 1, "o": 98, "h": 100, "l": 97, "c": 99 },
+        { "t": 2, "o": 99, "h": 104, "l": 98, "c": 103 },
+        { "t": 3, "o": 103, "h": 108, "l": 105, "c": 107 },
+        { "t": 4, "o": 107, "h": 108, "l": 106.5, "c": 107.5 }
+      ],
+      "expected": {
+        "present": true,
+        "type": "bullish",
+        "top": 105,
+        "bottom": 100,
+        "formationIndex": 2,
+        "inverted": false,
+        "filled": false
+      }
+    },
+    {
+      "id": "1m-bear-basic",
+      "kind": "intraday_1m",
+      "description": "Clear 5pt bearish FVG, unfilled",
+      "bars": [
+        { "t": 1, "o": 112, "h": 115, "l": 110, "c": 111 },
+        { "t": 2, "o": 111, "h": 112, "l": 108, "c": 109 },
+        { "t": 3, "o": 109, "h": 105, "l": 100, "c": 101 },
+        { "t": 4, "o": 101, "h": 107, "l": 100.5, "c": 101.5 }
+      ],
+      "expected": {
+        "present": true,
+        "type": "bearish",
+        "top": 110,
+        "bottom": 105,
+        "formationIndex": 2,
+        "inverted": false,
+        "filled": false
+      }
+    },
+    {
+      "id": "1m-gap-too-small",
+      "kind": "intraday_1m",
+      "description": "2pt gap — below MIN_GAP_POINTS (3)",
+      "bars": [
+        { "t": 1, "o": 100, "h": 100, "l": 99, "c": 99.5 },
+        { "t": 2, "o": 99.5, "h": 101, "l": 99, "c": 100.5 },
+        { "t": 3, "o": 100.5, "h": 103, "l": 102.5, "c": 102.8 }
+      ],
+      "expected": {
+        "present": false
+      },
+      "ictNote": "ICT would also reject sub-3pt MNQ gaps as noise"
+    },
+    {
+      "id": "1m-gap-exactly-3",
+      "kind": "intraday_1m",
+      "description": "Exactly 3pt gap — boundary of MIN_GAP_POINTS",
+      "bars": [
+        { "t": 1, "o": 100, "h": 100, "l": 99, "c": 99.5 },
+        { "t": 2, "o": 99.5, "h": 102, "l": 99, "c": 101 },
+        { "t": 3, "o": 101, "h": 105, "l": 103, "c": 104 },
+        { "t": 4, "o": 104, "h": 104.5, "l": 103.5, "c": 104 }
+      ],
+      "expected": {
+        "present": true,
+        "type": "bullish",
+        "top": 103,
+        "bottom": 100,
+        "formationIndex": 2,
+        "inverted": false,
+        "filled": false
+      }
+    },
+    {
+      "id": "1m-no-wick-gap",
+      "kind": "intraday_1m",
+      "description": "Overlapping wicks — no FVG",
+      "bars": [
+        { "t": 1, "o": 100, "h": 102, "l": 99, "c": 101 },
+        { "t": 2, "o": 101, "h": 103, "l": 100, "c": 102 },
+        { "t": 3, "o": 102, "h": 104, "l": 101, "c": 103 }
+      ],
+      "expected": {
+        "present": false
+      }
+    },
+    {
+      "id": "1m-bull-filled-50pct",
+      "kind": "intraday_1m",
+      "description": "Bullish FVG mitigated by >=50% overlap (excluded from unfilled list)",
+      "bars": [
+        { "t": 1, "o": 100, "h": 100, "l": 99, "c": 99.5 },
+        { "t": 2, "o": 99.5, "h": 105, "l": 99, "c": 104 },
+        { "t": 3, "o": 104, "h": 115, "l": 110, "c": 112 },
+        { "t": 4, "o": 112, "h": 112, "l": 104, "c": 106 }
+      ],
+      "expected": {
+        "present": false,
+        "filled": true,
+        "mitigationRule": ">=50% overlap fill via isGapFilled"
+      }
+    },
+    {
+      "id": "1m-bull-filled-full-traverse",
+      "kind": "intraday_1m",
+      "description": "Subsequent bar fully traverses gap",
+      "bars": [
+        { "t": 1, "o": 100, "h": 100, "l": 99, "c": 99.5 },
+        { "t": 2, "o": 99.5, "h": 105, "l": 99, "c": 104 },
+        { "t": 3, "o": 104, "h": 115, "l": 110, "c": 112 },
+        { "t": 4, "o": 112, "h": 116, "l": 99, "c": 105 }
+      ],
+      "expected": {
+        "present": false,
+        "filled": true,
+        "mitigationRule": "full traverse via isGapFilled"
+      }
+    },
+    {
+      "id": "1m-bull-inverted-ifvg",
+      "kind": "intraday_1m",
+      "description": "From test-scoped-chart-qa: bullish FVG inverted by body close below gap",
+      "bars": [
+        { "t": 1, "o": 98, "h": 100, "l": 97, "c": 99 },
+        { "t": 2, "o": 99, "h": 104, "l": 98, "c": 103 },
+        { "t": 3, "o": 103, "h": 108, "l": 105, "c": 107 },
+        { "t": 4, "o": 107, "h": 101, "l": 98, "c": 99 }
+      ],
+      "expected": {
+        "present": true,
+        "type": "bullish",
+        "top": 105,
+        "bottom": 100,
+        "formationIndex": 2,
+        "inverted": true,
+        "invalidationRule": "body close < gap bottom (100)"
+      }
+    },
+    {
+      "id": "1m-bear-inverted-ifvg",
+      "kind": "intraday_1m",
+      "description": "From test-scoped-chart-qa: bearish FVG inverted by body close above gap",
+      "bars": [
+        { "t": 1, "o": 112, "h": 115, "l": 110, "c": 111 },
+        { "t": 2, "o": 111, "h": 112, "l": 108, "c": 109 },
+        { "t": 3, "o": 109, "h": 105, "l": 100, "c": 101 },
+        { "t": 4, "o": 101, "h": 111, "l": 109, "c": 110.5 }
+      ],
+      "expected": {
+        "present": true,
+        "type": "bearish",
+        "top": 110,
+        "bottom": 105,
+        "formationIndex": 2,
+        "inverted": true,
+        "invalidationRule": "body close > gap top (110)"
+      }
+    },
+    {
+      "id": "5m-bull-basic",
+      "kind": "intraday_5m",
+      "description": "5m path uses same rules as 1m",
+      "bars": [
+        { "t": 1, "o": 200, "h": 200, "l": 198, "c": 199 },
+        { "t": 2, "o": 199, "h": 205, "l": 198, "c": 204 },
+        { "t": 3, "o": 204, "h": 212, "l": 208, "c": 210 },
+        { "t": 4, "o": 210, "h": 211, "l": 206, "c": 210.5 }
+      ],
+      "expected": {
+        "present": true,
+        "type": "bullish",
+        "top": 208,
+        "bottom": 200,
+        "formationIndex": 2,
+        "inverted": false
+      }
+    },
+    {
+      "id": "daily-bull-basic",
+      "kind": "daily",
+      "description": "Daily bullish FVG — no min-gap check",
+      "dailyBars": [
+        { "dateKey": "2026-01-05", "o": 100, "h": 101, "l": 99, "c": 100.5 },
+        { "dateKey": "2026-01-06", "o": 100.5, "h": 102, "l": 100, "c": 101.5 },
+        { "dateKey": "2026-01-07", "o": 101.5, "h": 106, "l": 103, "c": 105 },
+        { "dateKey": "2026-01-08", "o": 105, "h": 106, "l": 104, "c": 105.5 },
+        { "dateKey": "2026-01-09", "o": 105.5, "h": 107, "l": 105, "c": 106 }
+      ],
+      "expected": {
+        "recentPresent": true,
+        "unfilledPresent": true,
+        "type": "bullish",
+        "top": 103,
+        "bottom": 101,
+        "formedAtDateKey": "2026-01-07"
+      }
+    },
+    {
+      "id": "daily-bear-basic",
+      "kind": "daily",
+      "description": "Daily bearish FVG",
+      "dailyBars": [
+        { "dateKey": "2026-01-05", "o": 110, "h": 112, "l": 109, "c": 111 },
+        { "dateKey": "2026-01-06", "o": 111, "h": 111.5, "l": 108, "c": 109 },
+        { "dateKey": "2026-01-07", "o": 109, "h": 106, "l": 104, "c": 105 },
+        { "dateKey": "2026-01-08", "o": 105, "h": 106, "l": 104, "c": 105.5 },
+        { "dateKey": "2026-01-09", "o": 105.5, "h": 106, "l": 104, "c": 104.5 }
+      ],
+      "expected": {
+        "recentPresent": true,
+        "unfilledPresent": true,
+        "type": "bearish",
+        "top": 109,
+        "bottom": 106,
+        "formedAtDateKey": "2026-01-07"
+      }
+    },
+    {
+      "id": "daily-bull-1pt-gap",
+      "kind": "daily",
+      "description": "1pt daily gap — intraday would reject, daily accepts",
+      "dailyBars": [
+        { "dateKey": "2026-02-02", "o": 200, "h": 200.5, "l": 199, "c": 200 },
+        { "dateKey": "2026-02-03", "o": 200, "h": 201, "l": 199.5, "c": 200.5 },
+        { "dateKey": "2026-02-04", "o": 200.5, "h": 203, "l": 201.5, "c": 202.5 },
+        { "dateKey": "2026-02-05", "o": 202.5, "h": 203, "l": 202, "c": 202.5 }
+      ],
+      "expected": {
+        "recentPresent": true,
+        "unfilledPresent": true,
+        "type": "bullish",
+        "top": 201.5,
+        "bottom": 200.5,
+        "formedAtDateKey": "2026-02-04"
+      },
+      "ictNote": "ICT traders often ignore sub-3pt gaps; code daily path has no minimum"
+    },
+    {
+      "id": "daily-bull-filled",
+      "kind": "daily",
+      "description": "Daily bullish FVG filled on subsequent daily bar",
+      "dailyBars": [
+        { "dateKey": "2026-03-02", "o": 300, "h": 301, "l": 299, "c": 300.5 },
+        { "dateKey": "2026-03-03", "o": 300.5, "h": 302, "l": 300, "c": 301.5 },
+        { "dateKey": "2026-03-04", "o": 301.5, "h": 308, "l": 305, "c": 307 },
+        { "dateKey": "2026-03-05", "o": 307, "h": 308, "l": 299, "c": 302 },
+        { "dateKey": "2026-03-06", "o": 302, "h": 303, "l": 301, "c": 302.5 }
+      ],
+      "expected": {
+        "recentPresent": true,
+        "unfilledPresent": false,
+        "type": "bullish",
+        "top": 305,
+        "bottom": 301,
+        "formedAtDateKey": "2026-03-04",
+        "mitigationRule": "filterUnfilledDailyFvgs drops filled gaps"
+      }
+    },
+    {
+      "id": "fpfvg-ny-opening-bull",
+      "kind": "fpfvg_ny",
+      "dateKey": "2026-08-12",
+      "description": "From test-scoped-chart-qa fpBars — first NY opening FPFVG",
+      "bars": [
+        { "h": 9, "m": 28, "o": 29680, "hi": 29690, "l": 29675, "c": 29685 },
+        { "h": 9, "m": 29, "o": 29685, "hi": 29695, "l": 29680, "c": 29690 },
+        { "h": 9, "m": 30, "o": 29700, "hi": 29705, "l": 29695, "c": 29702 },
+        { "h": 9, "m": 31, "o": 29702, "hi": 29720, "l": 29700, "c": 29715 },
+        { "h": 9, "m": 32, "o": 29715, "hi": 29725, "l": 29712, "c": 29722 },
+        { "h": 9, "m": 33, "o": 29722, "hi": 29740, "l": 29730, "c": 29735 }
+      ],
+      "expected": {
+        "present": true,
+        "type": "bullish",
+        "top": 29712,
+        "bottom": 29705,
+        "formedAt": "09:32",
+        "variant": "ny_opening",
+        "middleBarIndex": 4
+      }
+    },
+    {
+      "id": "fpfvg-ny-middle-is-open-bar",
+      "kind": "fpfvg_ny",
+      "dateKey": "2026-08-13",
+      "description": "FVG at 9:30 with middle=c2 at 9:29 — skipped by middleNotOpenBar rule",
+      "bars": [
+        { "h": 9, "m": 28, "o": 100, "hi": 100, "l": 99, "c": 99.5 },
+        { "h": 9, "m": 29, "o": 99.5, "hi": 102, "l": 99, "c": 101 },
+        { "h": 9, "m": 30, "o": 101, "hi": 110, "l": 106, "c": 108 },
+        { "h": 9, "m": 31, "o": 108, "hi": 109, "l": 107, "c": 108.5 }
+      ],
+      "expected": {
+        "present": false,
+        "skipReason": "c2 at 9:29 fails middleNotOpenBar (must be > 9:30)"
+      }
+    },
+    {
+      "id": "fpfvg-ny-after-window",
+      "kind": "fpfvg_ny",
+      "dateKey": "2026-08-14",
+      "description": "Valid FVG forms after 10:00 — outside NY opening window",
+      "bars": [
+        { "h": 9, "m": 55, "o": 100, "hi": 100, "l": 99, "c": 99.5 },
+        { "h": 9, "m": 56, "o": 99.5, "hi": 102, "l": 99, "c": 101 },
+        { "h": 9, "m": 57, "o": 101, "hi": 103, "l": 99.5, "c": 102.5 },
+        { "h": 10, "m": 1, "o": 102.5, "hi": 103, "l": 102, "c": 102.5 },
+        { "h": 10, "m": 2, "o": 102.5, "hi": 110, "l": 105, "c": 108 },
+        { "h": 10, "m": 3, "o": 108, "hi": 112, "l": 109, "c": 111 }
+      ],
+      "expected": {
+        "present": false,
+        "skipReason": "c3 at 10:03 is outside 9:30–10:00 window"
+      }
+    },
+    {
+      "id": "fpfvg-ny-gap-too-small",
+      "kind": "fpfvg_ny",
+      "dateKey": "2026-08-15",
+      "description": "Opening-window FVG with 2pt gap — rejected by MIN_GAP_POINTS",
+      "bars": [
+        { "h": 9, "m": 28, "o": 100, "hi": 100, "l": 99, "c": 99.5 },
+        { "h": 9, "m": 29, "o": 99.5, "hi": 101, "l": 99, "c": 100.5 },
+        { "h": 9, "m": 30, "o": 100.5, "hi": 101, "l": 100.2, "c": 100.8 },
+        { "h": 9, "m": 31, "o": 100.8, "hi": 103, "l": 100.5, "c": 102 },
+        { "h": 9, "m": 32, "o": 102, "hi": 104, "l": 102.5, "c": 103.5 }
+      ],
+      "expected": {
+        "present": false,
+        "skipReason": "gap 102.5-100.5 = 2pt < MIN_GAP_POINTS"
+      }
+    }
+  ]
+}
