@@ -1,0 +1,69 @@
+{
+  "$schema_note": "Example only — copy to r2.local.json (gitignored). No real credentials.",
+  "provider": "cloudflare-r2",
+  "bucket": "karen-nq-history",
+  "accountId": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+  "endpoint": "https://YOUR_CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com",
+  "region": "auto",
+  "prefixes": {
+    "raw": "raw/tickstream-nq-history-archive/",
+    "normalized": "normalized/nq-history-archive-1m/",
+    "experimentsDev": "experiments/dev/",
+    "experimentsVal": "experiments/val/",
+    "experimentsHoldoutSealed": "experiments/sealed/holdout/",
+    "checkpoints": "checkpoints/jobs/",
+    "meta": "meta/"
+  },
+  "roles": {
+    "karen-ingest": {
+      "description": "Desktop ingest: append-only write to raw/ + meta checksums",
+      "allow": ["raw/*", "meta/*"],
+      "deny": ["experiments/sealed/holdout/*"]
+    },
+    "karen-dev": {
+      "description": "Laptop/DEV: read normalized + experiments/dev|val; write checkpoints + experiments/dev",
+      "allow": [
+        "normalized/*",
+        "experiments/dev/*",
+        "experiments/val/*",
+        "checkpoints/*",
+        "meta/dataset-index.json"
+      ],
+      "deny": ["experiments/sealed/holdout/*"]
+    },
+    "karen-holdout-unlock": {
+      "description": "Adam-only: read sealed holdout reports",
+      "allow": ["experiments/sealed/holdout/*"],
+      "deny": []
+    }
+  },
+  "syncProfiles": {
+    "min-dev": {
+      "include": [
+        "normalized/nq-history-archive-1m/",
+        "experiments/dev/micro-fixtures/",
+        "checkpoints/",
+        "meta/cloud-config/"
+      ],
+      "exclude": ["experiments/sealed/", "raw/"],
+      "mode": "append-only",
+      "purpose": "Holiday laptop minimum — ~0.3GB normalized + fixtures"
+    },
+    "laptop-dev-normalized": {
+      "include": ["normalized/nq-history-archive-1m/v*/", "experiments/dev/"],
+      "exclude": ["experiments/sealed/", "raw/"]
+    },
+    "desktop-raw-append": {
+      "include": ["raw/tickstream-nq-history-archive/by-day/"],
+      "mode": "append-only",
+      "exclude": [],
+      "purpose": "Background resumable ~46GB; never --delete"
+    }
+  },
+  "notes": [
+    "Credentials via secret manager / env — never commit.",
+    "HOLDOUT remains sealed under experiments/sealed/holdout/.",
+    "Use scripts/karen-cloud-r2-sync.ts for checksum inventory + plan.",
+    "Prefer min-dev upload first; raw-append as throttled background."
+  ]
+}

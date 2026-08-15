@@ -1,0 +1,54 @@
+{
+  "version": "karen-min-dev-dataset-manifest-v1",
+  "EDGE_CLAIM": "NONE",
+  "includes": [
+    {
+      "id": "normalized/candles-1m.json",
+      "required": true,
+      "note": "Full 1m archive (laptop/VM can filter DEV carve in-process)"
+    },
+    {
+      "id": "normalized/dv-fixture-bounded.json",
+      "required": true,
+      "note": "Bounded DV fixture"
+    },
+    {
+      "id": "normalized/manifest.json",
+      "required": true,
+      "note": "Dataset manifest"
+    },
+    {
+      "id": "normalized/splits/carve-manifest-v1.json",
+      "required": true,
+      "note": "DEV/VAL/HOLDOUT carve — HOLDOUT sealed in policy"
+    },
+    {
+      "id": "micro-fixtures/fixtures/micro-empty-session-hl-v0.json",
+      "required": true,
+      "note": "Equivalence smoke fixture A"
+    },
+    {
+      "id": "micro-fixtures/fixtures/micro-pd-missing-lastprice-v0.json",
+      "required": true,
+      "note": "Equivalence smoke fixture B"
+    },
+    {
+      "id": "config/cloud/r2.example.json",
+      "required": true,
+      "note": "R2 prefix contract"
+    },
+    {
+      "id": "config/cloud/min-dev-dataset.manifest.json",
+      "required": false,
+      "note": "Human manifest (written by this script if missing later)"
+    }
+  ],
+  "excludes": [
+    "raw/tickstream-nq-history-archive/by-day/** (~46GB)",
+    "experiments/sealed/holdout/**",
+    "node_modules",
+    ".next",
+    ".env*"
+  ],
+  "laptopPullCommand": "npx tsx scripts/karen-cloud-r2-sync.ts --profile min-dev --inventory --plan"
+}

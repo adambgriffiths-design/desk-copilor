@@ -9,3 +9,11 @@ data/session-log.jsonl
 
 .vercel
 .env*
+
+# Cloud / laptop infra — secrets & local caches (examples stay tracked)
+.karen-cache/
+config/cloud/r2.local.json
+config/cloud/credentials.json
+config/cloud/*.local.json
+config/cloud/rclone.conf
+

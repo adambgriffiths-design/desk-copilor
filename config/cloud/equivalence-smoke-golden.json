@@ -1,0 +1,10 @@
+{
+  "version": "karen-equivalence-smoke-golden-v1",
+  "semanticHash": "d58ad6ab720033ff2acd917a14fbb2962543a3237cc0f28b21331b8e9c29321e",
+  "fixtureHashes": {
+    "data/karen-decision-validation/micro-fixtures/fixtures/micro-empty-session-hl-v0.json": "d2a8656779646058d3e8c06deb4be716f8baca38c2f01eb1de5b385df0ee39ba",
+    "data/karen-decision-validation/micro-fixtures/fixtures/micro-pd-missing-lastprice-v0.json": "1144737095ef75cdd558f214ae3cb5677f5dc4af8591e8203612079eae22df4c"
+  },
+  "at": "2026-08-15T21:08:33.686Z",
+  "EDGE_CLAIM": "NONE"
+}

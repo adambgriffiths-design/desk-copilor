@@ -1,0 +1,48 @@
+# rclone.conf example for Cloudflare R2 (Karen)
+
+Copy to a **gitignored** location (e.g. `%APPDATA%/rclone/rclone.conf` or `~/.config/rclone/rclone.conf`).
+Never commit real keys.
+
+```ini
+[karen-r2]
+type = s3
+provider = Cloudflare
+access_key_id = YOUR_R2_ACCESS_KEY_ID
+secret_access_key = YOUR_R2_SECRET_ACCESS_KEY
+endpoint = https://YOUR_CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com
+acl = private
+no_check_bucket = true
+```
+
+## Append-only upload (min-dev)
+
+```bash
+# Desktop → R2 (no --delete, no sync that prunes remote)
+rclone copy ./data/karen-decision-validation/acquisition/normalized/nq-history-archive-1m \
+  karen-r2:karen-nq-history/normalized/nq-history-archive-1m/v-local/ \
+  --checksum --transfers 2 --checkers 4 --bwlimit 8M
+
+rclone copy ./data/karen-decision-validation/micro-fixtures \
+  karen-r2:karen-nq-history/experiments/dev/micro-fixtures/ \
+  --checksum --transfers 2 --checkers 4 --bwlimit 8M
+```
+
+`--bwlimit 8M` keeps headroom for local DEV jobs. Raise off-peak.
+
+## Raw background (resume-safe)
+
+```bash
+rclone copy ./data/karen-decision-validation/acquisition/raw/tickstream-nq-history-archive/by-day \
+  karen-r2:karen-nq-history/raw/tickstream-nq-history-archive/by-day/ \
+  --checksum --transfers 2 --checkers 4 --bwlimit 4M --fast-list
+```
+
+## Pull on laptop (DEV only)
+
+```bash
+rclone copy karen-r2:karen-nq-history/normalized/nq-history-archive-1m/v-local/ \
+  ./data/karen-decision-validation/acquisition/normalized/nq-history-archive-1m/ \
+  --checksum
+```
+
+Do **not** pull `experiments/sealed/holdout/`.
