@@ -142,7 +142,14 @@ export type MarketContext = {
     }>;
     levelInteractions?: Array<{
       levelId: string;
-      status: string;
+      status:
+        | "UNTOUCHED"
+        | "TESTED"
+        | "TOUCHED"
+        | "BREACHED"
+        | "SWEPT"
+        | "CLOSED_BEYOND"
+        | "INVALIDATED";
       why: string;
       atTime?: number;
       candleId?: string;

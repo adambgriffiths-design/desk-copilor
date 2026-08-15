@@ -620,7 +620,9 @@ export type StructureFactsUpdateResult = {
  * re-detection once formations are set. Output must match buildStructureFacts.
  */
 export function updateStructureFacts(
-  prevFacts: StructureFactsResult | null | undefined,
+  // Only firstPresentedFvg is read on the incremental path; accept MarketContext.structureFacts
+  // which may omit/widen levelInteractions relative to StructureFactsResult.
+  prevFacts: Pick<StructureFactsResult, "firstPresentedFvg"> | null | undefined,
   prevState: StructureFactsIncState | null | undefined,
   m1: Bar[],
   liquidityLevels: Array<{ id: string; label: string; price: number }>,
