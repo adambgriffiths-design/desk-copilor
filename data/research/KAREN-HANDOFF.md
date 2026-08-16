@@ -52,9 +52,13 @@ CLI ready: `karen:research:status`, `sot-check`, `governance-check`.
 
 **Info-loss audit:** **DONE** (2026-08-16) — [`karen-decision-pipeline-info-loss-audit.md`](./karen-decision-pipeline-info-loss-audit.md). Outcomes not inspected.
 
-**Liquidity:** priority **#1** timing (`liquidity_repr_v1`) = **PASS** (session `formedAt` wired; smoke freq 100% formedAt session+PD; dump enrich progressive 12/1075 on 8GB). Priority **#2** full map = **NEXT / NOT_STARTED**. Priority **#3** sequence = **NOT_STARTED**. SoT: [`karen-liquidity-internal-vs-featuresAtT.md`](./karen-liquidity-internal-vs-featuresAtT.md) · [`karen-liquidity-timing-freshness-audit.md`](./karen-liquidity-timing-freshness-audit.md) · freq [`karen-liquidity-representation-freq-partial.md`](./karen-liquidity-representation-freq-partial.md).
+**Liquidity:** priority **#1** timing (`liquidity_repr_v1`) = **PASS** (session `formedAt` wired; smoke freq 100% formedAt session+PD; dump enrich progressive 12/1075 on 8GB). Priority **#2** full map (`liquidity_map_repr_v0`) = **PASS** — `featuresAtT.liquidityPools[]` stamps NY-pre / ORG / NDOG·NWOG / REH·REL / EQH·EQL when present at asOf; keeps `liquidityLevels` + `liquidity_repr_v1`. Smoke: [`karen-liquidity-map-repr-v0-smoke.md`](./karen-liquidity-map-repr-v0-smoke.md). Priority **#3** sequence = **NOT_STARTED**. SoT: [`karen-liquidity-map-completeness-audit.md`](./karen-liquidity-map-completeness-audit.md) · [`karen-liquidity-internal-vs-featuresAtT.md`](./karen-liquidity-internal-vs-featuresAtT.md) · [`karen-liquidity-timing-freshness-audit.md`](./karen-liquidity-timing-freshness-audit.md).
 
 **HTF bias stack** (`htf_bias_repr_v0`) = **PASS** — [`karen-htf-bias-stack-representation.md`](./karen-htf-bias-stack-representation.md).
+
+**Reasoning** (`reasoning_repr_v0`) = **PASS** — compact `reasoningChainCompact[]` + `conflictBetween` into featuresAtT; `citedConcepts` / reason counts retained. Fixture smoke n=4: 40 rows; PRIMARY 17 / SUPPORTING 4; used-but-not-cited 4; shared evidenceSource 4/4 (report only). SoT: [`karen-reasoning-representation-v0.md`](./karen-reasoning-representation-v0.md) · prior audit [`karen-reasoning-chain-info-loss-audit.md`](./karen-reasoning-chain-info-loss-audit.md).
+
+**Evidence dependency** (`evidence_dependency_repr_v0`) = **PASS** (audit + synthetic smoke) — shared-source vs independent reasons; no dedupe / no trading change. SoT: [`karen-evidence-dependency-representation-v0.md`](./karen-evidence-dependency-representation-v0.md) · helper `lib/evidence-dependency-repr-v0.ts` · smoke `scripts/karen-evidence-dependency-smoke.ts`.
 
 ---
 
@@ -62,7 +66,7 @@ CLI ready: `karen:research:status`, `sot-check`, `governance-check`.
 
 - Selective one-knob unlock on current features
 - c4 score / implement (`c4_shadow_quality_gated_wait` = label only)
-- Audit areas 2–4 (confirmation sequence, liquidity meaning, independent confluence)
+- Audit areas 2–3 (confirmation sequence, liquidity meaning); area 4 independent-confluence **implementation/dedupe** (representation audit PASS — do not change reason counts yet)
 - Five QUEUED_SUSPECTS (weighting → entry timing → T/inv → semantic confounders → regime)
 - Binary c1 (`REJECT`); cited_mss seed (`DEFINE_BLOCK`)
 
@@ -76,6 +80,7 @@ Queue: [`karen-research-queue-one-bottleneck.md`](./karen-research-queue-one-bot
 - FORCE_WAIT stamp dump N≈1075 done; `CLEAR_PIT_SAFE_DISCRIMINATOR=NO`
 - Alt one-knob scan → **BEST_ALT=NONE_JUSTIFIED**
 - Lane 1 typed repr **FROZEN**; type-vs-count **RICHER=YES**; outcome-relation **RUN_COMPLETED** → **CONTINUE_WAIT_REPRESENTATION_WORK** (unlock still PARKED)
+- Evidence dependency repr **PASS** — duplicate/correlated evidence confirmed; stable source IDs justified; unlock still PARKED
 
 Detail: [`karen-next-single-change-dev-candidate.md`](./karen-next-single-change-dev-candidate.md)
 
@@ -83,9 +88,9 @@ Detail: [`karen-next-single-change-dev-candidate.md`](./karen-next-single-change
 
 ## Next action
 
-**NEXT (pointer only — do not implement yet):** full liquidity map (priority #2) — NY-pre, ORG, gaps, REH/REL, EQH/EQL.  
+**NEXT (pointer only):** liquidity interaction **sequence / history (#3)** remains **NOT_STARTED** — do not start unless Adam confirms. Optional: small outcome-blind frequency for `liquidity_map_repr_v0` when RAM allows — **or** optional tiny stamp of `evidence_dependency_repr_v0` (annotation only; no dedupe / no gate change) if Adam confirms.
 
-Liquidity #1 timing + HTF stack = **PASS**. Optional: continue progressive dump enrich (`--merge --skip-enriched`) when RAM allows. Do **not** invent unlocks, open weighting, or touch VAL/HOLDOUT.
+Liquidity #1 timing + #2 map + HTF stack + reasoning_repr_v0 + evidence-dependency audit = **PASS**. Optional: continue progressive dump enrich (`--merge --skip-enriched`) when RAM allows. Do **not** invent unlocks, open weighting, or touch VAL/HOLDOUT.
 
 ---
 

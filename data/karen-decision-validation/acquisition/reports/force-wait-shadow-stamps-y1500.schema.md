@@ -3,7 +3,20 @@
 **KIND:** `force_wait_shadow_stamps_y1500`  
 **BASELINE:** baseline-v2  
 **EDGE_CLAIM:** NONE · **HOLDOUT:** SEALED · **VAL:** not touched  
-**REPRESENTATION:** `contradiction_repr_v1` + `htf_bias_repr_v0` + `liquidity_repr_v1`
+**REPRESENTATION:** `contradiction_repr_v1` + `htf_bias_repr_v0` + `liquidity_repr_v1` + `liquidity_map_repr_v0` + `reasoning_repr_v0`
+
+## Reasoning (`reasoning_repr_v0`)
+
+`featuresAtT.reasoningChainCompact[]` — compact copy of `DecisionEnvelope.reasoningChain` at asOf:
+
+| Field | Required |
+|-------|----------|
+| concept, checked, outcome, detected, usedInDecision, role | yes when chain present |
+| evidenceSource | yes (copied from `evidence.source`; empty string if absent) |
+
+`featuresAtT.conflictBetween` — `conflictResolution.between` when present; else null.
+
+`citedConcepts` + `longReasonCount` / `shortReasonCount` retained for back-compat (PRIMARY ≈ citedConcepts).
 
 ## Liquidity (`liquidity_repr_v1`)
 

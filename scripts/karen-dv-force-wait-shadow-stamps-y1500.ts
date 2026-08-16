@@ -38,6 +38,10 @@ import {
   LIQUIDITY_MAP_REPRESENTATION_VERSION,
   stampLiquidityMapFromEvidence,
 } from "../lib/liquidity-map-stamp-features";
+import {
+  REASONING_REPRESENTATION_VERSION,
+  stampReasoningFeaturesFromEvidence,
+} from "../lib/reasoning-stamp-features";
 
 const root = process.cwd();
 
@@ -319,6 +323,8 @@ function featuresAtT(r: DecisionValidationRecordV0) {
     htfAligned?: boolean | "unknown" | null;
     liquidityLevels?: import("../lib/liquidity-stamp-features").LiquidityLevelStamp[] | null;
     liquidityPools?: import("../lib/liquidity-map-stamp-features").LiquidityPoolStamp[] | null;
+    reasoningChainCompact?: import("../lib/reasoning-stamp-features").ReasoningChainCompactRow[] | null;
+    conflictBetween?: import("../lib/decision-envelope").ConflictBetween | null;
   };
   const longN = rs?.longReasons?.length ?? 0;
   const shortN = rs?.shortReasons?.length ?? 0;
@@ -346,6 +352,7 @@ function featuresAtT(r: DecisionValidationRecordV0) {
   const htf = stampHtfBiasFeaturesFromEvidence(e);
   const liq = stampLiquidityFeaturesFromEvidence(e);
   const liqMap = stampLiquidityMapFromEvidence(e);
+  const reasoning = stampReasoningFeaturesFromEvidence(e);
   const sweepFromConfounder = sweepPresent(r);
   const sweepFromLevels = sweepPresentFromLiquidityLevels(liq.liquidityLevels);
   const sweep =
@@ -369,6 +376,10 @@ function featuresAtT(r: DecisionValidationRecordV0) {
     fvgStatus: e.fvgStatus,
     mssPresent: Boolean(rs?.mssPresent),
     citedConcepts: e.citedConcepts ?? [],
+    // Structured reasoning chain (additive; citedConcepts + reason counts retained).
+    reasoningChainCompact: reasoning.reasoningChainCompact,
+    conflictBetween: reasoning.conflictBetween,
+    reasoningRepresentationVersion: REASONING_REPRESENTATION_VERSION,
     factsPreview: e.factsPreview,
     sessionLabel: e.sessionLabel,
     timeBucketEt: e.timeBucketEt,
@@ -766,9 +777,11 @@ function main() {
     },
     schemaNote: {
       featuresAtT:
-        "PIT-safe fields frozen at asOf (evidence + reasoningStructure + derived PD geometry). Outcomes excluded. Includes contradictionItems (typed) + legacy contradictions[]/contradictionCount.",
+        "PIT-safe fields frozen at asOf (evidence + reasoningStructure + derived PD geometry). Outcomes excluded. Includes contradictionItems (typed) + legacy contradictions[]/contradictionCount + reasoning_repr_v0 (reasoningChainCompact / conflictBetween).",
       contradictionItems:
         "Typed items {id,severity,affects,polarity,evidence_paths,description} via stampContradictionItemsFromDvEvidence — mirrors buildContradictionReport predicates from DV evidence fields; polarity for structure_vs_bias from marketStructure×tradeableBias. Version: contradiction_repr_v1.",
+      reasoningChainCompact:
+        "Compact playbook rows {concept,checked,outcome,detected,usedInDecision,role,evidenceSource} + conflictBetween from DecisionEnvelope.reasoningChain / conflictResolution — reasoning_repr_v0. citedConcepts retained (PRIMARY back-compat).",
       c1Shadow:
         "Counterfactual under c1_wait_entry_actionable after freeze; side + MFE/MAE/proxyR/T-before + GOOD/BAD/NEUTRAL label. Labels are post-t analysis only — must not enter a live predicate.",
       outcomeLabelRule:

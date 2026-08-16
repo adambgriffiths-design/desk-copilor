@@ -1,0 +1,352 @@
+{
+  "representationVersion": "evidence_dependency_repr_v0",
+  "generatedAt": "2026-08-16T02:43:40.146Z",
+  "outcomesInspected": false,
+  "tradingBehaviourChanged": false,
+  "reasonCountsPreserved": true,
+  "summary": {
+    "cases": 5,
+    "sharedSourceCases": [
+      "bias_alias_double_count",
+      "ssl_raid_plus_displacement_confirm"
+    ],
+    "separateSourceCases": [
+      "mss_and_bias_independent",
+      "ssl_and_fvg_separate_families"
+    ],
+    "provenance": {
+      "reasonRows": 11,
+      "deterministic": 9,
+      "code_path": 2,
+      "unresolved": 0,
+      "determinedRate": 1,
+      "unresolvedRate": 0
+    },
+    "stableSourceIdsJustified": true,
+    "duplicateEvidenceConfirmed": true
+  },
+  "cases": [
+    {
+      "id": "bias_alias_double_count",
+      "intent": "shared_source",
+      "description": "No MSS evidence; market_structure copied from tradeable bias → HTF bias + structure reasons share bias source",
+      "longReasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish"
+      ],
+      "shortReasons": [],
+      "longReasonCount": 2,
+      "shortReasonCount": 0,
+      "structureAliasedFromBias": true,
+      "annotation": {
+        "representationVersion": "evidence_dependency_repr_v0",
+        "nodes": [
+          {
+            "surfaceId": "interpretation_reason:long:htf_bias_bullish_bias_stack_tradeable_bias_bullish",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+            "evidenceFamily": "htf_bias",
+            "evidenceSourceId": "src:bias:tradeable:bullish",
+            "derivedFrom": [],
+            "dependencyGroupId": "dep:bias_alias:src:bias:tradeable:bullish",
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "interpretation_reason:long:observed_market_structure_is_bullish",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "Observed market structure is bullish",
+            "evidenceFamily": "mss_structure",
+            "evidenceSourceId": "src:bias:tradeable:bullish",
+            "derivedFrom": [
+              "src:bias:tradeable:bullish"
+            ],
+            "dependencyGroupId": "dep:bias_alias:src:bias:tradeable:bullish",
+            "provenance": "code_path"
+          },
+          {
+            "surfaceId": "entry_model:neutral:bullish_structure_continuation",
+            "surface": "entry_model",
+            "side": "neutral",
+            "label": "bullish structure continuation",
+            "evidenceFamily": "entry_model",
+            "evidenceSourceId": "src:bias:tradeable:bullish",
+            "derivedFrom": [
+              "src:bias:tradeable:bullish"
+            ],
+            "dependencyGroupId": "dep:entry_bundle:src:bias:tradeable:bullish",
+            "provenance": "code_path"
+          }
+        ],
+        "longReasonCount": 2,
+        "shortReasonCount": 0,
+        "distinctSourceCount": 1,
+        "dependencyGroupCount": 1,
+        "provenanceStats": {
+          "deterministic": 1,
+          "code_path": 1,
+          "unresolved": 0
+        }
+      },
+      "groupedReasons": [
+        [
+          "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+          "Observed market structure is bullish"
+        ]
+      ]
+    },
+    {
+      "id": "ssl_raid_plus_displacement_confirm",
+      "intent": "shared_source",
+      "description": "PDL taken + displacement present → sweep reason + 'Displacement present after sell-side sweep' share dep:ssl_disp_confirm",
+      "longReasons": [
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Displacement present after sell-side sweep"
+      ],
+      "shortReasons": [],
+      "longReasonCount": 2,
+      "shortReasonCount": 0,
+      "structureAliasedFromBias": false,
+      "annotation": {
+        "representationVersion": "evidence_dependency_repr_v0",
+        "nodes": [
+          {
+            "surfaceId": "interpretation_reason:long:pdl_taken_sell_side_liquidity_raid_on_lows_not_a_bearish_continuation",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+            "evidenceFamily": "liquidity_sweep",
+            "evidenceSourceId": "src:liq:pdl:candle:1m:2026-08-15T14:32:00Z",
+            "derivedFrom": [],
+            "dependencyGroupId": "dep:ssl_disp_confirm:src:liq:pdl:candle:1m:2026-08-15T14:32:00Z",
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "interpretation_reason:long:displacement_present_after_sell_side_sweep",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "Displacement present after sell-side sweep",
+            "evidenceFamily": "displacement",
+            "evidenceSourceId": "src:disp:present:pts:12.50",
+            "derivedFrom": [
+              "src:liq:pdl:candle:1m:2026-08-15T14:32:00Z",
+              "src:disp:present:pts:12.50"
+            ],
+            "dependencyGroupId": "dep:ssl_disp_confirm:src:liq:pdl:candle:1m:2026-08-15T14:32:00Z",
+            "provenance": "code_path"
+          }
+        ],
+        "longReasonCount": 2,
+        "shortReasonCount": 0,
+        "distinctSourceCount": 2,
+        "dependencyGroupCount": 1,
+        "provenanceStats": {
+          "deterministic": 1,
+          "code_path": 1,
+          "unresolved": 0
+        }
+      },
+      "groupedReasons": [
+        [
+          "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+          "Displacement present after sell-side sweep"
+        ]
+      ]
+    },
+    {
+      "id": "mss_and_bias_independent",
+      "intent": "separate_sources",
+      "description": "MSS evidence present + HTF bias → structure reason uses mss source; bias reason uses bias source (no shared group)",
+      "longReasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish"
+      ],
+      "shortReasons": [],
+      "longReasonCount": 2,
+      "shortReasonCount": 0,
+      "structureAliasedFromBias": false,
+      "annotation": {
+        "representationVersion": "evidence_dependency_repr_v0",
+        "nodes": [
+          {
+            "surfaceId": "interpretation_reason:long:htf_bias_bullish_bias_stack_tradeable_bias_bullish",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+            "evidenceFamily": "htf_bias",
+            "evidenceSourceId": "src:bias:tradeable:bullish",
+            "derivedFrom": [],
+            "dependencyGroupId": null,
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "interpretation_reason:long:observed_market_structure_is_bullish",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "Observed market structure is bullish",
+            "evidenceFamily": "mss_structure",
+            "evidenceSourceId": "src:mss:bullish:level:20010.00",
+            "derivedFrom": [
+              "src:mss:bullish:level:20010.00"
+            ],
+            "dependencyGroupId": "dep:mss_structure:src:mss:bullish:level:20010.00",
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "entry_model:neutral:bullish_structure_continuation",
+            "surface": "entry_model",
+            "side": "neutral",
+            "label": "bullish structure continuation",
+            "evidenceFamily": "entry_model",
+            "evidenceSourceId": "src:mss:bullish:level:20010.00",
+            "derivedFrom": [
+              "src:mss:bullish:level:20010.00"
+            ],
+            "dependencyGroupId": "dep:entry_bundle:src:mss:bullish:level:20010.00",
+            "provenance": "code_path"
+          }
+        ],
+        "longReasonCount": 2,
+        "shortReasonCount": 0,
+        "distinctSourceCount": 2,
+        "dependencyGroupCount": 1,
+        "provenanceStats": {
+          "deterministic": 2,
+          "code_path": 0,
+          "unresolved": 0
+        }
+      },
+      "groupedReasons": []
+    },
+    {
+      "id": "ssl_and_fvg_separate_families",
+      "intent": "separate_sources",
+      "description": "Sell-side sweep + bullish FVG — different families; no auto-group without shared candle proof",
+      "longReasons": [
+        "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+        "Bullish FVG present in observation"
+      ],
+      "shortReasons": [],
+      "longReasonCount": 2,
+      "shortReasonCount": 0,
+      "structureAliasedFromBias": false,
+      "annotation": {
+        "representationVersion": "evidence_dependency_repr_v0",
+        "nodes": [
+          {
+            "surfaceId": "interpretation_reason:long:pdl_taken_sell_side_liquidity_raid_on_lows_not_a_bearish_continuation",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "PDL taken (sell-side liquidity — raid on lows, not a bearish continuation)",
+            "evidenceFamily": "liquidity_sweep",
+            "evidenceSourceId": "src:liq:pdl:candle:1m:2026-08-15T13:00:00Z",
+            "derivedFrom": [],
+            "dependencyGroupId": "dep:ssl_disp_confirm:src:liq:pdl:candle:1m:2026-08-15T13:00:00Z",
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "interpretation_reason:long:bullish_fvg_present_in_observation",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "Bullish FVG present in observation",
+            "evidenceFamily": "fvg",
+            "evidenceSourceId": "src:fvg:bullish:20005.00:20020.00",
+            "derivedFrom": [],
+            "dependencyGroupId": null,
+            "provenance": "deterministic"
+          }
+        ],
+        "longReasonCount": 2,
+        "shortReasonCount": 0,
+        "distinctSourceCount": 2,
+        "dependencyGroupCount": 1,
+        "provenanceStats": {
+          "deterministic": 2,
+          "code_path": 0,
+          "unresolved": 0
+        }
+      },
+      "groupedReasons": []
+    },
+    {
+      "id": "mss_disp_fvg_co_present_ungrouped",
+      "intent": "mixed",
+      "description": "MSS + displacement + FVG co-present (classic impulse bundle). MSS grouped with structure; disp/FVG stay separate — no shared candle on reason path",
+      "longReasons": [
+        "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+        "Observed market structure is bullish",
+        "Bullish FVG present in observation"
+      ],
+      "shortReasons": [],
+      "longReasonCount": 3,
+      "shortReasonCount": 0,
+      "structureAliasedFromBias": false,
+      "annotation": {
+        "representationVersion": "evidence_dependency_repr_v0",
+        "nodes": [
+          {
+            "surfaceId": "interpretation_reason:long:htf_bias_bullish_bias_stack_tradeable_bias_bullish",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "HTF bias bullish (bias_stack.tradeable_bias=bullish)",
+            "evidenceFamily": "htf_bias",
+            "evidenceSourceId": "src:bias:tradeable:bullish",
+            "derivedFrom": [],
+            "dependencyGroupId": null,
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "interpretation_reason:long:observed_market_structure_is_bullish",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "Observed market structure is bullish",
+            "evidenceFamily": "mss_structure",
+            "evidenceSourceId": "src:mss:bullish:level:20015.00",
+            "derivedFrom": [
+              "src:mss:bullish:level:20015.00"
+            ],
+            "dependencyGroupId": "dep:mss_structure:src:mss:bullish:level:20015.00",
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "interpretation_reason:long:bullish_fvg_present_in_observation",
+            "surface": "interpretation_reason",
+            "side": "long",
+            "label": "Bullish FVG present in observation",
+            "evidenceFamily": "fvg",
+            "evidenceSourceId": "src:fvg:bullish:20022.00:20040.00",
+            "derivedFrom": [],
+            "dependencyGroupId": null,
+            "provenance": "deterministic"
+          },
+          {
+            "surfaceId": "entry_model:neutral:displacement_fvg_retrace_entry",
+            "surface": "entry_model",
+            "side": "neutral",
+            "label": "Displacement + FVG retrace entry",
+            "evidenceFamily": "entry_model",
+            "evidenceSourceId": null,
+            "derivedFrom": [
+              "src:mss:bullish:level:20015.00",
+              "src:disp:present:pts:18.00",
+              "src:fvg:bullish:20022.00:20040.00"
+            ],
+            "dependencyGroupId": "dep:entry_bundle:src:disp:present:pts:18.00+src:fvg:bullish:20022.00:20040.00+src:mss:bullish:level:20015.00",
+            "provenance": "code_path"
+          }
+        ],
+        "longReasonCount": 3,
+        "shortReasonCount": 0,
+        "distinctSourceCount": 3,
+        "dependencyGroupCount": 1,
+        "provenanceStats": {
+          "deterministic": 3,
+          "code_path": 0,
+          "unresolved": 0
+        }
+      },
+      "groupedReasons": []
+    }
+  ]
+}
