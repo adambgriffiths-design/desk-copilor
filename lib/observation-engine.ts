@@ -127,8 +127,19 @@ function buildLiquidityLevels(
     } else {
       taken = sweepHit;
     }
-    const formedAt =
-      id === "pdc" ? pdcFormedAt : id === "pdh" || id === "pdl" ? pdhFormedAt : undefined;
+    // Formation = extreme print time when known (PD from daily; session from ctx.sessions.*Time).
+    const formedAtById: Record<string, number | undefined> = {
+      pdh: pdhFormedAt,
+      pdl: pdhFormedAt,
+      pdc: pdcFormedAt,
+      asia_high: ctx.sessions.asiaHighTime,
+      asia_low: ctx.sessions.asiaLowTime,
+      london_high: ctx.sessions.londonHighTime,
+      london_low: ctx.sessions.londonLowTime,
+      ny_rth_high: ctx.sessions.nyRthHighTime,
+      ny_rth_low: ctx.sessions.nyRthLowTime,
+    };
+    const formedAt = formedAtById[id];
     return {
       id,
       label,

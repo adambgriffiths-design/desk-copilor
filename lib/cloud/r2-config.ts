@@ -4,6 +4,7 @@
  */
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
+import { loadKarenEnv } from "../karen-env";
 import { resolveRepoRoot, resolveUnderRepo } from "../karen-paths";
 
 export type R2Prefixes = {
@@ -44,6 +45,7 @@ export function loadR2ExampleConfig(repoRoot?: string): R2Config {
 }
 
 export function loadR2Config(repoRoot?: string): R2Config {
+  loadKarenEnv({ startDir: repoRoot });
   const root = repoRoot ?? resolveRepoRoot();
   const override =
     process.env.KAREN_R2_CONFIG?.trim() ||
@@ -59,24 +61,30 @@ export function loadR2Config(repoRoot?: string): R2Config {
   });
 }
 
+function envOrUndefined(raw: string | undefined): string | undefined {
+  const v = raw?.trim();
+  if (!v || PLACEHOLDER_RE.test(v)) return undefined;
+  return v;
+}
+
 function applyEnvOverrides(cfg: R2Config): R2Config {
-  const accountId =
-    process.env.KAREN_R2_ACCOUNT_ID?.trim() || cfg.accountId;
-  const bucket = process.env.KAREN_R2_BUCKET?.trim() || cfg.bucket;
+  const accountId = envOrUndefined(process.env.KAREN_R2_ACCOUNT_ID) || cfg.accountId;
+  const bucket = envOrUndefined(process.env.KAREN_R2_BUCKET) || cfg.bucket;
   const endpoint =
-    process.env.KAREN_R2_ENDPOINT?.trim() ||
+    envOrUndefined(process.env.KAREN_R2_ENDPOINT) ||
     (accountId && !PLACEHOLDER_RE.test(accountId)
       ? `https://${accountId}.r2.cloudflarestorage.com`
       : cfg.endpoint);
-  const region = process.env.KAREN_R2_REGION?.trim() || cfg.region || "auto";
+  const region = envOrUndefined(process.env.KAREN_R2_REGION) || cfg.region || "auto";
   return { ...cfg, accountId, bucket, endpoint, region };
 }
 
 export function r2CredentialsStatus(cfg?: R2Config): R2CredentialsStatus {
+  loadKarenEnv();
   const config = cfg ?? loadR2Config();
   const missing: string[] = [];
-  const access = process.env.KAREN_R2_ACCESS_KEY_ID?.trim();
-  const secret = process.env.KAREN_R2_SECRET_ACCESS_KEY?.trim();
+  const access = envOrUndefined(process.env.KAREN_R2_ACCESS_KEY_ID);
+  const secret = envOrUndefined(process.env.KAREN_R2_SECRET_ACCESS_KEY);
   if (!access) missing.push("KAREN_R2_ACCESS_KEY_ID");
   if (!secret) missing.push("KAREN_R2_SECRET_ACCESS_KEY");
   if (!config.bucket || PLACEHOLDER_RE.test(config.bucket)) {

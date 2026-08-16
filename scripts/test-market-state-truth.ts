@@ -505,6 +505,20 @@ console.log("\n=== PDC LEVEL PROVENANCE (Globex close ≠ Yahoo settlement) ==="
   assert("observation PDC price Globex", pdc.price === fx.globexPdc);
   assert("observation PDC formedAt = close candle", pdc.formedAt === ctx.daily.pdcFormedAt);
   assert("observation PDC source cme", pdc.source === "cme_session_1m");
+  const asiaHigh = obs.liquidity.levels.find((l) => l.id === "asia_high");
+  if (ctx.sessions.asiaHighTime != null && asiaHigh) {
+    assert(
+      "observation asia_high formedAt = asiaHighTime",
+      asiaHigh.formedAt === ctx.sessions.asiaHighTime
+    );
+  }
+  const nyHigh = obs.liquidity.levels.find((l) => l.id === "ny_rth_high");
+  if (ctx.sessions.nyRthHighTime != null && nyHigh) {
+    assert(
+      "observation ny_rth_high formedAt = nyRthHighTime",
+      nyHigh.formedAt === ctx.sessions.nyRthHighTime
+    );
+  }
   const brief = formatContextForLiveVerdict(ctx);
   assert("verdict brief cites Globex PDC", /PDC 30216\.25 \(CME Globex last 1m/i.test(brief), brief.slice(0, 600));
   assert("verdict brief notes Yahoo settlement ignored", /Yahoo settlement 30188\.50 ignored/i.test(brief), brief.slice(0, 800));

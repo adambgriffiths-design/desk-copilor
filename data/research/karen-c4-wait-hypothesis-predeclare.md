@@ -1,6 +1,6 @@
 # KAREN — c4 WAIT hypothesis pre-declare (research text only)
 
-**DATE:** 2026-08-15  
+**DATE:** 2026-08-15 (DEFINE_BLOCK 2026-08-16 — see below)  
 **TREE:** `.tmp/karen-final-integration/` (mirrored to repo `data/research/`)  
 **MODE:** research documentation only  
 **EDGE_CLAIM:** NONE  
@@ -8,7 +8,9 @@
 **VAL:** DO NOT TOUCH  
 **ALS / registry / production:** none — do **not** score, register, or implement
 
-**Source dump:** `data/karen-decision-validation/acquisition/reports/force-wait-shadow-stamps-y1500-latest.json` (N=1075 stamps; shadow-ACT pool n=1074)
+**Source dump:** `data/karen-decision-validation/acquisition/reports/force-wait-shadow-stamps-y1500-latest.json` (N=1075 stamps; shadow-ACT pool n=1074)  
+**H-review:** [`karen-c4-h-review-cited-mss.md`](./karen-c4-h-review-cited-mss.md) — **ADAM_DECISION=DEFINE_BLOCK**; **H_VERDICT=DEFINE_BLOCK**; confound **YES** collinear with `contradictionCount=1`; Gate-10 projected ACT **34.1%** if unlock all cited_mss; **C4 still NOT_DEFINED**  
+**Alt scan:** [`karen-c4-alt-discriminator-scan.md`](./karen-c4-alt-discriminator-scan.md) — **BEST_ALT=NONE_JUSTIFIED**
 
 ---
 
@@ -16,12 +18,13 @@
 
 | Field | Value |
 |-------|--------|
-| **PREDECLARE** | **ONE** — `h_c4_fw_unlock_cited_mss` |
+| **PREDECLARE** | **ONE** — `h_c4_fw_unlock_cited_mss` (**BLOCKED / CLOSED** as c4 seed) |
+| **ADAM_DECISION** | **DEFINE_BLOCK** |
 | **C4_SINGLE_CHANGE** | **NOT_DEFINED** (unchanged) |
 | **C4_DEFINED** | **NO** |
 | **CLEAR_PIT_SAFE_DISCRIMINATOR** | **NO** (unchanged — pre-declare ≠ clean cut) |
-| **DECISION** | **RESEARCH_MORE** |
-| **NONE_JUSTIFIED** | no — one unlock hypothesis meets effect-size + N bar for *research text*; still fails ship/score bar |
+| **DECISION / H_VERDICT** | **DEFINE_BLOCK** (Adam 2026-08-16; prior gaps 1–2 history retained in H-review) |
+| **NONE_JUSTIFIED (alt one-knob)** | **yes** — see alt discriminator scan; cited_mss seed closed |
 
 ---
 
@@ -122,8 +125,10 @@ Source: [`karen-force-wait-clearance-bins.md`](./karen-force-wait-clearance-bins
 
 ## NEXT_SINGLE_ACTION
 
-Adam review whether `h_c4_fw_unlock_cited_mss` may become a registered c4 single-change given §2 clearance (permanent HARMFUL_SUPPRESSION, not brief-delay) — **no** ALS / score / VAL without explicit define.
+`h_c4_fw_unlock_cited_mss` is **DEFINE_BLOCK’d / CLOSED** as c4 seed; alt one-knob scan **NONE_JUSTIFIED** ([`karen-c4-alt-discriminator-scan.md`](./karen-c4-alt-discriminator-scan.md)). Adam: authorize a *new* pre-declared PIT-safe interaction hypothesis (n≤229, not cc=1/cited_mss rename) or park selective unlock — still no ALS/score/VAL. CURRENT bottleneck remains **WAIT quality**.
 
-**DECISION:** RESEARCH_MORE  
+**ADAM_DECISION / H_VERDICT:** DEFINE_BLOCK  
 **C4_SINGLE_CHANGE:** NOT_DEFINED  
+**CLEAR_PIT_SAFE_DISCRIMINATOR:** NO  
+**BEST_ALT:** NONE_JUSTIFIED  
 **EDGE_CLAIM:** NONE · **HOLDOUT:** SEALED

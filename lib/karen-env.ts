@@ -4,12 +4,14 @@
  * Sources (first wins per key; never overwrites existing process.env):
  *   1. Already-set process.env (secret manager inject / CI / shell)
  *   2. KAREN_ENV_FILE if set
- *   3. <repoRoot>/.env.local then .env
- *   4. Optional walk from cwd upward to repoRoot for .env.local
+ *   3. ~/.config/karen/env (portable private file; not in git)
+ *   4. <repoRoot>/.env.local then .env
+ *   5. Optional walk from cwd upward to repoRoot for .env.local
  *
  * No hardcoded desktop absolute paths. Never log secret values.
  */
 import { existsSync, readFileSync } from "fs";
+import { homedir } from "os";
 import { dirname, join, resolve } from "path";
 import { resolveRepoRoot } from "./karen-paths";
 
@@ -71,6 +73,9 @@ export function listKarenEnvCandidates(
   const candidates: string[] = [];
   const fromEnv = process.env.KAREN_ENV_FILE?.trim();
   if (fromEnv) candidates.push(resolve(fromEnv));
+
+  const defaultPrivate = resolve(join(homedir(), ".config", "karen", "env"));
+  if (!candidates.includes(defaultPrivate)) candidates.push(defaultPrivate);
 
   for (const rel of extraFiles) {
     candidates.push(resolve(repoRoot, rel));

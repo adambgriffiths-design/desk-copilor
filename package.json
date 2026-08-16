@@ -75,6 +75,13 @@
     "test:karen-path-unification": "npx tsx scripts/test-karen-path-unification.ts",
     "test:karen-dv-day-checkpoint": "npx tsx scripts/test-karen-dv-day-checkpoint.ts",
     "karen:cloud:status": "npx tsx scripts/karen-cloud-status.ts",
+    "karen:research:status": "npx tsx scripts/karen-research-status.ts",
+    "karen:research:sot-check": "npx tsx scripts/karen-research-sot-check.ts",
+    "karen:research:governance-check": "npx tsx scripts/karen-research-governance-check.ts",
+    "karen:ui:brief-status": "npx tsx scripts/karen-ui-ask.ts --brief-status",
+    "karen:ui:ask": "npx tsx scripts/karen-ui-ask.ts",
+    "karen:ui:reply": "npx tsx scripts/karen-ui-ask.ts --reply",
+    "karen:ui:chrome": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/karen-ui-chrome.ps1",
     "karen:cloud:min-dev-pack": "npx tsx scripts/karen-cloud-min-dev-pack.ts",
     "karen:cloud:r2-sync": "npx tsx scripts/karen-cloud-r2-sync.ts",
     "test:karen-cloud-equivalence-smoke": "npx tsx scripts/karen-cloud-equivalence-smoke.ts",
@@ -130,7 +137,8 @@
     "test:supervisor-parallel": "npx tsx scripts/test-supervisor-parallel.ts",
     "test:supervisor-adaptive": "npx tsx scripts/test-supervisor-adaptive.ts",
     "test:supervisor-control": "npx tsx scripts/test-supervisor-control.ts",
-    "supervisor:benchmark-parallel": "npx tsx scripts/supervisor-benchmark-parallel.ts"
+    "supervisor:benchmark-parallel": "npx tsx scripts/supervisor-benchmark-parallel.ts",
+    "karen:cloud:r2-autosync": "npx tsx scripts/karen-cloud-r2-autosync.ts"
   },
   "dependencies": {
     "@tickstream/client": "^0.1.0",

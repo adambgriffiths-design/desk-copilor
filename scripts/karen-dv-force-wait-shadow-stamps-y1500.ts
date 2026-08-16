@@ -21,6 +21,23 @@ import {
   describeDecisionProcessExperiment,
   type DecisionProcessExperimentId,
 } from "../lib/decision-process-experiment";
+import {
+  CONTRADICTION_REPRESENTATION_VERSION,
+  stampContradictionItemsFromDvEvidence,
+} from "../lib/contradiction-stamp-features";
+import {
+  HTF_BIAS_REPRESENTATION_VERSION,
+  stampHtfBiasFeaturesFromEvidence,
+} from "../lib/htf-bias-stamp-features";
+import {
+  LIQUIDITY_REPRESENTATION_VERSION,
+  stampLiquidityFeaturesFromEvidence,
+  sweepPresentFromLiquidityLevels,
+} from "../lib/liquidity-stamp-features";
+import {
+  LIQUIDITY_MAP_REPRESENTATION_VERSION,
+  stampLiquidityMapFromEvidence,
+} from "../lib/liquidity-map-stamp-features";
 
 const root = process.cwd();
 
@@ -295,7 +312,14 @@ function sweepPresent(r: DecisionValidationRecordV0): boolean | null {
 
 function featuresAtT(r: DecisionValidationRecordV0) {
   const rs = r.reasoningStructure;
-  const e = r.evidence;
+  const e = r.evidence as DecisionValidationRecordV0["evidence"] & {
+    htfBiasDaily?: string | null;
+    htfBiasM15?: string | null;
+    htfBiasM5?: string | null;
+    htfAligned?: boolean | "unknown" | null;
+    liquidityLevels?: import("../lib/liquidity-stamp-features").LiquidityLevelStamp[] | null;
+    liquidityPools?: import("../lib/liquidity-map-stamp-features").LiquidityPoolStamp[] | null;
+  };
   const longN = rs?.longReasons?.length ?? 0;
   const shortN = rs?.shortReasons?.length ?? 0;
   const longS = Boolean(rs?.longSupported);
@@ -319,11 +343,26 @@ function featuresAtT(r: DecisionValidationRecordV0) {
       ? (last - pdl) / (pdh - pdl)
       : null;
 
+  const htf = stampHtfBiasFeaturesFromEvidence(e);
+  const liq = stampLiquidityFeaturesFromEvidence(e);
+  const liqMap = stampLiquidityMapFromEvidence(e);
+  const sweepFromConfounder = sweepPresent(r);
+  const sweepFromLevels = sweepPresentFromLiquidityLevels(liq.liquidityLevels);
+  const sweep =
+    sweepFromConfounder != null ? sweepFromConfounder : sweepFromLevels;
+
   return {
     lastPrice: last,
     pdh,
     pdl,
     tradeableBias: e.tradeableBias,
+    // HTF bias stack (additive; tradeableBias retained for back-compat).
+    htfBiasDaily: htf.htfBiasDaily,
+    htfBiasM15: htf.htfBiasM15,
+    htfBiasM5: htf.htfBiasM5,
+    htfAligned: htf.htfAligned,
+    htfBias: htf.htfBias,
+    htfBiasRepresentationVersion: HTF_BIAS_REPRESENTATION_VERSION,
     marketStructure: e.marketStructure,
     displacement: e.displacement,
     displacementDirection: rs?.displacementDirection ?? null,
@@ -343,6 +382,19 @@ function featuresAtT(r: DecisionValidationRecordV0) {
     absReasonMargin: Math.abs(reasonMargin),
     contradictions: rs?.contradictions ?? [],
     contradictionCount: rs?.contradictions?.length ?? 0,
+    // Typed ContradictionReport-aligned items (additive; legacy strings/count unchanged).
+    // Reconstruct from DV evidence + reasoningStructure at asOf — full obs/interp not on record.
+    contradictionItems: stampContradictionItemsFromDvEvidence({
+      marketStructure: e.marketStructure,
+      tradeableBias: e.tradeableBias,
+      displacement: e.displacement,
+      fvgStatus: e.fvgStatus,
+      htfAligned: htf.htfAligned,
+      longSupported: longS,
+      shortSupported: shortS,
+      contradictions: rs?.contradictions ?? [],
+    }),
+    contradictionRepresentationVersion: CONTRADICTION_REPRESENTATION_VERSION,
     entryModel: rs?.entryModel ?? null,
     whyNow: rs?.whyNow ?? null,
     waitReason: r.waitReason,
@@ -358,7 +410,17 @@ function featuresAtT(r: DecisionValidationRecordV0) {
     distToPdl,
     pdMid: midPd,
     pdPosition,
-    sweepPresent: sweepPresent(r),
+    // Liquidity levels (additive; sweepPresent retained for back-compat).
+    liquidityLevels: liq.liquidityLevels,
+    liquidityLevelCount: liq.liquidityLevelCount,
+    liquidityTakenCount: liq.liquidityTakenCount,
+    liquidityRepresentationVersion: LIQUIDITY_REPRESENTATION_VERSION,
+    // Full liquidity map (additive; liquidity_map_repr_v0 — pools when Evidence carries them).
+    liquidityPools: liqMap.liquidityPools,
+    liquidityPoolCount: liqMap.liquidityPoolCount,
+    liquidityPoolTakenCount: liqMap.liquidityPoolTakenCount,
+    liquidityMapRepresentationVersion: LIQUIDITY_MAP_REPRESENTATION_VERSION,
+    sweepPresent: sweep,
     confounderActiveIds: (r.confounders ?? []).filter((c) => c.active).map((c) => c.id),
     // vol context not on EvidenceAtT — explicit null so schema stays honest
     volContext: null as null,
@@ -703,7 +765,10 @@ function main() {
       note: "Identical asOf plan as overcaution Y=1500; stamp dump only — not a scored candidate run",
     },
     schemaNote: {
-      featuresAtT: "PIT-safe fields frozen at asOf (evidence + reasoningStructure + derived PD geometry). Outcomes excluded.",
+      featuresAtT:
+        "PIT-safe fields frozen at asOf (evidence + reasoningStructure + derived PD geometry). Outcomes excluded. Includes contradictionItems (typed) + legacy contradictions[]/contradictionCount.",
+      contradictionItems:
+        "Typed items {id,severity,affects,polarity,evidence_paths,description} via stampContradictionItemsFromDvEvidence — mirrors buildContradictionReport predicates from DV evidence fields; polarity for structure_vs_bias from marketStructure×tradeableBias. Version: contradiction_repr_v1.",
       c1Shadow:
         "Counterfactual under c1_wait_entry_actionable after freeze; side + MFE/MAE/proxyR/T-before + GOOD/BAD/NEUTRAL label. Labels are post-t analysis only — must not enter a live predicate.",
       outcomeLabelRule:
@@ -777,7 +842,13 @@ PIT-safe stamp table for discriminator search: baseline FORCE_WAIT / WAIT→ACT-
 - \`population\` — \`FORCE_WAIT\` | \`WAIT_TO_ACT_NON_FORCE\` | \`FORCE_WAIT_STAY_WAIT\`
 - \`baselineForceWaitPrimary\` — taxonomy primary (one-sided support + WAIT)
 - \`featuresAtT\` — evidence + reasoningStructure + PD geometry; **no** post-t labels
+- \`featuresAtT.contradictions\` / \`contradictionCount\` — legacy free-text (unchanged meaning)
+- \`featuresAtT.contradictionItems\` — typed \`{id, severity, affects, polarity, evidence_paths, description}\` (\`contradiction_repr_v1\`)
 - \`c1Shadow.side\` / \`outcomeLabel\` — shadow under \`c1_wait_entry_actionable\` after freeze
+
+### Typed contradiction reconstruction (DV)
+
+DV records lack full obs+interp. Typed items are reconstructed at stamp time from asOf evidence + reasoningStructure via \`stampContradictionItemsFromDvEvidence\` (same predicates as \`buildContradictionReport\`). \`htfAligned\` / \`dataQuality\` are not on EvidenceAtT — HTF misalignment inferred from contradiction string when needed.
 
 ### Outcome label rule (analysis only)
 
